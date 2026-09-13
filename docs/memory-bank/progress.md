@@ -1,6 +1,6 @@
 # Progress
 
-Snapshot: September 13, 2026, after the first playable scaffold.
+Snapshot: September 13, 2026, after fixes for the eight code-review findings.
 
 ## Complete
 
@@ -23,7 +23,9 @@ Transactional IndexedDB saves, authored/installed K–1 narration, production ar
 
 ## Verification status
 
-`pnpm build` passes against Phaser 4.2.1 and `git diff --check` passes. A server-free Chrome smoke check boots the production bundle, writes a five-second combat checkpoint, and restores it in a second browser session. Headless screenshots at 390×844 portrait and 844×390 landscape confirmed the corrected canvas centering and reachable touch controls. Complete run interaction, performance, persistence-failure, offline, and physical-device checks remain pending. Historical Python calculations do not verify the current rules.
+The review fixes pass 21 regression tests (`pnpm test`), the production build, and whitespace checks. Chrome interaction checks cover paused quiz input/time, fraction entry and draft resume at a phone-sized viewport, and failed-save retries without duplicate answers. See [review fixes](../REVIEW_FIXES.md). Complete ten-wave play, physical-device, performance, and offline verification remain pending.
+
+Earlier scaffold verification: a server-free Chrome smoke check boots the production bundle, writes a five-second combat checkpoint, and restores it in a second browser session. Headless screenshots at 390×844 portrait and 844×390 landscape confirmed canvas centering and reachable touch controls. Historical Python calculations do not verify the current rules.
 
 ## Open implementation details
 

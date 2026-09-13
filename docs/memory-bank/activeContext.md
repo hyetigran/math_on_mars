@@ -8,8 +8,10 @@ The plans and WizardGenie prompt pack reflect the personal MVP and confirmed fiv
 
 ## Next implementation work
 
+The eight code-review findings are now addressed: committed RunSession commands, validated saves with backup/retry recovery, occurrence-based answer history, paused-input guards, a fraction correction keypad, muzzle-origin aiming, shared volley chain limits, and funded burn reservoirs. See [review fixes](../REVIEW_FIXES.md) for verification and migration limits.
+
 1. Exercise the complete ten-wave flow in WizardGenie Play and on physical phones/tablets, then fix runtime/input issues found there.
-2. Replace temporary browser speech synthesis with reviewed, installed K–1 narration assets.
+2. Add reviewed, installed K–1 narration assets; browser speech synthesis is already removed.
 3. Expand persistence from localStorage snapshots to the IndexedDB transaction contracts in [ARCHITECTURE.md](../ARCHITECTURE.md).
 4. Continue enemy, content, economy, offline, and real-device verification in [GAME_PLAN.md](../GAME_PLAN.md).
 

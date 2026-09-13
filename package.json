@@ -6,12 +6,16 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "node scripts/test.mjs",
+    "format": "prettier --write src tests scripts \"*.{html,json,ts,yaml}\"",
+    "format:check": "prettier --check src tests scripts \"*.{html,json,ts,yaml}\""
   },
   "dependencies": {
     "phaser": "4.2.1"
   },
   "devDependencies": {
+    "prettier": "3.9.6",
     "typescript": "^5.9.2",
     "vite": "^7.1.5"
   },

@@ -1,7 +1,13 @@
 export const GRADES = ["K", "1", "2", "3", "4", "5", "6"] as const;
 export type Grade = (typeof GRADES)[number];
 
-export const AMMO_TYPES = ["Piercing", "Multi Shot", "Electric Chain", "Frost", "Fiery"] as const;
+export const AMMO_TYPES = [
+  "Piercing",
+  "Multi Shot",
+  "Electric Chain",
+  "Frost",
+  "Fiery",
+] as const;
 export type AmmoType = (typeof AMMO_TYPES)[number];
 export type Tier = 1 | 2 | 3 | 4;
 export type Quality = "white" | "green" | "blue" | "purple";
@@ -39,6 +45,8 @@ export interface Attempt {
 }
 
 export interface QuizState {
+  draft?: string;
+  correctionDraft?: string;
   questions: Question[];
   index: number;
   attempts: Attempt[];
@@ -78,7 +86,7 @@ export interface CombatBoltSave {
   fiery: number;
 }
 
-export interface CombatSave {
+export interface CombatSaveV1 {
   version: 1;
   wave: number;
   hp: number;
@@ -94,6 +102,48 @@ export interface CombatSave {
   enemies: CombatEnemySave[];
   bolts: CombatBoltSave[];
 }
+
+export interface CombatShotSave {
+  id: number;
+  baseDamage: number;
+  chainRemaining: number;
+  chainStarted: boolean;
+  chainVisited: number[];
+  burnFunds: number;
+  frost: number;
+  fiery: number;
+}
+
+export interface CombatEnemySaveV2 extends Omit<
+  CombatEnemySave,
+  "burnRemainingMs" | "burnDps"
+> {
+  burnRemainingDamage: number;
+  burnRate: number;
+}
+
+export interface CombatBoltSaveV2 extends Omit<
+  CombatBoltSave,
+  "chain" | "frost" | "fiery"
+> {
+  id: number;
+  shotId: number;
+}
+
+export interface CombatSaveV2 extends Omit<
+  CombatSaveV1,
+  "version" | "enemies" | "bolts"
+> {
+  version: 2;
+  nextShotId: number;
+  nextBoltId: number;
+  stepRemainderMs: number;
+  shots: CombatShotSave[];
+  enemies: CombatEnemySaveV2[];
+  bolts: CombatBoltSaveV2[];
+}
+
+export type CombatSave = CombatSaveV1 | CombatSaveV2;
 
 export interface RunState {
   id: string;
@@ -117,6 +167,7 @@ export interface RunState {
 }
 
 export interface HistoryEntry {
+  occurrenceId: string;
   question: string;
   grade: Grade;
   correctInitially: boolean;

@@ -33,6 +33,8 @@ The draft's asset sequencing needs an explicit production gate: ticket 16 establ
 
 **How to use this pack**
 
+For a copyable project-conventions skill, optional memory seeds and session opener, use [WIZARDGENIE_SETUP.md](./WIZARDGENIE_SETUP.md). It points back to the current PRD, architecture and memory bank instead of duplicating their rules.
+
 All paths inside the copyable prompts are relative to the repository root. Planning files live in `docs/`; preserved screenshots remain under `references/`. Apply the PRD's mobile launch requirements to every implementation prompt, including early prototypes.
 
 For implementation and asset integration, also read [ARCHITECTURE.md](/Users/tig/Desktop/tigran/mathonmars/docs/ARCHITECTURE.md) for state ownership, save contracts, and installed asset/content manifests. GAME_PLAN.md continues to govern gameplay and launch scope.

@@ -1,6 +1,6 @@
 # System patterns
 
-Status: proposed architecture; no runtime implementation exists yet. Consult [ARCHITECTURE.md](../ARCHITECTURE.md) before changing these contracts.
+Status: RunSession commands, pure CombatSimulation rules, and a validated ProfileRepository now implement the core separation. IndexedDB and remaining architecture contracts are still planned. Consult [ARCHITECTURE.md](../ARCHITECTURE.md) before changing these contracts.
 
 - One responsive static browser application: Phaser combat rendering and semantic HTML math/menu controls.
 - RunSession coordinates authoritative commands and phase transitions. Views send commands and render state.
@@ -12,4 +12,4 @@ Status: proposed architecture; no runtime implementation exists yet. Consult [AR
 - Keep content, asset, and rule versions pinned for resumable runs. Installed static assets and authored questions avoid runtime generation dependencies.
 - Touch and keyboard invoke the same commands. Mobile layouts preserve game rules and keep controls readable.
 
-Future tests should cover timer boundaries, timeout continuation, first-pass/correction separation, duplicate commands, interrupted saves, ammo merging/forge, and complete browser flows. Historical design calculations are not current runtime tests.
+Current regression tests cover timer boundaries, timeout continuation, first-pass/correction separation, stale commands, failed saves, ammo merging/forge, shared shot budgets, and save migration. Complete browser flows still need verification. See [review fixes](../REVIEW_FIXES.md). Historical design calculations are not current runtime tests.

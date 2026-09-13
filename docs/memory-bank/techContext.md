@@ -7,6 +7,8 @@ Observed September 13, 2026.
 - Current stack: strict TypeScript, Vite 7.3.6, Phaser 4.2.1, and semantic DOM/CSS screens. `pnpm` is the workspace package manager.
 - The first slice uses localStorage profile snapshots. Browser-generated question speech was removed at the owner's request; reviewed installed K–1 audio remains planned alongside IndexedDB transactions and a service worker.
 - Deployment target and concrete supported device versions remain to be established.
+- `pnpm test` runs 21 Node regression tests through `scripts/test.mjs`; `pnpm build` type-checks and builds the app. `tests/browser.html` provides isolated development fixtures for interactive pause, fraction, and save-failure checks.
+- `src/session.ts` owns committed run commands; `src/combat-rules.ts` owns plain simulation state; `src/persistence.ts` validates localStorage snapshots and offers explicit backup recovery. Combat saves are version 2; see [migration limits](../REVIEW_FIXES.md).
 
 ## References
 

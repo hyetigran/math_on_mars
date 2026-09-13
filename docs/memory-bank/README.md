@@ -2,6 +2,8 @@
 
 Last initialized: September 13, 2026.
 
+For WizardGenie setup, [WIZARDGENIE_SETUP.md](../WIZARDGENIE_SETUP.md) provides a copyable conventions skill and session opener that use this bank. The text is prepared; installation into WizardGenie has not been performed.
+
 When resuming project work, read [activeContext.md](./activeContext.md) and [progress.md](./progress.md) first. Read the other files when their topic is relevant:
 
 - [projectbrief.md](./projectbrief.md): scope and owner priorities.

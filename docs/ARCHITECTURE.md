@@ -326,6 +326,7 @@ docs/
   GAME_PLAN.md                 # PRD: gameplay, mobile requirements, MVP scope
   ARCHITECTURE.md              # runtime boundaries, data/save contracts, this layout
   WIZARDGENIE_PROMPTS.md        # asset and implementation prompts
+  WIZARDGENIE_SETUP.md          # copyable conventions skill, memory pointers and opener
   QUIZCASTER_REFERENCES.md      # screenshot observations and UI applications
   DESIGN_VALIDATION.md          # historical calculations; superseded quiz rules
   design_checks.py              # historical planning checks; not current quiz tests

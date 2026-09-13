@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en" data-profile-storage-key="math-on-mars-review-fixtures">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Math on Mars regression fixtures</title>
+  </head>
+  <body>
+    <main id="app">
+      <h1>Review regression fixtures</h1>
+      <p>
+        Isolated test profiles. Select a scenario to exercise the real game UI.
+      </p>
+      <button id="quiz-fixture">Open countdown quiz</button
+      ><button id="fraction-fixture">Open fraction correction</button
+      ><button id="failure-fixture">Open save failure</button>
+    </main>
+    <div id="announcer" role="status" aria-live="polite"></div>
+    <script type="module">
+      import { RunSession } from "../src/session.ts";
+      import { ProfileRepository } from "../src/persistence.ts";
+      const key = document.documentElement.dataset.profileStorageKey;
+      async function launch(kind) {
+        const store = new ProfileRepository(localStorage, key);
+        const session = new RunSession([], store);
+        const id = session.createProfile("Regression fixture");
+        session.start(id, "4");
+        session.finishWave(id, { hp: 100, salvage: 8, medkits: 1 });
+        if (kind === "fraction") {
+          // Known mathematical content makes the UI path repeatable without runtime introspection.
+          const fixture = session.profiles;
+          fixture[0].activeRun.quiz.questions[0].answer = [1, 3];
+          fixture[0].activeRun.quiz.questions[0].prompt = "1/6 + 1/6 = ?";
+          fixture[0].activeRun.quiz.questions[0].hint =
+            "Add the numerators and keep the denominator.";
+          fixture[0].activeRun.quiz.questions[0].explanation =
+            "2/6 equals 1/3.";
+          const correctedSession = new RunSession(fixture, store);
+          for (let i = 0; i < 5; i++) {
+            const q = correctedSession.profile(id).activeRun.quiz.questions[i];
+            correctedSession.submit(
+              id,
+              q.id,
+              i === 0 ? "999" : `${q.answer[0]}/${q.answer[1]}`,
+              30000,
+            );
+          }
+          correctedSession.chooseReward(
+            id,
+            correctedSession.profile(id).activeRun.quiz.rewardChoices[0].id,
+          );
+        }
+        if (kind === "failure") {
+          const original = Storage.prototype.setItem;
+          let fail = true;
+          Storage.prototype.setItem = function (name, value) {
+            if (name.startsWith(key) && fail)
+              throw new Error("Test storage failure");
+            return original.call(this, name, value);
+          };
+          const restore = document.createElement("button");
+          restore.textContent = "Allow test saves";
+          restore.id = "allow-test-saves";
+          restore.style.cssText = "position:fixed;right:0;top:0;z-index:10000";
+          restore.onclick = () => {
+            fail = false;
+            restore.remove();
+          };
+          document.body.append(restore);
+        }
+        await import("../src/main.ts");
+      }
+      document.querySelector("#quiz-fixture").onclick = () => launch("quiz");
+      document.querySelector("#fraction-fixture").onclick = () =>
+        launch("fraction");
+      document.querySelector("#failure-fixture").onclick = () =>
+        launch("failure");
+    </script>
+  </body>
+</html>

@@ -1,0 +1,163 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import { ProfileRepository, type ProfileStorage } from "../src/persistence";
+import type { Profile } from "../src/types";
+
+class MemoryStorage implements ProfileStorage {
+  values = new Map<string, string>();
+  failKey?: string;
+  getItem(key: string): string | null {
+    return this.values.get(key) ?? null;
+  }
+  setItem(key: string, value: string): void {
+    if (key === this.failKey) throw new Error("quota exceeded");
+    this.values.set(key, value);
+  }
+}
+const key = "test-profiles";
+const sample = (): Profile => ({
+  id: "cadet",
+  name: "Cadet",
+  grade: "3",
+  handedness: "left",
+  history: [],
+  victories: 0,
+});
+
+test("valid profiles round trip independently of caller mutations", () => {
+  const storage = new MemoryStorage();
+  const repository = new ProfileRepository(storage, key);
+  const profile = sample();
+  repository.commit([profile]);
+  profile.name = "Changed";
+  assert.equal(repository.load()[0].name, "Cadet");
+});
+
+test("malformed nested saves are rejected without discarding durable bytes", () => {
+  const storage = new MemoryStorage();
+  const repository = new ProfileRepository(storage, key);
+  const raw = JSON.stringify([{ ...sample(), history: [{}] }]);
+  storage.setItem(key, raw);
+  assert.throws(() => repository.load(), /Invalid saved profile/);
+  assert.equal(storage.getItem(key), raw);
+  assert.throws(() => repository.commit([sample()]), /Could not save/);
+  assert.equal(storage.getItem(key), raw);
+});
+
+test("failed primary write retains prior durable data and a valid backup", () => {
+  const storage = new MemoryStorage();
+  const repository = new ProfileRepository(storage, key);
+  repository.commit([sample()]);
+  storage.failKey = key;
+  assert.throws(
+    () => repository.commit([{ ...sample(), victories: 1 }]),
+    /Could not save/,
+  );
+  assert.equal(repository.load()[0].victories, 0);
+  assert.equal(JSON.parse(storage.getItem(`${key}-backup`)!)[0].victories, 0);
+});
+
+test("invalid candidate cannot replace a valid save", () => {
+  const storage = new MemoryStorage();
+  const repository = new ProfileRepository(storage, key);
+  repository.commit([sample()]);
+  assert.throws(
+    () => repository.commit([{ ...sample(), victories: -1 }]),
+    /Invalid saved profile/,
+  );
+  assert.equal(repository.load()[0].victories, 0);
+});
+
+test("backup write failure does not publish the new primary", () => {
+  const storage = new MemoryStorage();
+  const repository = new ProfileRepository(storage, key);
+  repository.commit([sample()]);
+  storage.failKey = `${key}-backup`;
+  assert.throws(
+    () => repository.commit([{ ...sample(), victories: 1 }]),
+    /Could not save/,
+  );
+  assert.equal(repository.load()[0].victories, 0);
+});
+
+test("corrupt primary never overwrites backup and recovery requires explicit call", () => {
+  const storage = new MemoryStorage();
+  const repository = new ProfileRepository(storage, key);
+  repository.commit([sample()]);
+  repository.commit([{ ...sample(), victories: 1 }]);
+  storage.setItem(key, "broken JSON");
+  assert.throws(() => repository.load(), /invalid JSON/);
+  assert.equal(storage.getItem(key), "broken JSON");
+  assert.equal(repository.recoverBackup()[0].victories, 0);
+  assert.equal(repository.load()[0].victories, 0);
+});
+
+test("legacy repeated prompts retain distinct occurrence IDs in initial order", () => {
+  const storage = new MemoryStorage();
+  const repository = new ProfileRepository(storage, key);
+  const questions = Array.from({ length: 5 }, (_, i) => ({
+    id: `q${i}`,
+    prompt: "Count cells",
+    spoken: "Count cells",
+    answer: [i + 1, 1],
+    hint: "Count",
+    explanation: "Count",
+    visualCount: i + 1,
+  }));
+  const rewards = [0, 1, 2].map((i) => ({
+    id: `m${i}`,
+    name: "Armor",
+    stat: "armor",
+    value: 2,
+    quality: "white",
+  }));
+  const legacy = {
+    ...sample(),
+    history: questions.map((q) => ({
+      question: q.prompt,
+      grade: "3",
+      correctInitially: false,
+      corrected: false,
+      at: 1,
+    })),
+    activeRun: {
+      id: "run",
+      grade: "3",
+      wave: 2,
+      totalWaves: 10,
+      difficulty: "standard",
+      hp: 100,
+      maxHp: 100,
+      salvage: 0,
+      medkits: 1,
+      ammoCapacity: 1,
+      ammo: [],
+      activeAmmoIds: [],
+      modules: [rewards[0]],
+      phase: "correction",
+      shopBought: [],
+      cacheClaimed: false,
+      quiz: {
+        questions,
+        index: 5,
+        attempts: questions.map((question) => ({
+          question,
+          input: "0",
+          correct: false,
+          corrected: false,
+        })),
+        elapsedMs: 1000,
+        remainingMs: 29000,
+        rewardQuality: "white",
+        rewardChoices: rewards,
+        selectedReward: "m0",
+        correctionIndex: 0,
+      },
+    },
+  };
+  storage.setItem(key, JSON.stringify([legacy]));
+  assert.deepEqual(
+    repository.load()[0].history.map((entry) => entry.occurrenceId),
+    ["run:2:0", "run:2:1", "run:2:2", "run:2:3", "run:2:4"],
+  );
+});
