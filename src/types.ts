@@ -1,0 +1,99 @@
+export const GRADES = ["K", "1", "2", "3", "4", "5", "6"] as const;
+export type Grade = (typeof GRADES)[number];
+
+export const AMMO_TYPES = ["Piercing", "Multi Shot", "Electric Chain", "Frost", "Fiery"] as const;
+export type AmmoType = (typeof AMMO_TYPES)[number];
+export type Tier = 1 | 2 | 3 | 4;
+export type Quality = "white" | "green" | "blue" | "purple";
+
+export interface Ammo {
+  id: string;
+  type: AmmoType;
+  tier: Tier;
+  legendary?: boolean;
+}
+
+export interface Module {
+  id: string;
+  name: string;
+  stat: "damage" | "attackSpeed" | "maxHp" | "armor" | "moveSpeed" | "healing";
+  value: number;
+  quality: Quality;
+}
+
+export interface Question {
+  id: string;
+  prompt: string;
+  spoken: string;
+  answer: [number, number];
+  hint: string;
+  explanation: string;
+  visualCount?: number;
+}
+
+export interface Attempt {
+  question: Question;
+  input: string;
+  correct: boolean;
+  corrected: boolean;
+}
+
+export interface QuizState {
+  questions: Question[];
+  index: number;
+  attempts: Attempt[];
+  elapsedMs: number;
+  remainingMs: number;
+  rewardQuality?: Quality;
+  rewardChoices?: Module[];
+  selectedReward?: string;
+  correctionIndex: number;
+}
+
+export interface RunState {
+  id: string;
+  grade: Grade;
+  wave: number;
+  totalWaves: number;
+  difficulty: "easy" | "standard";
+  hp: number;
+  maxHp: number;
+  salvage: number;
+  medkits: number;
+  ammoCapacity: number;
+  ammo: Ammo[];
+  activeAmmoIds: string[];
+  modules: Module[];
+  phase: "combat" | "quiz" | "reward" | "correction" | "cache" | "shop";
+  quiz?: QuizState;
+}
+
+export interface HistoryEntry {
+  question: string;
+  grade: Grade;
+  correctInitially: boolean;
+  corrected: boolean;
+  at: number;
+}
+
+export interface Profile {
+  id: string;
+  name: string;
+  grade: Grade;
+  handedness: "left" | "right";
+  history: HistoryEntry[];
+  activeRun?: RunState;
+  victories: number;
+}
+
+export const QUALITY_ORDER: Quality[] = ["white", "green", "blue", "purple"];
+export const QUALITY_LABEL: Record<Quality, string> = {
+  white: "White",
+  green: "Green",
+  blue: "Blue",
+  purple: "Purple",
+};
+
+export function uid(prefix = "id"): string {
+  return `${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+}
