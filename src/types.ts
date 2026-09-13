@@ -50,6 +50,51 @@ export interface QuizState {
   correctionIndex: number;
 }
 
+export interface CombatEnemySave {
+  id: number;
+  x: number;
+  y: number;
+  hp: number;
+  maxHp: number;
+  speed: number;
+  radius: number;
+  boss: boolean;
+  slowRemainingMs: number;
+  slowAmount: number;
+  burnRemainingMs: number;
+  burnDps: number;
+}
+
+export interface CombatBoltSave {
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  damage: number;
+  pierce: number;
+  hitIds: number[];
+  chain: number;
+  frost: number;
+  fiery: number;
+}
+
+export interface CombatSave {
+  version: 1;
+  wave: number;
+  hp: number;
+  salvage: number;
+  medkits: number;
+  marine: { x: number; y: number };
+  spawned: number;
+  spawnTotal: number;
+  nextEnemyId: number;
+  rngState: number;
+  spawnCooldownMs: number;
+  shotCooldownMs: number;
+  enemies: CombatEnemySave[];
+  bolts: CombatBoltSave[];
+}
+
 export interface RunState {
   id: string;
   grade: Grade;
@@ -68,6 +113,7 @@ export interface RunState {
   quiz?: QuizState;
   shopBought: string[];
   cacheClaimed: boolean;
+  combatSave?: CombatSave;
 }
 
 export interface HistoryEntry {

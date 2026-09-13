@@ -16,6 +16,7 @@ let timerId: number | null = null;
 let quizStartedAt = 0;
 let paused = false;
 let quizKeyHandler: ((event: KeyboardEvent) => void) | null = null;
+let combatCheckpointId: number | null = null;
 
 const moduleCatalog: Array<Omit<Module, "id" | "value" | "quality"> & { base: number }> = [
   { name: "Rapid Overclock", stat: "attackSpeed", base: .06 },
@@ -56,7 +57,9 @@ function announce(message: string): void {
 
 function cleanup(): void {
   if (timerId !== null) window.clearInterval(timerId);
+  if (combatCheckpointId !== null) window.clearInterval(combatCheckpointId);
   timerId = null;
+  combatCheckpointId = null;
   combat?.destroy();
   combat = null;
   if (quizKeyHandler) window.removeEventListener("keydown", quizKeyHandler);
@@ -87,6 +90,7 @@ function bindHome(): void {
     event.preventDefault();
     if (activeProfileId && activeProfile().activeRun) {
       persistCurrentQuizTime();
+      persistCombatState();
       saveProfiles();
     }
     renderProfiles();
@@ -143,7 +147,7 @@ function renderSetup(): void {
   cleanup();
   const profile = activeProfile();
   app.innerHTML = shell(`<section class="terminal" id="content">
-    <div class="terminal-heading"><p class="eyebrow warm">MISSION TERMINAL</p><h1>Ready, ${escapeHtml(profile.name)}?</h1><p>Pick a math track and flight controls. Combat difficulty stays separate from grade.</p></div>
+    <div class="terminal-heading"><p class="eyebrow warm">MISSION TERMINAL</p><h1>Ready, ${escapeHtml(profile.name)}?</h1><p>Choose the grade-level math track for this mission.</p></div>
     <form id="mission-form">
       <fieldset><legend>Math track</legend><div class="grade-grid">${GRADES.map((grade) => `<label class="choice-tile"><input type="radio" name="grade" value="${grade}" ${profile.grade === grade ? "checked" : ""}><span><b>${grade}</b><small>${gradeLabel(grade)}</small></span></label>`).join("")}</div></fieldset>
       <div class="mission-brief"><div><span class="mission-number">10</span><p><b>Waves</b><small>Nine recharges, then the Overmind</small></p></div><div><span class="mission-number">01</span><p><b>Pulse Blaster</b><small>White Piercing equipped</small></p></div></div>
@@ -197,12 +201,16 @@ function renderCombat(): void {
   const host = document.querySelector<HTMLElement>("#combat-canvas")!;
   combat = new CombatController({ parent: host, wave: run.wave, totalWaves: run.totalWaves, difficulty: run.difficulty,
     hp: run.hp, maxHp: run.maxHp, salvage: run.salvage, medkits: run.medkits, ammo: run.ammo,
-    activeAmmoIds: run.activeAmmoIds, modules: run.modules,
+    activeAmmoIds: run.activeAmmoIds, modules: run.modules, restore: run.combatSave, seed: hashSeed(`${run.id}-${run.wave}`),
     onHud: (state) => updateCombatHud(state),
     onComplete: (state) => finishWave(state),
     onDefeat: (state) => endRun(false, state),
   });
   bindTouchControls();
+  combatCheckpointId = window.setInterval(() => {
+    persistCombatState();
+    saveProfiles();
+  }, 5000);
   document.querySelector("#pause-button")!.addEventListener("click", () => showPause("Mission paused"));
 }
 
@@ -216,6 +224,18 @@ function updateCombatHud(state: CombatSnapshot): void {
   const salvage = document.querySelector<HTMLElement>("#salvage-count"); if (salvage) salvage.textContent = String(state.salvage);
   const medkits = document.querySelector<HTMLElement>("#medkit-count"); if (medkits) medkits.textContent = String(state.medkits);
   const enemies = document.querySelector<HTMLElement>("#enemy-count"); if (enemies) enemies.textContent = state.enemiesLeft ? `${state.enemiesLeft} hostiles` : "Area clear";
+}
+
+function persistCombatState(): void {
+  if (!activeProfileId || !combat) return;
+  const run = activeProfile().activeRun;
+  if (!run || run.phase !== "combat") return;
+  const snapshot = combat.snapshot();
+  if (!snapshot) return;
+  run.combatSave = snapshot;
+  run.hp = snapshot.hp;
+  run.salvage = snapshot.salvage;
+  run.medkits = snapshot.medkits;
 }
 
 function bindTouchControls(): void {
@@ -240,6 +260,7 @@ function bindTouchControls(): void {
 function finishWave(state: CombatSnapshot): void {
   const run = activeRun();
   run.hp = state.hp; run.salvage = Math.max(state.salvage, run.wave === 1 ? 8 : state.salvage); run.medkits = state.medkits;
+  run.combatSave = undefined;
   combat?.destroy(); combat = null;
   if (run.wave === run.totalWaves) { endRun(true, state); return; }
   run.phase = "quiz";
@@ -431,7 +452,7 @@ function renderShop(message = ""): void {
   document.querySelectorAll<HTMLElement>("[data-merge]").forEach((button) => button.addEventListener("click", () => mergeAmmo(button.dataset.merge as AmmoType, Number(button.dataset.tier) as 1|2|3)));
   document.querySelector("#forge-button")!.addEventListener("click", forgeOmni);
   document.querySelector("#save-exit")!.addEventListener("click", saveAndExit);
-  document.querySelector("#next-wave")!.addEventListener("click", () => { run.wave++; run.phase = "combat"; run.quiz = undefined; run.cacheClaimed = false; run.shopBought = []; saveProfiles(); renderCombat(); });
+  document.querySelector("#next-wave")!.addEventListener("click", () => { run.wave++; run.phase = "combat"; run.quiz = undefined; run.combatSave = undefined; run.cacheClaimed = false; run.shopBought = []; saveProfiles(); renderCombat(); });
 }
 
 function buyOffer(id: string, offers: Array<{ id: string; price: number }>): void {
@@ -498,14 +519,15 @@ function endRun(victory: boolean, state?: CombatSnapshot): void {
   const accuracy = profile.history.length ? Math.round(profile.history.filter((h) => h.correctInitially).length / profile.history.length * 100) : 0;
   app.innerHTML = shell(`<section class="summary-screen" id="content"><div class="summary-mark ${victory ? "victory" : "defeat"}"><i></i></div><p class="eyebrow warm">${victory ? "MISSION COMPLETE" : "SUIT OFFLINE"}</p><h1>${victory ? "Mars is secure." : "The slimes broke through."}</h1><p>${victory ? "The Overmind is down and the outpost reactor is stable." : "Your learning record is safe. Refit and launch again."}</p>
     <div class="summary-stats"><div><small>WAVES</small><b>${run.wave}</b></div><div><small>FIRST-TRY ACCURACY</small><b>${accuracy}%</b></div><div><small>MODULES</small><b>${run.modules.length}</b></div><div><small>SALVAGE</small><b>${run.salvage}</b></div></div>
-    <button id="return-home" class="button launch">Return to crew</button></section>`, "summary-shell");
+    <div class="summary-actions">${victory ? "" : `<button id="retry-mission" class="button primary">Retry mission</button>`}<button id="return-home" class="button ${victory ? "launch" : "secondary"}">Return to crew</button></div></section>`, "summary-shell");
   profile.activeRun = undefined; saveProfiles(); bindHome();
+  document.querySelector("#retry-mission")?.addEventListener("click", () => { profile.activeRun = newRun(profile.grade); saveProfiles(); renderCombat(); });
   document.querySelector("#return-home")!.addEventListener("click", renderProfiles);
 }
 
 function showPause(title: string): void {
   if (paused || !activeProfileId || !activeProfile().activeRun) return;
-  persistCurrentQuizTime(); paused = true; if (timerId !== null) window.clearInterval(timerId); timerId = null; combat?.pause(); combat?.setTouchVector(0, 0); saveProfiles();
+  persistCurrentQuizTime(); persistCombatState(); paused = true; if (timerId !== null) window.clearInterval(timerId); timerId = null; combat?.pause(); combat?.clearInput(); saveProfiles();
   const overlay = document.createElement("div"); overlay.className = "pause-overlay"; overlay.id = "pause-overlay";
   overlay.innerHTML = `<div class="pause-dialog" role="dialog" aria-modal="true" aria-labelledby="pause-title"><p class="eyebrow warm">MISSION HOLD</p><h2 id="pause-title">${escapeHtml(title)}</h2><p>Combat and question time are stopped.</p><button id="resume-button" class="button primary">Resume</button><button id="pause-exit" class="text-button">Save & exit</button></div>`;
   document.body.append(overlay); (document.querySelector("#resume-button") as HTMLElement).focus();
@@ -517,7 +539,7 @@ function showPause(title: string): void {
 }
 
 function saveAndExit(): void {
-  persistCurrentQuizTime(); saveProfiles(); renderProfiles();
+  persistCurrentQuizTime(); persistCombatState(); saveProfiles(); renderProfiles();
 }
 
 function timeQuality(remaining: number): Quality {
@@ -548,12 +570,14 @@ function ammoChip(ammo: Ammo, active: boolean): string {
 
 function ammoClass(type: AmmoType): string { return type.toLowerCase().replaceAll(" ", "-"); }
 function formatTime(ms: number): string { return (Math.max(0, ms) / 1000).toFixed(1).padStart(4, "0"); }
+function hashSeed(value: string): number { return [...value].reduce((seed, character) => (seed * 31 + character.charCodeAt(0)) >>> 0, 2166136261); }
 function gradeLabel(grade: Grade): string { return ({ K: "Count & compare", 1: "Within 20", 2: "Within 100", 3: "Multiply & divide", 4: "Fractions & products", 5: "Decimals & fractions", 6: "Ratios & equations" } as Record<Grade, string>)[grade]; }
 function escapeHtml(value: string): string {
   return value.replace(/[&<>'"]/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" })[char]!);
 }
 
 document.addEventListener("visibilitychange", () => { if (document.hidden && activeProfileId && activeProfile().activeRun) showPause("App switched away"); });
+window.addEventListener("blur", () => { if (activeProfileId && activeProfile().activeRun) showPause("Window focus changed"); });
 window.addEventListener("orientationchange", () => { if (activeProfileId && activeProfile().activeRun) showPause("Screen rotated"); });
 
 renderProfiles();

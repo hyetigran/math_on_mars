@@ -1,5 +1,5 @@
 import Phaser from "phaser";
-import type { Ammo, AmmoType, Module } from "./types";
+import type { Ammo, AmmoType, CombatBoltSave, CombatEnemySave, CombatSave, Module } from "./types";
 
 export interface CombatSnapshot {
   hp: number;
@@ -48,6 +48,8 @@ interface CombatOptions {
   ammo: Ammo[];
   activeAmmoIds: string[];
   modules: Module[];
+  restore?: CombatSave;
+  seed: number;
   onHud: (state: CombatSnapshot) => void;
   onComplete: (state: CombatSnapshot) => void;
   onDefeat: (state: CombatSnapshot) => void;
@@ -92,11 +94,21 @@ export class CombatController {
   }
 
   pause(): void {
+    this.scene?.clearInput();
     this.scene?.scene.pause();
   }
 
   resume(): void {
+    this.scene?.clearInput();
     this.scene?.scene.resume();
+  }
+
+  snapshot(): CombatSave | undefined {
+    return this.scene?.serialize();
+  }
+
+  clearInput(): void {
+    this.scene?.clearInput();
   }
 
   destroy(): void {
@@ -121,6 +133,8 @@ class MarsCombatScene extends Phaser.Scene {
   private medkits: number;
   private ended = false;
   private hudAt = 0;
+  private currentNow = 0;
+  private rngState: number;
   private baseDamage = 18;
   private shotDelay = 520;
   private moveSpeed = 220;
@@ -131,18 +145,44 @@ class MarsCombatScene extends Phaser.Scene {
     this.hp = options.hp;
     this.salvage = options.salvage;
     this.medkits = options.medkits;
+    const restore = options.restore?.version === 1 && options.restore.wave === options.wave ? options.restore : undefined;
+    this.rngState = restore?.rngState ?? options.seed;
     this.baseDamage *= 1 + moduleTotal(options.modules, "damage");
     this.shotDelay /= 1 + moduleTotal(options.modules, "attackSpeed");
     this.moveSpeed *= 1 + moduleTotal(options.modules, "moveSpeed");
   }
 
   create(): void {
+    const now = this.time.now;
+    this.currentNow = now;
     this.drawArena();
-    this.marine = this.makeMarine(480, 270);
-    this.spawnTotal = this.options.wave === this.options.totalWaves ? 1 : Math.min(10 + this.options.wave * 3, 34);
+    const restore = this.options.restore?.version === 1 && this.options.restore.wave === this.options.wave ? this.options.restore : undefined;
+    this.marine = this.makeMarine(restore?.marine.x ?? 480, restore?.marine.y ?? 270);
+    this.spawnTotal = restore?.spawnTotal ?? (this.options.wave === this.options.totalWaves ? 1 : Math.min(10 + this.options.wave * 3, 34));
+    if (restore) {
+      this.hp = restore.hp;
+      this.salvage = restore.salvage;
+      this.medkits = restore.medkits;
+      this.spawned = restore.spawned;
+      this.nextEnemyId = restore.nextEnemyId;
+      this.rngState = restore.rngState ?? this.options.seed;
+      this.lastSpawn = now - (this.spawnDelay() - restore.spawnCooldownMs);
+      this.lastShot = now - (this.shotDelay - restore.shotCooldownMs);
+      for (const enemy of restore.enemies) this.restoreEnemy(enemy);
+      for (const bolt of restore.bolts) this.restoreBolt(bolt);
+    }
     this.keys = this.input.keyboard!.addKeys("W,A,S,D,UP,DOWN,LEFT,RIGHT") as Record<string, Phaser.Input.Keyboard.Key>;
     this.input.keyboard?.on("keydown-Q", () => this.useMedkit());
     this.publishHud(0);
+  }
+
+  private spawnDelay(): number {
+    return this.options.wave === this.options.totalWaves ? 100 : 560;
+  }
+
+  private randomBetween(min: number, max: number): number {
+    this.rngState = (this.rngState * 1664525 + 1013904223) >>> 0;
+    return Math.floor((this.rngState / 4294967296) * (max - min + 1)) + min;
   }
 
   private drawArena(): void {
@@ -175,24 +215,59 @@ class MarsCombatScene extends Phaser.Scene {
 
   private spawnEnemy(): void {
     const boss = this.options.wave === this.options.totalWaves;
-    const edge = Phaser.Math.Between(0, 3);
+    const edge = this.randomBetween(0, 3);
     const margin = 40;
-    let x = edge === 0 ? margin : edge === 1 ? 960 - margin : Phaser.Math.Between(margin, 960 - margin);
-    let y = edge === 2 ? margin : edge === 3 ? 540 - margin : Phaser.Math.Between(margin, 540 - margin);
-    const color = boss ? 0xc147a3 : this.options.wave === 2 ? 0x9ddf3c : 0x75e353;
+    let x = edge === 0 ? margin : edge === 1 ? 960 - margin : this.randomBetween(margin, 960 - margin);
+    let y = edge === 2 ? margin : edge === 3 ? 540 - margin : this.randomBetween(margin, 540 - margin);
     const radius = boss ? 58 : 24;
+    const baseHp = boss ? 620 : 42 + this.options.wave * 10;
+    this.enemies.push({
+      id: this.nextEnemyId++, body: this.makeEnemyBody(x, y, boss, radius), hp: baseHp, maxHp: baseHp,
+      speed: (boss ? 32 : 45 + this.options.wave * 7) * (this.options.difficulty === "easy" ? 0.82 : 1),
+      radius, boss, slowUntil: 0, slowAmount: 0, burnUntil: 0, burnDps: 0,
+    });
+  }
+
+  private makeEnemyBody(x: number, y: number, boss: boolean, radius: number): Phaser.GameObjects.Container {
+    const color = boss ? 0xc147a3 : this.options.wave === 2 ? 0x9ddf3c : 0x75e353;
     const shadow = this.add.ellipse(0, radius * 0.55, radius * 1.8, radius * 0.55, 0x211b20, 0.28);
     const blob = this.add.ellipse(0, 0, radius * 2, radius * 1.65, color).setStrokeStyle(boss ? 7 : 4, 0x263022);
     const core = this.add.circle(0, 3, boss ? 20 : 8, boss ? 0xffc65e : 0xf3f179).setStrokeStyle(2, 0x58632e);
     const eye1 = this.add.circle(-8, -8, boss ? 4 : 3, 0x18211b);
     const eye2 = this.add.circle(8, -8, boss ? 4 : 3, 0x18211b);
     const shine = this.add.ellipse(-radius * 0.3, -radius * 0.32, radius * 0.35, radius * 0.18, 0xffffff, 0.45);
-    const body = this.add.container(x, y, [shadow, blob, core, eye1, eye2, shine]).setDepth(4);
-    const baseHp = boss ? 620 : 42 + this.options.wave * 10;
+    return this.add.container(x, y, [shadow, blob, core, eye1, eye2, shine]).setDepth(4);
+  }
+
+  private restoreEnemy(saved: CombatEnemySave): void {
+    const now = this.currentNow;
     this.enemies.push({
-      id: this.nextEnemyId++, body, hp: baseHp, maxHp: baseHp,
-      speed: (boss ? 32 : 45 + this.options.wave * 7) * (this.options.difficulty === "easy" ? 0.82 : 1),
-      radius, boss, slowUntil: 0, slowAmount: 0, burnUntil: 0, burnDps: 0,
+      id: saved.id,
+      body: this.makeEnemyBody(saved.x, saved.y, saved.boss, saved.radius),
+      hp: saved.hp,
+      maxHp: saved.maxHp,
+      speed: saved.speed,
+      radius: saved.radius,
+      boss: saved.boss,
+      slowUntil: now + saved.slowRemainingMs,
+      slowAmount: saved.slowAmount,
+      burnUntil: now + saved.burnRemainingMs,
+      burnDps: saved.burnDps,
+    });
+  }
+
+  private restoreBolt(saved: CombatBoltSave): void {
+    const body = this.add.circle(saved.x, saved.y, 5, saved.fiery ? 0xffa23f : 0x68efff).setDepth(6);
+    this.bolts.push({
+      body,
+      vx: saved.vx,
+      vy: saved.vy,
+      damage: saved.damage,
+      pierce: saved.pierce,
+      hit: new Set(saved.hitIds),
+      chain: saved.chain,
+      frost: saved.frost,
+      fiery: saved.fiery,
     });
   }
 
@@ -259,6 +334,7 @@ class MarsCombatScene extends Phaser.Scene {
 
   update(now: number, delta: number): void {
     if (this.ended) return;
+    this.currentNow = now;
     const dt = Math.min(delta, 34) / 1000;
     const keyboard = new Phaser.Math.Vector2(
       (this.keys.D.isDown || this.keys.RIGHT.isDown ? 1 : 0) - (this.keys.A.isDown || this.keys.LEFT.isDown ? 1 : 0),
@@ -269,7 +345,7 @@ class MarsCombatScene extends Phaser.Scene {
     this.marine.x = Phaser.Math.Clamp(this.marine.x + movement.x * this.moveSpeed * dt, 44, 916);
     this.marine.y = Phaser.Math.Clamp(this.marine.y + movement.y * this.moveSpeed * dt, 58, 495);
 
-    if (this.spawned < this.spawnTotal && now - this.lastSpawn > (this.options.wave === this.options.totalWaves ? 100 : 560)) {
+    if (this.spawned < this.spawnTotal && now - this.lastSpawn > this.spawnDelay()) {
       this.spawnEnemy(); this.spawned++; this.lastSpawn = now;
     }
     this.fire(now);
@@ -315,12 +391,61 @@ class MarsCombatScene extends Phaser.Scene {
     if (this.touch.lengthSq() > 1) this.touch.normalize();
   }
 
+  clearInput(): void {
+    this.touch.set(0, 0);
+    this.input.keyboard?.resetKeys();
+  }
+
   useMedkit(): void {
     if (this.medkits < 1 || this.hp >= this.options.maxHp || this.ended) return;
     const healing = 35 * (1 + moduleTotal(this.options.modules, "healing"));
     this.hp = Math.min(this.options.maxHp, this.hp + healing);
     this.medkits--;
     this.publishHud(0);
+  }
+
+  serialize(): CombatSave {
+    const now = this.currentNow;
+    return {
+      version: 1,
+      wave: this.options.wave,
+      hp: Math.max(0, this.hp),
+      salvage: this.salvage,
+      medkits: this.medkits,
+      marine: { x: this.marine?.x ?? 480, y: this.marine?.y ?? 270 },
+      spawned: this.spawned,
+      spawnTotal: this.spawnTotal,
+      nextEnemyId: this.nextEnemyId,
+      rngState: this.rngState,
+      spawnCooldownMs: Math.max(0, this.spawnDelay() - (now - this.lastSpawn)),
+      shotCooldownMs: Math.max(0, this.shotDelay - (now - this.lastShot)),
+      enemies: this.enemies.map((enemy) => ({
+        id: enemy.id,
+        x: enemy.body.x,
+        y: enemy.body.y,
+        hp: enemy.hp,
+        maxHp: enemy.maxHp,
+        speed: enemy.speed,
+        radius: enemy.radius,
+        boss: enemy.boss,
+        slowRemainingMs: Math.max(0, enemy.slowUntil - now),
+        slowAmount: enemy.slowAmount,
+        burnRemainingMs: Math.max(0, enemy.burnUntil - now),
+        burnDps: enemy.burnDps,
+      })),
+      bolts: this.bolts.map((bolt) => ({
+        x: bolt.body.x,
+        y: bolt.body.y,
+        vx: bolt.vx,
+        vy: bolt.vy,
+        damage: bolt.damage,
+        pierce: bolt.pierce,
+        hitIds: [...bolt.hit],
+        chain: bolt.chain,
+        frost: bolt.frost,
+        fiery: bolt.fiery,
+      })),
+    };
   }
 
   private snapshot(): CombatSnapshot {

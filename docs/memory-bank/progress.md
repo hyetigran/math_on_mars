@@ -12,6 +12,8 @@ Snapshot: September 13, 2026, after the first playable scaffold.
 - Memory bank initialized from current documents and conversation decisions.
 - Runnable Vite/TypeScript project using Phaser 4.2.1.
 - Ten-wave combat run with automatic fire, desktop/touch movement, med-gel, pause, and a final Overmind wave.
+- Serializable combat checkpoints and deterministic resume for the marine, scheduled spawns, enemies, projectiles, effect durations, cooldowns, and random state.
+- Interruption handling that clears held keyboard/touch input, plus direct retry after defeat.
 - Local profile/setup flow and all seven K–6 practice-track generators.
 - Five-question shared countdown, time tier, wrong-answer drops, reward choice, corrections, cache, shop, loadout, merge, and forge interfaces.
 
@@ -21,7 +23,7 @@ Transactional IndexedDB saves, authored/installed K–1 narration, production ar
 
 ## Verification status
 
-`pnpm build` passes against Phaser 4.2.1 and `git diff --check` passes. Runtime Play, browser interaction, performance, persistence-failure, offline, and physical-device checks remain pending. Historical Python calculations do not verify the current rules.
+`pnpm build` passes against Phaser 4.2.1 and `git diff --check` passes. A server-free Chrome smoke check boots the production bundle, writes a five-second combat checkpoint, and restores it in a second browser session. Headless screenshots at 390×844 portrait and 844×390 landscape confirmed the corrected canvas centering and reachable touch controls. Complete run interaction, performance, persistence-failure, offline, and physical-device checks remain pending. Historical Python calculations do not verify the current rules.
 
 ## Open implementation details
 
