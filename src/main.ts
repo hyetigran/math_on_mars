@@ -57,7 +57,6 @@ function announce(message: string): void {
 function cleanup(): void {
   if (timerId !== null) window.clearInterval(timerId);
   timerId = null;
-  window.speechSynthesis?.cancel();
   combat?.destroy();
   combat = null;
   if (quizKeyHandler) window.removeEventListener("keydown", quizKeyHandler);
@@ -147,9 +146,7 @@ function renderSetup(): void {
     <div class="terminal-heading"><p class="eyebrow warm">MISSION TERMINAL</p><h1>Ready, ${escapeHtml(profile.name)}?</h1><p>Pick a math track and flight controls. Combat difficulty stays separate from grade.</p></div>
     <form id="mission-form">
       <fieldset><legend>Math track</legend><div class="grade-grid">${GRADES.map((grade) => `<label class="choice-tile"><input type="radio" name="grade" value="${grade}" ${profile.grade === grade ? "checked" : ""}><span><b>${grade}</b><small>${gradeLabel(grade)}</small></span></label>`).join("")}</div></fieldset>
-      <div class="setup-row"><fieldset><legend>Combat</legend><div class="segmented"><label><input type="radio" name="difficulty" value="easy"><span>Easy</span></label><label><input type="radio" name="difficulty" value="standard" checked><span>Standard</span></label></div></fieldset>
-      <fieldset><legend>Control side</legend><div class="segmented"><label><input type="radio" name="handedness" value="left" ${profile.handedness === "left" ? "checked" : ""}><span>Stick left</span></label><label><input type="radio" name="handedness" value="right" ${profile.handedness === "right" ? "checked" : ""}><span>Stick right</span></label></div></fieldset></div>
-      <div class="mission-brief"><div><span class="mission-number">03</span><p><b>Waves</b><small>Two recharges, then the Overmind</small></p></div><div><span class="mission-number">01</span><p><b>Pulse Blaster</b><small>White Piercing equipped</small></p></div></div>
+      <div class="mission-brief"><div><span class="mission-number">10</span><p><b>Waves</b><small>Nine recharges, then the Overmind</small></p></div><div><span class="mission-number">01</span><p><b>Pulse Blaster</b><small>White Piercing equipped</small></p></div></div>
       <button class="button launch" type="submit"><span>Launch mission</span><i aria-hidden="true">→</i></button>
     </form>
   </section>`, "terminal-screen");
@@ -158,20 +155,21 @@ function renderSetup(): void {
     event.preventDefault();
     const data = new FormData(event.currentTarget as HTMLFormElement);
     profile.grade = data.get("grade") as Grade;
-    profile.handedness = data.get("handedness") as "left" | "right";
-    profile.activeRun = newRun(profile.grade, data.get("difficulty") as "easy" | "standard");
+    profile.handedness = "left";
+    profile.activeRun = newRun(profile.grade);
     saveProfiles(); renderCombat();
   });
 }
 
-function newRun(grade: Grade, difficulty: "easy" | "standard"): RunState {
+function newRun(grade: Grade): RunState {
   const starter: Ammo = { id: uid("ammo"), type: "Piercing", tier: 1 };
-  return { id: uid("run"), grade, wave: 1, totalWaves: 3, difficulty, hp: 100, maxHp: 100, salvage: 0, medkits: 1,
+  return { id: uid("run"), grade, wave: 1, totalWaves: 10, difficulty: "standard", hp: 100, maxHp: 100, salvage: 0, medkits: 1,
     ammoCapacity: 1, ammo: [starter], activeAmmoIds: [starter.id], modules: [], phase: "combat", shopBought: [], cacheClaimed: false };
 }
 
 function resumeRun(): void {
   const run = activeRun();
+  if (run.totalWaves === 3) run.totalWaves = 10;
   if (!run.shopBought) run.shopBought = [];
   if (run.cacheClaimed === undefined) run.cacheClaimed = false;
   if (run.phase === "combat") renderCombat();
@@ -270,7 +268,7 @@ function renderQuiz(message = ""): void {
       <div class="mobile-tier-strip" id="mobile-tier">${qualityPips(timeQuality(quiz.remainingMs))}<b>${QUALITY_LABEL[timeQuality(quiz.remainingMs)]}</b><span>candidate</span></div>
       <div class="question-panel"><div class="question-copy"><p class="prompt">${escapeHtml(question.prompt)}</p>${question.visualCount ? `<div class="cell-grid" aria-label="${question.visualCount} energy cells">${Array.from({ length: question.visualCount }, () => "<i></i>").join("")}</div>` : ""}
         <label for="answer">Your answer</label><output id="answer" class="answer-field" aria-live="polite">&nbsp;</output><p class="input-error" id="input-error">${escapeHtml(message)}</p>
-        <div class="quiz-tools"><button id="speak-button" class="text-button" type="button">◖ Replay</button><button id="save-exit" class="text-button" type="button">Save & exit</button></div></div>
+        <div class="quiz-tools"><span>Take your best shot.</span><button id="save-exit" class="text-button" type="button">Save & exit</button></div></div>
         <div class="keypad" aria-label="Number keypad">${[7,8,9,4,5,6,1,2,3].map((n) => `<button data-key="${n}" aria-label="${n}">${n}</button>`).join("")}
           <button data-key="." aria-label="Decimal point">.</button><button data-key="0" aria-label="0">0</button><button data-key="/" aria-label="Fraction bar">⁄</button>
           <button data-key="back" class="key-muted" aria-label="Backspace">⌫</button><button data-key="clear" class="key-muted">Clear</button><button data-key="check" class="key-check">Check</button>
@@ -296,12 +294,10 @@ function renderQuiz(message = ""): void {
     else if (event.key === "Enter") { press("check"); event.preventDefault(); }
   };
   window.addEventListener("keydown", quizKeyHandler);
-  document.querySelector("#speak-button")!.addEventListener("click", () => speak(question.spoken));
   document.querySelector("#save-exit")!.addEventListener("click", saveAndExit);
   quizStartedAt = performance.now();
   timerId = window.setInterval(updateTimer, 50);
   updateTierRail();
-  if (run.grade === "K" || run.grade === "1") speak(question.spoken);
 }
 
 function updateTimer(): void {
@@ -373,7 +369,7 @@ function renderCorrection(message = ""): void {
   const attempt = misses[0];
   app.innerHTML = shell(`<section class="correction-screen" id="content"><div class="correction-copy"><p class="eyebrow warm">UNTIMED CORRECTION</p><h1>Let’s repair this one.</h1><p>Rewards are locked in. Work it through before the next wave.</p></div>
     <div class="correction-card"><div><span class="correction-count">${quiz.attempts.filter((a) => !a.correct).length - misses.length + 1} / ${quiz.attempts.filter((a) => !a.correct).length}</span><p class="prompt">${escapeHtml(attempt.question.prompt)}</p>${attempt.question.visualCount ? `<div class="cell-grid">${Array.from({ length: attempt.question.visualCount }, () => "<i></i>").join("")}</div>` : ""}<div class="hint-box"><b>Mission hint</b><p>${escapeHtml(attempt.question.hint)}</p></div></div>
-      <div><label for="correction-input">Correct answer</label><input id="correction-input" inputmode="decimal" autocomplete="off"><p class="input-error" id="correction-error">${escapeHtml(message)}</p><button id="correction-check" class="button primary">Check answer</button><button id="correction-speak" class="text-button">◖ Replay</button></div></div>
+      <div><label for="correction-input">Correct answer</label><input id="correction-input" inputmode="decimal" autocomplete="off"><p class="input-error" id="correction-error">${escapeHtml(message)}</p><button id="correction-check" class="button primary">Check answer</button></div></div>
     <button id="save-exit" class="text-button centered">Save & exit</button></section>`, "correction-shell");
   bindHome();
   const input = document.querySelector<HTMLInputElement>("#correction-input")!; input.focus();
@@ -386,7 +382,6 @@ function renderCorrection(message = ""): void {
   };
   document.querySelector("#correction-check")!.addEventListener("click", submit);
   input.addEventListener("keydown", (event) => { if (event.key === "Enter") submit(); });
-  document.querySelector("#correction-speak")!.addEventListener("click", () => speak(`${attempt.question.spoken}. Hint: ${attempt.question.hint}`));
   document.querySelector("#save-exit")!.addEventListener("click", saveAndExit);
 }
 
@@ -510,7 +505,7 @@ function endRun(victory: boolean, state?: CombatSnapshot): void {
 
 function showPause(title: string): void {
   if (paused || !activeProfileId || !activeProfile().activeRun) return;
-  persistCurrentQuizTime(); paused = true; if (timerId !== null) window.clearInterval(timerId); timerId = null; combat?.pause(); combat?.setTouchVector(0, 0); window.speechSynthesis?.cancel(); saveProfiles();
+  persistCurrentQuizTime(); paused = true; if (timerId !== null) window.clearInterval(timerId); timerId = null; combat?.pause(); combat?.setTouchVector(0, 0); saveProfiles();
   const overlay = document.createElement("div"); overlay.className = "pause-overlay"; overlay.id = "pause-overlay";
   overlay.innerHTML = `<div class="pause-dialog" role="dialog" aria-modal="true" aria-labelledby="pause-title"><p class="eyebrow warm">MISSION HOLD</p><h2 id="pause-title">${escapeHtml(title)}</h2><p>Combat and question time are stopped.</p><button id="resume-button" class="button primary">Resume</button><button id="pause-exit" class="text-button">Save & exit</button></div>`;
   document.body.append(overlay); (document.querySelector("#resume-button") as HTMLElement).focus();
@@ -554,10 +549,6 @@ function ammoChip(ammo: Ammo, active: boolean): string {
 function ammoClass(type: AmmoType): string { return type.toLowerCase().replaceAll(" ", "-"); }
 function formatTime(ms: number): string { return (Math.max(0, ms) / 1000).toFixed(1).padStart(4, "0"); }
 function gradeLabel(grade: Grade): string { return ({ K: "Count & compare", 1: "Within 20", 2: "Within 100", 3: "Multiply & divide", 4: "Fractions & products", 5: "Decimals & fractions", 6: "Ratios & equations" } as Record<Grade, string>)[grade]; }
-function speak(text: string): void {
-  if (!("speechSynthesis" in window)) { announce("Speech is unavailable in this browser."); return; }
-  speechSynthesis.cancel(); const utterance = new SpeechSynthesisUtterance(text); utterance.rate = .88; utterance.pitch = 1.05; speechSynthesis.speak(utterance);
-}
 function escapeHtml(value: string): string {
   return value.replace(/[&<>'"]/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" })[char]!);
 }

@@ -5,7 +5,7 @@ Observed September 13, 2026.
 - Git remote: `https://github.com/hyetigran/math_on_mars.git`.
 - The repository contains a runnable Vite browser project, planning Markdown, reference images, and a historical Python calculation script.
 - Current stack: strict TypeScript, Vite 7.3.6, Phaser 4.2.1, and semantic DOM/CSS screens. `pnpm` is the workspace package manager.
-- The first slice uses localStorage profile snapshots and browser speech synthesis as temporary adapters. IndexedDB transactions, installed K–1 audio, and a service worker remain planned.
+- The first slice uses localStorage profile snapshots. Browser-generated question speech was removed at the owner's request; reviewed installed K–1 audio remains planned alongside IndexedDB transactions and a service worker.
 - Deployment target and concrete supported device versions remain to be established.
 
 ## References

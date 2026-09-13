@@ -139,7 +139,7 @@ class MarsCombatScene extends Phaser.Scene {
   create(): void {
     this.drawArena();
     this.marine = this.makeMarine(480, 270);
-    this.spawnTotal = this.options.wave === this.options.totalWaves ? 1 : (this.options.wave === 1 ? 10 : 16);
+    this.spawnTotal = this.options.wave === this.options.totalWaves ? 1 : Math.min(10 + this.options.wave * 3, 34);
     this.keys = this.input.keyboard!.addKeys("W,A,S,D,UP,DOWN,LEFT,RIGHT") as Record<string, Phaser.Input.Keyboard.Key>;
     this.input.keyboard?.on("keydown-Q", () => this.useMedkit());
     this.publishHud(0);

@@ -11,13 +11,13 @@ Snapshot: September 13, 2026, after the first playable scaffold.
 - Remaining conflicting historical validation/screenshot guidance marked as superseded.
 - Memory bank initialized from current documents and conversation decisions.
 - Runnable Vite/TypeScript project using Phaser 4.2.1.
-- Three-wave combat slice with automatic fire, desktop/touch movement, med-gel, pause, and a final Overmind wave.
+- Ten-wave combat run with automatic fire, desktop/touch movement, med-gel, pause, and a final Overmind wave.
 - Local profile/setup flow and all seven K–6 practice-track generators.
 - Five-question shared countdown, time tier, wrong-answer drops, reward choice, corrections, cache, shop, loadout, merge, and forge interfaces.
 
 ## Not implemented
 
-Transactional IndexedDB saves, authored/installed K–1 narration, production art/animation, the full enemy roster and mission presets, complete versioned content packs, service-worker delivery, and deployment.
+Transactional IndexedDB saves, authored/installed K–1 narration, production art/animation, the full enemy roster, complete versioned content packs, service-worker delivery, and deployment.
 
 ## Verification status
 
