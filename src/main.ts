@@ -577,6 +577,11 @@ function escapeHtml(value: string): string {
 }
 
 document.addEventListener("visibilitychange", () => { if (document.hidden && activeProfileId && activeProfile().activeRun) showPause("App switched away"); });
+window.addEventListener("keydown", (event) => {
+  if (event.key !== "Escape" || !activeProfileId || !activeProfile().activeRun) return;
+  event.preventDefault();
+  showPause("Mission paused");
+});
 window.addEventListener("blur", () => { if (activeProfileId && activeProfile().activeRun) showPause("Window focus changed"); });
 window.addEventListener("orientationchange", () => { if (activeProfileId && activeProfile().activeRun) showPause("Screen rotated"); });
 
