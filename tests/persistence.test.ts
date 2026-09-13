@@ -1,6 +1,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { ProfileRepository, type ProfileStorage } from "../src/persistence";
+import { RunSession } from "../src/session";
+import { CombatSimulation } from "../src/combat-rules";
 import type { Profile } from "../src/types";
 
 class MemoryStorage implements ProfileStorage {
@@ -160,4 +162,20 @@ test("legacy repeated prompts retain distinct occurrence IDs in initial order", 
     repository.load()[0].history.map((entry) => entry.occurrenceId),
     ["run:2:0", "run:2:1", "run:2:2", "run:2:3", "run:2:4"],
   );
+});
+
+test("saved loot cannot share an ID with a living enemy", () => {
+  const storage = new MemoryStorage();
+  const repository = new ProfileRepository(storage, key);
+  const session = new RunSession([sample()], repository);
+  session.start("cadet", "3");
+  const profiles = session.profiles;
+  const run = profiles[0].activeRun!;
+  const simulation = new CombatSimulation({ ...run, seed: 1 });
+  for (let i = 0; i < 6; i++) simulation.advance(100);
+  const save = simulation.serialize();
+  const enemy = save.enemies[0];
+  save.pickups = [{ id: enemy.id, x: enemy.x, y: enemy.y, value: 1 }];
+  run.combatSave = save;
+  assert.throws(() => repository.commit(profiles), /pickup ID/);
 });

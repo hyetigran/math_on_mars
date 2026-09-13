@@ -886,6 +886,7 @@ legend {
 }
 .joystick::before,
 .joystick::after {
+  translate: var(--stick-x, 0px) var(--stick-y, 0px);
   content: "";
   position: absolute;
   background: #ffffff27;
@@ -2320,7 +2321,12 @@ legend {
     display: none;
   }
   .combat-tip {
-    display: none;
+    display: block;
+    width: max-content;
+    max-width: 95%;
+    text-align: center;
+    font-size: 0.65rem;
+    pointer-events: none;
   }
   .joystick {
     width: 116px;

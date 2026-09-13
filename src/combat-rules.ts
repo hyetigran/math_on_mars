@@ -141,6 +141,7 @@ export class CombatSimulation {
             nextShotId: 1,
             nextBoltId: 1,
             stepRemainderMs: 0,
+            pickups: [],
             shots: [],
             enemies: [],
             bolts: [],
@@ -395,18 +396,36 @@ export class CombatSimulation {
     state.bolts = surviving;
     const activeShotIds = new Set(surviving.map((b) => b.shotId));
     state.shots = state.shots.filter((s) => activeShotIds.has(s.id));
+    state.pickups ??= [];
     for (const enemy of state.enemies) {
-      if (enemy.hp <= 0) state.salvage += enemy.boss ? 12 : 1;
+      if (enemy.hp <= 0)
+        state.pickups.push({
+          id: enemy.id,
+          x: enemy.x,
+          y: enemy.y,
+          value: enemy.boss ? 12 : 1,
+        });
       else if (distance(enemy, state.marine) < enemy.radius + 20) {
         const armor = Math.min(20, moduleTotal(this.options.modules, "armor"));
         state.hp -= (((enemy.boss ? 26 : 11) * 20) / (20 + armor)) * dt;
       }
     }
     state.enemies = state.enemies.filter((e) => e.hp > 0);
+    state.pickups = state.pickups.filter((pickup) => {
+      if (distance(pickup, state.marine) > 48) return true;
+      state.salvage += pickup.value;
+      return false;
+    });
     state.hp = Math.max(0, state.hp);
     if (state.hp === 0) this.outcome = "defeat";
-    else if (state.spawned >= state.spawnTotal && state.enemies.length === 0)
+    else if (state.spawned >= state.spawnTotal && state.enemies.length === 0) {
+      state.salvage += state.pickups.reduce(
+        (sum, pickup) => sum + pickup.value,
+        0,
+      );
+      state.pickups = [];
       this.outcome = "victory";
+    }
   }
 
   useMedkit(): void {

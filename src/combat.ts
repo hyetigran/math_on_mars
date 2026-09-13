@@ -74,6 +74,7 @@ export class CombatController {
 class MarsCombatScene extends Phaser.Scene {
   private marine!: Phaser.GameObjects.Container;
   private enemies = new Map<number, Phaser.GameObjects.Container>();
+  private pickups = new Map<number, Phaser.GameObjects.Rectangle>();
   private bolts = new Map<number, Phaser.GameObjects.Arc>();
   private keys!: Record<string, Phaser.Input.Keyboard.Key>;
   private touch = { x: 0, y: 0 };
@@ -198,6 +199,24 @@ class MarsCombatScene extends Phaser.Scene {
         this.enemies.set(enemy.id, body);
       }
       body.setPosition(enemy.x, enemy.y);
+    }
+    const pickupIds = new Set((state.pickups ?? []).map((p) => p.id));
+    for (const [id, body] of this.pickups) {
+      if (!pickupIds.has(id)) {
+        body.destroy();
+        this.pickups.delete(id);
+      }
+    }
+    for (const pickup of state.pickups ?? []) {
+      if (!this.pickups.has(pickup.id))
+        this.pickups.set(
+          pickup.id,
+          this.add
+            .rectangle(pickup.x, pickup.y, 14, 14, 0xffd36a)
+            .setStrokeStyle(2, 0x49341a)
+            .setAngle(45)
+            .setDepth(3),
+        );
     }
     const boltIds = new Set(state.bolts.map((b) => b.id));
     for (const [id, body] of this.bolts)

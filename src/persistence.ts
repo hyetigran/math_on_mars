@@ -147,6 +147,23 @@ function combat(value: unknown, run: RecordValue): void {
       number(enemy[key], `enemy.${key}`);
     boolean(enemy.boss, "enemy.boss");
   }
+  if (state.pickups !== undefined) {
+    const ids = new Set<unknown>();
+    for (const value of list(state.pickups, "combat.pickups")) {
+      const pickup = record(value, "pickup");
+      integer(pickup.id, "pickup.id", 1);
+      ensure(
+        !ids.has(pickup.id) &&
+          !enemyIds.has(pickup.id) &&
+          (pickup.id as number) < (state.nextEnemyId as number),
+        "pickup ID",
+      );
+      ids.add(pickup.id);
+      number(pickup.x, "pickup.x");
+      number(pickup.y, "pickup.y");
+      integer(pickup.value, "pickup.value", 1);
+    }
+  }
   const shots = new Set<unknown>();
   const boltIds = new Set<unknown>();
   if (state.version === 2) {

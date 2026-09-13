@@ -148,6 +148,12 @@ export class RunSession {
     if (!result) throw new Error("No active profile");
     return structuredClone(result);
   }
+  setHandedness(id: string, handedness: Profile["handedness"]): void {
+    this.change((profiles) => {
+      const profile = profiles.find((p) => p.id === id);
+      if (profile) profile.handedness = handedness;
+    });
+  }
   setPaused(paused: boolean): void {
     this.paused = paused;
   }

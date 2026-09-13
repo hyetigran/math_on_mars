@@ -39,6 +39,7 @@ let quizStartedAt = 0;
 let paused = false;
 let quizKeyHandler: ((event: KeyboardEvent) => void) | null = null;
 let combatCheckpointId: number | null = null;
+let resetTouch: (() => void) | null = null;
 
 function activeProfile(): Profile {
   const profile = activeProfileId
@@ -62,6 +63,8 @@ function announce(message: string): void {
 }
 
 function cleanup(): void {
+  resetTouch?.();
+  resetTouch = null;
   if (timerId !== null) window.clearInterval(timerId);
   if (combatCheckpointId !== null) window.clearInterval(combatCheckpointId);
   timerId = null;
@@ -227,7 +230,7 @@ function renderCombat(): void {
     <div id="combat-canvas" class="combat-canvas" aria-label="Combat arena"></div>
     <div class="touch-controls"><div id="joystick" class="joystick" aria-label="Movement control"><div id="stick-knob"></div></div>
       <button id="medkit-button" class="medkit-button" aria-label="Use med-kit"><i aria-hidden="true">+</i><span>MED-GEL <b id="medkit-count">${run.medkits}</b></span></button></div>
-    <div class="combat-tip">MOVE: WASD / ARROWS <span>·</span> MED-GEL: Q</div>
+    <div class="combat-tip">${matchMedia("(pointer: coarse)").matches ? "DRAG TO MOVE · TAP MED-GEL TO HEAL · FIRING IS AUTOMATIC" : "MOVE: WASD / ARROWS · MED-GEL: Q · FIRING IS AUTOMATIC"}</div>
   </div>`;
   const host = document.querySelector<HTMLElement>("#combat-canvas")!;
   combat = new CombatController({
@@ -296,32 +299,49 @@ function bindTouchControls(): void {
   const zone = document.querySelector<HTMLElement>("#joystick")!;
   const knob = document.querySelector<HTMLElement>("#stick-knob")!;
   let pointerId: number | null = null;
+  let origin = { x: 0, y: 0 };
   const move = (event: PointerEvent) => {
-    if (event.pointerId !== pointerId) return;
+    if (event.pointerId !== pointerId || paused) return;
     const rect = zone.getBoundingClientRect();
-    let x =
-      (event.clientX - (rect.left + rect.width / 2)) / (rect.width * 0.32);
-    let y =
-      (event.clientY - (rect.top + rect.height / 2)) / (rect.height * 0.32);
+    let x = (event.clientX - origin.x) / (rect.width * 0.32);
+    let y = (event.clientY - origin.y) / (rect.height * 0.32);
     const length = Math.hypot(x, y);
     if (length > 1) {
       x /= length;
       y /= length;
     }
-    knob.style.translate = `${x * 34}px ${y * 34}px`;
+    knob.style.translate = `${origin.x - rect.left - rect.width / 2 + x * 34}px ${origin.y - rect.top - rect.height / 2 + y * 34}px`;
     combat?.setTouchVector(x, y);
   };
   zone.addEventListener("pointerdown", (event) => {
+    if (pointerId !== null || paused) return;
+    origin = { x: event.clientX, y: event.clientY };
+    const rect = zone.getBoundingClientRect();
+    zone.style.setProperty(
+      "--stick-x",
+      `${origin.x - rect.left - rect.width / 2}px`,
+    );
+    zone.style.setProperty(
+      "--stick-y",
+      `${origin.y - rect.top - rect.height / 2}px`,
+    );
     pointerId = event.pointerId;
     zone.setPointerCapture(event.pointerId);
     move(event);
   });
   zone.addEventListener("pointermove", move);
-  const release = (event: PointerEvent) => {
-    if (event.pointerId !== pointerId) return;
+  resetTouch = () => {
+    const held = pointerId;
     pointerId = null;
+    if (held !== null && zone.hasPointerCapture(held))
+      zone.releasePointerCapture(held);
     knob.style.translate = "0 0";
+    zone.style.removeProperty("--stick-x");
+    zone.style.removeProperty("--stick-y");
     combat?.setTouchVector(0, 0);
+  };
+  const release = (event: PointerEvent) => {
+    if (event.pointerId === pointerId) resetTouch?.();
   };
   zone.addEventListener("pointerup", release);
   zone.addEventListener("pointercancel", release);
@@ -740,6 +760,7 @@ function setBlocked(blocked: boolean): void {
   session.setPaused(blocked);
   app.inert = blocked;
   if (blocked) {
+    resetTouch?.();
     if (timerId !== null) window.clearInterval(timerId);
     timerId = null;
     combat?.pause();
@@ -753,7 +774,8 @@ function perform<T>(action: () => T, after: (result: T) => void): void {
     result = action();
   } catch (error) {
     setBlocked(true);
-    document.querySelector("#pause-overlay")?.remove();
+    const previousPause = document.querySelector<HTMLElement>("#pause-overlay");
+    previousPause?.remove();
     const overlay = document.createElement("div");
     overlay.id = "pause-overlay";
     overlay.className = "pause-overlay";
@@ -776,8 +798,12 @@ function perform<T>(action: () => T, after: (result: T) => void): void {
         return;
       }
       overlay.remove();
-      setBlocked(false);
+      setBlocked(Boolean(previousPause));
+      if (previousPause) document.body.append(previousPause);
       after(retried);
+      previousPause
+        ?.querySelector<HTMLButtonElement>("#resume-button")
+        ?.focus();
       if (combat && !paused) combat.resume();
       if (
         !paused &&
@@ -810,9 +836,24 @@ function showPause(title: string): void {
       const overlay = document.createElement("div");
       overlay.className = "pause-overlay";
       overlay.id = "pause-overlay";
-      overlay.innerHTML = `<div class="pause-dialog" role="dialog" aria-modal="true" aria-labelledby="pause-title"><p class="eyebrow warm">MISSION HOLD</p><h2 id="pause-title">${escapeHtml(title)}</h2><p>Combat and question time are stopped.</p><button id="resume-button" class="button primary">Resume</button><button id="pause-exit" class="text-button">Save & exit</button></div>`;
+      overlay.innerHTML = `<div class="pause-dialog" role="dialog" aria-modal="true" aria-labelledby="pause-title"><p class="eyebrow warm">MISSION HOLD</p><h2 id="pause-title">${escapeHtml(title)}</h2><p>Combat and question time are stopped.</p><button id="mirror-controls" class="button">Move with ${activeProfile().handedness === "left" ? "right" : "left"} thumb</button><button id="resume-button" class="button primary">Resume</button><button id="pause-exit" class="text-button">Save & exit</button></div>`;
       document.body.append(overlay);
       overlay.querySelector<HTMLButtonElement>("#resume-button")!.focus();
+      overlay
+        .querySelector("#mirror-controls")!
+        .addEventListener("click", () => {
+          const next = activeProfile().handedness === "left" ? "right" : "left";
+          perform(
+            () => session.setHandedness(activeProfileId!, next),
+            () => {
+              document
+                .querySelector(".combat-screen")
+                ?.classList.toggle("mirrored", next === "right");
+              overlay.querySelector("#mirror-controls")!.textContent =
+                `Move with ${next === "left" ? "right" : "left"} thumb`;
+            },
+          );
+        });
       overlay.querySelector("#resume-button")!.addEventListener("click", () => {
         overlay.remove();
         setBlocked(false);
