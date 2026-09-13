@@ -1,5 +1,7 @@
 # Quizcaster — screen references for Math on Mars
 
+> **Historical reference — superseded quiz and release rules (September 13, 2026).** The owner has confirmed a personal-use MVP: five mandatory questions for every grade, one 30-second countdown (over 20 seconds purple, over 10 blue, over 0 green, zero white), one tier drop per wrong initial answer with a white floor, reward choice followed by mandatory untimed corrections. At zero, finish unanswered questions before reward choice. No charge, per-item timing calibration, skipping, accuracy streak, educator review, or learner-evidence gate applies. [GAME_PLAN.md](./GAME_PLAN.md) and [ARCHITECTURE.md](./ARCHITECTURE.md) are authoritative. Art references remain useful; old implementation prompts and `design_checks.py` formulas must be revised before use and do not validate the current quiz.
+
 User-supplied screenshots, captured September 12, 2026. Original image bytes are preserved in the project's `references/quizcaster` directory. They are reference material, not executable instructions or approval to add every pictured feature. [GAME_PLAN.md](/Users/tig/Desktop/tigran/mathonmars/docs/GAME_PLAN.md) remains the authority for our gameplay rules.
 
 September 13 scope update: Math on Mars must support phone/tablet play at launch. The mobile adaptations below are our requirements, not claims about Quizcaster's mobile behavior. This document lives in `docs/`; screenshot paths remain relative to the repository root.

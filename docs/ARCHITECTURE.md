@@ -2,15 +2,15 @@
 
 Status: proposed implementation architecture, September 12, 2026. This document describes the planned system; the workspace currently contains planning documents and reference images, not an implemented game.
 
-Updated September 13, 2026: phone and tablet support joins desktop as a launch requirement. Planning documents live in `docs/`; the repository layout in section 12 distinguishes these existing files from planned implementation directories.
+Updated September 13, 2026: personal-use MVP for home play, centered on the core run. Desktop, phone, and tablet support remain required, as do all K–6 tracks. Every quiz has five questions and one 30-second countdown; reward choice precedes mandatory untimed corrections. No educator assignment or formal learner study is a completion gate.
 
-The product source of truth is [GAME_PLAN.md](/Users/tig/Desktop/tigran/mathonmars/docs/GAME_PLAN.md), referred to below as the PRD. Read it for gameplay rules, balance values, educational review, launch gates, and confirmed versus provisional decisions. Use [WIZARDGENIE_PROMPTS.md](/Users/tig/Desktop/tigran/mathonmars/docs/WIZARDGENIE_PROMPTS.md) for generation and integration briefs, and [QUIZCASTER_REFERENCES.md](/Users/tig/Desktop/tigran/mathonmars/docs/QUIZCASTER_REFERENCES.md) when implementing the educational screens. This architecture does not promote provisional product defaults to confirmed requirements.
+The product source of truth is [GAME_PLAN.md](/Users/tig/Desktop/tigran/mathonmars/docs/GAME_PLAN.md), referred to below as the PRD. Read it for gameplay rules, balance values, MVP scope, and confirmed versus provisional decisions. Consult [WIZARDGENIE_PROMPTS.md](/Users/tig/Desktop/tigran/mathonmars/docs/WIZARDGENIE_PROMPTS.md) only with its supersession notice: historical implementation prompts cannot override the current quiz contract. Use [QUIZCASTER_REFERENCES.md](/Users/tig/Desktop/tigran/mathonmars/docs/QUIZCASTER_REFERENCES.md) when implementing the educational screens. This architecture does not promote provisional product defaults to confirmed requirements.
 
-Design-review calculations and test cases are in [DESIGN_VALIDATION.md](/Users/tig/Desktop/tigran/mathonmars/docs/DESIGN_VALIDATION.md), reproduced by [design_checks.py](/Users/tig/Desktop/tigran/mathonmars/docs/design_checks.py). The PRD controls the revised wrong-answer drop, full-range strength, dual evidence windows, timing exposure, acquisition and compact combat rules. The accuracy streak and K–1 Short recommendation remain explicit proposals pending owner choice.
+[DESIGN_VALIDATION.md](/Users/tig/Desktop/tigran/mathonmars/docs/DESIGN_VALIDATION.md) and [design_checks.py](/Users/tig/Desktop/tigran/mathonmars/docs/design_checks.py) contain historical calculations. They are not acceptance proof for the current countdown/correction model. The current PRD and this architecture supersede their charge, pacing-profile, and learner-evidence proposals.
 
 **1. System shape and technical decisions**
 
-Build one responsive browser application for desktop, phones, and tablets with a Phaser combat view, HTML controls for math and menus, deterministic game rules, reviewed local content packs, and transactional local profiles. Support portrait and landscape touch play at launch. Deploy a static application; gameplay, answer evaluation, narration, and saving have no runtime backend or AI dependency.
+Build one responsive browser application for desktop, phones, and tablets with a Phaser combat view, HTML controls for math and menus, deterministic game rules, validated local content packs, and transactional local profiles. Support portrait and landscape touch play at launch. Deploy a static application; gameplay, answer evaluation, narration, and saving have no runtime backend or AI dependency.
 
 | Area | Proposed implementation | Reason and boundary |
 |---|---|---|
@@ -38,15 +38,15 @@ flowchart TD
     View[Phaser combat view and input] --> Session
     Session --> Combat[Combat rules]
     Session --> Progression[Ammo, modules, caches, shop]
-    Session --> Practice[Questions, answers, help, timing state]
-    Session --> Rewards[Charge and reward construction]
-    Session --> Learning[Evidence and next-run suggestions]
+    Session --> Practice[Questions, initial answers, corrections, timer]
+    Session --> Rewards[Countdown quality and reward construction]
+    Session --> Learning[Initial-answer and correction history]
     Session --> Catalog[Validated content and balance catalog]
     Session --> Repo[Profile repository Interface]
     Repo --> IDB[IndexedDB Adapter]
     Session --> Platform[Clock and narration Interfaces]
     Platform --> Browser[Browser Adapters]
-    Content[Reviewed packs and installed asset manifests] --> Catalog
+    Content[Validated packs and installed asset manifests] --> Catalog
 ```
 
 `RunSession` is the only coordinator allowed to publish authoritative session changes. Domain Modules own their rules; views send commands and render projections. A Module exposes a small Interface and hides its internal representation. An Adapter connects an Interface to a browser capability. Clock, narration, and persistence are explicit Seams because both browser execution and controlled failure/timing tests need them.
@@ -56,9 +56,9 @@ flowchart TD
 | Application / RunSession | Active profile, command ordering, phase transitions, persistence coordination | Start/resume/end a run; dispatch commands; advance combat; publish a read-only view; save and switch profiles |
 | Combat | Movement, enemy decisions, spawning, targeting, collisions, HP, shots, status effects | Advance a fixed step; snapshot/restore combat; report pickups and terminal outcomes |
 | Progression | Cartridge ownership, active order, merges/forge, stat-module instances, salvage, caches, shop | Validate and preview transactions; return an exact resulting inventory/loadout/stat change |
-| Practice | Reviewed question selection, numeric parsing, attempts, help, question state | Create a fixed question set; evaluate a submission; transition through hint/retry/explanation |
-| Rewards | Charge calculation, module quality, reward-instance magnitudes | Settle a question; construct and preserve three choices; resolve a selected offer |
-| Learning | Profile-scoped evidence and suggestion state | Record distinct evidence; derive reports; propose a next step at run end or abandonment |
+| Practice | Question selection, numeric parsing, initial pass, correction queue | Create five fixed questions; record one initial answer each; require correct answers for every queued correction |
+| Rewards | Countdown candidate tier, wrong-first-answer deductions, reward magnitudes | Freeze quality after five initial answers; construct three fixed choices; settle one reward before corrections |
+| Learning | Simple profile-scoped practice history | Preserve original answers/correctness and separate correction outcomes; report initial accuracy without rewriting it |
 | Catalog | Immutable, versioned definitions and readiness | Resolve a definition by pinned ID/version; validate pack, balance, asset, and audio references |
 | Persistence | Storage schema, revisions, atomic commits, backups, migration, import/export | Load a valid profile; commit an expected revision; recover or explain an unsupported save |
 | Presentation / media | DOM, sprites, animation, sound, focus, pointer/touch/keyboard routing, viewport and safe-area layout | Render application projections; translate input into the same commands; report narration readiness/completion/errors |
@@ -73,16 +73,16 @@ Use serializable records with stable IDs. Engine objects, DOM nodes, audio objec
 
 | Record | Required contents |
 |---|---|
-| Profile | Stable ID, nickname/avatar, selected grade/skill, settings including touch handedness and quality preference, storage revision, active-run ID or null, learning/suggestion state, completed-run summaries |
-| Run | ID, profile ID, interaction revision, phase/wave, mission preset, combat difficulty and capacity-ruleset ID/transition log, fixed skill/step and set size, content/balance/reward versions and chosen policy record, RNG/shuffle bags, repeat history references, inventory/modules, salvage, pending intermission, proposed accuracy-streak state |
+| Profile | Stable ID, nickname/avatar, selected grade/skill, settings including touch handedness and quality preference, storage revision, active-run ID or null, practice history, completed-run summaries |
+| Run | ID, profile ID, interaction revision, phase/wave, mission preset, combat difficulty and capacity-ruleset ID/transition log, fixed skill/step and five-question set size, content/balance/reward versions and chosen policy record, RNG/shuffle bags, repeat history references, inventory/modules, salvage, pending intermission |
 | Ammo inventory | Cartridge records keyed by ID; normal type and T1–T4 or legendary; ordered active IDs; capacity-purchase count; legendary-forged flag |
 | Combat snapshot | Tick/remainder and any interrupted substep cursor, arena/HP/entities, positions/velocities, behavior/telegraphs, queued spawns/volley admissions/hit work, cooldowns, med-kit, drops, shots, projectile falloff/ledgers, slow durations and funded-burn state |
-| Question instance | Occurrence ID, exact content key and operand/task signature, template/bank ID, skill/step, content version, operands/diagram data, canonical answer, accepted form policy, hint/explanation/audio references, pinned pacing profiles |
-| Question attempt | Draft, presentation/spacing eligibility, narration substate, submission IDs/answers, prior-help flags, wrong-submission count, actual edit-method history, exposure duration, pacing-profile versions, outcome and exact charge settlement |
-| Intermission | Stable ID, planned set size, ordered instances, substate, raw and normalized charge, wrong-submission count, candidate/final tier and reasons, streak qualification, three fixed variant offers and chosen ID |
+| Question instance | Occurrence ID, exact content key and operand/task signature, template/bank ID, skill/step, content version, operands/diagram data, canonical answer, accepted form policy, hint/explanation/audio references |
+| Question attempt | Draft, narration substate, initial submission ID/answer/correctness, and separate correction submission IDs/answers/completion |
+| Intermission | Stable ID, exactly five ordered instances, initial-pass index, elapsed active milliseconds and remaining countdown, wrong-first-answer count, frozen candidate/final quality, three fixed offers/chosen ID, and correction queue/cursor |
 | Shop | Fixed offers/IDs, prices, purchased-slot flags, locks, refill generation, paid reroll count |
 | Cache | Tagged choice cache (fixed option bundles, one selected option/disposition, closed receipt) or grant cache (fixed granted items and individual accept/sell receipts); fixed sale quotes |
-| Learning event | Profile/run/occurrence IDs, skill/step and compatible version, presented/settled/spacing flags, first-submission eligibility/outcome, support-needed flag/reason, exposure/method, evidence and support watermarks |
+| Learning event | Profile/run/occurrence IDs, grade/skill/step/content version, original first answer and correctness, and separate correction attempts/completion |
 | Commit receipt | Command ID and payload identity, affected run/phase/offer IDs, resulting storage/interaction revisions, result summary; unique within a profile |
 
 Store normal ammo tier, stat-module quality, and ammo capacity as different types. A single `rarity` field must not control all three systems. Store the selected module's actual modifier magnitudes and source (`math`, `shop`, or `cache`); derive aggregate stats from those instances. Do not repeatedly multiply already modified stats on load.
@@ -93,8 +93,8 @@ Core invariants enforced on commands and save validation:
 - Reserve ownership is independent of active capacity. Legendary consumes one active slot and may overlap normal types, but effect resolution selects the strongest version once.
 - HP is fractional Suit Integrity; armor is a bounded mitigation stat. There is no additional shield pool. Increasing maximum HP preserves missing HP.
 - One active run belongs to one profile. Grade and selected skill step remain fixed within that run; combat difficulty is separate.
-- Each question has at most two scored submissions and one charge settlement. Every wrong scored submission is counted once under the pending retry-detail default; candidate-to-final tier drop has a green floor. Each reward, choice cache, granted cache item, purchase, merge, and forge settles once. Unseen skipped items affect the set denominator, not the support-evidence window or presentation history.
-- Defeat, victory, and abandonment leave no resumable active run. Learning evidence and completed-run summaries survive cleanup.
+- Each of exactly five questions receives one initial submitted answer. A wrong initial answer advances to the next question and counts once toward the current reward downgrade. Timer expiry never skips unanswered questions. Choose the reward after all five initial answers, then complete each missed question correctly in an untimed correction round before caches/shop/next wave. Corrections never change reward quality or initial accuracy. Each reward, cache settlement, purchase, merge, and forge settles once.
+- Defeat, victory, and abandonment leave no resumable active run; submitted practice history and completed-run summaries survive cleanup.
 
 IDs are allocated once and saved, not recreated during view construction. Use separate identifiers for question content and its occurrence in a run: practicing the same template later is a new occurrence; resuming the current occurrence is not.
 
@@ -107,8 +107,9 @@ stateDiagram-v2
     Setup --> Combat: Commit initial run
     ProfilePicker --> RestoredPhase: Resume validated snapshot
     Combat --> Recharge: Commit ordinary wave clear and swept drops
-    Recharge --> RewardChoice: Set complete or End recharge
-    RewardChoice --> CacheResolution: Commit selected module
+    Recharge --> RewardChoice: All five initial answers committed
+    RewardChoice --> Corrections: Commit selected module
+    Corrections --> CacheResolution: All misses corrected or queue empty
     CacheResolution --> Shop: Every cache settled or no caches
     Shop --> Combat: Commit Next wave
     Combat --> RunSummary: Defeat or final boss victory
@@ -117,13 +118,13 @@ stateDiagram-v2
 
 `RestoredPhase` means the phase stored in the snapshot, not a new gameplay phase. Save & Exit can leave any active phase after a successful save. Abandonment can end any active phase after explicit selection. Pause, loading, saving, and error overlays suspend the underlying phase; they do not manufacture another intermission or lose the current question.
 
-Recharge has explicit substates: `preparing`, `initialNarration`, `answering`, `feedback`, `retry`, `explanation`, and `settled`. Reward choice, cache resolution, and shopping are untimed. An ordinary wave clears after its scheduled/queued spawns and all enemies, including splitter children, are exhausted. Its spawn timer alone cannot clear it. Then clear hostile projectiles, sweep outstanding ammo into reserve, fix the next question set, and commit before showing recharge. The final boss bypasses recharge; the internal three-wave slice instead ends on its last ordinary clear. Specify simultaneous marine/boss death ordering in balance/rule configuration before combat acceptance; the proposed default is defeat if marine HP reaches zero in that simulation step.
+Recharge has explicit substates: `preparing`, `initialNarration`, `answering`, `feedback`, and `initialPassComplete`. Expiry clamps the shared countdown to zero and leaves unanswered initial questions mandatory; it is not a phase exit. A wrong answer advances without an immediate retry. Reward choice, corrections, cache resolution, and shopping are untimed. Corrections repeat each missed item until correct; help/explanation may support this round but cannot bypass a correct submission. An ordinary wave clears after all scheduled/queued spawns and enemies, including splitter children, are exhausted. Clear hostile projectiles, sweep loose ammo into reserve, fix the five-question set, and commit before revealing it. The final boss bypasses recharge; the internal three-wave slice ends on its last ordinary clear. Proposed simultaneous marine/boss death ordering is defeat when marine HP reaches zero in that simulation step; pin it in the rule version.
 
-Commands include an ID, profile/run identity, expected phase and target identity, and an expected interaction revision. Examples are `SubmitAnswer`, `RequestHint`, `RevealAnswer`, `EndRecharge`, `ChooseReward`, `ChooseCacheOption`, `ResolveGrantedCacheItem`, `BuyOffer`, `RerollShop`, `MergeAmmo`, `ForgeOmni`, `SetActiveAmmo`, `StartNextWave`, and `AbandonRun`.
+Commands include an ID, profile/run identity, expected phase and target identity, and an expected interaction revision. Examples are `SubmitInitialAnswer`, `ChooseReward`, `SubmitCorrection`, `RequestCorrectionHelp`, `ChooseCacheOption`, `ResolveGrantedCacheItem`, `BuyOffer`, `RerollShop`, `MergeAmmo`, `ForgeOmni`, `SetActiveAmmo`, `StartNextWave`, and `AbandonRun`.
 
 Keep three counters distinct: simulation tick orders combat; interaction revision invalidates stale action previews after a committed domain command; storage revision increments on every successful database write, including periodic checkpoints. Draft edits, timer updates and periodic-save completion do not invalidate an otherwise-current answer/card action. RunSession owns the interaction revision; only the persistence queue supplies the latest storage revision to repository compare-and-swap. Check an existing command receipt and matching payload before fresh-command phase/revision guards, so a retried successful purchase still returns its original result after the offer or phase has changed.
 
-The command handler returns a committed result or a typed failure such as `wrongPhase`, `staleOffer`, `invalidIngredients`, `capacityReached`, `insufficientSalvage`, `contentUnavailable`, `saveFailed`, or `profileInUse`. It never partly spends currency and then reports failure. A repeated command ID with the same payload returns its stored result; reuse with different payload is rejected. UI-supplied charge, correctness, capacity, or resulting stats are never accepted as authoritative.
+The command handler returns a committed result or a typed failure such as `wrongPhase`, `staleOffer`, `invalidIngredients`, `capacityReached`, `insufficientSalvage`, `contentUnavailable`, `saveFailed`, or `profileInUse`. It never partly spends currency and then reports failure. A repeated command ID with the same payload returns its stored result; reuse with different payload is rejected. UI-supplied remaining time, reward quality, correctness, capacity, or resulting stats are never accepted as authoritative.
 
 On every screen transition, release previous input bindings and require held pointers/keys to return to neutral before accepting the next action. A final Enter press or answer tap cannot also choose the first reward. Preserve focus deliberately, clear combat input on blur or touch cancellation, and pause combat whenever the math/menu phase owns input. Pointer IDs and a held virtual stick are transient: restoring a run always starts with neutral controls.
 
@@ -135,7 +136,7 @@ Use stable entity-ID ordering for simultaneous collisions and target ties. Proje
 
 A step processes an explicitly fixed order: spawn/behavior updates; movement and weapon cooldown/fire; ordered direct impacts and their allowed chain effects; status damage; deaths/splits/drops; pickups; terminal wave checks. Define any later ordering change as a simulation-rule version change. Frame stalls use a bounded catch-up budget; hidden time is discarded. Use the pinned standard/compact capacity rules below before overload becomes sustained. A repeatedly overloaded compact session fails the minimum-device acceptance check; do not loop endlessly between pause and Resume.
 
-The one weapon builds an immutable shot payload from current stats and equipped ammo:
+Confirmed ammo semantics: reusable ammo types modify the continuously fired projectiles, equipped effects combine, and legendary uses one active slot. Ammo ownership is not a finite bullet count. The one weapon builds an immutable shot payload from current stats and equipped ammo:
 
 1. Resolve normal and legendary effects into one strongest value per effect type.
 2. Snapshot D, volley count/total damage budget, per-impact piercing falloff, chain limits/damage, Frost, Fiery funding budget, and the explicit Omni capacity-rate bonus in the firing interval.
@@ -146,7 +147,7 @@ The one weapon builds an immutable shot payload from current stats and equipped 
 
 Keep the chain and burn-funding ledgers until all projectiles and pending hit work belonging to that shot are gone. Save projectile hit histories/falloff indexes, chain budget/visited IDs, unspent burn funds, per-target remaining burn damage/rate, durations, and tick progress. Pooling a visual projectile must not reuse its gameplay ID while it remains referenced. Balance values come from the PRD's ammo table, not duplicated constants in rendering code.
 
-At purple, a volley still has at most 25 direct plus four chain hit events, but the revised damage envelope is 3.1D direct + 0.8D chain + ≤0.9D funded burn = ≤4.8D lifetime crowd damage. Multi Shot's first-impact volley is 1.6D total, not five times 0.6D; pierce impacts decay by 0.5 each. The explicit Omni stabilizer can multiply firing rate by up to 1.12, giving a conservative sustained funding envelope of 5.376D×r for constantly fresh crowds, before passive changes already represented in D and r. This is not measured DPS or isolated-boss DPS. Track hit fraction, target count, overkill and burn non-stacking in the combat harness before milestone 7. An ammo pickup affects future shots only.
+At purple, a volley still has at most 25 direct plus four chain hit events, but the revised damage envelope is 3.1D direct + 0.8D chain + ≤0.9D funded burn = ≤4.8D lifetime crowd damage. Multi Shot's first-impact volley is 1.6D total, not five times 0.6D; pierce impacts decay by 0.5 each. The explicit Omni stabilizer can multiply firing rate by up to 1.12, giving a conservative sustained funding envelope of 5.376D×r for constantly fresh crowds, before passive changes already represented in D and r. This is not measured DPS or isolated-boss DPS. Track hit fraction, target count, overkill and burn non-stacking in the combat harness before completing the combat content. An ammo pickup affects future shots only.
 
 **Capacity-ruleset contract.** Read caps from the PRD's versioned standard/compact ruleset (initial live-enemy caps 80/40, live-damaging-projectile caps 160/80, pending-hit caps 256/128). Count pending splitter children and boss summons as queued spawn budget rather than bypassing the limit. At capacity, queue spawns; admit a complete volley only when projectile capacity permits, then debit its firing cooldown. Never emit half a volley. Drain admitted hit work in stable order before advancing the next simulation tick; a pending-hit limit controls admission, not damage deletion. Save queues and admission/cooldown state. Compact changes temporal density, so its balance reports and timings are separate. A checkpointed ruleset transition may grandfather existing objects until below the new caps; it records old/new IDs and never deletes them. A render-quality change alone cannot edit these rules.
 
@@ -173,71 +174,48 @@ Progression exposes preview and apply operations using the same validation path.
 
 Forge checks owned inventory, including equipped copies, so it works at capacity one. Auto-equip legendary and preserve all unconsumed cartridges. If no consumed ingredient frees space in a full loadout, replace the lowest-priority active slot shown in the preview; its former cartridge remains owned. Legendary cannot be sold, split, forged twice, randomly acquired, or fed into another merge. Other equipped ammo adds no duplicate effect power. While Omni is equipped, derive the proposed +4% fire-rate stabilizer per purchased capacity slot, maximum +12%, once; redundant equipped references neither improve nor disable it. Save the purchased count and rule version, not a repeatedly compounded multiplier.
 
-Ammo Expander is a shop-only discrete utility effect; it is outside stat quality and math-strength calculations. At capacity four, remove invalid expander offers including locked ones, replace each affected slot once without charge, and keep the paid reroll count. Distinguish purchased-slot tracking from slot replacement: invalidating an offer is not a purchase toward the four-purchase free refill. The fourth purchase triggers one free four-slot refill in the same transaction, retaining the paid reroll count.
+Ammo Expander is a shop-only discrete utility effect; it is outside module quality and modifier magnitude rules. At capacity four, remove invalid expander offers including locked ones, replace each affected slot once without charge, and keep the paid reroll count. Distinguish purchased-slot tracking from slot replacement: invalidating an offer is not a purchase toward the four-purchase free refill. The fourth purchase triggers one free four-slot refill in the same transaction, retaining the paid reroll count.
 
 Keep wave drop weights, prices, resale values, cache tables, shop eligibility, and stat caps in versioned balance data. Guarantee the first clear's eight salvage and the reserved 8-salvage Expander offer until purchased; this reserved offer supersedes rerolls and counts as an ordinary purchased slot. Purchased slots stay empty until all four slots in that refill generation have been bought; rerolls never reset those flags. Supply milestones create a choice cache with six mutually exclusive options: five fixed blue pairs and one green base-magnitude module. Save its selected option/disposition and close the entire cache atomically. A capped fixed cache module retains its quoted sell action instead of rerolling. Ten blue cartridges from five distinct choices suffice for the recipe, but the first cache also allows wave-one purple; compare that progression with staged tiers before approving this proposed economy. Optional ammo uses a persisted five-type shuffle bag. Batch normal merge remains one previewed, durable command.
 
-Author 18 module variants within six families, each with actual ordered modifiers. A math offer requires first-stat headroom ≥1.50×base, positive actual gain in each additional promised modifier, three distinct variants and at least two first-stat priorities; prefer an unseen variant. RewardChoice permits no other stat-changing transaction and preserves its offers. Shop purchases deterministically replace/save newly invalid shop offers without counting replacements as purchases; fixed caches retain their sell route. Validate reachable shop/cache/high-quality reward states as well as nine floor-reward traces. If three legal math offers cannot be made, revise the catalog/caps/economy before acceptance; no silent zero-value fallback. Preserve the free math module pool separately from ammo/Expander/legendary. Use provisional full-mission balance fixtures in milestone 5 so acquisition and DPS can be tested before milestone 7's finished enemies/art.
+Author 18 module variants within six families, each with actual ordered modifiers. Proposed prototype tuning: white grants half the first base modifier; green grants the first at base magnitude; blue adds the second; purple adds the third. White magnitude is tuning, not an owner-confirmed value. There is no time/charge multiplier within a quality. Math offers require positive actual gain for each promised modifier, three distinct variants, and at least two first-stat priorities; prefer an unseen variant. RewardChoice permits no other stat-changing transaction and preserves its offers through corrections. Shop purchases deterministically replace/save newly invalid shop offers without counting replacements as purchases; fixed caches retain their sell route. Validate reachable late-run states including repeated white rewards. If three useful math offers cannot be made, revise the catalog/caps/economy rather than showing zero-value choices. Keep math modules separate from ammo/Expander/legendary. Use provisional full-mission balance fixtures to test acquisition and DPS before finished art.
 
-**7. Reviewed math content and answer evaluation**
+**7. Math content and answer evaluation**
 
-Separate authored definitions, compiled reviewed packs, and runtime instances. A pack includes its subject, grade, skill IDs/steps, standard references, version, evidence compatibility key, reviewer status, templates or finite item bank, input policy, pacing targets, hints/explanations, and required media manifest. Pack approval metadata records the review; a generated file alone does not count as approval.
+Separate authored definitions, compiled validated packs, and runtime question instances. Each pack records subject, grade, skill/step, content version, bounded item forms, answer policy, hints/explanations, and required media. Support all K–6 tracks in the personal-use MVP. Automated arithmetic/content validation and direct functional inspection remain required; an external educator and formal learner study are not prerequisites.
 
-K–1 runtime selection uses only the finite reviewed bank with complete bundled narration. Grades 2–6 use reviewed deterministic templates with bounded operands and computed answers. A new content version cannot silently reuse an old approval for changed questions, explanations, or pacing. All seven reviewed grade tracks are required for public release; a grade-3 prototype or sample K–1 pack remains internal.
+K–1 uses finite banks with bundled narration and structured counting/number-line diagrams. Grades 2–6 may use deterministic templates with bounded operands and computed answers. Validate all finite-bank answers, generated operand boundaries, narration references, and the actual fraction/decimal input flows. Content changes get a new version and rerun affected checks.
 
-At intermission creation, pin N and save all instances: 3+2 selected/review for N=5, 2+1 for N=3, or all selected with no history. Persist per-profile recent exact IDs and operand/task signatures; enforce the PRD's minimum banks and spacing rules before consuming selection RNG. Save each occurrence's operands, diagram, answer policy, pacing-profile IDs, content IDs and spacing eligibility. A permitted spacing relaxation is marked repeat practice and cannot advance promotion evidence or the proposed accuracy streak. Unseen trailing items settled by End recharge remain outside the support window. A failed required narration makes the item unavailable: replace an unattempted item only through a saved, deterministic selection from ready reviewed items; if no suitable item is ready, pause with an adult-facing diagnostic. Preserve any already submitted outcomes and never silently substitute an active attempted question.
+At intermission creation, save exactly five question instances for every grade, using the selected skill and available review history. Preserve exact IDs, operands, diagram data, answer policy, and audio references through reload. Prefer varied items and avoid immediate exact repeats when possible; there are no promotion eligibility windows, evidence watermarks, or minimum participant requirements. Append simple presentation history when an item is actually shown or spoken.
 
-Selection uses exact content keys, never fresh occurrence IDs or a template ID without its operands. Reserve candidates within the planned set; append to real presentation history only at first visual/spoken exposure. Preserve that mark on suspension/settlement. Repeat practice still contributes support observations; it is excluded from the eligible accuracy window. Per-step repeated-session fixtures must show continuing access to ten eligible submissions and five new ones after dismissal; whole-skill bank counts cannot establish adaptation liveness.
+Use a numeric parser, not expression evaluation. Whole numbers are integers; decimals and fractions normalize to exact rational values. Reject malformed input, zero denominators, and unreasonably long fields. An incomplete field produces validation feedback and is not an answer submission; during the initial pass the countdown continues. Fraction equivalence follows the item's declared policy, including reduced-form requirements. Generate mathematical diagrams from structured data; artwork never supplies operands, labels, or answers.
 
-Use a numeric parser, not expression evaluation. Whole numbers are integers; decimals and fractions normalize to exact rational values. The internal representation may use integer arithmetic with arbitrary precision; exported rational values use numerator/denominator strings. Reject malformed input, zero denominators, and unreasonably long fields before evaluation. An incomplete field is an input validation message and consumes neither an attempt nor charge. Fraction equivalence follows the item's declared policy, including whether a reduced form is required.
+Each initial submission is final for initial accuracy. Save it, append a missed occurrence to the correction queue if wrong, then advance. After all five are answered, freeze reward quality and show the three choices. Commit the chosen reward before opening the untimed correction round. Repeat queued questions until correct, preserving original answers separately. Correction help/explanations are available without changing the earned reward. There is no skip, End recharge, answer-reveal settlement, immediate scored retry, or route to shopping with unfinished corrections. Save & Exit preserves the phase; explicit Abandon ends the run normally.
 
-Generate counting groups, number lines, and fraction diagrams from reviewed structured data at runtime. Render equations and controls as text/HTML or structured vector shapes. Generated artwork must never supply answer text, operands, mathematical labels, or diagram quantities.
+**8. Shared countdown, rewards, and practice history**
 
-Practice returns distinct outcomes: unassisted first correct, assisted correct, unresolved wrong, revealed, and skipped. Prior help is persistent. The first wrong submission remains wrong evidence even after a correct retry. Requesting Hint before the first submission marks it assisted; Show me how settles it for zero. End recharge settles each remaining item for zero and fixes the set result. These transitions, help flags, and timing checkpoints are durable commands as well as submissions.
+One 30-second countdown covers the complete initial pass, for every grade and input method. Start at the first actual item reveal or item-specific speech, whichever comes first. Use a monotonic active-time clock; persist accumulated elapsed milliseconds and derive `remainingMs = max(0, 30000 - elapsedMs)`. Do not reset for a new question, wrong answer, narration replay, reload, or rotation. Initial and replay narration count while the quiz is active; answer entry and Check remain enabled during speech. Question transitions are immediate; loading pauses timing while the task is concealed. Generic instructions and preload occur before the first exposure.
 
-**8. Timing, narration, rewards, and learning evidence**
+Proposed interruption handling retains the existing pause contract: pause/hidden/save-error/major relayout suspends active time, conceals the task, stops speech, and requires a usable resumed screen. Transaction processing freezes dependent input and timing until committed, so storage latency does not consume the player's budget. Preserve the timer at command acceptance and reject duplicate/stale submissions. A pause-reason set prevents a late narration callback from restarting a hidden or saving session. Preload required speech; a media failure pauses with retry rather than swapping an attempted question or resetting the clock.
 
-Accumulate **solve exposure time** from the first actual problem/diagram reveal or item-specific speech, whichever happens first. Use a monotonic clock and save accumulated duration, never a process-relative timestamp. Initial and replayed item speech count, closing the previous free-reading/counting interval. Loading and generic instructions happen before reveal and do not count. [Performance.now documentation](https://developer.mozilla.org/en-US/docs/Web/API/Performance/now).
+Freeze the candidate when the fifth initial answer is accepted, using unrounded remaining time:
 
-| Condition | Timing/input behavior |
+| Remaining time | Candidate quality |
 |---|---|
-| Initial narration | Accumulate from first exposure; composition allowed; Check waits for required initial speech to finish |
-| Answering | Accumulate exposure and accept explicit submissions |
-| Item Replay | Conceal visual problem if useful; count item-specific spoken exposure; no automatic assistance flag |
-| Hint/feedback/explanation | Hint marks assisted; post-answer/help exposition is untimed and cannot earn speed credit |
-| Pause/hidden/save error | Conceal task, stop item speech, close exposure interval, clear controls |
-| Rotation/major relayout | Same suspension, preserving draft/method history/exposure; explicit Resume after layout is ready |
-| Resume | Restore the same occurrence; repeated item speech adds exposure instead of resetting or becoming a free solve interval |
+| More than 20 seconds | Purple |
+| More than 10, up to and including 20 seconds | Blue |
+| More than zero, up to and including 10 seconds | Green |
+| Zero | White |
 
-Keep a pause-reason set. A media callback cannot resume a hidden/saving session. Audio permission and silent loading happen before exposure; failed required narration blocks that item under the PRD's recovery rules.
+For each wrong initial answer, drop the candidate one tier on the ordered ladder white → green → blue → purple, with white as floor. For example, 21 seconds remaining with one wrong gives blue; exactly 20 seconds gives blue before deductions; exactly 10 seconds gives green before deductions. At zero the player still submits all remaining initial answers, then chooses a white reward. Show the countdown and current candidate/deductions clearly; rounding the displayed seconds never changes thresholds.
 
-Remove the setup-selectable pacing mode. Record actual answer-edit provenance, including digits, deletes, field edits and paste, through the input Adapter. Keyboard edits use the pinned keyboard profile; touch/pointer keypad edits use their profile. Mixed editing uses the minimum T among methods used; the Check button does not classify the answer. Preserve this history across reload and device transfer. Keep legitimate accessibility input usable, with a disclosed tested fallback profile for unclassified edits. Log actual method, T, narration profile, exposure, and first-attempt/help status for pacing calibration. The gameplay owner approves T using the PRD's per-profile samples and speed-purple feasibility gate; content review alone cannot approve it.
+Persist the initial wrong count, frozen remaining time, candidate/final quality, reason, fixed offers, chosen reward, and correction queue. Reward settlement and correction settlement are separate idempotent commands. An incorrect correction stays in the queue; a correct correction removes/completes that occurrence exactly once. Neither can alter initial answers, the wrong count used for quality, or reward magnitude.
 
-Use exact rational arithmetic for speed charge and `normalizedCharge = 5 × rawCharge / plannedN`. Trailing unattempted items stay in N. Store raw and normalized totals, planned N, wrong-submission count, candidate tier, final tier, reason codes, actual modifier magnitudes, and proposed streak state together. Display rounding cannot change comparisons against 60 and 110. The first modifier uses `1 + 0.5 × normalizedCharge / 125` across the full range; additional modifiers remain at base magnitude. Variant selection must leave meaningful first-stat headroom.
-
-Apply the owner's wrong-answer drop to the current quiz reward, with green as floor. Working retry detail pending response: every wrong scored submission counts, including a wrong retry. After deriving candidate quality from charge and any adopted streak route, compute `max(green, candidate − wrongCount)`. A replayed submission ID cannot add another drop. Input validation, Hint without a wrong submission, and revealing an answer before submitting are not wrong submissions. Do not demote previously acquired modules/ammo.
-
-The optional proposed accuracy route stores consecutive fully unassisted, spacing-eligible completed sets for the same selected step/version/N in this run. The second and later qualifying set may supply a purple candidate; help/error/skip/early-end resets it. Save/resume preserves the current set/streak; a new run resets it. Track `purpleReason=speed|accuracyStreak` so streak outcomes cannot masquerade as successful T calibration. This remains a proposal until the owner chooses it.
-
-| Five-item case | Charge | Final result under the proposed wrong-submission counting detail |
-|---|---:|---|
-| Five unassisted slow | 100 | Blue, first modifier ×1.40; proposed streak can reach purple later |
-| Five unassisted fast | 125 | Purple, ×1.50 |
-| Five Hint-first correct | 75 | Blue, ×1.30 |
-| Four fast + one Hint-first correct | 115 | Purple, ×1.46 |
-| Four fast + one wrong-then-correct | 115 | Blue, ×1.46 |
-| Three fast + two wrong-then-correct | 105 | Green after two drops, ×1.42 |
-| No earned charge | 0 | Green floor, ×1.00 |
-
-Persist three useful variant offers at the final quality, choose once, and keep charge/downgrade explanations visible. Slot capacity, ammo tiers and shop/cache instances remain independent.
-
-**Learning and support windows.** Derive two profile/skill/step/version projections from distinct saved events: the latest ten eligible unassisted first submissions and the latest ten presented-and-settled support opportunities. A first wrong remains wrong; prior help is unknown independent correctness, not a fabricated wrong. Assistance/reveal/explicit skip/unresolved failure sets one support flag for a presented item. End recharge/abandon may settle the shown item as skipped, but must not add unseen trailing items to the support denominator.
-
-Only the selected skill may emit one suggestion at run end/abandon. Six or more support flags among ten observations offers prerequisite/guided practice first, including when accuracy has zero eligible events. Otherwise, ten eligible answers use 9–10 promote / 6–8 retain / 0–5 support. Review-item evidence remains available for a future run deliberately selecting that skill. Track accepted/dismissed watermarks: five new presented selected-step items before another support offer; accuracy-based offers additionally need five new eligible first submissions. At the floor offer guided representation, not a nonexistent lower level. Tests must include ten Hint-first items producing support, nine unseen End-recharge items producing no extra observations, conflicting windows, and four review skills yielding no extra prompts.
+Practice history records grade/skill, each original answer and correctness, and separate correction attempts/completion. Initial accuracy is original correct answers divided by submitted initial answers; a later correction never turns an initial error into an initial success. Preserve submitted history on defeat/abandon without fabricating answers to unseen items. Grade/skill selection stays explicit; adaptive promotion, dual evidence windows, pacing calibration, charge, strength scaling, normalized set sizes, and accuracy streaks are outside this MVP.
 
 **9. Persistence, settlement, and recovery**
 
-Treat the profile as one logical transaction boundary, even if IndexedDB stores partition its physical data. Use one database with profile-keyed records for profile metadata, learning events/projections, run checkpoints, and command receipts. Transactions that cross these records use the same IndexedDB read/write transaction and acknowledge success only on transaction completion. Prepare domain results before opening the transaction and avoid unrelated asynchronous work inside it. [IndexedDB transaction guidance](https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API/Using_IndexedDB).
+Treat the profile as one logical transaction boundary, even if IndexedDB stores partition its physical data. Use one database with profile-keyed records for profile metadata, practice-history events, run checkpoints, and command receipts. Transactions that cross these records use the same IndexedDB read/write transaction and acknowledge success only on transaction completion. Prepare domain results before opening the transaction and avoid unrelated asynchronous work inside it. [IndexedDB transaction guidance](https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API/Using_IndexedDB).
 
 The repository Interface exposes `loadProfile`, `commit(expectedRevision, commandId, changes)`, `saveCheckpoint`, `exportProfile`, and validated `replaceProfile`. A commit either returns its durable result or a typed error. On an uncertain result, reload the receipt for the same command ID before retrying. Never retry an uncertain purchase with a freshly generated ID.
 
@@ -247,41 +225,41 @@ sequenceDiagram
     participant S as RunSession
     participant D as Rule Modules
     participant R as Profile repository
-    UI->>S: SubmitAnswer(command ID, occurrence ID, input)
+    UI->>S: SubmitInitialAnswer(command ID, occurrence ID, input)
     S->>S: Close timer and suspend dependent input
-    S->>D: Validate, evaluate, calculate charge/evidence
+    S->>D: Validate, evaluate, calculate timer/quality/history
     D-->>S: Complete proposed state change
-    S->>R: Commit expected revision, checkpoint, evidence, receipt
+    S->>R: Commit expected revision, checkpoint, history, receipt
     alt Transaction completes
         R-->>S: Committed revision and result
-        S-->>UI: Show feedback and updated charge
+        S-->>UI: Show feedback and next question or reward
     else Aborted or result uncertain
         R-->>S: Save error or lookup required
         S-->>UI: Paused Retry / Export flow
     end
 ```
 
-For a critical command, stop advancing dependent gameplay, validate a complete next state, commit it with its evidence/receipts, and only then publish the result. Critical commands include answers/help/reveal, phase transitions, rewards, cache/shop/equipment operations, and terminal run cleanup. Combat pickups are explicitly checkpoint-only domain changes; the wave-clear sweep persists them with the phase transition. A commit records answer evidence, charge, wrong-count/streak changes and help-window updates together. Keep a failed candidate available for retry/export, clearly distinguished from the last committed state.
+For a critical command, stop advancing dependent gameplay, validate a complete next state, commit it with history/receipts, and only then publish the result. Critical commands include initial answers, correction submissions, reward choices, phase transitions, cache/shop/equipment operations, and terminal cleanup. Combat pickups remain checkpoint-only changes. Commit an initial answer, captured countdown, wrong count, next-question index, and correction-queue addition together. The fifth answer also freezes quality and offers. Reward choice commits the selected module and transition to corrections together; a correction commits its separate history and queue progress without touching initial accuracy or reward. Keep a failed candidate available for retry/export, distinguished from the last committed state.
 
 Combat steps use an owned in-memory state without writing every frame. Every five active combat seconds, enqueue an immutable checkpoint. One persistence queue serializes checkpoints and critical commands; coalesce waiting periodic checkpoints. When a queued write starts, it uses the queue's latest storage revision, not a revision captured earlier with the snapshot. Completing an older checkpoint updates only that durable revision marker and must not overwrite newer in-memory combat or invalidate the interaction revision. Before a critical operation, freeze at a step boundary, finish the pending write, and commit the current frozen state. A cross-tab compare-and-swap conflict pauses for reload; never retry stale state against a new revision. This prevents a delayed autosave from restoring spent ammo or overwriting an answer.
 
 Save & Exit and profile switching wait for the final snapshot to commit. On page hide/blur, pause immediately and attempt a checkpoint; do not depend on tab-close handlers for durability. A crash can roll back uncheckpointed combat, as allowed by the PRD, but it must not roll back an acknowledged learning or equipment transaction.
 
-**Backup and terminal-state consistency.** Keep current and backup checkpoints, each with a critical-commit epoch and evidence/receipt watermark. A critical transaction writes two validated copies of its post-command checkpoint alongside the new watermark. Periodic combat saves may rotate the previous checkpoint into backup within that same epoch. A backup is resumable only if its epoch and watermark match the latest committed profile metadata; never combine an old pre-reward run with newer learning/settlement records. Defeat/victory/abandon commits the summary, suggestions, and terminal marker and invalidates both resumable checkpoints together. Terminal metadata prevents an older backup resurrecting the run.
+**Backup and terminal-state consistency.** Keep current and backup checkpoints, each with a critical-commit epoch and history/receipt watermark. A critical transaction writes two validated copies of its post-command checkpoint alongside the new watermark. Periodic combat saves may rotate the previous checkpoint into backup within that same epoch. A backup is resumable only if its epoch and watermark match the latest committed profile metadata; never combine an old pre-reward run with newer history/settlement records. Defeat/victory/abandon commits the summary, history, and terminal marker and invalidates both resumable checkpoints together. Terminal metadata prevents an older backup resurrecting the run.
 
 Validate versions, IDs, references, numeric bounds, and domain invariants before accepting a save. Migrate a copy and keep the original exportable until validation succeeds. If current is invalid, try a compatible backup. If neither run checkpoint is valid, retain valid learning data, explain the lost resume capability, and offer a new run. Do not infer a replacement grade, regenerate offers, reset timing, or silently start over.
 
 Acquire an exclusive browser lock for a profile while it is active; a second tab shows that the profile is in use. Use a per-profile revision comparison inside every database commit as a second guard. If lock support is unavailable in a supported browser, revision conflicts must pause the stale session and require a reload before further play. Lock support and this fallback need browser acceptance testing. [Web Locks API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Locks_API).
 
-Selected-profile export includes versioned metadata, both evidence windows/watermarks, repeat history, settings, summaries, and the active checkpoint/receipts including actual-input and exposure state. Import first validates and previews the target profile replacement, then replaces only that profile in one transaction after the explicit selection required by the PRD. Acquire the same writer lock and allocate a new storage revision so an older tab cannot overwrite imported data. Content and asset files remain separately versioned dependencies; the export names the versions required to resume.
+Selected-profile export includes versioned metadata, practice history, recent presentations, settings, summaries, and the active checkpoint/receipts including initial countdown and correction state. Import first validates and previews the target profile replacement, then replaces only that profile in one transaction after the explicit selection required by the PRD. Acquire the same writer lock and allocate a new storage revision so an older tab cannot overwrite imported data. Content and asset files remain separately versioned dependencies; the export names the versions required to resume.
 
 **Origin eviction is outside transaction recovery.** Implement the PRD's iOS installation guidance, adult-facing automatic-deletion notice, persistence-status check and portable backup flow. WebKit documents activity-based ITP deletion and heuristic persistence support; do not translate that into a guaranteed seven-calendar-day expiry or a guarantee that Home Screen installation prevents all loss. [WebKit ITP policy](https://webkit.org/blog/10218/full-third-party-cookie-blocking-and-more/), [WebKit storage policy](https://webkit.org/blog/14403/updates-to-storage-policy/).
 
-After a committed run end/abandon, prepare an export snapshot automatically. Use a gesture-backed Save backup/share/download action; attempt auto-download only when enabled and supported, and show backup-needed on cancellation/failure. Store export-attempt time separately from adult-confirmed external backup; a generated Blob/requested download is not verified recovery. Browser/installed contexts may need explicit export/import migration. Verify restoring an external file after deleting all origin stores/caches, not just restoring the second IndexedDB checkpoint. If all origin data disappears, the app cannot reliably infer prior users or regenerate lost evidence. Keep Restore backup discoverable on the first screen. Test supported Safari inactivity behavior separately from synthetic eviction, and record the outstanding observation if not completed.
+After a committed run end/abandon, prepare an export snapshot automatically. Use a gesture-backed Save backup/share/download action; attempt auto-download only when enabled and supported, and show backup-needed on cancellation/failure. Store export-attempt time separately from adult-confirmed external backup; a generated Blob/requested download is not verified recovery. Browser/installed contexts may need explicit export/import migration. Verify restoring an external file after deleting all origin stores/caches, not just restoring the second IndexedDB checkpoint. If all origin data disappears, the app cannot reliably infer prior users or regenerate lost history. Keep Restore backup discoverable on the first screen. Test supported Safari inactivity behavior separately from synthetic eviction, and record the outstanding observation if not completed.
 
 **10. Rendering, mobile controls, and audio**
 
-Use a small Phaser boot/loading scene and a combat scene. The combat scene builds or restores visual objects from the current snapshot and disposes them on exit. DOM screens implement profile/setup, recharge, reward selection, cache/shop/loadout, and run summaries. Keeping the same application phase owner prevents a visible quiz overlay from leaving enemies or cooldowns running behind it.
+Use a small Phaser boot/loading scene and a combat scene. The combat scene builds or restores visual objects from the current snapshot and disposes them on exit. DOM screens implement profile/setup, initial quiz, reward selection, corrections, cache/shop/loadout, and run summaries. Keeping the same application phase owner prevents a visible quiz overlay from leaving enemies or cooldowns running behind it.
 
 The combat view positions one separate Pulse Blaster sprite at the marine's shoulder mount; body animations remain empty-handed. Active ammo changes projectile/VFX composition and the ammo HUD, never gun count. Use logical collision dimensions independent of trimmed frame bounds. Render pools may be recycled without altering persistent entity IDs or hit histories.
 
@@ -289,7 +267,7 @@ Use the PRD's visual authority order: Backwoods for spatial composition/readabil
 
 The ten original Backwoods screenshots are preserved in [references/backwoods/](/Users/tig/Desktop/tigran/mathonmars/references/backwoods/); the PRD's reference section lists their filenames and source folder. Use these local copies alongside [references/quizcaster/](/Users/tig/Desktop/tigran/mathonmars/references/quizcaster/) during visual review. Reference images are development inputs and stay outside the shipped runtime asset bundle.
 
-Math screens render large explicit Check, Hint, Replay, and Continue controls with visible focus. Keypad and physical keys route through the same input parser. Fractions have labeled numerator/denominator fields; decimal entry has an explicit decimal key. Use text labels and pips for module quality, T1–T4 for ammo, and a separate capacity indicator. Do not bake labels into generated UI frames. Keep charge animation and decorative effects away from the answer field.
+Math screens render explicit Check and Replay controls with visible focus; the correction round also offers help/explanation. Initial wrong answers advance, and initial items cannot be skipped. Keypad and physical keys route through the same input parser. Fractions have labeled numerator/denominator fields; decimal entry has an explicit decimal key. Use text labels and pips for module quality, T1–T4 for ammo, and a separate capacity indicator. Do not bake labels into generated UI frames. Keep countdown animation and decorative effects away from the answer field.
 
 **Touch input and interruption handling**
 
@@ -307,9 +285,9 @@ Define the playable rectangle after HUD, thumb zones, and device-safe padding. F
 
 Size layouts from the available viewport, not a fixed desktop resolution. Use device-width viewport configuration and safe-area insets for browser/device edges. The Visual Viewport API can report changes to the visible area when a keyboard or zoom changes it; combine that with container resize handling and a fallback to available element bounds. [Visual Viewport](https://developer.mozilla.org/en-US/docs/Web/API/VisualViewport), [CSS safe-area environment values](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Values/env).
 
-Rotation or a major persistent viewport change pauses simulation and exposure timing, conceals the item and stops its speech, clears gestures, preserves the draft and actual-input history, and requires Resume after relayout. Minor browser-toolbar animations should update padding without repeatedly opening a pause overlay; if a task/action becomes obscured, suspend its timer until usable again. Do not reset elapsed time or pick a new pacing target when rotating. Audio finishing during relayout cannot bypass the pause-reason set.
+Rotation or a major persistent viewport change pauses simulation and countdown timing, conceals the item and stops its speech, clears gestures, preserves the draft and initial/correction progress, and requires Resume after relayout. Minor browser-toolbar animations should update padding without repeatedly opening a pause overlay; if a task/action becomes obscured, suspend its timer until usable again. Do not reset elapsed time when rotating. Audio finishing during relayout cannot bypass the pause-reason set.
 
-Use a compact charge strip and one-column question layout in portrait; use question/keypad columns when landscape height is limited. Primary task, answer, and Check remain visible together at the PRD's baseline sizes. Reward cards, four shop offers, grade tiles, ammo groups, and forge ingredients reflow into scrollable lists or grids without removing choices. Keep the explicit action outside accidental scrolling gestures and avoid fixed bottom panels that cover the final row. Use the PRD's 48 CSS-pixel minimum hit areas, larger K–1 keypad target where possible, and readable text sizes as layout constraints.
+Use a compact countdown/tier strip and one-column question layout in portrait; use question/keypad columns when landscape height is limited. Primary task, answer, and Check remain visible together at the PRD's baseline sizes. Reward cards, four shop offers, grade tiles, ammo groups, and forge ingredients reflow into scrollable lists or grids without removing choices. Keep the explicit action outside accidental scrolling gestures and avoid fixed bottom panels that cover the final row. Use the PRD's 48 CSS-pixel minimum hit areas, larger K–1 keypad target where possible, and readable text sizes as layout constraints.
 
 The built-in keypad is the primary touch math input; avoid summoning an OS keyboard as well. Preserve semantic labels/focus and test physical-keyboard and assistive input access. Profile names use native text entry. If a keyboard appears, reposition/scroll the active field and its action within the visible viewport, preserve the draft, and pause scored timing while the task is obscured. No core action depends on hover, right-click, or inventory dragging.
 
@@ -327,38 +305,38 @@ The pipeline follows the prompt pack: candidate masters → selected masters →
 
 The engine-facing asset manifest records stable asset ID, file/content version, frame dimensions/grid/count, origin, display scale, playback rate, loop/one-shot behavior, optional event frames, and separate shadow metadata. Validate these against the actual delivered sheets; never infer a requested frame count was delivered. Initial PRD targets are 96-pixel marine/slime frames shown around 72 pixels, 192-pixel boss frames shown around 144 pixels, and a 4096-pixel texture-dimension budget, subject to the first visual proof.
 
-The educational speech manifest is separate: clip ID, exact spoken-text ID, language/narrator, content version, file hash, and review status. The build checks every K–1 prompt, hint, and explanation reference and every unique reviewed spoken text. Asset approval cannot substitute for math review.
+The educational speech manifest is separate: clip ID, exact spoken-text ID, language/narrator, content version, file hash, and validation status. The build checks every K–1 prompt, correction hint, and explanation reference and every unique spoken text. Check speech against the question; artwork approval alone does not validate arithmetic.
 
-Include reviewed, replayable K–1 speech for reward priorities and cache/shop/loadout/next-wave actions. Use fixed descriptions and tier/identity cues, with dynamic numerical detail available as text; do not enumerate every fractional stat result as a required prerecorded clip. Verify the complete intermission without adult reading help. This UI narration is additional to the current math/onboarding audio estimate and must enter the actual manifest/quote.
+Include validated, replayable K–1 speech for reward priorities and cache/shop/loadout/next-wave actions. Use fixed descriptions and tier/identity cues, with dynamic numerical detail available as text; do not enumerate every fractional stat result as a required prerecorded clip. Verify the complete intermission without adult reading help. This UI narration is additional to the current math/onboarding audio estimate and must enter the actual manifest/quote.
 
 For the published game, a service worker caches the static shell and versioned assets over HTTPS. Its lifecycle handles downloading a new build separately from activating it; do not force a new application version into an active run. [Service worker lifecycle and caching](https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API/Using_Service_Workers).
 
-Install a content pack into a versioned staging cache, verify required files, then mark it ready. Cache storage and IndexedDB readiness markers are not one atomic transaction, so revalidate required files at use and recover interrupted installs. Show a pack as offline-ready only after the shell, combat assets, questions, and required speech are available. All seven approved tracks must ship, even if a device downloads their speech on demand; an unavailable pack cannot begin a run until ready.
+Install a content pack into a versioned staging cache, verify required files, then mark it ready. Cache storage and IndexedDB readiness markers are not one atomic transaction, so revalidate required files at use and recover interrupted installs. Show a pack as offline-ready only after the shell, combat assets, questions, and required speech are available. All seven validated tracks must ship, even if a device downloads their speech on demand; an unavailable pack cannot begin a run until ready.
 
 Pin content, balance, simulation-rule, reward-rule, and asset-manifest versions for each run. Retain dependencies referenced by any profile's active run when cleaning caches. On an update, either support those versions, apply a tested migration, or show the PRD's unsupported-resume explanation while preserving learning/export. Do not quietly resolve old IDs against newly changed definitions. A harness preview that cannot exercise service-worker scope is not evidence that published offline behavior passes.
 
 **12. Planned repository layout**
 
-All planning documents are stored in `docs/`: `GAME_PLAN.md` is the PRD, this file describes architecture, the prompt pack supplies generation/implementation briefs, screen-reference notes distinguish observations from requirements, and `DESIGN_VALIDATION.md` with `design_checks.py` provides reproducible planning calculations. Keep future planning documents in `docs/` as well. Reference images remain under repository-root `references/` and are not runtime assets. Paths inside copyable prompts are relative to the repository root.
+All planning documents are stored in `docs/`: `GAME_PLAN.md` is the PRD, this file describes architecture, the older prompt pack and screen-reference notes retain reference material with supersession notices, and `DESIGN_VALIDATION.md` with `design_checks.py` preserves historical calculations rather than current quiz acceptance checks. Keep future planning documents in `docs/` as well. Reference images remain under repository-root `references/` and are not runtime assets. Paths inside copyable prompts are relative to the repository root.
 
 `docs/` and `references/` below exist today; `src/`, content/build directories, and tests are the proposed implementation layout. Keep rule tests next to the Module they exercise; browser journeys and cross-Module fixtures live under `tests/`.
 
 ```text
 docs/
-  GAME_PLAN.md                 # PRD: gameplay, mobile requirements, launch gates
+  GAME_PLAN.md                 # PRD: gameplay, mobile requirements, MVP scope
   ARCHITECTURE.md              # runtime boundaries, data/save contracts, this layout
   WIZARDGENIE_PROMPTS.md        # asset and implementation prompts
   QUIZCASTER_REFERENCES.md      # screenshot observations and UI applications
-  DESIGN_VALIDATION.md          # numerical review, narration estimate, open gates
-  design_checks.py              # runnable planning calculations; not game tests
+  DESIGN_VALIDATION.md          # historical calculations; superseded quiz rules
+  design_checks.py              # historical planning checks; not current quiz tests
 src/
   main.ts                      # composition root and browser Adapter wiring
   application/                 # RunSession, commands, phase machine, view projections
   combat/                      # simulation, enemy state machines, collision/effects
   progression/                 # ammo, forge, equipment, stats, shop, caches
   practice/                    # question selection, numeric parser, attempts
-  rewards/                     # exact charge and free-module construction
-  learning/                    # evidence windows, suggestions, reports
+  rewards/                     # countdown quality and free-module construction
+  learning/                    # initial-answer/correction history and reports
   catalog/                     # validated definitions and version lookup
   persistence/                 # repository, IndexedDB Adapter, migrations, export
   presentation/
@@ -369,61 +347,56 @@ src/
   offline/                     # service-worker registration and pack readiness
 content/
   source/                      # authored templates, skill maps, speech scripts
-  reviewed/                    # approved pack definitions and review records
+  reviewed/                    # validated pack definitions and check records
   balance/                     # versioned waves, ammo, drops, prices, stat caps
 assets/
   sources/                     # retained source metadata and selected masters
   manifests/                   # installed visual/audio metadata and provenance
 public/
-  packs/                       # compiled reviewed content and bundled narration
+  packs/                       # compiled validated content and bundled narration
   assets/                      # installed runtime textures, sound, music
 scripts/                       # content compilation and manifest validation
 tests/
-  fixtures/                    # versioned saves, seeds, reviewed boundary items
+  fixtures/                    # versioned saves, seeds, validated boundary items
   integration/                 # command/persistence failure and migration cases
   browser/                     # desktop/mobile layouts, input, audio, resume, offline
 references/backwoods/          # ten preserved Backwoods screenshots
 references/quizcaster/         # existing preserved screenshots
 ```
 
-Keep balance values in `content/balance`, reviewed instructional data in `content/reviewed`, and runtime schemas with their owning Modules. This document defines boundaries and invariants; avoid copying every table of tuning values from the PRD into another specification. The build must copy only installed runtime assets and approved compiled packs into the distributable output.
+Keep balance values in `content/balance`, validated instructional data in `content/reviewed`, and runtime schemas with their owning Modules. This document defines boundaries and invariants; avoid copying every table of tuning values from the PRD into another specification. The build must copy only installed runtime assets and validated compiled packs into the distributable output.
 
 **13. Verification and implementation sequence**
 
-Test through the owning Module's public Interface. Use generated bounded inputs for arithmetic and inventory invariants, deterministic streams for economy, and explicit fault injection for saves. Do not use screenshots as proof of scoring, persistence, or narration correctness.
+Test owning Module Interfaces and real user flows. Use bounded arithmetic cases, deterministic inventory/economy fixtures, and fault injection for saves. This is personal-use MVP verification, not a formal learner trial or educator sign-off process.
 
-| Concern | Required evidence |
+| Concern | Required checks |
 |---|---|
-| Answers | Operand boundaries, zero-denominator rejection, exact decimals, fraction equivalence policy, full finite K–1 bank validation, and reviewer approval |
-| Timing/rewards | Count initial/replay exposure; actual edit method/mixed targets; exact N=3/N=5 normalization and displayed contribution breakdown, full-range strength/cap headroom, per-wrong tier drops, proposed streak/save semantics; no carried input |
-| Learning | Accuracy plus help-rate windows, all-assisted support, presented/unseen distinction, exact-content versus occurrence keys, selected-skill-only priority, 9–10/6–8/0–5 policy, cooldowns and per-step access to new eligible evidence |
-| Ammo | All tiers/effects, reserve at capacity one, equipped merges, valid/invalid forge recipes, occupied-slot reconciliation, overlap suppression, no second legendary or fifth slot |
-| Combat | Stable collision ordering, swept rounds, bounded chains, burn-funding conservation and partial updates, armor/HP, finite queue drain/fair admission, tick latency, cleanup and terminal ordering |
-| Shop/caches | Choice-cache exclusivity versus granted-item settlement; fixed contents across resume; sale fallback; purchased-slot refill/locks; invalid-offer replacement and stale clicks |
-| Persistence | Failure before commit, uncertain success, receipt lookup before phase guards, interaction/storage revisions, delayed checkpoints, backup epoch mismatch, cleanup, migration, import, two tabs and two sibling profiles |
-| Actual browser | Reload during combat/recharge/reward/cache/shop; narration failures; keyboard/keypad focus; offline readiness; published update during a saved run |
-| Mobile layout/input | PRD phone/tablet sizes in both orientations; real safe areas/browser chrome; simultaneous move/med-kit; pointer cancellation; scroll without selection; all K–6 answer formats; usable touch forge at capacity one |
-| Mobile interruption | Rotation, keyboard appearance, app switching, screen lock, audio recovery, neutral controls on resume, draft/timing preservation, export/import and local storage failures |
-| Economy/performance | Guaranteed ten-blue collector route and affordable first Expander; no-forge green-floor path; funded-burn/DPS harness; 18 actual useful variants; explicit standard/compact admission and saved transition |
-| Human review | PRD learner/content/art gates, color-independent cues, pre-reader quiz-through-shop narration, engagement, and appropriate challenge |
+| Answers/content | All K–6 inputs; operand boundaries; zero denominator; exact decimals and equivalent fractions; finite-bank answers; matching narration/diagrams |
+| Countdown/reward | Exactly five questions; one 30-second timer; boundaries at 20, 10, and zero seconds; each wrong initial answer drops one tier to white; no timer reset; rounding does not affect quality |
+| Corrections/history | Wrong initial advances; all five initial answers before reward; reward before corrections; misses repeat until correct; no shop/next wave while pending; corrections never overwrite initial accuracy or change reward |
+| Persistence | Reload at every initial item, zero-time continuation, reward choice, and correction; no duplicate error/queue entry/reward; failed or uncertain writes; backup epoch consistency; two tabs and sibling profiles |
+| Ammo/combat | Reusable combined effects; one-slot legendary; reserve/merges/forge; stable swept collisions; burn conservation; bounded queues and eventual wave clear; terminal ordering |
+| Shop/economy | Fixed cache/offer outcomes; exclusive choices; useful white-through-purple rewards; refill/capacity rules; collector route and no-forge white-floor viability |
+| Browser/mobile | Keyboard/keypad; both orientations; real safe areas; move plus med-kit; cancelled gestures; touch forge; pause/narration/rotation recovery; responsive countdown and correction screens |
+| Offline/backup | Pack readiness, published update with active run, external export/import and deliberate origin-deletion recovery; clear local-storage failure handling |
+| Visual/audio | Gameplay-size readability; color-independent cues; all question/reward/correction/shop controls and speech function |
 
-Target 60 rendered frames per second on capable desktop and mobile devices, with sustained 30 or more on the agreed minimum mobile hardware and no persistent simulation backlog. Select exact desktop, iOS Safari, and Android Chrome device/OS/browser targets during the first combat proof. Include a real tablet, phone portrait and landscape, the busiest combined-ammo wave, and a full-session soak. Record enemy/projectile counts, frame times, input response, save latency, texture memory, speech download/decoded size, and heat-related slowdown. Desktop viewport emulation complements real-device checks; it does not establish mobile readiness.
+Target 60 rendered frames per second on capable devices and sustained 30 or more on the minimum tested mobile hardware without persistent simulation backlog. Select concrete desktop, iOS Safari, Android Chrome and tablet targets during the first combat proof. Record frame/input/save latency and memory during the busiest combined-ammo wave and a full session. Check real devices as available; record any untested device limitations honestly. There is no required participant count, pacing-calibration study, or retention-observation study before personal use.
 
-Implement in the PRD's delivery order:
+Follow the PRD's six implementation steps:
 
-1. Verify the actual WizardGenie runtime and settle package versions, minimum browser/device targets, and the reference-sheet workflow. Define core records and catalog contracts without building every feature.
-2. Prove three combat waves with one gun and white Piercing, using the serializable simulation and view separation. Include touch movement/med-kit and portrait/landscape phone layouts immediately.
-3. Add the revised grade-3 scoring loop and narrated K–1 sample; observe the PRD's three cadence configurations without causal claims, using normalized sets and quit-at-boundary reasons.
-4. Complete profiles, transactional settlement, backups, save/resume, and defeat/abandon behavior before expanding content. Introduce repository Interfaces earlier so prototypes do not teach views to own save state.
-5. Complete ammo/shop/forge, guaranteed acquisition, 18 authored useful module variants, and resume. Review the DPS/control matrix and compact-rule performance before content expansion.
-6. Deliver reviewed packs in PRD milestones 6A/6B/6C; compile and validate narration and input flows. Public launch requires all K–6 tracks.
-7. Integrate the approved art/audio roster and ten-wave content; profile performance and tune the economy and cadence.
-8. Run the PRD's stop-rule learner checks, measured T feasibility, real-device retention/backup and standard/compact performance gates; verify published offline/update behavior and record the owner's release decision.
+1. Establish the runnable browser project and three-wave responsive combat slice. Verify actual harness/package versions and prove desktop/touch movement and med-kit with one gun and white Piercing.
+2. Implement five questions, the shared countdown, four quality bands, wrong-first-answer drops, reward choice, and mandatory untimed corrections. Start with grade 3, then cover all K–6 tracks.
+3. Complete local profiles and resumable phases, including atomic initial/reward/correction settlement, backups, and defeat/abandon cleanup.
+4. Complete ammo/shop/forge, adjustable acquisition tuning, useful module variants at all four qualities, and white-floor progression checks.
+5. Integrate remaining enemies/boss, approved art, narration, and responsive screens; check standard/compact performance on available devices.
+6. Exercise complete win/defeat/correction/save paths and focused rule tests, including offline/update and export/import behavior where supported. Report untested devices honestly; formal education/retention studies do not block this personal MVP.
 
-Architecture choices that still need a concrete integration result are the harness engine/build versions, minimum browser/device matrix, generated animation metadata, and downloaded narration size. The educator assignment and reference-sheet approval remain outstanding PRD gates. Reusable ammo, combined effects, one-slot legendary, proposed post-forge stabilizer, Short/Standard mission recommendations, proposed accuracy streak, wrong-retry counting detail, and core-run/home scope retain the PRD's stated decision status. None is silently settled by choosing a data structure here.
+Integration unknowns remain the harness/build versions, concrete device matrix, generated animation metadata, and narration size. Reference-sheet approval remains part of the asset workflow. Reusable combined ammo, one-slot legendary, home core-run scope, and the countdown/correction rules are confirmed. Optional post-forge bonuses, acquisition schedules, mission-length choices, and exact reward modifier magnitudes remain tuning or proposals unless separately confirmed.
 
 **14. Future expansion boundaries**
 
-Keep subject, grade, and skill/deck distinct in content IDs and menu data now. Add a new answer evaluator, input view, evidence policy, and timing policy only when a reviewed non-math subject is implemented; do not build a generic quiz-authoring platform for launch. Render only available reviewed content in the Mission terminal.
+Keep subject, grade, and skill/deck distinct in content IDs and menu data now. Add a new answer evaluator, input view, practice-history policy, and timing policy only when a validated non-math subject is implemented; do not build a generic quiz-authoring platform for launch. Render only available validated content in the Mission terminal.
 
 A future hub and permanent armory would add profile-level combat progression separate from both active-run inventory and learning records. Cloud sync would require its own identity/conflict model; the local revision check is not a cloud sync protocol. Controller support would add an input Adapter and another usability pass. Phone/tablet touch controls and responsive screens are already part of the first release. Future changes can use the established boundaries without enlarging launch scope.
