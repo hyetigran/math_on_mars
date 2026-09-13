@@ -1,6 +1,6 @@
 # Progress
 
-Snapshot: September 13, 2026.
+Snapshot: September 13, 2026, after the first playable scaffold.
 
 ## Complete
 
@@ -10,14 +10,18 @@ Snapshot: September 13, 2026.
 - WizardGenie prompts updated to current gameplay and all 20 draft tickets, including corrections, content, enemy assets, audio, and offline delivery.
 - Remaining conflicting historical validation/screenshot guidance marked as superseded.
 - Memory bank initialized from current documents and conversation decisions.
+- Runnable Vite/TypeScript project using Phaser 4.2.1.
+- Three-wave combat slice with automatic fire, desktop/touch movement, med-gel, pause, and a final Overmind wave.
+- Local profile/setup flow and all seven K–6 practice-track generators.
+- Five-question shared countdown, time tier, wrong-answer drops, reward choice, corrections, cache, shop, loadout, merge, and forge interfaces.
 
 ## Not implemented
 
-Application scaffolding, combat, math input/scoring, correction screens, profiles/saves, ammo/shop/forge, K–6 content, runtime art/audio, offline delivery, and deployment.
+Transactional IndexedDB saves, authored/installed K–1 narration, production art/animation, the full enemy roster and mission presets, complete versioned content packs, service-worker delivery, and deployment.
 
 ## Verification status
 
-The plan revision passed `git diff --check`. No gameplay, browser, performance, or save tests have run because there is no application. Historical Python calculations do not verify the current rules.
+`pnpm build` passes against Phaser 4.2.1 and `git diff --check` passes. Runtime Play, browser interaction, performance, persistence-failure, offline, and physical-device checks remain pending. Historical Python calculations do not verify the current rules.
 
 ## Open implementation details
 

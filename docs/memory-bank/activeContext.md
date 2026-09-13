@@ -4,14 +4,14 @@ Updated September 13, 2026.
 
 ## Current work
 
-The plans and WizardGenie prompt pack now reflect the personal MVP and confirmed five-question, 30-second countdown with post-reward corrections. A 20-ticket breakdown has been proposed and mapped to prompts; it is not yet approved or published. The pack assigns animation/icon work to feature tickets, makes the reference sheet a production-asset prerequisite, and identifies sound/music integration under draft ticket 20. Final ticket granularity and asset blocking edges still need approval before publication. No game implementation has started.
+The plans and WizardGenie prompt pack reflect the personal MVP and confirmed five-question, 30-second countdown with post-reward corrections. A runnable Phaser 4 browser project and three-wave core slice now exist. The slice includes local profiles, K–6 question generation, desktop/touch combat, reward deductions, mandatory corrections, choice caches, shop/loadout actions, ammo merging, and the Omni forge path. The 20-ticket breakdown remains proposed rather than published. The generated reference sheet remains a candidate awaiting owner approval.
 
 ## Next implementation work
 
-1. Establish the actual runtime/build tooling and scaffold a runnable browser project.
-2. Build a three-wave combat slice with one gun, white Piercing, and desktop/touch controls.
-3. Add two five-question intermissions with countdown rarity, wrong-answer deductions, and mandatory post-reward corrections.
-4. Continue through durable profiles, ammo progression, all K–6 tracks, and art/mobile integration in [GAME_PLAN.md](../GAME_PLAN.md).
+1. Exercise the complete three-wave flow in WizardGenie Play and fix runtime/input issues found there.
+2. Replace temporary browser speech synthesis with reviewed, installed K–1 narration assets.
+3. Expand persistence from localStorage snapshots to the IndexedDB transaction contracts in [ARCHITECTURE.md](../ARCHITECTURE.md).
+4. Continue enemy, content, economy, offline, and real-device verification in [GAME_PLAN.md](../GAME_PLAN.md).
 
 Keep routine tuning adjustable and proceed with the personal MVP; formal educational review or learner evidence is not a prerequisite.
 

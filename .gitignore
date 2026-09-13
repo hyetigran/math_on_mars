@@ -2,3 +2,4 @@
 .env
 .wizardgenie
 node_modules/
+dist/

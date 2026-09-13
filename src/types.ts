@@ -66,6 +66,8 @@ export interface RunState {
   modules: Module[];
   phase: "combat" | "quiz" | "reward" | "correction" | "cache" | "shop";
   quiz?: QuizState;
+  shopBought: string[];
+  cacheClaimed: boolean;
 }
 
 export interface HistoryEntry {
