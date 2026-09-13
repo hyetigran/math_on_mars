@@ -7,7 +7,8 @@ Snapshot: September 13, 2026.
 - Git repository and GitHub remote established.
 - Game plan and architecture reconciled with the owner's countdown, rarity, correction, ammo, and personal-MVP decisions.
 - Root domain glossary created.
-- Conflicting older planning references marked as superseded.
+- WizardGenie prompts updated to current gameplay and all 20 draft tickets, including corrections, content, enemy assets, audio, and offline delivery.
+- Remaining conflicting historical validation/screenshot guidance marked as superseded.
 - Memory bank initialized from current documents and conversation decisions.
 
 ## Not implemented

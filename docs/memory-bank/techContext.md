@@ -18,4 +18,4 @@ Observed September 13, 2026.
 - Goblin Gutter: rendering and gameplay reference described in the plan.
 - WizardGenie: intended development-time asset workflow. The project reference sheet is not yet created or approved.
 
-`WIZARDGENIE_PROMPTS.md`, `QUIZCASTER_REFERENCES.md`, and `DESIGN_VALIDATION.md` carry supersession notices. Their old quiz rules and formal review gates are historical. `docs/design_checks.py` still contains old formulas and must be revised before use as current validation.
+[WIZARDGENIE_PROMPTS.md](../WIZARDGENIE_PROMPTS.md) now reflects the current plan and maps all 20 draft tickets to prompts. `QUIZCASTER_REFERENCES.md` and `DESIGN_VALIDATION.md` still carry supersession notices; their old quiz rules and formal review gates are historical. `docs/design_checks.py` still contains old formulas and must be revised before use as current validation.

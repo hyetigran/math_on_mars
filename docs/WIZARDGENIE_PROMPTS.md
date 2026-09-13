@@ -1,10 +1,35 @@
 # Math on Mars — WizardGenie prompt pack
 
-> **Historical reference — superseded quiz and release rules (September 13, 2026).** The owner has confirmed a personal-use MVP: five mandatory questions for every grade, one 30-second countdown (over 20 seconds purple, over 10 blue, over 0 green, zero white), one tier drop per wrong initial answer with a white floor, reward choice followed by mandatory untimed corrections. At zero, finish unanswered questions before reward choice. No charge, per-item timing calibration, skipping, accuracy streak, educator review, or learner-evidence gate applies. [GAME_PLAN.md](./GAME_PLAN.md) and [ARCHITECTURE.md](./ARCHITECTURE.md) are authoritative. Art references remain useful; old implementation prompts and `design_checks.py` formulas must be revised before use and do not validate the current quiz.
+Updated September 13, 2026 for the personal-use MVP, confirmed countdown/correction rules, and proposed ticket breakdown. [GAME_PLAN.md](./GAME_PLAN.md) governs product behavior; [ARCHITECTURE.md](./ARCHITECTURE.md) governs implementation contracts. These prompts are instructions to adapt, not completed assets or implemented features.
 
-Companion to [GAME_PLAN.md](/Users/tig/Desktop/tigran/mathonmars/docs/GAME_PLAN.md). Revised September 13 for mobile launch support and the `docs/` directory. These are ready-to-adapt prompts, not completed generations. Confirmed launch requirements: desktop and phone/tablet play, speed-based upgrades, no relaxed mode, reviewed practice tracks for every grade K–6, one weapon slot, five upgradeable ammo types, the five-purple legendary recipe, and shop-trinket ammo capacity from one to four. Final title, remaining scope choices, art references, and a generation budget remain provisional.
+## Draft ticket coverage
 
-Design-review update: use the revised exposure timer, actual-input targets, full-range reward strength, wrong-answer tier drop, help-rate support window, authored variants, supply milestones and compact combat rules. See [DESIGN_VALIDATION.md](/Users/tig/Desktop/tigran/mathonmars/docs/DESIGN_VALIDATION.md) for arithmetic and the live audio estimate. Keep the PRD's pending choice labels for streak/Short recommendation/wrong-retry counting; do not present them as approved.
+Ticket numbers below refer to the proposed 20-ticket breakdown, not published GitHub issues. Publication and final granularity remain pending owner approval. Each implementation request should complete only its named ticket, including its UI, state, persistence where available, and relevant checks.
+
+| Draft ticket | Prompt coverage | Deliverable ownership |
+| --- | --- | --- |
+| 1 — Three combat waves | 0, 10 | Runnable touch/keyboard combat; temporary art allowed |
+| 2 — Complete math loop | 8A, 8B, 8D, 10 | Five-question timer, reward, then mandatory corrections |
+| 3 — Local profiles/intermission saves | 8C, 11 | Profile picker and durable quiz/reward/correction state |
+| 4 — Combat resume | 11 | Combat snapshots and interruption recovery |
+| 5 — Salvage shop | 7A, 12A | Four offers, passive catalog, purchases and refill |
+| 6 — Ammo inventory/merges/Expanders | 7A, 7B, 12 | Reserve, caches, Piercing/Multi Shot and capacity |
+| 7 — Electric Chain | 7A, 7B, 12 | Chain icon, actual-hit feedback, bounded combat effect |
+| 8 — Frost/Fiery | 7A, 7B, 12 | Type icons, status feedback and saved effects |
+| 9 — Legendary forge | 7A, 7B, 12 | Legendary icon, ingredient preview and combined effect |
+| 10 — Narrated K–1 | 8A, 8C, 8D, 9A, 13 | Tasks, diagrams, narration, correction help |
+| 11 — Grades 2–3 | 8A, 8C, 8D, 13 | Selected arithmetic tracks and history |
+| 12 — Grade 4 | 8A, 8C, 8D, 13 | Larger multiplication and fraction entry |
+| 13 — Grades 5–6 | 8A, 8C, 8D, 13 | Decimals, fractions, ratios and equations |
+| 14 — Spitter/Charger | 3, 4, 14 | Behavior, masters, animations, telegraphs and restore |
+| 15 — Splitter/Overmind missions | 3, 4, 14 | Enemy/boss assets, behavior, missions and victory |
+| 16 — Mars visual style | 1, 2, 4, 5, 6, 8A, 8B | Reference sheet, marine/Drifter animations, arena and core UI |
+| 17 — Spoken equipment guidance | 9A | Reward/cache/shop/loadout narration and recovery |
+| 18 — Profile recovery/transfer | 11 | Export/import, backup recovery and conflicting writes |
+| 19 — Offline play | 15 | Installed packs, readiness and safe version updates |
+| 20 — Integrated personal MVP | 9B, 16 | Sound/music integration, final full-loop checks and distribution |
+
+The draft's asset sequencing needs an explicit production gate: ticket 16 establishes the reference sheet before production batches in tickets 6–9 and 14–15. Their mechanics can proceed with temporary assets. Integrate each type/enemy's production assets in its owning ticket after the sheet is approved. Ticket 20 verifies completeness rather than owning every missing animation. Sound/music is an explicit work package under ticket 20; splitting it into a separate ticket remains a proposed granularity change, not an approved new issue.
 
 **How to use this pack**
 
@@ -12,7 +37,7 @@ All paths inside the copyable prompts are relative to the repository root. Plann
 
 For implementation and asset integration, also read [ARCHITECTURE.md](/Users/tig/Desktop/tigran/mathonmars/docs/ARCHITECTURE.md) for state ownership, save contracts, and installed asset/content manifests. GAME_PLAN.md continues to govern gameplay and launch scope.
 
-Use the PRD's implementation policy record: default to the speed-only reward route while the accuracy streak is unapproved, identify prototype retry/set/mission rules, and retain the proposed status of the early blue-pair acquisition schedule and Omni stabilizer. Verify the complete module-headroom and cache-settlement contracts in the architecture before using the implementation prompts below.
+Implement the confirmed five-question countdown and post-reward corrections. Keep white reward magnitude, mission lengths, supply schedules, and the Omni stabilizer labeled as prototype tuning. Check current positive-gain, cache-settlement, and persistence contracts before implementation.
 
 Use one asset or one milestone per request. Start with the shared brief and a small set of candidates: marine, Drifter, Martian terrain, and a sample UI panel. Assemble them into the Math on Mars reference sheet with a gameplay-size view and obtain approval before batch asset generation or animation. Once approved, attach that sheet as the primary visual authority along with the selected character/object master when identity must be preserved; describe only the required change. The reference sheet is a planned deliverable and has not yet been created or approved.
 
@@ -22,16 +47,18 @@ Follow the reference roles in GAME_PLAN.md: Backwoods screenshots guide arena/fu
 
 For UI work, read [QUIZCASTER_REFERENCES.md](/Users/tig/Desktop/tigran/mathonmars/docs/QUIZCASTER_REFERENCES.md) and inspect the three preserved images under `references/quizcaster`. They guide layout and hierarchy; GAME_PLAN.md controls scoring, reward pools, ammo capacity, and the forge-only legendary. Use the question image for Prompt 8A, upgrade image for Prompt 8B, and study-menu image for Prompt 8C. Their artwork and pictured future features are not instructions to change our art style or launch scope.
 
-The current [Sorceress API guide](https://sorceress.games/account/api-keys) describes AutoSprite V3 as character look → animation → Corridor Key sheet. Live tools in this session expose image generation, character registration, animation, keying, sound effects, and music. Use current tool schemas and prices at execution time; the earlier Goblin Gutter guide's AutoSprite v2 references should not dictate new API calls.
+At execution time, inspect the actual WizardGenie project, available generation tools, supported animation/keying workflow, and current schemas and prices. Historical AutoSprite version names are not proof of live availability. Retain source IDs, installed outputs, and returned metadata.
 
 **Prompt 0 — shared project brief**
 
 ```text
-We are making Math on Mars, a working-title browser game for desktop, phones, and tablets inspired by my Goblin Gutter project. Read docs/GAME_PLAN.md for scope and docs/ARCHITECTURE.md for implementation boundaries. Preserve its smooth illustrated chibi visual language, slight overhead camera, readable combat, automatic firing, and wave-to-upgrade rhythm. The setting is a Martian research outpost defended by a space marine against alien slimes. Launch must include reviewed practice tracks for all seven grades K–6 and spoken support for K–1. Keep speed-based upgrades and omit relaxed mode. Grade-limited prototypes are internal milestones, not public releases. Apply the owner's wrong-answer rule to the current quiz's final reward tier, with green as floor and no loss of prior equipment. Follow the PRD's exact candidate/downgrade order, full-range strength, and pending retry detail. Use configured three- or five-item sets with fixed-denominator normalization; preserve the proposed status of the K–1 Short default and accuracy streak.
+We are making Math on Mars, a personal-use browser MVP for desktop, phones, and tablets inspired by Goblin Gutter. Read docs/GAME_PLAN.md and docs/ARCHITECTURE.md. Build the home-use core run with local profiles and selected practice tracks for all seven grades K–6, including spoken K–1 support. Hub, accounts, classroom tools, and formal educator/learner-study gates are outside this MVP.
+
+After each ordinary wave, ask exactly five mandatory questions with one shared 30-second countdown. At completion, more than 20 seconds remaining gives purple, more than 10 gives blue, more than zero gives green, and zero gives white. Each wrong initial answer lowers that candidate one tier, with white as floor. At zero, finish every unanswered question. Choose one of three rewards, then retry every missed question untimed until correct before caches/shop/next wave. Corrections never change the selected reward or original accuracy. No charge score, skipping, immediate retry, per-item timer, or streak applies.
 
 Mobile is launch scope: support portrait and landscape, a floating virtual movement stick, auto-aim/fire, reachable med-kit/pause buttons, and a mirrored handedness setting. Support moving and using med-kit with separate fingers. Reflow the HUD, math keypad, cards, shop, and inventory without shrinking controls or hiding choices. Use the PRD's safe-area, text, touch-target, interruption, and real-device acceptance requirements. Keep physics and reward rules independent of screen size. Do not require fullscreen, an orientation lock, hover, right-click, or drag-only inventory interaction.
 
-Combat uses exactly one Pulse Blaster in one weapon slot. Ammo types are Piercing, Multi Shot, Electric Chain, Frost, and Fiery, each progressing White T1 to Green T2 to Blue T3 to Purple T4 through matching-pair merges. One purple of each type forges Legendary Omni Ammo with all five purple effects. The gun starts with one active ammo slot; the shop's Ammo Expander adds one per purchase, capped at four. Reserve storage is separate from active capacity, so five legendary ingredients never require five active slots. Use docs/GAME_PLAN.md's working defaults of reusable run-long cartridges, combined effects per shot, and legendary occupying one slot.
+Combat uses exactly one Pulse Blaster in one weapon slot. Ammo types are Piercing, Multi Shot, Electric Chain, Frost, and Fiery, each progressing White T1 to Green T2 to Blue T3 to Purple T4 through matching-pair merges. One purple of each type forges Legendary Omni Ammo with all five purple effects. The gun starts with one active ammo slot; the shop's Ammo Expander adds one per purchase, capped at four. Reserve storage is separate from active capacity, so five legendary ingredients never require five active slots. Use the confirmed reusable ammo types, combined effects per shot, and legendary occupying one slot; projectiles are continuous rather than a finite bullet supply.
 
 Reference roles: use Backwoods for world composition, scale, readability, environmental detail, and combat HUD placement; Goblin Gutter for smooth chibi rendering and animation continuity; Quizcaster for math questions, reward selection, progress indicators, and future subject menus. Before batch production, create and obtain approval for a Math on Mars reference sheet containing the marine, a slime, Martian terrain, and a sample UI panel, with a gameplay-size comparison. Once approved, use that sheet as the primary visual reference for every asset request and use individual approved masters to preserve identity. Reference images do not alter the gameplay rules or add a hub or future subjects to launch scope.
 
@@ -41,7 +68,7 @@ Shared view clause: fixed slight three-quarter overhead view for a top-down 2D g
 
 Marine: compact 2–2.5-head proportions, off-white and navy exploration suit, broad helmet, horizontal cyan visor, orange shoulder patch, empty hands. The suit is the fixed base appearance for this release. The one gun is a separate sprite on a single shoulder-side mount; ammo changes the shot's appearance, never the number of guns.
 
-World: muted rusty Martian soil, charcoal equipment, sparse off-white outpost structures. Keep ground contrast lower than characters. Slimes have different silhouettes as well as different colors. Hostile warnings use orange-red with distinct ring, line, or cone geometry. Item quality uses text and one/two/three pips in the runtime interface, never color alone. Enemy bodies do not carry rarity frames.
+World: muted rusty Martian soil, charcoal equipment, sparse off-white outpost structures. Keep ground contrast lower than characters. Slimes have different silhouettes as well as different colors. Hostile warnings use orange-red with distinct ring, line, or cone geometry. Item quality uses text and one/two/three/four pips for white/green/blue/purple in the runtime interface, never color alone. Enemy bodies do not carry rarity frames.
 
 Use smooth illustration throughout. Exclude pixel grids, dithering, photorealism, human gore, logos, watermarks, and tiny decorative text. Equations, numbers, labels, fractions, and answer controls are rendered by the game, not generated into artwork.
 
@@ -188,7 +215,7 @@ For the in-world Pulse Blaster, request one whole-object asset matching its icon
 **Prompt 7B — combined ammo effects and loadout presentation**
 
 ```text
-Implement readable ammo feedback using the approved single Pulse Blaster and cartridge art. Follow the mechanical definitions and working combined-effects rule in docs/GAME_PLAN.md. There is one gun regardless of ammo capacity. Use bounded runtime effects rather than a separate fully generated animation for every possible ammo combination.
+Implement readable ammo feedback using the approved single Pulse Blaster and cartridge art. Follow the mechanical definitions and confirmed combined-effects rule in docs/GAME_PLAN.md. There is one gun regardless of ammo capacity. Use bounded runtime effects rather than a separate fully generated animation for every possible ammo combination.
 
 Piercing: a narrow elongated projectile and a brief through-hit streak. Multi Shot: a visible spread of distinct projectiles. Electric Chain: a short angular arc connecting actual chain-hit targets. Frost: a small crystal-shaped status mark and cool impact accent. Fiery: a small flame-shaped status mark and restrained warm burn pulses. Legendary: one distinct gold muzzle accent with the five functional effects, not five guns or five overlapping full-screen particle layers. Keep orange-red hostile warning geometry visible under all effects.
 
@@ -199,69 +226,77 @@ The loadout shows one weapon slot, an Active Ammo row with one to four available
 Check the display at desktop and phone gameplay sizes in both orientations and in grayscale/color-vision simulations, including Multi Shot + Piercing + Electric Chain + Fiery and the full legendary combination. Damage telegraphs, the marine, and remaining enemies must stay readable around thumb controls. Tier, capacity, and effect identity must not rely on color alone. Bound cosmetic particles and render resolution for mobile performance without changing hit effects or damage.
 ```
 
-**Prompt 8A — math screen visual design / implementation**
+**Prompt 8A — five-question countdown screen**
+
+Draft tickets 2 and 10–13; visual integration in ticket 16.
 
 ```text
-Design and implement the reactor recharge screen according to docs/GAME_PLAN.md. Use the selected game palette and frame it as a calm ship console.
+Implement the between-wave quiz from docs/GAME_PLAN.md and docs/ARCHITECTURE.md. Use the Quizcaster question reference for layout and the approved Mars style for decoration. Show Question 1 of 5, the actual question/diagram, answer, full 7–8–9 / 4–5–6 / 1–2–3 / Backspace–0–Check keypad, and one visible 30-second countdown with White/Green/Blue/Purple labels and one-to-four pips.
 
-Use references/quizcaster/02-math-question.png and docs/QUIZCASTER_REFERENCES.md for the layout. Center progress, question, answer field, and keypad in that order. Arrange the keypad as 7–8–9 / 4–5–6 / 1–2–3 / Backspace–0–Check, with real labels and accessible names. Use a vertical Reactor charge rail at the left on wide screens and a compact horizontal strip on narrow screens. Display our Standard/Advanced/Overcharged thresholds and settled charge; do not copy the reference's five-tier ladder or show a quiz-earned legendary. Earned charge does not drain while answering. Display the configured three- or five-item set and normalize its charge using planned N; early exit cannot shrink the denominator.
+Five questions apply to every grade. Start the shared clock on first problem exposure or item-specific speech. Initial/replayed task speech consumes time; Check remains available during playback. A valid first submission settles the answer once and advances, queuing misses for later correction. Malformed/incomplete input is validation, not a wrong answer. At zero the timer stays zero and all unanswered questions remain mandatory. There is no Skip, End quiz, immediate retry, charge rail, per-item timer, or streak.
 
-Prioritize a large central math question, clear visual aids when required, large answer controls, a Submit action, question progress out of the configured N, and a reactor-charge display. Show correctness charge separately from speed charge in feedback. Include Hint, Show me how, End recharge, Replay narration, and Save & Exit. Keep decorative machinery around the edges. Support the PRD's structured cadence observations, including three-question breaks, without claiming a controlled causal experiment.
+Use unrounded remaining time at the fifth initial answer for the candidate: over 20 seconds purple, over 10 blue, over zero green, zero white. Exact 20 is blue and exact 10 is green. Deduct one tier per wrong initial answer with white as floor. Save the original answers, wrong count, frozen time and correction queue. Proceed to reward selection, never directly to corrections or the next wave.
 
-Render every equation, number, fraction, label, input, and feedback message with real text and programmatic shapes. Counting groups, fraction bars, and number lines must be generated from the actual question data, with exactly the required quantities. Background artwork must contain no educational content. Combat stays paused until the intermission and shop are finished.
+Render equations and diagrams from real data, with exact fraction/decimal evaluation. Support keyboard and touch, visible focus, 48-pixel minimum targets, large K–1 keys where practical, fraction fields and a decimal key. Keep task, answer, and Check visible in both orientations; normal menu scrolling must remain available. Countdown uses the same rules across devices and grades.
 
-Support keyboard, mouse, and touch input, readable focus, and clear error feedback. Use at least 48×48 CSS-pixel hit areas and aim for 56-pixel K–1 keypad keys where possible. Use the full numeric keypad for constructed answers, with fraction fields and decimal entry where required. Default touch math entry to the built-in keypad without also opening an OS keyboard. Keep the question/visual aid, answer, and Check visible together: one column in portrait, question/keypad columns in short landscape layouts. Explanations may scroll. Account for safe areas and browser chrome; pause during rotation/major relayout and preserve draft input and elapsed time. Do not award correctness or speed charge for multiple-choice activities inside hints. Do not implement relaxed mode or put a countdown over the equation. Correctness and speed rewards, retries, skips, and tier/strength rules come from docs/GAME_PLAN.md; do not invent another scoring system.
-
-For K–1, use the reviewed bundled narration manifest. Speak the question, hints, worked explanation, and onboarding instructions without requiring the learner to read. Start solve-exposure timing at first problem/diagram reveal or item-specific speech, whichever occurs first; initial submission waits until required narration ends, but that narration time counts. Item-specific Replay also counts as exposure while the visual may be hidden. Genuine pause conceals the problem and stops speech. Resume restores accumulated exposure and counts any repeated item narration. Never reveal the correct count in a counting prompt. Do not silently substitute text-only play when required audio fails.
-
-Show Standard / Advanced / Overcharged with one / two / three pips and visible modifier rows. Use first-modifier strength 1 + 0.5 × normalizedCharge / 125 across green, blue and purple. Math variants need first-stat headroom for 1.50 times the base modifier and positive actual gains in every additional quality modifier; a merely nonzero capped gain is insufficient. Show wrong-answer tier drops separately from accumulated charge and preserve their count across resume. Render all labels and pips in code. Keep learning outcomes and active runs scoped to the selected local profile, and restore the exact current item/help/timer state after Save & Exit.
+Provide Replay and Save & Exit; hint/worked-explanation controls belong to the later correction round. A genuine pause or major relayout conceals the task, stops speech and suspends time. Preserve draft and countdown through resume. Capture timing at command acceptance; storage latency cannot consume the budget. Ignore stale audio callbacks and duplicate input. Test boundaries, wrong answers, zero-time completion, validation, pause/rotation, and held input crossing into reward selection.
 ```
 
-**Prompt 8B — after-quiz upgrade cards**
+
+**Prompt 8B — reward choice before corrections**
+
+Draft ticket 2; catalog expansion in ticket 5; visual integration in ticket 16.
 
 ```text
-Design and implement the Fabricator reward screen using references/quizcaster/01-upgrade-selection.png for visual hierarchy and docs/GAME_PLAN.md for behavior. Continue the reactor console frame and reward rail from the quiz screen, using our smooth science-fiction surfaces and readable type.
+Implement three reward cards using the Quizcaster upgrade reference and current Mars visual style. Show completion time, starting rarity, wrong-answer drops, and final White/Green/Blue/Purple rarity with text and pips. For example, 24 seconds remaining with one wrong answer yields blue; finishing at zero yields white regardless of accuracy. Use saved outcomes rather than hardcoded examples. There is no charge breakdown or continuous strength multiplier.
 
-Show the earned quality, a compact outcome summary, and the answer-charge/speed-charge breakdown above three large cards. Use aligned columns on wide screens and readable stacked rows or a scrollable list on phones; keep all three offers and their complete gains available. For 115 charge, distinguish 4 fast plus 1 Hint-first correct (purple, no wrong) from 4 fast plus 1 wrong-then-correct (purple candidate drops to blue); both have 95 answer charge and 20 speed charge. The first-modifier factor is 1.46 in both, with final-tier modifier count after the drop. Derive real results from saved item outcomes rather than hardcoding this example.
+Each card shows a family icon, variant name, exact gains, resulting stats and an explicit Choose action. Offer three distinct useful variants. Prototype tuning: white gives half the first base modifier, green the full first, blue adds the second, purple adds the third. Each promised modifier must provide positive actual gain after caps; identify this magnitude policy as tuning, not a newly confirmed owner requirement.
 
-Each selectable card contains an icon, module name, earned tier text/pips, exact gains, and before/after stats with caps applied. Label a new family New module, an unseen variant within an owned family New variant, and a repeated variant Add another. Show family/variant names and actual stat priorities. Choose three distinct useful variants from the 18-entry catalog, with at least two priorities and first-stat headroom; never serve an all-capped card. Show a visible selection/focus state and a clear Choose action. Preserve three legal offers at the earned quality across Save & Exit/Resume and settle only one. Wait for the answer-submission input to be released before accepting a reward selection. Scrolling, cancelled touches, and held answer taps must not select a card. Keep actions at least 48 CSS pixels in each dimension and clear of device edges/browser controls.
+Keep all three cards readable on desktop and phones. Scrolling/cancelled gestures and held answer input cannot choose a card. Preserve offers through save/resume, award once, and prevent shopping from rerolling them. Commit selection and phase transition together. If misses exist, open the mandatory untimed correction round; otherwise continue to caches/shop. Choosing a reward never bypasses outstanding corrections.
 
-Apply the full first-stat headroom and positive-modifier eligibility contract from section 6 of docs/GAME_PLAN.md. Other stat-changing commands are unavailable until reward choice settles, so shopping cannot reroll these saved cards. Include reviewed replayable spoken descriptions of each choice's purpose and quality for K–1; dynamic exact stats remain readable/accessible text. Verify a pre-reader can choose and proceed into cache/shop without adult reading help.
-
-This screen awards passive stat modules under the current reward contract. It does not consume an existing module, grant free ammo evolution, sell an Ammo Expander, or create legendary ammo. The ammo inventory/forge can reuse the card layout with its actual merge ingredients and capacity rules. Do not infer Quizcaster's internal scoring or reward distribution from card colors. Generate only decorative assets; all text, values, controls, and card state come from the game.
+Math rewards are passive modules, separate from ammo progression. They do not grant an Ammo Expander or legendary fusion. Add replayable fixed descriptions through the equipment-narration ticket; dynamic stat totals remain real accessible text.
 ```
 
-**Prompt 8C — Mission terminal and future content menu**
+
+**Prompt 8C — profile and mission terminal**
+
+Draft tickets 3 and 10–15.
 
 ```text
-Design the Math on Mars Mission terminal using references/quizcaster/03-study-menu.png for clear grouping and large selectable tiles. Read docs/QUIZCASTER_REFERENCES.md and docs/GAME_PLAN.md first. Retain the smooth science-fiction visual language.
+Implement a responsive local-profile and mission terminal using the Quizcaster study-menu reference for grouping, with Mars styling. Show nickname/avatar, selected grade/skill, independent combat difficulty, mission preset, and Resume when an active run exists. New run must offer explicit abandonment rather than silently discard progress.
 
-Implement the launch scope: selected local profile, Math training, seven grade choices K–6, reviewed skill tracks for the selected grade, a mission summary, and a separate Resume action when that profile has an active run. Grade and skill selection must not silently discard a saved run. Keep combat difficulty visibly separate from learning level. A learner should be able to reach a reviewed skill without navigating through unavailable future subjects.
+The finished MVP exposes all seven K–6 practice tracks. During incremental development, clearly distinguish implemented tracks from unavailable ones. Selecting a grade never changes the five-question count, 30-second timer, enemy health, or combat difficulty. Keep selected skill fixed for a run. Show simple original first-attempt practice history and separate correction completion, not game rarity as mastery.
 
-Document future menu groups for School subjects, Test preparation, and Custom practice. Future spelling, vocabulary, science, older grades, and user-created decks are expansion concepts, not buttons backed by fabricated content. Keep subject, grade, and skill/deck distinct in menu metadata. New subjects require reviewed content, an appropriate answer evaluator/input, pacing rules, a version, and separate profile progress. Do not implement custom imports, runtime AI question generation, accounts, or unreviewed subject packs as part of this UI task.
-
-Use real rendered labels, visible keyboard focus, and generous touch controls. The reference's K–5 row becomes a responsive K–6 grid here, wrapping into fewer columns on phones without removing any grade. Keep Resume and mission actions reachable, allow normal vertical scrolling, and keep the profile-name field/action visible when the OS keyboard opens. Do not copy its parchment, pixel fonts, exact course counts, or assumption that every shown category is already available in this project.
+Use real labels, keyboard focus, large touch targets, responsive grade tiles, scrolling, and a visible native profile-name field when the OS keyboard opens. Future subjects, permanent hub progression, accounts and classroom tools remain outside this task. Implement only the currently assigned ticket's menu and content paths.
 ```
 
-**Prompt 9A — reviewed K–1 speech pipeline**
+**Prompt 8D — mandatory correction round**
 
-This is an educational-content milestone, before the final sound-effects/music pass. Use the first small narrated bank to verify the format; expand only from the reviewed item manifest. Generation alone does not count as educational review.
+Draft ticket 2; content expansion in tickets 10–13.
 
 ```text
-Create the narrated K–1 sample required by docs/GAME_PLAN.md using deterministic question instances and the versioned content/audio manifest. For each item, provide the exact displayed task, spoken task, correct answer, hint, and worked explanation. Use counting or composition tasks with a constructed numeric response. Keep spoken task wording free of answer leakage.
+After the reward is selected, present every incorrectly answered initial question in an untimed correction round. Reuse its saved problem, show helpful feedback, and provide hints/worked explanations and replayable narration where supported. The learner must enter the correct answer before that correction completes. A further wrong answer keeps it pending with no additional reward penalty. There is no Skip or direct Next wave action while corrections remain.
 
-Prepare the sample for the designated elementary-math reviewer's content check. Use only reviewed text for the production narration batch. Select one narrator from the live speech tool's available voices; keep voice, pronunciation, speaking rate, and recording level consistent. Follow the current tool's supported schema and exact cost quote, staying within an authorized budget.
-
-Use the PRD's minimum bank counts (500 K–1 instances across six declared skills), exact-ID and operand-spacing policy, and reviewed generic prompt reuse. Produce a unique-text/character manifest and a current cost quote before any paid batch; docs/DESIGN_VALIDATION.md contains a dated planning estimate, not spending authorization. Generate a complete clip for each unique spoken string rather than concatenating arbitrary numeral fragments at runtime. Reuse identical clips across items. Save local audio files and a manifest linking content version, item ID, clip role, exact transcript, selected voice ID, source asset ID, and output path. The game must work offline with these bundled clips after asset loading.
-
-Include initial-question speech, Replay, a specific hint, a worked explanation, and brief spoken onboarding for answer entry, Check, help, and exiting. Keep speech clear and neutral, with no music underneath the recordings. Avoid praising speed or calling a learner slow. Do not invent a correct answer, rewrite reviewed text during synthesis, or label generated audio as reviewed automatically.
-
-Also inventory fixed spoken descriptions for reward priorities, ammo identity/tier, cache selection, buy/equip/merge/forge actions, Next wave and Save & Exit. These UI clips are additional to the report's math/onboarding subtotal; obtain their actual deduplicated text count and price. Do not generate a recording for every possible fractional stat total. Test the whole K–1 intermission and per-step repeat-spacing liveness before expanding the bank; a whole-skill count of 500 does not prove either.
-
-Verify every manifest reference and review pronunciation against the displayed item and correct answer. Test a pre-reader using the full 0–9 keypad on a phone/tablet with initial narration, Replay, help, rotation, app-switch audio recovery, and pause/resume. Missing required clips must stop that item from entering a scored K–1 set. Produce a review report identifying any item that is not ready for the public grade pack.
+Keep original answers/accuracy and the already-chosen reward unchanged. Save correction attempts and queue progress separately and idempotently. Resume the same correction after reload, including draft and narration recovery. When the queue is empty, proceed to caches/shop; an initially empty queue needs no correction screen. Verify repeated misses, helped correct answers, duplicate submission, reload, and inability to bypass corrections.
 ```
 
-Example counting item: the game renders five cells; the question audio says “How many energy cells are there? Enter the number, then press Check.” The question audio does not say “five.” A hint may encourage counting each cell once without naming the answer. The worked explanation may say the answer after the scored attempts end.
+
+**Prompt 9A — K–1 task and equipment narration**
+
+Draft ticket 10 owns math/task speech; ticket 17 owns equipment-management speech.
+
+```text
+Prepare authored K–1 questions, displayed diagrams, computed answers, spoken tasks, correction hints and worked explanations using the current game plan. Check arithmetic and transcripts directly. This personal MVP does not require an educator assignment, recruited learner sessions, a fixed 500-item quota, or a review report.
+
+Create a deduplicated exact-text manifest and inspect available voices, supported schema, output formats and current prices before paid generation. Stay within authorized scope/budget. Use one consistent narrator and complete clips for unique spoken strings; reuse identical clips. Retain content version, item/text ID, clip role, transcript, voice/source ID, local output, and file hash. Bundle installed audio for offline use after download.
+
+Ticket 10 includes initial tasks, Replay, keypad/Check onboarding, and correction hints/explanations. The initial task must not reveal a counting answer. Worked explanations belong after reward selection, during corrections. Answer entry stays enabled during initial narration; the same shared countdown includes task speech and Replay. Pause stops speech and conceals the question, and resume preserves time. Missing required audio keeps an unready item out of the set; a playback failure pauses with recovery rather than skipping a question.
+
+Ticket 17 adds fixed spoken descriptions of reward priorities and all four rarities, ammo identity/tier, cache choices, buying, equipping, merging, forging, Next wave and Save & Exit. Dynamic numerical totals remain accessible text; do not generate a clip for every possible stat combination. Inspect the complete quiz → reward → corrections → shop path using developer checks, including audio cancellation, rotation, app switching, and repeated playback. Each ticket owns its manifest entries and integration, not just generated files.
+```
+
+Example: five rendered cells use “How many energy cells are there? Enter the number, then press Check.” The task does not announce five. The correction explanation can state the answer, but the learner still enters it to complete the correction.
+
 
 **Prompt 9B — sound effects**
 
@@ -281,73 +316,127 @@ Create a short original sound effect for a playful science-fiction wave-survival
 | Slime hit | Small rubbery squish-pop, about 0.2 seconds |
 | Slime defeated | Light elastic splat dissolving into tiny bubble pops, about 0.5 seconds |
 | Correct answer | Warm clear two-note digital chime, about 0.4 seconds |
-| Try again | Gentle low two-note prompt, neutral and unobtrusive, about 0.3 seconds |
-| Reactor charged | Rising energy swell resolving into a satisfying clean tone, about 1 second |
+| Correction retry | Gentle low two-note prompt, neutral and unobtrusive, about 0.3 seconds |
+| Reward ready | Rising energy swell resolving into a satisfying clean tone, about 1 second |
 | Upgrade selected | Crisp mechanical click plus a small electronic lift, about 0.5 seconds |
 | Boss warning | Distinct descending synthetic alert, about 1 second, no piercing alarm |
 
-Generate two music tracks initially: combat and recharge/shop. Add a separate boss track after the main loop works.
+Draft ticket 20 owns integrating these effects, volume/mute controls, phase transitions, and two initial music tracks: combat and quiz/corrections/shop. If audio becomes a separate ticket, transfer this whole work package. Keep narration intelligible with music ducking. Test loop boundaries, repeated effects, user-gesture audio unlock, pause and app-switch recovery. Generate two music tracks initially: combat and quiz/shop. Add a separate boss track after the main loop works.
 
 ```text
 Create an original seamless-loop instrumental for Math on Mars combat. Energetic but playful science-fiction synth score, approximately 112 BPM, springy electronic bass, light percussion, bright spacious motifs, adventurous cartoon tone. Leave room for frequent short sound effects. No vocals, dramatic intro, abrupt ending, or recognizable melody from another work. Target 60–90 seconds if the selected tool supports it. Verify the loop boundary after export.
 ```
 
 ```text
-Create an original seamless-loop instrumental for a children's math recharge screen in Math on Mars. Calm spacious science-fiction ambience, gentle soft synth pulses, approximately 75 BPM, very sparse percussion and melody, supportive and curious mood. No ticking clock, urgent build, vocals, startling transients, or recognizable melody from another work. Target 60–90 seconds if supported. It should sit quietly under mathematical thinking and feedback chimes.
+Create an original seamless-loop instrumental for the math quiz, correction and shop screens in Math on Mars. Calm spacious science-fiction ambience, gentle soft synth pulses, approximately 75 BPM, very sparse percussion and melody, supportive and curious mood. No ticking clock, urgent build, vocals, startling transients, or recognizable melody from another work. Target 60–90 seconds if supported. It should sit quietly under mathematical thinking and feedback chimes.
 ```
 
-**Prompt 10 — first playable implementation handoff**
+**Prompt 10 — playable combat and math slices**
+
+Run draft ticket 1 first, then ticket 2 as a separate request.
 
 ```text
-Build only the three-wave playable slice in docs/GAME_PLAN.md. Read the current WizardGenie project rules and supported engine setup first. Use the approved Math on Mars assets when available and clearly track temporary art coverage.
+Read the actual project runtime and current game plan/architecture. Establish a runnable browser project with pinned compatible versions. Use temporary art until the reference sheet and production assets exist; record temporary coverage explicitly.
 
-Build desktop and phone/tablet play into this slice. Add a floating touch movement stick, auto-aim/fire, simultaneous move/med-kit input, mirrored handedness, and reachable pause. Use the common command Interface from docs/ARCHITECTURE.md. Prove readable combat and responsive quiz/reward layouts in portrait and landscape at the PRD's baseline sizes. Clear gestures on cancellation/rotation/blur; pause major relayout without resetting question time or losing draft answers. No required orientation lock or fullscreen.
+For ticket 1, deliver three escalating combat waves with a moving marine, one automatic Pulse Blaster, white Piercing, Drifters, Suit Integrity, med-kit, drops, pause, defeat/restart and final-wave victory. Use plain serializable simulation state and separate views. An ordinary wave clears only after scheduled/queued spawns and surviving enemies are exhausted. Support keyboard plus floating touch movement, simultaneous med-kit use, mirrored handedness, safe areas, and both phone orientations. Cancel held input on blur, pointer loss or phase change. Between waves a temporary Continue screen is sufficient before ticket 2.
 
-Include: one moving marine; one automatically firing Pulse Blaster in exactly one weapon slot; one active ammo slot with the white Piercing starter cartridge; ammo pickups entering a separate reserve; one Drifter enemy; three short escalating waves; HP presented as Suit Integrity, salvage, defeat and restart; two between-wave reactor recharge rounds with five grade-3 multiplication questions each; deterministic answer validation; exactly the revised first-attempt, assisted, skip, speed, and first-modifier-strength rules; and one free choice among three appropriately tiered stat modules after each round. Ammo and stat modules last until the run ends. End wave three with victory and a summary rather than another math round. Defeat at any wave ends the run while retaining already-submitted learning outcomes. If a stat module adds armor, use docs/GAME_PLAN.md's single mitigation formula; do not add a shield resource.
+For ticket 2, replace those breaks with two grade-3 five-question quizzes using Prompts 8A, 8B and 8D. One shared 30-second countdown determines purple/blue/green/white; each wrong first answer drops one tier. Timeout leaves unanswered items mandatory. Reward choice precedes untimed correct-until-complete corrections. Apply the chosen module to the next wave. End the final wave directly with a summary. Keep an explicit local profile identity so later saves can preserve original accuracy.
 
-Verify charge 100 for five unassisted slow, 125 for five fast, 75 for five Hint-first correct, and 115 for four fast plus one assisted. Distinguish Hint-first from wrong-then-correct: the latter's wrong submission drops the final tier. Verify full-range strength, N=3 normalization, fixed denominator on early exit, and idempotent wrong-count/charge settlement. There is no relaxed mode. Actual edit provenance determines T; mixed editing uses the smallest applicable target. The live timing includes item-specific initial/replay narration. Keep proposed streak behavior behind the explicitly recorded product-policy choice, with a separate purple reason. Multiple-choice hint interactions earn no score.
-
-Alongside the slice, prepare the small reviewed narrated K–1 sample from Prompt 9A so pre-reader usability is tested early. Keep prototype learning records under an explicit local profile ID so the subsequent profile-picker and resume milestone can preserve them. This internal slice is not the public K–6 release.
-
-An ordinary wave ends after its finite spawn schedule, queued spawns and surviving enemies are exhausted; 30–45 seconds is a spawn-schedule target, not a forced despawn timer. Use the PRD's final-ordinary-clear exception for this boss-free internal slice. Keep provisional full-mission balance fixtures separate from its three playable waves.
-
-Keep the full shop, Ammo Expander, remaining ammo effects/tiers, merges and legendary forge, cache inventory, other enemies, hub, and grade expansion for their later milestones. The public release still requires all five ammo types and the full legendary/capacity progression. Keep scoring and math generation independent of combat scenes so they can be verified directly. The selected math grade must never change enemy health or combat difficulty.
-
-Verify a complete run, defeat and restart, all answer outcomes, scores at the tier boundaries, pause/background timing, and duplicate-submit/reward prevention. Include real iOS Safari and Android Chrome touch play, safe areas, rotation, sustained frame pacing, and readable controls; use a tablet in the launch matrix as well. Show which behavior was actually checked in the built-in preview versus on physical devices, and mark unavailable device checks as pending. Report the files changed, checks performed, remaining limitations, and the next milestone. Do not claim success solely because the project compiles or a desktop viewport was resized.
+Verify each ticket's complete playable path, defeat/restart, keyboard/touch input and relevant rules. Ticket 2 checks exact 20/10/0 boundaries, zero-to-five misses, late completion, validation, pause and duplicate actions. Inspect available real devices and report untested limitations honestly. Keep full shop, additional ammo, enemy roster, and grade expansion with their owning tickets. No learner-study gate or historical charge calculation applies.
 ```
 
-**Prompt 11 — profiles and resumable sessions**
+
+**Prompt 11 — durable profiles and recovery**
+
+Use separately for draft tickets 3, 4, and 18. Each later feature extends its own saved state.
 
 ```text
-Implement the session-durability milestone in docs/GAME_PLAN.md after the three-wave educational slice is verified. Read its profile, defeat, adaptation, and save/restore rules before editing. Use local profiles with stable IDs, nicknames, avatars, isolated learning histories/settings, and one active run per profile. Do not require accounts or a cloud service.
+Follow the current profile and transaction contracts. Ticket 3 provides isolated local profiles and Save & Exit/Resume for initial questions, reward selection and corrections. Persist five exact question instances, original answers, shared elapsed/countdown state, wrong count, fixed offers, selected reward and pending correction queue. Commit each answer once; commit reward and correction-phase entry together. Preserve original history after defeat or abandon. No charge, streak, promotion windows or fabricated timeout answers belong in saves.
 
-Implement Save & Exit, Resume, profile switching, autosave, and explicit abandonment. Serialize all phase-relevant state, RNG, questions, accumulated timer values, first-attempt/help flags, offers, caches, pending rewards, and settlement IDs. Ammo state includes owned cartridges/tiers, active references/order, capacity purchases, legendary-forged flag, loose pickups, shot payloads, chain budgets/visited targets, and slow/burn durations. Add fields when their ammo milestone lands, with save-version migration. Resume must continue the same state rather than rerolling the wave or awarding the same learning event twice. Idle wall-clock time must not advance gameplay or question timers. Defeat retains learning outcomes but ends the run and its ammo/equipment/salvage, resetting active ammo capacity to one on a new run.
+Ticket 4 adds combat checkpoints and Save & Exit restoring enemies, projectiles, HP, pickups, RNG, cooldowns and existing effects. Hidden time never advances play. Each ammo/shop/enemy ticket subsequently adds and verifies its own state, including in-flight payloads and transaction receipts. Profile switching pauses/saves the old run and loads only the selected profile.
 
-Commit answer outcomes with their charge and commit selected rewards with their consumed IDs as logical transactions. Detect unsupported/corrupt saves and storage failures, retain a last-valid backup, and report failures without claiming a save succeeded. Never merge siblings' records. For adaptation maintain both ten-item accuracy and presented-support windows for each profile/skill/step/version. Six support-needed items can offer help even with zero eligible first submissions; otherwise use 9–10 advance / 6–8 retain / 0–5 support. Emit at most one selected-skill suggestion, save both cooldown watermarks, and exclude unseen auto-skips from support counts. Save repeat spacing, normalized N, actual input history, exposure, wrong-count and any adopted streak. Suggestions apply only before a later run.
+Use atomic local persistence, stable command IDs, serialized writes and separate interaction/simulation/storage revisions. Look up matching receipts before fresh-command phase guards. Pause on save failure with retry/recovery; never claim a save succeeded when it did not. Periodic combat saving must not invalidate an otherwise valid answer or card action.
 
-Separate interaction revision, simulation tick and database storage revision as defined in docs/ARCHITECTURE.md. A periodic save must not invalidate a current answer/card action. Check a matching command receipt before new-command phase/revision guards. Use stable content keys for spacing and occurrence IDs for evidence; unseen planned items do not enter presentation history, and repeat practice still enters the support window. Test the per-step path from a dismissed suggestion to five new eligible attempts.
+Ticket 18 adds export/import of a selected profile, explicit replacement choice, last-valid-backup recovery, corrupt/unsupported-save handling and conflicting-tab protection. Preserve recoverable history when a run cannot resume. Verify actual export cancellation/failure and import/restore with developer checks; formal inactivity studies and external backup evidence gates are not required.
 
-Add iOS installation/persistence-status guidance and the adult notice that origin data may be removed automatically. Prepare an external profile export at run end/abandon; offer a gesture-backed Save backup with cancellation/failure state, and never count a generated Blob as a verified file. Verify restore after deleting all origin storage/caches, separately from actual inactivity-return checks, and test browser-to-installed-context transfer through export/import. Verify exit/reopen in combat, mid-question after a first error, during a reward choice, and in the shop once that phase exists. Verify profile switching, double submission, repeated resume, defeat on a nonfinal wave, a simulated failed write, a corrupt active-run snapshot, and learning retention after defeat. On mobile, cover screen lock/app switching, rotation, draft preservation, audio recovery, neutral movement on resume, and usable selected-profile export/import. Add shop/cache coverage when their milestone lands. Report the supported save version, cases tested, and any remaining release blockers.
+For the assigned ticket, check duplicate actions, interrupted/uncertain writes, reload in its phases, sibling isolation, app switching and rotation. Corrections cannot be lost or used to alter original accuracy; the countdown never restarts on resume.
 ```
 
-**Prompt 12 — full ammo progression and legendary fusion**
+**Prompt 12A — salvage shop and passive upgrades**
+
+Draft ticket 5.
 
 ```text
-Implement the ammo-progression milestone from docs/GAME_PLAN.md after the three-wave educational slice and session-durability milestone. Preserve exactly one gun and one weapon slot. Add Piercing, Multi Shot, Electric Chain, Frost, and Fiery ammo in White T1, Green T2, Blue T3, and Purple T4, with reusable run-long cartridge ownership, grouped reserve, active equipment references, and the documented effect values.
+Build the four-offer between-wave shop after mandatory corrections. Earn salvage in combat and buy passive modules or med-kits with explicit costs and resulting gains. Complete the six-family/18-variant catalog and four reward rarities from the game plan, with positive useful gains and configurable caps. White magnitude remains prototype tuning. Include armor/HP effects in actual combat rather than decorative stats.
+
+Purchases settle once and survive resume. Purchased slots remain empty; buying all four triggers one free refill. Paid rerolls affect only eligible unpurchased slots; preserve valid locks if included. Replace newly capped/invalid offers without counting that as a purchase. Preserve math reward choices independently of the shop. Support readable touch scrolling without accidental purchases and keyboard focus. Add ammo/Expanders through ticket 6 rather than pretending unimplemented offers work.
+```
+
+
+**Prompt 12 — ammo progression and legendary fusion by ticket**
+
+Draft tickets 6–9. Use one ticket per request: 6 owns reserve/caches/merges/Expanders and Piercing/Multi Shot; 7 owns Chain; 8 owns Frost/Fiery; 9 owns legendary. Each owns its type icons, effects, persistence and checks. Use temporary assets until the reference sheet is approved, then integrate production art in the owning ticket.
+
+```text
+Implement only the assigned ammo ticket from docs/GAME_PLAN.md after its declared blockers are complete. The remaining paragraphs describe the completed system: apply only contracts for types/features available in this ticket, and defer unavailable types, five-type collector choices and forge actions to their owning tickets. Never display a functioning offer for an unimplemented effect. Each later ticket extends the catalog, supply choices, manifests and saved state. Preserve exactly one gun and one weapon slot. Add Piercing, Multi Shot, Electric Chain, Frost, and Fiery ammo in White T1, Green T2, Blue T3, and Purple T4, with reusable run-long cartridge ownership, grouped reserve, active equipment references, and the documented effect values.
 
 Use the PRD's explicit supply milestone schedule: fixed pair-of-blue choices across all five types plus the ordinary-module alternative, with five distinct type choices furnishing forty white-equivalents in ten cartridges. Optional drops use a persisted five-type shuffle bag. Guarantee eight first-clear salvage and reserve the affordable first Expander offer. Combat pickups update memory and the next checkpoint; do not freeze/commit IndexedDB on every pickup. Add direct ammo pickups, cache contents, and ammo shop offers. Ammo capacity starts at one. The shop-only Ammo Expander grants +1 active slot per purchase to a hard maximum of four; it is not multiplied by rarity, math strength, or other stat scaling. Exclude invalid offers at the cap and reject a stale purchase without charging salvage. Keep the four-offer shop's existing auto-refill, reroll, and valid-lock behavior.
 
-Milestone caches offer six mutually exclusive options: five blue pairs and one fixed green base-value module. A single choice accepts or sells one complete bundle and closes all alternatives atomically. Grant caches are a separate type with individually granted items; reject their commands against choice caches. A capped cache module keeps its fixed sell quote. Shop purchased slots stay empty until all four are bought, then refill once. Test choosing two different cache options, a failed write, retry and resume. The blue-pair schedule permits purple after wave one; compare it with staged-tier acquisition and record a product decision before locking release balance.
+Milestone caches offer six mutually exclusive options: five blue pairs and one fixed green base-value module. A single choice accepts or sells one complete bundle and closes all alternatives atomically. Grant caches are a separate type with individually granted items; reject their commands against choice caches. A capped cache module keeps its fixed sell quote. Shop purchased slots stay empty until all four are bought, then refill once. Test choosing two different cache options, a failed write, retry and resume. The blue-pair schedule permits purple after wave one; use it as adjustable prototype tuning and change its timing if it bypasses too much of the tier progression.
 
 Normal merge consumes two copies of one type and one tier below purple to make the next tier. Legendary fusion consumes exactly one purple of every distinct type from the entire owned reserve, including equipped copies, to make one Legendary Omni Ammo instance. It must work at capacity one; never require all five ingredients equipped. Apply the documented loadout replacement/overflow rules and show the result before Forge.
 
 Legendary occupies one active slot and applies all five purple effects. It is forge-only and once per run. Do not stack a normal ammo effect on top of the same legendary effect, allow recursive chain hits, or duplicate an equipped cartridge in storage. Merges, forging, and capacity purchases must commit ownership, equipped references, and settlement flags together and survive save/resume.
 
-Before combat-content expansion, run docs/design_checks.py and an actual isolated-boss/sparse/dense combat harness. Record DPS, burn funding, overkill, control and time-to-clear at each ammo tier and passive cap; the 4.8D lifetime crowd bound is not single-target DPS. Verify the proposed post-forge capacity stabilizer and non-collector green-floor path. Use the plan's combined-effects-per-shot working default unless the user explicitly changes that decision. Passive math-earned stat modules remain the separate reward system. The free math choice does not produce Ammo Expanders or shortcut the legendary recipe.
+Run focused combat checks for the implemented types against a boss and crowds, including funded burns, control and bounded combined damage. The 4.8D lifetime crowd bound is not single-target DPS. Historical design_checks.py formulas do not validate the current quiz. Check white-floor and non-forge progression. Combined reusable effects and one-slot legendary are confirmed; the post-forge capacity stabilizer remains optional tuning. Math rewards remain passive modules and do not shortcut the legendary recipe.
 
 Verify all four normal tiers for each type; capacity 1→2→3→4 and rejection of a fifth slot; automatic free-slot equip versus reserve-only pickup; duplicate-type equip rejection; merging with an equipped ingredient; missing/wrong-tier/duplicate-type legendary ingredients; successful forge from reserve at capacity one; occupied-slot replacement without losing unconsumed cartridges; repeated Forge clicks; no legendary overlap stacking; bounded chain behavior; and save/resume during projectiles, burning, and a pending forge. Check the normal economy separately: forty white-equivalents are required for the recipe, and seeded ten-wave acquisition paths should allow a deliberate collector to forge before the final boss.
 
 Use the approved cartridge/icon art and bounded VFX from Prompts 7A and 7B. Verify touch shop scrolling without purchases, readable four-offer layouts, tap-based reserve/equip/merge controls, and the five-ingredient forge preview at capacity one on real phones in both orientations. Measure standard and compact rulesets on minimum mobile hardware. Lower cosmetics first, then use the explicit versioned caps/queued-admission policy or saved ruleset transition; never delete live enemies, pending hits or loot to hide overload, and do not treat repeated Resume stalls as acceptable degradation. Report actual verified behavior and remaining balance work. Do not mark the progression complete solely because a developer-filled inventory can craft legendary.
+```
+
+**Prompt 13 — grade-track vertical slices**
+
+Draft tickets 10–13; one ticket per request.
+
+```text
+Make the assigned grade track playable from profile/skill selection through five initial questions, countdown reward, corrections and saved history. Use bounded deterministic templates, computed exact answers, explanations and the appropriate keypad/diagram. Keep the shared timer and combat rules unchanged across grades.
+
+Ticket 10: K counting/comparison/composition and grade-1 addition/subtraction/missing addends, with Prompt 9A speech. Ticket 11: grade-2 arithmetic/place value and grade-3 multiplication/exact division. Ticket 12: grade-4 larger multiplication, equivalent fractions and like-denominator sums. Ticket 13: grade-5 decimals/unlike-denominator fractions and grade-6 ratios/unit rates, fraction division and one-step equations.
+
+Check operand boundaries, fraction equivalence policy, zero-denominator rejection, decimals, diagrams and correction explanations. Preserve exact instances and initial/correction history through reload. Add content/audio to the installed-pack contract when offline delivery exists. No external reviewer, assessment study, or fixed bank-size quota gates this MVP.
+```
+
+**Prompt 14 — enemies and complete missions**
+
+Draft tickets 14 and 15; production assets depend on the approved reference sheet.
+
+```text
+Ticket 14 adds Spitter and Charger behavior, their Prompt 3 masters and Prompt 4 animations, visible shots/windups, damage, wave cleanup, and saved attack state. Ticket 15 adds Splitter children and Overmind boss attacks, matching masters/animations, mission presets, independent combat difficulty, victory/defeat summaries and final-wave quiz bypass.
+
+Mechanics may start with temporary art. Integrate each enemy's production frames, origin/grid metadata, telegraphs and audio hooks in its owning ticket once assets are available. Keep movement, spawning, projectiles and damage controlled by simulation rather than baked into animation. Check phone portrait/landscape readability, resume during attacks, splitter-child cleanup, and boss terminal ordering. Prototype mission lengths and balance are adjustable. Follow existing save and asset contracts.
+```
+
+**Prompt 15 — downloaded/offline play**
+
+Draft ticket 19.
+
+```text
+Make the installed game and downloaded content/audio playable offline on the published static origin. Show actual pack readiness; stage and validate required files before exposing a ready pack. Preserve versions required by active runs, handle interrupted downloads, and keep application update activation separate from an active session.
+
+Include shell, combat assets and narrated K–1 content in the first complete offline path. Every later grade, audio or asset addition registers in the same pack contract. Verify offline reload/resume, missing-file recovery and update behavior without resetting quiz time or losing corrections. Report preview-host limitations; runtime API keys and live generation are not game dependencies.
+```
+
+**Prompt 16 — personal MVP integration and distribution**
+
+Draft ticket 20, including the Prompt 9B audio work package.
+
+```text
+Integrate the completed tickets into a playable personal-use distribution. Install sound effects/music, phase transitions, mute/volume controls and narration ducking from Prompt 9B. Verify that every owning feature ticket supplied its production assets and manifests; complete small remaining integration gaps rather than defer all enemy animation work here.
+
+Exercise all K–6 input tracks, win/defeat, timed and expired quizzes, reward-before-corrections, save/recovery, full shop/ammo/forge progression and offline content. Tune white-reward and non-forge viability. Check both phone orientations, touch cancellation, safe areas, dense combined effects and standard/compact performance. Fix functional failures and state which devices were actually tested.
+
+Produce a runnable build with setup/run instructions and documented limitations. Establish the actual hosting target and use the session's deployment authorization for publication. This is a personal MVP: no recruited learners, educator sign-off, calibration samples or formal efficacy claims are required.
 ```
 
 **Asset delivery requirements**
@@ -359,6 +448,6 @@ Request high-resolution masters but judge them at actual desktop and mobile game
 - Keep each texture within the project's chosen compatibility budget, initially 4096 pixels per dimension. Split or pack sheets when required; never silently omit animation frames.
 - Check for clipped feet, camera turns, drifting scale, detached features, mismatched first/last loop frames, leftover plate color, lost slime edges, and inconsistent views. Regenerate substantial motion/identity errors. Normalize uniform frame padding and baseline only when the underlying animation is sound.
 - Test each keyed sprite over both light and dark backgrounds and the real Martian ground. Keep shadows as separate runtime elements.
-- Check rarity labels/pips, item-versus-enemy distinction, and telegraph geometry in grayscale and common color-vision simulations, followed by a user check. Color alone cannot communicate rarity, danger, or selection.
-- Track educational speech by content version and review status separately from cosmetic sound effects. Every K–1 production item requires a verified spoken prompt, hint, and explanation before the pack is available at launch.
+- Check rarity labels/pips, item-versus-enemy distinction, and telegraph geometry in grayscale and common color-vision simulations, using direct developer inspection. Color alone cannot communicate rarity, danger, or selection.
+- Track task speech by content version and validation status separately from cosmetic sound effects. Each playable K–1 item needs installed task speech and correction support; verify transcript, file references and playback directly. External reviewer sign-off is not required.
 - Record a status for each asset: candidate, selected master, animated, keyed, integrated, or verified in play. These stages are not interchangeable.

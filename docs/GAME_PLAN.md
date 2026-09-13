@@ -275,4 +275,4 @@ Required scoring cases include 30/20/10/0-second boundaries, late completion, ze
 
 Hub, permanent progression, accounts/cloud sync, classroom tools, additional subjects, controller support, and formal curriculum/effectiveness work can follow. They do not block this personal-use MVP.
 
-Earlier [DESIGN_VALIDATION.md](./DESIGN_VALIDATION.md), [design_checks.py](./design_checks.py), and implementation prompts contain historical formulas. They must not override this plan or be used as acceptance proof for the new quiz. See their supersession notices before reusing them.
+Earlier [DESIGN_VALIDATION.md](./DESIGN_VALIDATION.md) and [design_checks.py](./design_checks.py) contain historical formulas. [WIZARDGENIE_PROMPTS.md](./WIZARDGENIE_PROMPTS.md) has been updated to the current plan and draft tickets. They must not override this plan or be used as acceptance proof for the new quiz. See their supersession notices before reusing them.
