@@ -410,15 +410,15 @@ function renderCache(): void {
   cleanup();
   const run = activeRun();
   if (run.cacheClaimed) { run.phase = "shop"; renderShop(); return; }
-  app.innerHTML = shell(`<section class="cache-screen" id="content"><div class="cache-heading"><p class="eyebrow warm">SUPPLY CACHE</p><h1>Choose one field supply</h1><p>Take a matched blue pair for merging, or immediate suit power.</p></div>
-    <div class="cache-grid">${AMMO_TYPES.map((type) => `<article class="cache-card"><div class="ammo-icon ${ammoClass(type)}"><i></i></div><div><p class="eyebrow">BLUE PAIR</p><h2>${type}</h2><p>Two T3 cartridges. Merge them into one Purple T4.</p></div><button class="button secondary" data-cache-ammo="${type}">Take pair</button></article>`).join("")}
-      <article class="cache-card module-cache"><div class="module-icon armor"><i></i></div><div><p class="eyebrow">GREEN MODULE</p><h2>Field Plating</h2><p>Gain +2 armor for this run.</p></div><button class="button secondary" data-cache-module>Take module</button></article></div>
+  app.innerHTML = shell(`<section class="cache-screen" id="content"><div class="cache-heading"><p class="eyebrow warm">FREE SUPPLY DROP</p><h1>Pick one upgrade</h1><p>Choose the shot effect you want, or take stronger armor.</p></div>
+    <div class="cache-grid">${AMMO_TYPES.map((type) => `<article class="cache-card"><div class="ammo-icon ${ammoClass(type)}"><i></i></div><p class="eyebrow">AMMO UPGRADE</p><h2>${type}</h2><p>${ammoEffect(type)}</p><div class="cache-tier">Blue T3 ×2 <span>Ready to combine</span></div><button class="button secondary" data-cache-ammo="${type}">Choose ${type}</button></article>`).join("")}
+      <article class="cache-card module-cache"><div class="module-icon armor"><i></i></div><p class="eyebrow">SUIT UPGRADE</p><h2>Field Plating</h2><p>Take less damage when slimes reach you.</p><div class="cache-tier">Green module <span>+2 armor</span></div><button class="button secondary" data-cache-module>Choose armor</button></article></div>
     <button id="save-exit" class="text-button centered">Save & exit</button></section>`, "cache-shell");
   bindHome();
   document.querySelectorAll<HTMLElement>("[data-cache-ammo]").forEach((button) => button.addEventListener("click", () => {
     const type = button.dataset.cacheAmmo as AmmoType;
     run.ammo.push({ id: uid("ammo"), type, tier: 3 }, { id: uid("ammo"), type, tier: 3 });
-    run.cacheClaimed = true; run.phase = "shop"; saveProfiles(); renderShop();
+    run.cacheClaimed = true; run.phase = "shop"; saveProfiles(); renderShop(`${type} pair added. Combine it below for one Purple T4 cartridge.`);
   }));
   document.querySelector("[data-cache-module]")!.addEventListener("click", () => {
     run.modules.push({ id: uid("module"), name: "Field Plating", stat: "armor", value: 2, quality: "green" });
@@ -432,25 +432,30 @@ function renderShop(message = ""): void {
   const run = activeRun();
   const expanderPrice = [8, 16, 24][run.ammoCapacity - 1] ?? 24;
   const offers = [
-    { id: "expand", title: "Ammo Expander", detail: run.ammoCapacity < 4 ? `Active ammo ${run.activeAmmoIds.length}/${run.ammoCapacity} → ${run.activeAmmoIds.length}/${run.ammoCapacity + 1}` : "Capacity maximum reached", price: expanderPrice, disabled: run.ammoCapacity >= 4 },
-    { id: "medkit", title: "Med-gel", detail: "Add one field med-kit", price: 5, disabled: false },
-    { id: "ammo", title: `${AMMO_TYPES[run.wave % AMMO_TYPES.length]} Ammo`, detail: "One White T1 cartridge", price: 6, disabled: false },
+    { id: "expand", title: "Ammo Expander", detail: run.ammoCapacity < 4 ? `Equip ${run.ammoCapacity + 1} ammo effects at once` : "Active ammo slots are full", price: expanderPrice, disabled: run.ammoCapacity >= 4 },
+    { id: "medkit", title: "Med-gel", detail: "Carry one extra heal into combat", price: 5, disabled: false },
+    { id: "ammo", title: `${AMMO_TYPES[run.wave % AMMO_TYPES.length]} Ammo`, detail: "Add one White T1 cartridge to your locker", price: 6, disabled: false },
     { id: "repair", title: "Suit Repair", detail: "Restore 30 Suit Integrity", price: 4, disabled: run.hp >= run.maxHp },
   ];
-  app.innerHTML = shell(`<section class="shop-screen" id="content"><div class="shop-top"><div><p class="eyebrow warm">BETWEEN WAVES</p><h1>Outpost supply bay</h1><p>Buy gear, merge cartridges, and choose active ammo.</p></div><div class="salvage-chip"><small>SALVAGE</small><b>${run.salvage}</b></div></div><p class="shop-message" role="status">${escapeHtml(message)}</p>
-    <div class="shop-offers">${offers.map((offer, i) => `<article class="shop-offer ${run.shopBought.includes(offer.id) ? "bought" : ""}"><span>0${i + 1}</span><div><h2>${offer.title}</h2><p>${offer.detail}</p></div><button class="button secondary" data-buy="${offer.id}" ${offer.disabled || run.shopBought.includes(offer.id) ? "disabled" : ""}>${run.shopBought.includes(offer.id) ? "Purchased" : `${offer.price} salvage`}</button></article>`).join("")}</div>
-    <section class="loadout"><div class="loadout-heading"><div><p class="eyebrow">PULSE BLASTER LOADOUT</p><h2>Active ammo <span>${run.activeAmmoIds.length} / ${run.ammoCapacity}</span></h2></div><button id="forge-button" class="button forge" ${canForge(run) ? "" : "disabled"}>Forge Omni</button></div>
-      <div class="active-slots">${Array.from({ length: run.ammoCapacity }, (_, i) => { const ammo = run.ammo.find((a) => a.id === run.activeAmmoIds[i]); return `<div class="ammo-slot ${ammo ? "filled" : ""}">${ammo ? ammoChip(ammo, true) : `<span>EMPTY SLOT</span>`}</div>`; }).join("")}</div>
-      <div class="reserve"><h3>Ammo reserve</h3><div class="reserve-grid">${run.ammo.map((ammo) => ammoChip(ammo, run.activeAmmoIds.includes(ammo.id))).join("")}</div></div>
-      <div class="merge-row"><p>Two matching cartridges at the same tier can merge.</p>${mergeButtons(run)}</div>
+  const activeAmmo = run.activeAmmoIds.map((id) => run.ammo.find((ammo) => ammo.id === id)).filter((ammo): ammo is Ammo => Boolean(ammo));
+  const merges = mergeButtons(run);
+  const purpleTypes = new Set(run.ammo.filter((ammo) => ammo.tier === 4 && !ammo.legendary).map((ammo) => ammo.type)).size;
+  app.innerHTML = shell(`<section class="shop-screen" id="content"><div class="shop-top"><div><p class="eyebrow warm">BETWEEN WAVES</p><h1>Gear up for wave ${run.wave + 1}</h1><p>Everything here is optional. Your current gear is ready to go.</p></div><div class="salvage-chip"><small>SALVAGE</small><b>${run.salvage}</b></div></div><p class="shop-message" role="status">${escapeHtml(message)}</p>
+    <section class="market-panel" aria-labelledby="shop-title"><div class="panel-heading"><div><p class="eyebrow">OUTPOST SHOP</p><h2 id="shop-title">Buy an upgrade</h2></div><span>Four choices</span></div>
+      <div class="shop-offers">${offers.map((offer, i) => `<article class="shop-offer ${run.shopBought.includes(offer.id) ? "bought" : ""}"><span>0${i + 1}</span><div class="shop-offer-icon ${offer.id}" aria-hidden="true"><i></i></div><h3>${offer.title}</h3><p>${offer.detail}</p><button class="button secondary" data-buy="${offer.id}" ${offer.disabled || run.shopBought.includes(offer.id) ? "disabled" : ""}>${run.shopBought.includes(offer.id) ? "Bought" : `Buy · ${offer.price} salvage`}</button></article>`).join("")}</div>
     </section>
-    <div class="shop-actions"><button id="save-exit" class="text-button">Save & exit</button><button id="next-wave" class="button launch">Next wave <i aria-hidden="true">→</i></button></div>
+    <section class="loadout"><div class="loadout-heading"><div><p class="eyebrow">YOUR EQUIPMENT</p><h2>Pulse Blaster</h2><p>Tap Equip on any ammo card. When your active slots are full, it replaces the rightmost ammo.</p></div>${purpleTypes > 0 || canForge(run) ? `<div class="omni-progress"><small>OMNI AMMO</small><b>${purpleTypes} / 5</b><button id="forge-button" class="button forge" ${canForge(run) ? "" : "disabled"}>${canForge(run) ? "Forge Omni" : "Collect 5 Purple types"}</button></div>` : ""}</div>
+      <div class="weapon-dock"><div class="blaster-card"><div class="blaster-icon" aria-hidden="true"><i></i></div><div><small>ONE WEAPON</small><b>Pulse Blaster</b></div></div><div class="loaded-ammo"><small>ACTIVE AMMO · ${activeAmmo.length}/${run.ammoCapacity}</small><div>${activeAmmo.map((ammo) => `<span>${ammo.legendary ? "Omni" : ammo.type} T${ammo.tier}</span>`).join("") || "<em>No ammo equipped</em>"}${Array.from({ length: Math.max(0, run.ammoCapacity - activeAmmo.length) }, () => "<i>Empty</i>").join("")}</div></div></div>
+      <div class="reserve"><div class="panel-heading compact"><div><p class="eyebrow">AMMO LOCKER</p><h3>Owned ammo</h3></div><span>${run.ammo.length} cartridge${run.ammo.length === 1 ? "" : "s"}</span></div><div class="reserve-grid">${run.ammo.map((ammo) => ammoChip(ammo, run.activeAmmoIds.includes(ammo.id))).join("")}</div></div>
+      ${merges ? `<div class="merge-row"><div><p class="eyebrow">READY TO UPGRADE</p><span>Combine two matching cartridges into one stronger cartridge.</span></div><div>${merges}</div></div>` : ""}
+    </section>
+    <div class="shop-actions"><button id="save-exit" class="text-button">Save & exit</button><div><small>No purchase required</small><button id="next-wave" class="button launch">Start wave ${run.wave + 1} <i aria-hidden="true">→</i></button></div></div>
   </section>`, "shop-shell");
   bindHome();
   document.querySelectorAll<HTMLElement>("[data-buy]").forEach((button) => button.addEventListener("click", () => buyOffer(button.dataset.buy!, offers)));
   document.querySelectorAll<HTMLElement>("[data-ammo-id]").forEach((button) => button.addEventListener("click", () => toggleAmmo(button.dataset.ammoId!)));
   document.querySelectorAll<HTMLElement>("[data-merge]").forEach((button) => button.addEventListener("click", () => mergeAmmo(button.dataset.merge as AmmoType, Number(button.dataset.tier) as 1|2|3)));
-  document.querySelector("#forge-button")!.addEventListener("click", forgeOmni);
+  document.querySelector("#forge-button")?.addEventListener("click", forgeOmni);
   document.querySelector("#save-exit")!.addEventListener("click", saveAndExit);
   document.querySelector("#next-wave")!.addEventListener("click", () => { run.wave++; run.phase = "combat"; run.quiz = undefined; run.combatSave = undefined; run.cacheClaimed = false; run.shopBought = []; saveProfiles(); renderCombat(); });
 }
@@ -469,22 +474,30 @@ function buyOffer(id: string, offers: Array<{ id: string; price: number }>): voi
 
 function toggleAmmo(id: string): void {
   const run = activeRun(); const ammo = run.ammo.find((a) => a.id === id); if (!ammo) return;
-  if (run.activeAmmoIds.includes(id)) run.activeAmmoIds = run.activeAmmoIds.filter((active) => active !== id);
+  let message = "";
+  if (run.activeAmmoIds.includes(id)) {
+    run.activeAmmoIds = run.activeAmmoIds.filter((active) => active !== id);
+    message = `${ammo.legendary ? "Omni Ammo" : ammo.type} moved to the locker.`;
+  }
   else {
-    if (run.activeAmmoIds.length >= run.ammoCapacity) { renderShop("All active slots are full. Unequip one first."); return; }
     if (!ammo.legendary && run.activeAmmoIds.some((activeId) => run.ammo.find((a) => a.id === activeId)?.type === ammo.type)) { renderShop("That ammo type is already active."); return; }
+    if (run.activeAmmoIds.length >= run.ammoCapacity) {
+      const replacedId = run.activeAmmoIds.pop();
+      const replaced = run.ammo.find((candidate) => candidate.id === replacedId);
+      message = `${ammo.legendary ? "Omni Ammo" : ammo.type} equipped. ${replaced?.legendary ? "Omni Ammo" : replaced?.type ?? "Previous ammo"} moved to the locker.`;
+    } else message = `${ammo.legendary ? "Omni Ammo" : ammo.type} equipped.`;
     run.activeAmmoIds.push(id);
   }
-  saveProfiles(); renderShop();
+  saveProfiles(); renderShop(message);
 }
 
 function mergeButtons(run: RunState): string {
   const buttons: string[] = [];
   for (const type of AMMO_TYPES) for (let tier = 1; tier <= 3; tier++) {
     if (run.ammo.filter((a) => !a.legendary && a.type === type && a.tier === tier).length >= 2)
-      buttons.push(`<button class="button tiny" data-merge="${type}" data-tier="${tier}">Merge ${type} T${tier} → T${tier + 1}</button>`);
+      buttons.push(`<button class="button tiny" data-merge="${type}" data-tier="${tier}">Combine ${type}: ${QUALITY_LABEL[qualityFromTier(tier)]} → ${QUALITY_LABEL[qualityFromTier(tier + 1)]}</button>`);
   }
-  return buttons.join("") || `<span class="muted">No merge pairs ready.</span>`;
+  return buttons.join("");
 }
 
 function mergeAmmo(type: AmmoType, tier: 1|2|3): void {
@@ -565,10 +578,13 @@ function moduleDescription(stat: Module["stat"]): string {
 }
 
 function ammoChip(ammo: Ammo, active: boolean): string {
-  return `<button class="ammo-chip ${ammo.legendary ? "legendary" : `tier-${ammo.tier}`} ${active ? "active" : ""}" data-ammo-id="${ammo.id}"><span class="ammo-icon ${ammo.legendary ? "omni" : ammoClass(ammo.type)}"><i></i></span><b>${ammo.legendary ? "Legendary Omni" : ammo.type}</b><small>${ammo.legendary ? "All five effects" : `T${ammo.tier} · ${active ? "Equipped" : "Reserve"}`}</small></button>`;
+  const quality = ammo.legendary ? "purple" : qualityFromTier(ammo.tier);
+  return `<button class="ammo-chip ${ammo.legendary ? "legendary" : `tier-${ammo.tier}`} ${active ? "active" : ""}" data-ammo-id="${ammo.id}"><span class="ammo-icon ${ammo.legendary ? "omni" : ammoClass(ammo.type)}"><i></i></span><span class="ammo-copy"><b>${ammo.legendary ? "Legendary Omni" : ammo.type}</b><small>${ammo.legendary ? "All five effects" : `${QUALITY_LABEL[quality]} · T${ammo.tier}`}</small></span><span class="ammo-action">${active ? "Unequip" : "Equip"}</span></button>`;
 }
 
 function ammoClass(type: AmmoType): string { return type.toLowerCase().replaceAll(" ", "-"); }
+function ammoEffect(type: AmmoType): string { return ({ Piercing: "Shots pass through extra slimes.", "Multi Shot": "Fires extra projectiles with every shot.", "Electric Chain": "Jumps from one slime to nearby targets.", Frost: "Slows slimes so you can keep your distance.", Fiery: "Burns slimes after the shot lands." } as Record<AmmoType, string>)[type]; }
+function qualityFromTier(tier: number): Quality { return QUALITY_ORDER[Math.max(0, Math.min(3, tier - 1))]; }
 function formatTime(ms: number): string { return (Math.max(0, ms) / 1000).toFixed(1).padStart(4, "0"); }
 function hashSeed(value: string): number { return [...value].reduce((seed, character) => (seed * 31 + character.charCodeAt(0)) >>> 0, 2166136261); }
 function gradeLabel(grade: Grade): string { return ({ K: "Count & compare", 1: "Within 20", 2: "Within 100", 3: "Multiply & divide", 4: "Fractions & products", 5: "Decimals & fractions", 6: "Ratios & equations" } as Record<Grade, string>)[grade]; }
