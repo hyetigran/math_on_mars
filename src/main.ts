@@ -1,3 +1,5 @@
+import { BUILD_VERSION } from "./build-version";
+import { requireOfflinePack, releaseLocation } from "./offline";
 import { ProfileLease } from "./profile-lease";
 import { exportProfile, readProfileTransfer } from "./profile-transfer";
 import { EQUIPMENT_CLIPS } from "./equipment-narration-manifest";
@@ -57,10 +59,15 @@ const announcer = document.querySelector<HTMLElement>("#announcer")!;
 let repository: IndexedProfileRepository;
 const profileLease = new ProfileLease(navigator.locks, STORAGE_KEY);
 let session: RunSession;
-const narration = new InstalledNarration();
+const narration = new InstalledNarration(
+  undefined,
+  new URL("audio/k1", document.baseURI).pathname,
+  BUILD_VERSION,
+);
 const equipmentNarration = new InstalledNarration(
   EQUIPMENT_CLIPS,
-  "/audio/equipment",
+  new URL("audio/equipment", document.baseURI).pathname,
+  BUILD_VERSION,
 );
 let narrationLoading = false;
 let screenGeneration = 0;
@@ -268,10 +275,32 @@ async function openProfile(id: string): Promise<void> {
         "This profile is in use in another tab. Save and exit there, then try again.";
       return;
     }
+    const profile = session.profile(id);
+    if (profile.activeRun) {
+      document.querySelector("#profile-status")!.textContent =
+        "Checking installed mission content…";
+      await requireOfflinePack(
+        profile.activeRun.releaseVersion ?? BUILD_VERSION,
+      );
+      if (generation !== screenGeneration) {
+        profileLease.release();
+        return;
+      }
+      if (
+        profile.activeRun.releaseVersion &&
+        profile.activeRun.releaseVersion !== BUILD_VERSION
+      ) {
+        profileLease.release();
+        location.assign(releaseLocation(profile.activeRun.releaseVersion));
+        return;
+      }
+    }
     activeProfileId = id;
-    const profile = activeProfile();
-    profile.activeRun ? resumeRun() : renderSetup();
+    if (profile.activeRun && !profile.activeRun.releaseVersion) {
+      await perform(() => session.pinLegacyRelease(id), resumeRun);
+    } else profile.activeRun ? resumeRun() : renderSetup();
   } catch (error) {
+    profileLease.release();
     if (generation === screenGeneration)
       document.querySelector("#profile-status")!.textContent =
         error instanceof Error ? error.message : "Could not open this profile.";
@@ -347,7 +376,7 @@ function renderSetup(): void {
       <fieldset><legend>Combat difficulty</legend><div class="grade-grid"><label class="choice-tile"><input type="radio" name="difficulty" value="easy"><span><b>Easy</b><small>Slower enemies</small></span></label><label class="choice-tile"><input type="radio" name="difficulty" value="standard" checked><span><b>Standard</b><small>Full enemy speed</small></span></label></div></fieldset>
       <fieldset><legend>Mission length</legend><div class="grade-grid"><label class="choice-tile"><input type="radio" name="mission" value="standard" checked><span><b>Standard</b><small>10 waves · boss on wave 10</small></span></label><label class="choice-tile"><input type="radio" name="mission" value="short"><span><b>Short</b><small>6 waves · boss on wave 6</small></span></label></div></fieldset>
       <p>Both missions use five required questions and one 30-second countdown between waves. Start with a Pulse Blaster and white Piercing ammo.</p>
-      <button class="button launch" type="submit"><span>Launch mission</span><i aria-hidden="true">→</i></button>
+      <p id="offline-status" role="status">The complete game content is installed before launch.</p><button class="button launch" type="submit"><span>Launch mission</span><i aria-hidden="true">→</i></button>
     </form>
   </section>`,
     "terminal-screen",
@@ -355,19 +384,39 @@ function renderSetup(): void {
   bindHome();
   document
     .querySelector<HTMLFormElement>("#mission-form")!
-    .addEventListener("submit", (event) => {
+    .addEventListener("submit", async (event) => {
       event.preventDefault();
       const data = new FormData(event.currentTarget as HTMLFormElement);
-      perform(
-        () =>
-          session.start(
-            profile.id,
-            data.get("grade") as Grade,
-            data.get("mission") as MissionLength,
-            data.get("difficulty") as "easy" | "standard",
-          ),
-        renderCombat,
-      );
+      const generation = screenGeneration;
+      const button = document.querySelector<HTMLButtonElement>(
+        "#mission-form button[type=submit]",
+      )!;
+      if (button.disabled) return;
+      button.disabled = true;
+      document.querySelector("#offline-status")!.textContent =
+        "Installing and checking complete offline content…";
+      try {
+        await requireOfflinePack();
+        if (generation !== screenGeneration) return;
+        await perform(
+          () =>
+            session.start(
+              profile.id,
+              data.get("grade") as Grade,
+              data.get("mission") as MissionLength,
+              data.get("difficulty") as "easy" | "standard",
+            ),
+          renderCombat,
+        );
+      } catch (error) {
+        if (generation === screenGeneration)
+          document.querySelector("#offline-status")!.textContent =
+            error instanceof Error
+              ? error.message
+              : "Offline content is unavailable.";
+      } finally {
+        if (generation === screenGeneration) button.disabled = false;
+      }
     });
 }
 
@@ -1226,18 +1275,36 @@ function endRun(victory: boolean, state?: CombatSnapshot): void {
       bindHome();
       document
         .querySelector("#retry-mission")
-        ?.addEventListener("click", () =>
-          perform(
-            () =>
-              session.start(
-                profile.id,
-                run.grade,
-                missionLengthForWaves(run.totalWaves),
-                run.difficulty,
-              ),
-            renderCombat,
-          ),
-        );
+        ?.addEventListener("click", async () => {
+          const generation = screenGeneration;
+          const button =
+            document.querySelector<HTMLButtonElement>("#retry-mission")!;
+          if (button.disabled) return;
+          button.disabled = true;
+          const status = document.createElement("p");
+          status.setAttribute("role", "status");
+          status.textContent = "Checking installed mission content…";
+          button.parentElement!.append(status);
+          try {
+            await requireOfflinePack();
+            if (generation !== screenGeneration) return;
+            await perform(
+              () =>
+                session.start(
+                  profile.id,
+                  run.grade,
+                  missionLengthForWaves(run.totalWaves),
+                  run.difficulty,
+                ),
+              renderCombat,
+            );
+          } catch (error) {
+            if (generation === screenGeneration)
+              status.textContent = String(error);
+          } finally {
+            if (generation === screenGeneration) button.disabled = false;
+          }
+        });
       document
         .querySelector("#return-home")!
         .addEventListener("click", renderProfiles);
@@ -1579,6 +1646,8 @@ window.addEventListener("orientationchange", () => {
 });
 
 async function boot(): Promise<void> {
+  if (!import.meta.env.DEV)
+    history.replaceState(null, "", releaseLocation(BUILD_VERSION));
   try {
     repository?.close();
     repository = new IndexedProfileRepository(

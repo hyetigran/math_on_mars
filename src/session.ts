@@ -1,3 +1,4 @@
+import { BUILD_VERSION } from "./build-version";
 import { decodeProfiles } from "./persistence";
 import {
   MISSION_PRESETS,
@@ -71,6 +72,7 @@ function newRun(
   const starter: Ammo = { id: uid("ammo"), type: "Piercing", tier: 1 };
   return {
     id: uid("run"),
+    releaseVersion: BUILD_VERSION,
     grade,
     wave: 1,
     totalWaves: MISSION_PRESETS[mission].waves,
@@ -124,6 +126,12 @@ export class RunSession {
         throw new Error("The profile to replace is no longer available.");
       if (index >= 0) profiles[index] = incoming;
       else profiles.push(incoming);
+    });
+  }
+  pinLegacyRelease(id: string): void {
+    this.change((profiles) => {
+      const run = profiles.find((profile) => profile.id === id)?.activeRun;
+      if (run && !run.releaseVersion) run.releaseVersion = BUILD_VERSION;
     });
   }
   setHandedness(id: string, handedness: Profile["handedness"]): void {

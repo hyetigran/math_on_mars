@@ -465,6 +465,12 @@ export function decodeProfiles(raw: string): Profile[] {
     }
     if (profile.activeRun === undefined) continue;
     const run = record(profile.activeRun, "run");
+    if (run.releaseVersion !== undefined)
+      ensure(
+        typeof run.releaseVersion === "string" &&
+          /^[a-f0-9]{16}$/.test(run.releaseVersion),
+        "run release version",
+      );
     if (run.interactionRevision !== undefined)
       integer(run.interactionRevision, "run.interactionRevision");
     string(run.id, "run.id");
