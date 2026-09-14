@@ -1,3 +1,4 @@
+import { ammoSellPrice, previewMerges } from "./ammo";
 import { rerollPrice } from "./shop";
 import { CheckpointQueue } from "./checkpoint-queue";
 import { modifiers, moduleTotal } from "./modules";
@@ -251,6 +252,8 @@ function renderCombat(): void {
     salvage: run.salvage,
     medkits: run.medkits,
     ammo: run.ammo,
+    ammoBag: run.ammoBag,
+    ammoCapacity: run.ammoCapacity,
     activeAmmoIds: run.activeAmmoIds,
     modules: run.modules,
     restore: run.combatSave,
@@ -613,38 +616,42 @@ function renderCache(): void {
     renderShop();
     return;
   }
+  if (!run.choiceCache) {
+    void perform(() => session.openCache(activeProfileId!), renderCache);
+    return;
+  }
+  const cache = run.choiceCache;
   app.innerHTML = shell(
-    `<section class="cache-screen" id="content"><div class="cache-heading"><p class="eyebrow warm">FREE SUPPLY DROP</p><h1>Pick one upgrade</h1><p>Choose the shot effect you want, or take stronger armor.</p></div>
-    <div class="cache-grid">${AMMO_TYPES.map((type) => `<article class="cache-card"><div class="ammo-icon ${ammoClass(type)}"><i></i></div><p class="eyebrow">AMMO UPGRADE</p><h2>${type}</h2><p>${ammoEffect(type)}</p><div class="cache-tier">Blue T3 ×2 <span>Ready to combine</span></div><button class="button secondary" data-cache-ammo="${type}">Choose ${type}</button></article>`).join("")}
-      <article class="cache-card module-cache"><div class="module-icon armor"><i></i></div><p class="eyebrow">SUIT UPGRADE</p><h2>Field Plating</h2><p>Take less damage when slimes reach you.</p><div class="cache-tier">Green module <span>+2 armor</span></div><button class="button secondary" data-cache-module>Choose armor</button></article></div>
+    `<section class="cache-screen" id="content"><div class="cache-heading"><p class="eyebrow warm">FREE SUPPLY DROP</p><h1>Choose one bundle</h1><p>Accept one upgrade or sell its complete bundle for salvage. All other choices close.</p></div>
+    <div class="cache-grid">${cache.options
+      .map((option) => {
+        const type = option.kind === "ammo" ? option.ammo[0].type : undefined;
+        const title =
+          type ?? (option.kind === "module" ? option.module.name : "Ammo");
+        return `<article class="cache-card"><div class="${type ? `ammo-icon ${ammoClass(type)}` : "module-icon armor"}"><i></i></div><h2>${escapeHtml(title)}</h2><p>${type ? ammoEffect(type) : "Take less damage when slimes reach you."}</p><div class="cache-tier">${type ? "Blue T3 ×2 · Ready to combine" : "Green module · +2 armor (up to cap)"}</div><button class="button secondary" data-cache-option="${escapeHtml(option.id)}" data-disposition="accept">Accept ${escapeHtml(title)}</button><button class="text-button" data-cache-option="${escapeHtml(option.id)}" data-disposition="sell">Sell bundle · ${option.sellPrice} salvage</button></article>`;
+      })
+      .join("")}</div>
     <button id="save-exit" class="text-button centered">Save & exit</button></section>`,
     "cache-shell",
   );
   bindHome();
   document
-    .querySelectorAll<HTMLElement>("[data-cache-ammo]")
+    .querySelectorAll<HTMLElement>("[data-cache-option]")
     .forEach((button) =>
       button.addEventListener("click", () => {
-        const type = button.dataset.cacheAmmo as AmmoType;
         if (!paused)
-          perform(
-            () => session.claimCache(activeProfileId!, type),
+          void perform(
             () =>
-              renderShop(
-                `${type} pair added. Combine it below for one Purple T4 cartridge.`,
+              session.settleCache(
+                activeProfileId!,
+                cache.id,
+                button.dataset.cacheOption!,
+                button.dataset.disposition as "accept" | "sell",
               ),
+            () => renderShop(),
           );
       }),
     );
-  document
-    .querySelector("[data-cache-module]")!
-    .addEventListener("click", () => {
-      if (!paused)
-        perform(
-          () => session.claimCache(activeProfileId!),
-          () => renderShop(),
-        );
-    });
   document.querySelector("#save-exit")!.addEventListener("click", saveAndExit);
 }
 
@@ -662,7 +669,16 @@ function renderShop(message = ""): void {
   const activeAmmo = run.activeAmmoIds
     .map((id) => run.ammo.find((ammo) => ammo.id === id))
     .filter((ammo): ammo is Ammo => Boolean(ammo));
-  const merges = mergeButtons(run);
+  const mergePreview = previewMerges(run);
+  const merges = mergePreview.pairs
+    .map(([firstId, secondId]) => {
+      const first = run.ammo.find((a) => a.id === firstId)!;
+      const equipped =
+        run.activeAmmoIds.includes(firstId) ||
+        run.activeAmmoIds.includes(secondId);
+      return `<li>2 × ${first.type} T${first.tier} → 1 × T${first.tier + 1}${equipped ? " · replaces equipped ingredient in its slot" : " · stays in reserve"}</li>`;
+    })
+    .join("");
   const purpleTypes = new Set(
     run.ammo
       .filter((ammo) => ammo.tier === 4 && !ammo.legendary)
@@ -676,8 +692,8 @@ function renderShop(message = ""): void {
     </section>
     <section class="loadout"><details><summary>Marine stats</summary><p>${marineStats(run)}</p></details><div class="loadout-heading"><div><p class="eyebrow">YOUR EQUIPMENT</p><h2>Pulse Blaster</h2><p>Tap Equip on any ammo card. When your active slots are full, it replaces the rightmost ammo.</p></div>${purpleTypes > 0 || canForge(run) ? `<div class="omni-progress"><small>OMNI AMMO</small><b>${purpleTypes} / 5</b><button id="forge-button" class="button forge" ${canForge(run) ? "" : "disabled"}>${canForge(run) ? "Forge Omni" : "Collect 5 Purple types"}</button></div>` : ""}</div>
       <div class="weapon-dock"><div class="blaster-card"><div class="blaster-icon" aria-hidden="true"><i></i></div><div><small>ONE WEAPON</small><b>Pulse Blaster</b></div></div><div class="loaded-ammo"><small>ACTIVE AMMO · ${activeAmmo.length}/${run.ammoCapacity}</small><div>${activeAmmo.map((ammo) => `<span>${ammo.legendary ? "Omni" : ammo.type} T${ammo.tier}</span>`).join("") || "<em>No ammo equipped</em>"}${Array.from({ length: Math.max(0, run.ammoCapacity - activeAmmo.length) }, () => "<i>Empty</i>").join("")}</div></div></div>
-      <div class="reserve"><div class="panel-heading compact"><div><p class="eyebrow">AMMO LOCKER</p><h3>Owned ammo</h3></div><span>${run.ammo.length} cartridge${run.ammo.length === 1 ? "" : "s"}</span></div><div class="reserve-grid">${run.ammo.map((ammo) => ammoChip(ammo, run.activeAmmoIds.includes(ammo.id))).join("")}</div></div>
-      ${merges ? `<div class="merge-row"><div><p class="eyebrow">READY TO UPGRADE</p><span>Combine two matching cartridges into one stronger cartridge.</span></div><div>${merges}</div></div>` : ""}
+      <div class="reserve"><div class="panel-heading compact"><div><p class="eyebrow">AMMO LOCKER</p><h3>Owned ammo</h3></div><span>${run.ammo.length} cartridge${run.ammo.length === 1 ? "" : "s"}</span></div><div class="reserve-grid">${reserveStacks(run)}</div></div>
+      ${merges ? `<div class="merge-row"><div><p class="eyebrow">READY TO UPGRADE</p><span>Combine two matching cartridges into one stronger cartridge.</span></div><details><summary>Preview ${mergePreview.pairs.length} merge${mergePreview.pairs.length === 1 ? "" : "s"}</summary><ul>${merges}</ul><p>Only these pairs are combined. New results stay available for your next merge.</p><button id="confirm-merges" class="button secondary">Confirm merges</button></details></div>` : ""}
     </section>
     <div class="shop-actions"><button id="save-exit" class="text-button">Save & exit</button><div><small>No purchase required</small><button id="next-wave" class="button launch">Start wave ${run.wave + 1} <i aria-hidden="true">→</i></button></div></div>
   </section>`,
@@ -702,16 +718,22 @@ function renderShop(message = ""): void {
         toggleAmmo(button.dataset.ammoId!),
       ),
     );
-  document
-    .querySelectorAll<HTMLElement>("[data-merge]")
-    .forEach((button) =>
-      button.addEventListener("click", () =>
-        mergeAmmo(
-          button.dataset.merge as AmmoType,
-          Number(button.dataset.tier) as 1 | 2 | 3,
-        ),
-      ),
-    );
+  document.querySelector("#confirm-merges")?.addEventListener("click", () => {
+    if (!paused)
+      void perform(
+        () => session.mergePreview(activeProfileId!, mergePreview),
+        (message) => renderShop(message),
+      );
+  });
+  document.querySelectorAll<HTMLElement>("[data-sell-ammo]").forEach((button) =>
+    button.addEventListener("click", () => {
+      if (!paused)
+        void perform(
+          () => session.sellAmmo(activeProfileId!, button.dataset.sellAmmo!),
+          (message) => renderShop(message),
+        );
+    }),
+  );
   document.querySelector("#forge-button")?.addEventListener("click", forgeOmni);
   document.querySelector("#save-exit")!.addEventListener("click", saveAndExit);
   document.querySelector("#next-wave")!.addEventListener("click", () => {
@@ -736,28 +758,24 @@ function toggleAmmo(id: string): void {
     );
 }
 
-function mergeButtons(run: RunState): string {
-  const buttons: string[] = [];
-  for (const type of AMMO_TYPES)
-    for (let tier = 1; tier <= 3; tier++) {
-      if (
-        run.ammo.filter(
-          (a) => !a.legendary && a.type === type && a.tier === tier,
-        ).length >= 2
-      )
-        buttons.push(
-          `<button class="button tiny" data-merge="${type}" data-tier="${tier}">Combine ${type}: ${QUALITY_LABEL[qualityFromTier(tier)]} → ${QUALITY_LABEL[qualityFromTier(tier + 1)]}</button>`,
-        );
-    }
-  return buttons.join("");
-}
-
-function mergeAmmo(type: AmmoType, tier: 1 | 2 | 3): void {
-  if (!paused)
-    perform(
-      () => session.merge(activeProfileId!, type, tier),
-      () => renderShop(`${type} upgraded.`),
-    );
+function reserveStacks(run: RunState): string {
+  const groups = new Map<string, Ammo[]>();
+  for (const ammo of run.ammo) {
+    const key = `${ammo.type}:${ammo.tier}:${!!ammo.legendary}`;
+    const group = groups.get(key) ?? [];
+    group.push(ammo);
+    groups.set(key, group);
+  }
+  return [...groups.values()]
+    .map((group) => {
+      const active = group.find((a) => run.activeAmmoIds.includes(a.id));
+      const representative = active ?? group[0];
+      const sellable = group.find(
+        (a) => !a.legendary && !run.activeAmmoIds.includes(a.id),
+      );
+      return `<article>${ammoChip(representative, !!active)}<p>${group.length} owned${active ? " · 1 equipped" : " · reserve"}</p>${sellable ? `<button class="text-button" data-sell-ammo="${escapeHtml(sellable.id)}">Sell 1 unequipped · ${ammoSellPrice(sellable)} salvage</button>` : ""}</article>`;
+    })
+    .join("");
 }
 
 function forgeOmni(): void {

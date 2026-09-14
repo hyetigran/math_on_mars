@@ -25,6 +25,45 @@ function ensure(condition: unknown, path: string): asserts condition {
       `Invalid saved profile data: ${path}. Your saved data has not been replaced.`,
     );
 }
+function ammoRecord(value: unknown): RecordValue {
+  const item = record(value, "ammo");
+  string(item.id, "ammo ID");
+  choice(item.type, AMMO_TYPES, "ammo.type");
+  integer(item.tier, "ammo.tier", 1, 4);
+  if (item.legendary !== undefined) {
+    boolean(item.legendary, "ammo.legendary");
+    if (item.legendary) ensure(item.tier === 4, "legendary tier");
+  }
+  return item;
+}
+function inventoryRecord(value: unknown): void {
+  const inventory = record(value, "ammo inventory");
+  integer(inventory.ammoCapacity, "ammo capacity", 1, 4);
+  const ammo = list(inventory.ammo, "ammo inventory items");
+  uniqueIds(ammo, "ammo inventory");
+  ammo.forEach(ammoRecord);
+  const active = list(inventory.activeAmmoIds, "equipped ammo");
+  ensure(
+    active.length <= (inventory.ammoCapacity as number) &&
+      new Set(active).size === active.length,
+    "ammo capacity/duplicates",
+  );
+  const types = new Set();
+  for (const id of active) {
+    const item = ammo.find((a) => record(a, "ammo").id === id);
+    ensure(item, "equipped ammo ownership");
+    const cartridge = ammoRecord(item);
+    if (!cartridge.legendary) {
+      ensure(!types.has(cartridge.type), "duplicate equipped ammo type");
+      types.add(cartridge.type);
+    }
+  }
+  if (inventory.ammoBag !== undefined) {
+    const bag = list(inventory.ammoBag, "ammo bag");
+    ensure(new Set(bag).size === bag.length, "duplicate bag type");
+    bag.forEach((type) => choice(type, AMMO_TYPES, "ammo bag type"));
+  }
+}
 function record(value: unknown, path: string): RecordValue {
   ensure(
     value !== null && typeof value === "object" && !Array.isArray(value),
@@ -182,6 +221,35 @@ function combat(value: unknown, run: RecordValue): void {
       number(pickup.x, "pickup.x");
       number(pickup.y, "pickup.y");
       integer(pickup.value, "pickup.value", 1);
+      if (pickup.ammo !== undefined) {
+        const ammo = ammoRecord(pickup.ammo);
+        ensure(!ammo.legendary, "legendary drop");
+        ensure(ammo.id === `drop-${state.wave}-${pickup.id}`, "ammo drop ID");
+      }
+    }
+  }
+  if (state.ammoInventory !== undefined) {
+    inventoryRecord(state.ammoInventory);
+    const inventory = record(state.ammoInventory, "combat inventory");
+    for (const key of ["ammo", "activeAmmoIds", "ammoCapacity"])
+      ensure(
+        JSON.stringify(inventory[key]) === JSON.stringify(run[key]),
+        "combat inventory checkpoint mismatch",
+      );
+    ensure(
+      JSON.stringify(inventory.ammoBag ?? []) ===
+        JSON.stringify(run.ammoBag ?? []),
+      "combat bag checkpoint mismatch",
+    );
+    for (const value of list(state.pickups ?? [], "pickups")) {
+      const pickup = record(value, "pickup");
+      if (pickup.ammo)
+        ensure(
+          !list(inventory.ammo, "inventory").some(
+            (a) => ammoRecord(a).id === ammoRecord(pickup.ammo).id,
+          ),
+          "already collected ammo drop",
+        );
     }
   }
   const shots = new Set<unknown>();
@@ -315,8 +383,12 @@ export function decodeProfiles(raw: string): Profile[] {
         else ensure(offer.module === undefined, "unexpected shop module");
         if (offer.kind !== "ammo")
           ensure(offer.ammoType === undefined, "unexpected shop ammo");
-        if (offer.kind === "ammo")
+        if (offer.kind === "ammo") {
           choice(offer.ammoType, AMMO_TYPES, "shop ammo type");
+          if (offer.ammoTier !== undefined)
+            integer(offer.ammoTier, "shop ammo tier", 1, 4);
+        } else
+          ensure(offer.ammoTier === undefined, "unexpected shop ammo tier");
       }
       const purchased = list(run.shopBought, "shopBought");
       ensure(
@@ -329,28 +401,66 @@ export function decodeProfiles(raw: string): Profile[] {
           "purchased offer reference",
         );
     }
-    const ammo = list(run.ammo, "run.ammo");
-    uniqueIds(ammo, "ammo");
-    for (const value of ammo) {
-      const item = record(value, "ammo");
-      choice(item.type, AMMO_TYPES, "ammo.type");
-      integer(item.tier, "ammo.tier", 1, 4);
-      if (item.legendary !== undefined) {
-        boolean(item.legendary, "ammo.legendary");
-        if (item.legendary) ensure(item.tier === 4, "legendary tier");
+    if (run.choiceCache !== undefined) {
+      const cache = record(run.choiceCache, "choice cache");
+      choice(cache.kind, ["choice"], "cache kind");
+      string(cache.id, "cache ID");
+      const options = list(cache.options, "cache options");
+      ensure(options.length === 6, "cache option count");
+      uniqueIds(options, "cache options");
+      const types = new Set();
+      const contents: unknown[] = [];
+      let modules = 0;
+      for (const value of options) {
+        const option = record(value, "cache option");
+        integer(option.sellPrice, "cache sell price");
+        choice(option.kind, ["ammo", "module"], "cache option kind");
+        if (option.kind === "module") {
+          ensure(option.ammo === undefined, "unexpected cache ammo");
+          moduleRecord(option.module);
+          modules++;
+        } else {
+          ensure(option.module === undefined, "unexpected cache module");
+          const pair = list(option.ammo, "cache pair");
+          ensure(pair.length === 2, "cache pair size");
+          const type = record(pair[0], "cache ammo").type;
+          ensure(!types.has(type), "duplicate cache type");
+          types.add(type);
+          for (const value of pair) {
+            const item = record(value, "cache ammo");
+            choice(item.type, AMMO_TYPES, "cache ammo type");
+            ensure(
+              item.type === type && item.tier === 3 && !item.legendary,
+              "cache blue pair",
+            );
+            contents.push(item);
+          }
+        }
+      }
+      uniqueIds(contents, "cache cartridge IDs");
+      ensure(modules === 1, "cache module count");
+      if (cache.selectedOptionId !== undefined) {
+        ensure(
+          options.some(
+            (o) => record(o, "option").id === cache.selectedOptionId,
+          ),
+          "cache selection",
+        );
+        choice(cache.disposition, ["accept", "sell"], "cache disposition");
+        ensure(
+          run.cacheClaimed && run.phase === "shop",
+          "cache settlement phase",
+        );
+      } else {
+        ensure(
+          cache.disposition === undefined &&
+            !run.cacheClaimed &&
+            run.phase === "cache",
+          "pending cache phase",
+        );
       }
     }
-    const active = list(run.activeAmmoIds, "run.activeAmmoIds");
-    ensure(
-      active.length <= run.ammoCapacity &&
-        new Set(active).size === active.length,
-      "active ammo capacity/duplicates",
-    );
-    for (const id of active)
-      ensure(
-        ammo.some((item) => record(item, "ammo").id === id),
-        "active ammo ownership",
-      );
+    inventoryRecord(run);
     const modules = list(run.modules, "run.modules");
     uniqueIds(modules, "modules");
     modules.forEach(moduleRecord);

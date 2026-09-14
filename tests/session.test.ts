@@ -137,19 +137,21 @@ test("fraction corrections resume with their draft and do not affect reward", ()
 
 test("shop, equipped merge, forge, next wave and end stay behind committed commands", () => {
   const { session, id, repository } = setup();
-  for (let wave = 1; wave <= 5; wave++) {
+  for (let wave = 1; wave <= 8; wave++) {
     if (wave > 1) session.finishWave(id, { hp: 100, salvage: 100, medkits: 1 });
     for (let i = 0; i < 5; i++) answer(session, id, true);
     session.chooseReward(
       id,
       session.profile(id).activeRun!.quiz!.rewardChoices![0].id,
     );
-    const type = (
-      ["Piercing", "Multi Shot", "Electric Chain", "Frost", "Fiery"] as const
-    )[wave - 1];
-    session.claimCache(id, type);
-    session.merge(id, type, 3);
-    if (wave < 5) session.nextWave(id);
+    if ([1, 3, 5, 7, 8].includes(wave)) {
+      const type = (
+        ["Piercing", "Multi Shot", "Electric Chain", "Frost", "Fiery"] as const
+      )[[1, 3, 5, 7, 8].indexOf(wave)];
+      session.claimCache(id, type);
+      session.merge(id, type, 3);
+    }
+    if (wave < 8) session.nextWave(id);
   }
   session.forge(id);
   session.forge(id);
@@ -165,7 +167,7 @@ test("shop, equipped merge, forge, next wave and end stay behind committed comma
   assert.equal(restored.profile(id).activeRun!.phase, "combat");
   restored.end(id, false);
   assert.equal(restored.profile(id).activeRun, undefined);
-  assert.equal(restored.profile(id).history.length, 25);
+  assert.equal(restored.profile(id).history.length, 40);
 });
 
 test("reward rarity adds saved modifiers instead of multiplying one stat", () => {

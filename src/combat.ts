@@ -212,7 +212,15 @@ class MarsCombatScene extends Phaser.Scene {
         this.pickups.set(
           pickup.id,
           this.add
-            .rectangle(pickup.x, pickup.y, 14, 14, 0xffd36a)
+            .rectangle(
+              pickup.x,
+              pickup.y,
+              pickup.ammo ? 20 : 14,
+              pickup.ammo ? 12 : 14,
+              pickup.ammo
+                ? [0xffffff, 0x65df87, 0x70b6ff, 0xbd85ff][pickup.ammo.tier - 1]
+                : 0xffd36a,
+            )
             .setStrokeStyle(2, 0x49341a)
             .setAngle(45)
             .setDepth(3),

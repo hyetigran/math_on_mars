@@ -153,7 +153,8 @@ export interface CombatSaveV2 extends Omit<
 > {
   version: 2;
   simulationTick?: number;
-  pickups?: { id: number; x: number; y: number; value: number }[];
+  ammoInventory?: AmmoInventory;
+  pickups?: { id: number; x: number; y: number; value: number; ammo?: Ammo }[];
   nextShotId: number;
   nextBoltId: number;
   stepRemainderMs: number;
@@ -166,7 +167,7 @@ export type CombatSave = CombatSaveV1 | CombatSaveV2;
 
 export type ShopItem = { id: string; title: string; price: number } & (
   | { kind: "module"; module: Module; ammoType?: never }
-  | { kind: "ammo"; ammoType: AmmoType; module?: never }
+  | { kind: "ammo"; ammoType: AmmoType; ammoTier?: Tier; module?: never }
   | { kind: "medkit" | "expand" | "repair"; module?: never; ammoType?: never }
 );
 export interface ShopState {
@@ -175,7 +176,26 @@ export interface ShopState {
   offers: ShopItem[];
 }
 
-export interface RunState {
+export type CacheOption = { id: string; sellPrice: number } & (
+  | { kind: "ammo"; ammo: Ammo[]; module?: never }
+  | { kind: "module"; module: Module; ammo?: never }
+);
+export interface ChoiceCache {
+  kind: "choice";
+  id: string;
+  options: CacheOption[];
+  selectedOptionId?: string;
+  disposition?: "accept" | "sell";
+}
+
+export interface AmmoInventory {
+  ammo: Ammo[];
+  activeAmmoIds: string[];
+  ammoCapacity: number;
+  ammoBag?: AmmoType[];
+}
+export interface RunState extends AmmoInventory {
+  choiceCache?: ChoiceCache;
   shop?: ShopState;
   interactionRevision?: number;
   id: string;

@@ -317,3 +317,28 @@ test("secondary projectile speed and pickup radius modifiers affect combat", () 
   );
   assert.ok(Math.abs(sim.state.bolts[0].damage - 19.8) < 1e-8);
 });
+
+test("scheduled ammo contents and shuffle bag survive resume and wave-clear sweep", () => {
+  const sim = fixture([
+    enemy(1, 900, 500),
+    enemy(2, 900, 500),
+    enemy(3, 900, 500),
+    enemy(4, 900, 500),
+  ]);
+  sim.state.enemies[3].hp = 0;
+  sim.advance(STEP, { x: 0, y: 0 });
+  const saved = sim.serialize();
+  const drop = saved.pickups!.find((p) => p.id === 4)!;
+  assert.ok(drop.ammo);
+  assert.equal(saved.ammoInventory!.ammoBag!.length, 4);
+  const resumed = new CombatSimulation({ ...options, restore: saved });
+  assert.deepEqual(resumed.serialize(), saved);
+  for (const target of resumed.state.enemies) target.hp = 0;
+  resumed.advance(STEP, { x: 0, y: 0 });
+  assert.equal(resumed.outcome, "victory");
+  assert.deepEqual(resumed.snapshot().ammoInventory!.ammo, [drop.ammo]);
+  assert.deepEqual(resumed.snapshot().ammoInventory!.activeAmmoIds, [
+    drop.ammo!.id,
+  ]);
+  assert.equal(resumed.serialize().pickups!.length, 0);
+});
