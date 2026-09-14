@@ -82,34 +82,115 @@ export function makeQuestions(
   const rand = seeded(seed);
   return Array.from({ length: 5 }, (_, i) => {
     if (grade === "K") {
-      const n = pickInt(rand, 1, 10);
-      return q(
-        i,
-        "How many energy cells are there?",
-        [n, 1],
-        "Touch each cell once as you count.",
-        `There are ${n} energy cells.`,
-        n,
-      );
+      const n = pickInt(rand, 0, 10);
+      if (i === 1) {
+        const other = ((n + pickInt(rand, 1, 9) - 1) % 10) + 1;
+        return {
+          ...q(
+            i,
+            "Which group has more energy cells? Enter the larger number.",
+            [Math.max(n, other), 1],
+            "Count each group. Choose the number that is larger.",
+            `${Math.max(n, other)} is greater than ${Math.min(n, other)}.`,
+          ),
+          visualGroups: [n, other],
+          speechClips: ["compare"],
+          hintClips: ["compare-hint"],
+        };
+      }
+      if (i === 2) {
+        const a = pickInt(rand, 0, 5),
+          b = pickInt(rand, 0, 5 - a);
+        return {
+          ...q(
+            i,
+            "How many energy cells are in both groups altogether?",
+            [a + b, 1],
+            "Count the first group, then count on through the second group.",
+            `${a} plus ${b} equals ${a + b}.`,
+          ),
+          visualGroups: [a, b],
+          speechClips: ["compose"],
+          hintClips: ["compose-hint"],
+        };
+      }
+      if (i === 3) {
+        const total = pickInt(rand, 0, 5),
+          removed = pickInt(rand, 0, total);
+        return {
+          ...q(
+            i,
+            `${total} cells started. ${removed} were taken away. How many remain?`,
+            [total - removed, 1],
+            "Count the starting cells. Remove the cells taken away. Count what is left.",
+            `${total} minus ${removed} equals ${total - removed}.`,
+          ),
+          visualGroups: [total, removed],
+          visualGroupLabels: ["Starting cells", "Taken away"],
+          speechClips: [
+            "started",
+            `n${total}`,
+            "take-away",
+            `n${removed}`,
+            "remain",
+          ],
+          hintClips: ["decompose-hint"],
+        };
+      }
+      return {
+        ...q(
+          i,
+          "How many energy cells are there?",
+          [n, 1],
+          "Touch each cell once as you count.",
+          `There are ${n} energy cells.`,
+          n,
+        ),
+        speechClips: ["count"],
+        hintClips: ["count-hint"],
+      };
     }
     if (grade === "1") {
       const a = pickInt(rand, 2, 12);
       const b = pickInt(rand, 1, Math.min(8, 20 - a));
-      return i % 3 === 2
-        ? q(
+      if (i % 3 === 2)
+        return {
+          ...q(
             i,
             `${a} + ? = ${a + b}`,
             [b, 1],
             `Count up from ${a} to ${a + b}.`,
             `${a} plus ${b} equals ${a + b}.`,
-          )
-        : q(
+          ),
+          spoken: `What number added to ${a} makes ${a + b}?`,
+          speechClips: ["missing", `n${a}`, "makes", `n${a + b}`],
+          hintClips: ["missing-hint"],
+        };
+      if (i % 3 === 1)
+        return {
+          ...q(
             i,
-            `${a} + ${b} = ?`,
-            [a + b, 1],
-            `Start at ${a} and count on ${b}.`,
-            `${a} plus ${b} equals ${a + b}.`,
-          );
+            `${a + b} − ${a} = ?`,
+            [b, 1],
+            `Start at ${a + b} and count back ${a}.`,
+            `${a + b} minus ${a} equals ${b}.`,
+          ),
+          spoken: `What is ${a + b} minus ${a}?`,
+          speechClips: ["what", `n${a + b}`, "minus", `n${a}`],
+          hintClips: ["subtract-hint"],
+        };
+      return {
+        ...q(
+          i,
+          `${a} + ${b} = ?`,
+          [a + b, 1],
+          `Start at ${a} and count on ${b}.`,
+          `${a} plus ${b} equals ${a + b}.`,
+        ),
+        spoken: `What is ${a} plus ${b}?`,
+        speechClips: ["what", `n${a}`, "plus", `n${b}`],
+        hintClips: ["add-hint"],
+      };
     }
     if (grade === "2") {
       const a = pickInt(rand, 20, 79);

@@ -1,3 +1,4 @@
+import { InstalledNarration } from "./narration";
 import {
   previewForge,
   retainedForgeLoadout,
@@ -32,6 +33,7 @@ import {
   type Module,
   type Profile,
   type Quality,
+  type Question,
   type RunState,
 } from "./types";
 
@@ -42,6 +44,9 @@ const app = document.querySelector<HTMLElement>("#app")!;
 const announcer = document.querySelector<HTMLElement>("#announcer")!;
 let repository: IndexedProfileRepository;
 let session: RunSession;
+const narration = new InstalledNarration();
+let narrationLoading = false;
+let screenGeneration = 0;
 let quizDraft = "";
 let quizElapsedAtStart = 0;
 let activeProfileId: string | null = null;
@@ -79,6 +84,9 @@ function announce(message: string): void {
 }
 
 function cleanup(): void {
+  screenGeneration++;
+  narrationLoading = false;
+  narration.stop();
   resetTouch?.();
   resetTouch = null;
   if (timerId !== null) window.clearInterval(timerId);
@@ -402,8 +410,89 @@ function currentElapsed(): number {
   return Math.min(
     30000,
     quizElapsedAtStart +
-      (paused ? 0 : Math.max(0, performance.now() - quizStartedAt)),
+      (paused || narrationLoading
+        ? 0
+        : Math.max(0, performance.now() - quizStartedAt)),
   );
+}
+
+function prepareNarration(question: Question, ready: () => void): boolean {
+  if (!question.speechClips?.length || narration.playable) return true;
+  narrationLoading = true;
+  quizElapsedAtStart = activeRun().quiz?.elapsedMs ?? 0;
+  const generation = screenGeneration;
+  app.innerHTML = shell(
+    `<section class="terminal"><h1>Loading task audio</h1><p id="audio-loading-status" role="status">The task stays hidden and its timer is stopped while audio loads.</p><button id="enable-audio" class="button primary" hidden>Enable speech</button><button id="retry-audio" class="button secondary" hidden>Retry audio</button><button id="save-exit" class="text-button">Save & exit</button></section>`,
+  );
+  bindHome();
+  document.querySelector("#save-exit")!.addEventListener("click", saveAndExit);
+  document.querySelector("#retry-audio")!.addEventListener("click", ready);
+  document.querySelector("#enable-audio")!.addEventListener("click", () => {
+    void narration
+      .enable()
+      .then(() => {
+        if (screenGeneration === generation && !paused) ready();
+      })
+      .catch(() => {
+        if (screenGeneration !== generation) return;
+        const status = document.querySelector("#audio-loading-status");
+        if (status)
+          status.textContent =
+            "Speech could not start. Tap Enable speech to try again.";
+      });
+  });
+  void narration
+    .load()
+    .then(() => {
+      if (screenGeneration !== generation || paused) return;
+      if (narration.playable) ready();
+      else {
+        document.querySelector<HTMLButtonElement>("#enable-audio")!.hidden =
+          false;
+        document.querySelector("#audio-loading-status")!.textContent =
+          "Speech is loaded. Tap Enable speech to begin. Your timer has not started.";
+      }
+    })
+    .catch(() => {
+      if (screenGeneration !== generation) return;
+      document.querySelector("#audio-loading-status")!.textContent =
+        "Audio could not load. Retry when the installed files are available.";
+      document.querySelector<HTMLButtonElement>("#retry-audio")!.hidden = false;
+    });
+  return false;
+}
+function narrationControls(question: Question, correction = false): string {
+  if (!question.speechClips?.length) return "";
+  return `<div class="quiz-tools"><button id="replay-task" class="button secondary" type="button">Replay task</button>${correction && question.hintClips?.length ? '<button id="replay-hint" class="button secondary" type="button">Read hint</button>' : ""}<span id="speech-status" role="status"></span></div>`;
+}
+function bindNarration(question: Question): void {
+  if (!question.speechClips?.length) return;
+  const play = (clips: string[]) => {
+    if (paused) return;
+    void narration.play(clips, (message) => {
+      const status = document.querySelector("#speech-status");
+      if (status) status.textContent = message;
+    });
+  };
+  document
+    .querySelector("#replay-task")!
+    .addEventListener("click", () => play(question.speechClips!));
+  document
+    .querySelector("#replay-hint")
+    ?.addEventListener("click", () => play(question.hintClips!));
+  play(question.speechClips);
+}
+
+function questionVisuals(question: Question): string {
+  const groups =
+    question.visualGroups ??
+    (question.visualCount !== undefined ? [question.visualCount] : []);
+  return groups
+    .map(
+      (count, index) =>
+        `<div>${groups.length > 1 ? `<p>${escapeHtml(question.visualGroupLabels?.[index] ?? `Group ${index + 1}`)}</p>` : ""}<div class="cell-grid" aria-label="${count} energy cells">${count === 0 ? "<span>No cells</span>" : Array.from({ length: count }, () => "<i></i>").join("")}</div></div>`,
+    )
+    .join("");
 }
 
 function renderQuiz(message = ""): void {
@@ -411,13 +500,15 @@ function renderQuiz(message = ""): void {
   const run = activeRun();
   const quiz = run.quiz!;
   const question = quiz.questions[quiz.index];
+  quizDraft = quiz.draft ?? "";
+  if (!prepareNarration(question, () => renderQuiz(message))) return;
   app.innerHTML = shell(
     `<section class="quiz-layout" id="content">
     <aside class="rarity-rail" aria-label="Reward power bands"><div class="rail-title">POWER LEVEL</div>${["purple", "blue", "green", "white"].map((q) => `<div class="rail-step ${q}" data-quality="${q}">${qualityPips(q as Quality)}<b>${QUALITY_LABEL[q as Quality]}</b><small>${q === "purple" ? "> 20s" : q === "blue" ? "> 10s" : q === "green" ? "> 0s" : "0s"}</small></div>`).join("")}</aside>
     <div class="quiz-main">
       <div class="quiz-topline"><div><p class="eyebrow warm">REACTOR RECHARGE</p><h1>Question ${quiz.index + 1} <span>of 5</span></h1></div><div class="countdown" id="countdown" aria-label="Time remaining"><small>SHARED TIME</small><b>${formatTime(quiz.remainingMs)}</b></div></div>
       <div class="mobile-tier-strip" id="mobile-tier">${qualityPips(timeQuality(quiz.remainingMs))}<b>${QUALITY_LABEL[timeQuality(quiz.remainingMs)]}</b><span>candidate</span></div>
-      <div class="question-panel"><div class="question-copy"><p class="prompt">${escapeHtml(question.prompt)}</p>${question.visualCount ? `<div class="cell-grid" aria-label="${question.visualCount} energy cells">${Array.from({ length: question.visualCount }, () => "<i></i>").join("")}</div>` : ""}
+      <div class="question-panel"><div class="question-copy"><p class="prompt">${escapeHtml(question.prompt)}</p>${questionVisuals(question)}${narrationControls(question)}
         <label for="answer">Your answer</label><output id="answer" class="answer-field" aria-live="polite">&nbsp;</output><p class="input-error" id="input-error">${escapeHtml(message)}</p>
         <div class="quiz-tools"><span>Take your best shot.</span><button id="save-exit" class="text-button" type="button">Save & exit</button></div></div>
         <div class="keypad" aria-label="Number keypad">${[7, 8, 9, 4, 5, 6, 1, 2, 3].map((n) => `<button data-key="${n}" aria-label="${n}">${n}</button>`).join("")}
@@ -475,6 +566,7 @@ function renderQuiz(message = ""): void {
   quizElapsedAtStart = quiz.elapsedMs;
   quizStartedAt = performance.now();
   timerId = window.setInterval(updateTimer, 50);
+  bindNarration(question);
   updateTierRail();
 }
 
@@ -560,15 +652,18 @@ function renderCorrection(message = ""): void {
     return;
   }
   const attempt = misses[0];
+  if (!prepareNarration(attempt.question, () => renderCorrection(message)))
+    return;
   app.innerHTML = shell(
     `<section class="correction-screen" id="content"><div class="correction-copy"><p class="eyebrow warm">UNTIMED CORRECTION</p><h1>Let’s repair this one.</h1><p>Rewards are locked in. Work it through before the next wave.</p></div>
-    <div class="correction-card"><div><span class="correction-count">${quiz.attempts.filter((a) => !a.correct).length - misses.length + 1} / ${quiz.attempts.filter((a) => !a.correct).length}</span><p class="prompt">${escapeHtml(attempt.question.prompt)}</p>${attempt.question.visualCount ? `<div class="cell-grid">${Array.from({ length: attempt.question.visualCount }, () => "<i></i>").join("")}</div>` : ""}<div class="hint-box"><b>Mission hint</b><p>${escapeHtml(attempt.question.hint)}</p></div><details><summary>Show worked explanation</summary><p>${escapeHtml(attempt.question.explanation)}</p></details></div>
+    <div class="correction-card"><div><span class="correction-count">${quiz.attempts.filter((a) => !a.correct).length - misses.length + 1} / ${quiz.attempts.filter((a) => !a.correct).length}</span><p class="prompt">${escapeHtml(attempt.question.prompt)}</p>${questionVisuals(attempt.question)}${narrationControls(attempt.question, true)}<div class="hint-box"><b>Mission hint</b><p>${escapeHtml(attempt.question.hint)}</p></div><details><summary>Show worked explanation</summary><p>${escapeHtml(attempt.question.explanation)}</p></details></div>
       <div><label for="correction-input">Correct answer</label><input id="correction-input" inputmode="none" autocomplete="off" value="${escapeHtml(quiz.correctionDraft ?? "")}"><div class="keypad correction-keypad" aria-label="Correction number keypad">${["7", "8", "9", "4", "5", "6", "1", "2", "3", ".", "0", "/", "back", "clear", "-"].map((key) => `<button type="button" data-correction-key="${key}" aria-label="${key === "/" ? "Fraction bar" : key === "back" ? "Backspace" : key === "-" ? "Minus" : key}">${key === "back" ? "⌫" : key === "clear" ? "Clear" : key}</button>`).join("")}</div><p class="input-error" id="correction-error">${escapeHtml(message)}</p><button id="correction-check" class="button primary">Check answer</button></div></div>
     <button id="save-exit" class="text-button centered">Save & exit</button></section>`,
     "correction-shell",
   );
   bindHome();
   const input = document.querySelector<HTMLInputElement>("#correction-input")!;
+  bindNarration(attempt.question);
   input.focus();
   const submit = () => {
     if (paused || activeRun().phase !== "correction") return;
@@ -904,6 +999,7 @@ function setBlocked(blocked: boolean): void {
   session.setPaused(blocked);
   app.inert = blocked;
   if (blocked) {
+    narration.stop();
     resetTouch?.();
     if (timerId !== null) window.clearInterval(timerId);
     timerId = null;
@@ -1025,6 +1121,21 @@ function showPause(title: string): void {
         overlay.remove();
         setBlocked(false);
         combat?.resume();
+        const run = activeRun();
+        const pendingQuestion =
+          run.phase === "quiz"
+            ? run.quiz?.questions[run.quiz.index]
+            : run.phase === "correction"
+              ? run.quiz?.attempts.find((attempt) => !attempt.corrected)
+                  ?.question
+              : undefined;
+        if (
+          narrationLoading ||
+          (pendingQuestion?.speechClips?.length && !narration.playable)
+        ) {
+          resumeRun();
+          return;
+        }
         if (activeRun().phase === "quiz") {
           quizElapsedAtStart = activeRun().quiz!.elapsedMs;
           quizStartedAt = performance.now();

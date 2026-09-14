@@ -1,3 +1,4 @@
+import { NARRATION_CLIPS } from "./narration-manifest";
 import {
   AMMO_TYPES,
   GRADES,
@@ -156,7 +157,29 @@ function question(value: unknown): void {
   integer(answer[0], "question numerator", -Number.MAX_SAFE_INTEGER);
   integer(answer[1], "question denominator", 1);
   if (item.visualCount !== undefined)
-    integer(item.visualCount, "question.visualCount", 1, 1000);
+    integer(item.visualCount, "question.visualCount", 0, 1000);
+  if (item.visualGroups !== undefined) {
+    const groups = list(item.visualGroups, "question groups");
+    ensure(groups.length === 2, "comparison group count");
+    groups.forEach((n) => integer(n, "comparison count", 0, 10));
+  }
+  if (item.visualGroupLabels !== undefined) {
+    const labels = list(item.visualGroupLabels, "group labels");
+    ensure(
+      labels.length === 2 && item.visualGroups !== undefined,
+      "group labels count",
+    );
+    labels.forEach((label) => string(label, "group label"));
+  }
+  for (const key of ["speechClips", "hintClips"]) {
+    if (item[key] === undefined) continue;
+    const clips = list(item[key], key);
+    ensure(clips.length > 0 && clips.length <= 8, "speech sequence length");
+    for (const clip of clips) {
+      string(clip, "speech clip");
+      ensure(NARRATION_CLIPS.includes(clip), "installed speech clip");
+    }
+  }
 }
 function combat(value: unknown, run: RecordValue): void {
   const state = record(value, "combat");

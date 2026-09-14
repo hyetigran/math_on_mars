@@ -2446,3 +2446,8 @@ legend {
   min-height: 44px;
   padding: 0.5rem;
 }
+
+#app[inert] .question-panel,
+#app[inert] .correction-card {
+  visibility: hidden;
+}
