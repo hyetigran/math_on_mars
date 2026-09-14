@@ -405,3 +405,24 @@ test("every Electric Chain tier restores its in-flight budget and hits each near
       assert.equal(restored.state.enemies[i].hp, 1000);
   }
 });
+
+test("Electric Chain adds no extra damage against an isolated boss", () => {
+  const sim = fixture([{ ...enemy(1, 530, 270), boss: true }]);
+  sim.state.shots = [shot({ chainRemaining: 4 })];
+  sim.state.bolts = [
+    {
+      id: 1,
+      shotId: 1,
+      x: 480,
+      y: 270,
+      vx: 5600,
+      vy: 0,
+      damage: 18,
+      pierce: 0,
+      hitIds: [],
+    },
+  ];
+  sim.advance(STEP);
+  assert.equal(sim.state.enemies[0].hp, 982);
+  assert.equal(sim.drainChainFlashes().length, 0);
+});
