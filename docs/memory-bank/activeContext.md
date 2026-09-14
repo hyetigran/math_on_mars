@@ -12,7 +12,9 @@ Ticket 1 merged as PR #1 (83e1931). It adds saved collectible salvage, wave-clea
 
 Ticket 2 merged as PR #2 (3d8193d), completing multi-stat rewards, capped gains, correction attempt history and worked explanations.
 
-Ticket 3 (`ticket/03-profile-saves`) replaces runtime localStorage writes with IndexedDB profile envelopes, atomic post-command backups/receipts and storage revisions. Existing localStorage profiles migrate once without changing their original bytes. RunSession prepares private candidates and rejects stale publication; UI pauses dependent input through transaction completion and retries the same candidate/command ID. Interaction revisions and simulation ticks remain separate from storage revisions. Recovery and raw export read IndexedDB; legacy backup recovery remains available. All 39 tests, build, formatting and diff checks pass. Both review axes' findings are fixed; final PR/merge is next. Ticket 4 follows for combat interruption/resume coverage. Browser/physical-device checks remain unverified. User approved merging subsequent ticket PRs after review and fixes.
+Ticket 3 merged as PR #3 (635bcb1), adding IndexedDB transactions, private publication, receipts and backup recovery.
+
+Ticket 4 (`ticket/04-combat-resume`) was implemented in `/tmp/mathonmars-ticket4` to preserve unrelated uncommitted instruction/memory edits in the original checkout. Periodic checkpoints now run in the background every 300 active simulation ticks, coalesce waiting snapshots and retain failed jobs/receipt IDs. Critical actions freeze immediately, drain pending saves, then commit their current state. Snapshots reject stale run/wave identities. All 43 tests, build, Prettier and diff checks pass; both reviews found no remaining production blockers. Integration covers delayed saves before wave transitions/defeat, sibling isolation, terminal backup invalidation and deterministic resumed combat. Live browser/device checks remain outstanding. PR/merge follows, then ticket 5’s salvage shop. User approval to merge subsequent reviewed PRs remains in force.
 
 ## Next implementation work
 

@@ -1,3 +1,4 @@
+import { CheckpointQueue } from "./checkpoint-queue";
 import { modifiers, moduleTotal } from "./modules";
 import "./style.css";
 import { CombatController, type CombatSnapshot } from "./combat";
@@ -41,8 +42,10 @@ let quizStartedAt = 0;
 let paused = false;
 let saving = false;
 let pendingPause: string | null = null;
+const checkpointQueue = new CheckpointQueue(() => {
+  if (!saving) showPause("Combat save failed — retry to continue");
+});
 let quizKeyHandler: ((event: KeyboardEvent) => void) | null = null;
-let combatCheckpointId: number | null = null;
 let resetTouch: (() => void) | null = null;
 
 function activeProfile(): Profile {
@@ -70,9 +73,7 @@ function cleanup(): void {
   resetTouch?.();
   resetTouch = null;
   if (timerId !== null) window.clearInterval(timerId);
-  if (combatCheckpointId !== null) window.clearInterval(combatCheckpointId);
   timerId = null;
-  combatCheckpointId = null;
   combat?.destroy();
   combat = null;
   if (quizKeyHandler) window.removeEventListener("keydown", quizKeyHandler);
@@ -237,6 +238,8 @@ function renderCombat(): void {
     <div class="combat-tip">${matchMedia("(pointer: coarse)").matches ? "DRAG TO MOVE · TAP MED-GEL TO HEAL · FIRING IS AUTOMATIC" : "MOVE: WASD / ARROWS · MED-GEL: Q · FIRING IS AUTOMATIC"}</div>
   </div>`;
   const host = document.querySelector<HTMLElement>("#combat-canvas")!;
+  let checkpointTick =
+    run.combatSave?.version === 2 ? (run.combatSave.simulationTick ?? 0) : 0;
   combat = new CombatController({
     parent: host,
     wave: run.wave,
@@ -251,14 +254,18 @@ function renderCombat(): void {
     modules: run.modules,
     restore: run.combatSave,
     seed: hashSeed(`${run.id}-${run.wave}`),
-    onHud: (state) => updateCombatHud(state),
+    onHud: (state) => {
+      updateCombatHud(state);
+      const tick = state.simulationTick ?? 0;
+      if (!paused && !saving && tick - checkpointTick >= 300) {
+        checkpointTick = tick;
+        saveBackgroundCheckpoint();
+      }
+    },
     onComplete: (state) => finishWave(state),
     onDefeat: (state) => endRun(false, state),
   });
   bindTouchControls();
-  combatCheckpointId = window.setInterval(() => {
-    if (!paused) saveCheckpoint();
-  }, 5000);
   document
     .querySelector("#pause-button")!
     .addEventListener("click", () => showPause("Mission paused"));
@@ -284,6 +291,7 @@ function updateCombatHud(state: CombatSnapshot): void {
 function checkpoint(): Checkpoint {
   const run = activeRun();
   return {
+    runId: run.id,
     combat: run.phase === "combat" ? combat?.snapshot() : undefined,
     elapsedMs: run.phase === "quiz" ? currentElapsed() : undefined,
     draft: run.phase === "quiz" ? quizDraft : undefined,
@@ -294,9 +302,22 @@ function checkpoint(): Checkpoint {
   };
 }
 
-function saveCheckpoint(after: () => void = () => {}): void {
+function saveCheckpoint(after: () => void): void {
   const data = checkpoint();
-  perform(() => session.checkpoint(activeProfileId!, data), after);
+  const id = activeProfileId!;
+  void perform(() => session.checkpoint(id, data), after);
+}
+
+function saveBackgroundCheckpoint(): void {
+  const data = structuredClone(checkpoint());
+  const profileId = activeProfileId!;
+  const commandId = uid("checkpoint");
+  let prepared: ReturnType<RunSession["prepare"]> | undefined;
+  checkpointQueue.enqueue(async () => {
+    prepared ??= session.prepare(() => session.checkpoint(profileId, data));
+    await repository.commit(prepared.profiles, commandId);
+    prepared.publish();
+  });
 }
 
 function bindTouchControls(): void {
@@ -792,7 +813,13 @@ async function perform<T>(
   const attempt = async () => {
     if (saving) return;
     saving = true;
+    setBlocked(true);
+    if (previousPause) previousPause.inert = true;
     try {
+      await checkpointQueue.drain(
+        Boolean(document.querySelector("#retry-save")),
+      );
+      session.setPaused(wasPaused);
       // Capture domain changes once; retries retain generated offers, time and IDs.
       if (!prepared) prepared = session.prepare(action);
       setBlocked(true);

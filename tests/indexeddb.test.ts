@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { IDBFactory } from "fake-indexeddb";
 import { IndexedProfileRepository } from "../src/indexeddb";
+import { CombatSimulation } from "../src/combat-rules";
 import { RunSession } from "../src/session";
 import type { Profile } from "../src/types";
 const profile = (id: string): Profile => ({
@@ -200,4 +201,31 @@ test("recovery repairs an envelope identity mismatch from its matching backup", 
     (await repo.load()).map((p) => p.id),
     ["a"],
   );
+});
+
+test("combat checkpoint reload retains simulation state and deterministic future steps", async () => {
+  const repo = new IndexedProfileRepository(new IDBFactory(), "combat-resume");
+  const session = new RunSession([], { commit: () => {} });
+  const id = session.createProfile("Marine");
+  session.start(id, "3");
+  const run = session.profile(id).activeRun!;
+  const live = new CombatSimulation({ ...run, hp: 65, seed: 42 });
+  for (let i = 0; i < 100; i++) live.advance(1000 / 60, { x: 1, y: 0 });
+  live.useMedkit();
+  const saved = live.serialize();
+  session.checkpoint(id, { runId: run.id, combat: saved });
+  await repo.commit(session.profiles, "combat-checkpoint");
+  const loaded = (await repo.load())[0].activeRun!;
+  const resumed = new CombatSimulation({
+    ...loaded,
+    seed: 42,
+    restore: loaded.combatSave,
+  });
+  assert.deepEqual(resumed.serialize(), saved);
+  for (let i = 0; i < 120; i++) {
+    const movement = { x: i < 60 ? -1 : 0, y: 1 };
+    live.advance(1000 / 60, movement);
+    resumed.advance(1000 / 60, movement);
+    assert.deepEqual(resumed.serialize(), live.serialize());
+  }
 });

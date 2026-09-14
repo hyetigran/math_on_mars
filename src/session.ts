@@ -30,6 +30,7 @@ export interface ShopOffer {
   disabled: boolean;
 }
 export interface Checkpoint {
+  runId?: string;
   elapsedMs?: number;
   draft?: string;
   correctionDraft?: string;
@@ -217,7 +218,8 @@ export class RunSession {
   checkpoint(id: string, snapshot: Checkpoint): void {
     this.change((profiles) => {
       const run = profiles.find((p) => p.id === id)?.activeRun;
-      if (!run) return;
+      if (!run || (snapshot.runId && snapshot.runId !== run.id)) return;
+      if (snapshot.combat && snapshot.combat.wave !== run.wave) return;
       if (snapshot.combat && run.phase === "combat") {
         run.combatSave = snapshot.combat;
         run.hp = snapshot.combat.hp;
