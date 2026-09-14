@@ -716,3 +716,27 @@ test("mission presets tune Short counts and put Overmind only on the final wave"
     assert.equal(splitter.state.enemies[3].kind, "splitter");
   }
 });
+
+test("Frost slows Overmind pursuit but does not move its committed warning", () => {
+  const positions: number[] = [];
+  for (const slowAmount of [0, 0.1, 0.2]) {
+    const sim = fixture([
+      {
+        ...enemy(1, 700, 270),
+        boss: true,
+        kind: "overmind",
+        speed: 32,
+        slowAmount,
+        slowRemainingMs: 3000,
+      },
+    ]);
+    for (let i = 0; i < 60; i++) sim.advance(STEP);
+    positions.push(sim.state.enemies[0].x);
+    const boss = sim.state.enemies[0];
+    Object.assign(boss.bossAttack!, { phase: "windup", remainingMs: 1200 });
+    const before = { x: boss.x, y: boss.y };
+    for (let i = 0; i < 60; i++) sim.advance(STEP, { x: 0, y: 1 });
+    assert.deepEqual({ x: boss.x, y: boss.y }, before);
+  }
+  assert.ok(positions[0] < positions[1] && positions[1] < positions[2]);
+});

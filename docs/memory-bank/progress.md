@@ -67,3 +67,10 @@ Ticket 13: grade 5 includes decimal addition/subtraction and guaranteed unlike-d
 - Saves retain warning/active/cooldown state, locked direction, hit ledger, and flying enemy projectiles. Profile validation rejects malformed attacks; projectiles clear on victory and defeat.
 - Fixed ammo shuffle RNG returning integer endpoints, which could produce an undefined ammo type; regression covers complete five-type bags across multiple seeds.
 - Validation: 76 tests, production build, and Prettier check pass. Separate spec and standards reviews completed; balance-location and duplicated-validation-limit findings fixed. Phone portrait/landscape visual readability remains unverified because no connected browser/device is available. Existing Phaser bundle-size warning remains.
+
+### Ticket 15 — Splitter, Overmind, mission presets
+
+- Splitters enter standard wave 6 / short wave 4 and split once into two weaker mini-slimes; surviving children prevent wave completion.
+- Final-wave Overmind alternates warned expanding slam rings, projectile fans, and limited summons. Boss attack phases, locked aim, hit ledger, and summon count survive save/resume; boss defeat removes remaining minions and shots. Frost slows cooldown pursuit while committed warnings remain stationary.
+- Setup independently selects Easy/Standard combat and six-wave Short/ten-wave Standard missions. Short uses a smaller wave budget; all grades/presets retain five required questions and one 30-second countdown. Retry retains mission settings. Summaries report this mission's answer accuracy; final victory/defeat ends directly without a quiz.
+- Validation: 83 tests, production build, and Prettier check pass. Spec and standards reviews completed; Frost control, shared fan geometry, and preset-lookup findings fixed. Browser/device readability and practical combat balance remain unverified. Existing bundle-size warning persists.

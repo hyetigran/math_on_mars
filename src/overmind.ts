@@ -5,6 +5,16 @@ import {
 } from "../content/balance/enemies";
 import type { CombatEnemySaveV2, CombatSaveV2 } from "./types";
 
+export function overmindFanAngles(dx: number, dy: number): number[] {
+  const direction = Math.atan2(dy, dx);
+  return Array.from(
+    { length: OVERMIND_BALANCE.fanCount },
+    (_, i) =>
+      direction +
+      (i / (OVERMIND_BALANCE.fanCount - 1) - 0.5) * OVERMIND_BALANCE.fanSpread,
+  );
+}
+
 function mini(
   parent: CombatEnemySaveV2,
   state: CombatSaveV2,
@@ -48,6 +58,7 @@ export function moveOvermind(
   enemy: CombatEnemySaveV2,
   state: CombatSaveV2,
   deltaMs: number,
+  slow: number,
   armorMultiplier: number,
 ): void {
   const tuning = OVERMIND_BALANCE;
@@ -62,12 +73,24 @@ export function moveOvermind(
   });
   attack.remainingMs = Math.max(0, attack.remainingMs - deltaMs);
   if (attack.phase === "cooldown") {
+    const distance = Math.hypot(
+      state.marine.x - enemy.x,
+      state.marine.y - enemy.y,
+    );
+    if (distance > enemy.radius + 20) {
+      const travel = Math.min(
+        distance - enemy.radius - 20,
+        (enemy.speed * slow * deltaMs) / 1000,
+      );
+      enemy.x += ((state.marine.x - enemy.x) / distance) * travel;
+      enemy.y += ((state.marine.y - enemy.y) / distance) * travel;
+    }
     if (attack.remainingMs > 0) return;
     const x = state.marine.x - enemy.x,
       y = state.marine.y - enemy.y;
-    const distance = Math.hypot(x, y);
-    attack.dx = distance ? x / distance : 1;
-    attack.dy = distance ? y / distance : 0;
+    const aimDistance = Math.hypot(x, y);
+    attack.dx = aimDistance ? x / aimDistance : 1;
+    attack.dy = aimDistance ? y / aimDistance : 0;
     attack.hit = false;
     attack.phase = "windup";
     attack.remainingMs = tuning.windupMs;
@@ -80,10 +103,7 @@ export function moveOvermind(
     if (attack.pattern === "fan") {
       state.enemyProjectiles ??= [];
       state.nextEnemyProjectileId ??= 1;
-      const direction = Math.atan2(attack.dy, attack.dx);
-      for (let i = 0; i < tuning.fanCount; i++) {
-        const angle =
-          direction + (i / (tuning.fanCount - 1) - 0.5) * tuning.fanSpread;
+      for (const angle of overmindFanAngles(attack.dx, attack.dy)) {
         state.enemyProjectiles.push({
           id: state.nextEnemyProjectileId++,
           x: enemy.x,

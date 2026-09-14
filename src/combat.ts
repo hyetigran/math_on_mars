@@ -1,3 +1,4 @@
+import { overmindFanAngles } from "./overmind";
 import { ENEMY_BALANCE, OVERMIND_BALANCE } from "../content/balance/enemies";
 import { STATUS_BALANCE } from "../content/balance/status";
 import { CHAIN_BALANCE } from "../content/balance/chain";
@@ -306,11 +307,8 @@ class MarsCombatScene extends Phaser.Scene {
             .lineStyle(bossAttack.phase === "windup" ? 3 : 10, 0xffe790, 1)
             .strokeCircle(enemy.x, enemy.y, radius);
         } else if (bossAttack.pattern === "fan") {
-          const direction = Math.atan2(bossAttack.dy, bossAttack.dx);
           indicators.lineStyle(3, 0xffa1c0, 1);
-          for (let i = 0; i < tuning.fanCount; i++) {
-            const angle =
-              direction + (i / (tuning.fanCount - 1) - 0.5) * tuning.fanSpread;
+          for (const angle of overmindFanAngles(bossAttack.dx, bossAttack.dy)) {
             indicators.lineBetween(
               enemy.x,
               enemy.y,

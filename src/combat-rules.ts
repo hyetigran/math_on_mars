@@ -1,6 +1,13 @@
-import { MISSION_PRESETS } from "../content/balance/missions";
+import {
+  MISSION_PRESETS,
+  missionLengthForWaves,
+} from "../content/balance/missions";
 import { splitEnemy } from "./overmind";
-import { ENEMY_SPAWNS, SPLITTER_BALANCE } from "../content/balance/enemies";
+import {
+  ENEMY_SPAWNS,
+  SPLITTER_BALANCE,
+  OVERMIND_BALANCE,
+} from "../content/balance/enemies";
 import { moveEnemy, advanceEnemyProjectiles } from "./enemy-attacks";
 import { omniRateBonus } from "./forge";
 import { STATUS_BALANCE } from "../content/balance/status";
@@ -136,10 +143,7 @@ export class CombatSimulation {
             ammoCapacity: options.ammoCapacity ?? 1,
           })));
     this.moveSpeed = 220 * (1 + moduleTotal(options.modules, "moveSpeed"));
-    const mission =
-      options.totalWaves === 6
-        ? MISSION_PRESETS.short
-        : MISSION_PRESETS.standard;
+    const mission = MISSION_PRESETS[missionLengthForWaves(options.totalWaves)];
     this.state =
       options.restore?.wave === options.wave
         ? migrateCombatSave(options.restore)
@@ -149,7 +153,13 @@ export class CombatSimulation {
             hp: options.hp,
             salvage: options.salvage,
             medkits: options.medkits,
-            marine: { x: 480, y: 270 },
+            marine: {
+              x: 480,
+              y:
+                options.wave === options.totalWaves
+                  ? OVERMIND_BALANCE.marineSpawnY
+                  : 270,
+            },
             spawned: 0,
             spawnTotal:
               options.wave === options.totalWaves
@@ -196,12 +206,14 @@ export class CombatSimulation {
     const y = edge === 2 ? 40 : edge === 3 ? 500 : this.randomBetween(40, 500);
     const hp = boss ? 620 : 42 + this.options.wave * 10;
     const schedule =
-      this.options.totalWaves === 6 ? "shortWave" : "standardWave";
+      missionLengthForWaves(this.options.totalWaves) === "short"
+        ? "shortWave"
+        : "standardWave";
     const cycleIndex = this.state.spawned % ENEMY_SPAWNS.cycleLength;
     this.state.enemies.push({
       id: this.state.nextEnemyId++,
-      x: boss ? 480 : x,
-      y: boss ? 220 : y,
+      x: boss ? OVERMIND_BALANCE.spawnX : x,
+      y: boss ? OVERMIND_BALANCE.spawnY : y,
       hp,
       maxHp: hp,
       radius: boss ? 58 : 24,

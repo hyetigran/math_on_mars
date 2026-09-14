@@ -39,7 +39,7 @@ export function moveEnemy(
     dy = distance ? y / distance : 0;
   const kind = enemy.kind ?? "drifter";
   if (enemy.boss) {
-    moveOvermind(enemy, state, deltaMs, armorMultiplier);
+    moveOvermind(enemy, state, deltaMs, slow, armorMultiplier);
     return;
   }
   if (kind !== "spitter" && kind !== "charger") {

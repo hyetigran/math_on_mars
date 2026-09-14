@@ -33,6 +33,9 @@ export const SPLITTER_BALANCE = {
 };
 
 export const OVERMIND_BALANCE = {
+  spawnX: 480,
+  spawnY: 220,
+  marineSpawnY: 450,
   cooldownMs: 2200,
   windupMs: 1200,
   slamDurationMs: 1100,

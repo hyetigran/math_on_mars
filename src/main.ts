@@ -1,4 +1,7 @@
-import type { MissionLength } from "../content/balance/missions";
+import {
+  missionLengthForWaves,
+  type MissionLength,
+} from "../content/balance/missions";
 import {
   usesFractionInput,
   fractionFields,
@@ -1036,7 +1039,7 @@ function endRun(victory: boolean, state?: CombatSnapshot): void {
               session.start(
                 profile.id,
                 run.grade,
-                run.totalWaves === 6 ? "short" : "standard",
+                missionLengthForWaves(run.totalWaves),
                 run.difficulty,
               ),
             renderCombat,
