@@ -234,3 +234,59 @@ test("correction retries persist separately, deduplicate commands and survive fa
   assert.equal(history.correctInitially, false);
   assert.equal(history.corrected, true);
 });
+
+test("mission length and combat difficulty preserve five questions and the shared countdown", () => {
+  for (const grade of ["K", "3", "6"] as const) {
+    for (const mission of ["standard", "short"] as const) {
+      for (const difficulty of ["easy", "standard"] as const) {
+        const data = new Map<string, string>();
+        const repository = new ProfileRepository({
+          getItem: (key) => data.get(key) ?? null,
+          setItem: (key, value) => {
+            data.set(key, value);
+          },
+        });
+        const session = new RunSession([], repository);
+        const id = session.createProfile("Cadet");
+        session.start(id, grade, mission, difficulty);
+        const run = session.profile(id).activeRun!;
+        assert.equal(run.totalWaves, mission === "short" ? 6 : 10);
+        assert.equal(run.difficulty, difficulty);
+        session.finishWave(id, { hp: 100, salvage: 8, medkits: 1 });
+        assert.equal(session.profile(id).activeRun!.quiz!.questions.length, 5);
+        assert.equal(session.profile(id).activeRun!.quiz!.remainingMs, 30000);
+        assert.deepEqual(
+          repository.load(),
+          JSON.parse(JSON.stringify(session.profiles)),
+        );
+      }
+    }
+  }
+});
+
+test("final-wave victories and defeats remove the active run without a quiz", () => {
+  for (const victory of [true, false]) {
+    const { session, id, repository } = setup();
+    const profiles = session.profiles;
+    const run = profiles[0].activeRun!;
+    run.wave = run.totalWaves;
+    run.phase = "combat";
+    run.quiz = undefined;
+    repository.commit(profiles);
+    const restored = new RunSession(repository.load(), repository);
+    assert.throws(
+      () => restored.finishWave(id, { hp: 50, salvage: 12, medkits: 0 }),
+      /final wave/,
+    );
+    const summary = restored.end(id, victory, {
+      hp: victory ? 50 : 0,
+      salvage: 12,
+      medkits: 0,
+    });
+    assert.equal(summary!.quiz, undefined);
+    assert.equal(summary!.salvage, 12);
+    assert.equal(restored.profile(id).activeRun, undefined);
+    assert.equal(restored.profile(id).victories, victory ? 1 : 0);
+    assert.equal(repository.load()[0].activeRun, undefined);
+  }
+});

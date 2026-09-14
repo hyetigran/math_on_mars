@@ -1,3 +1,4 @@
+import { moveOvermind } from "./overmind";
 import { ENEMY_BALANCE } from "../content/balance/enemies";
 import type { CombatEnemySaveV2, CombatSaveV2 } from "./types";
 
@@ -37,7 +38,11 @@ export function moveEnemy(
   const dx = distance ? x / distance : 1,
     dy = distance ? y / distance : 0;
   const kind = enemy.kind ?? "drifter";
-  if (kind === "drifter") {
+  if (enemy.boss) {
+    moveOvermind(enemy, state, deltaMs, slow, armorMultiplier);
+    return;
+  }
+  if (kind !== "spitter" && kind !== "charger") {
     enemy.x += (dx * enemy.speed * slow * deltaMs) / 1000;
     enemy.y += (dy * enemy.speed * slow * deltaMs) / 1000;
     return;

@@ -1,4 +1,5 @@
-import { ENEMY_BALANCE } from "../content/balance/enemies";
+import { overmindFanAngles } from "./overmind";
+import { ENEMY_BALANCE, OVERMIND_BALANCE } from "../content/balance/enemies";
 import { STATUS_BALANCE } from "../content/balance/status";
 import { CHAIN_BALANCE } from "../content/balance/chain";
 import Phaser from "phaser";
@@ -154,6 +155,17 @@ class MarsCombatScene extends Phaser.Scene {
     radius: number,
     kind: CombatEnemySaveV2["kind"],
   ): Phaser.GameObjects.Container {
+    if (kind === "splitter") {
+      const shape = this.add.graphics().lineStyle(4, 0x241d2e, 1);
+      for (const x of [-radius * 0.45, radius * 0.45]) {
+        shape
+          .fillStyle(0xac70e8, 1)
+          .fillEllipse(x, 0, radius * 1.4, radius * 1.8);
+        shape.strokeEllipse(x, 0, radius * 1.4, radius * 1.8);
+        shape.fillStyle(0xffefa2, 1).fillCircle(x, 0, 6);
+      }
+      return this.add.container(x, y, [shape]).setDepth(4);
+    }
     if (kind === "charger" || kind === "spitter") {
       const shape = this.add.graphics();
       shape.lineStyle(4, 0x241d2e, 1);
@@ -242,8 +254,7 @@ class MarsCombatScene extends Phaser.Scene {
       body.setPosition(enemy.x, enemy.y);
       if (
         enemy.attack?.phase === "windup" &&
-        enemy.kind &&
-        enemy.kind !== "drifter"
+        (enemy.kind === "spitter" || enemy.kind === "charger")
       ) {
         const attack = enemy.attack;
         const length =
@@ -282,6 +293,43 @@ class MarsCombatScene extends Phaser.Scene {
             (36 * attack.remainingMs) / ENEMY_BALANCE[enemy.kind].windupMs,
             5,
           );
+      }
+      const bossAttack = enemy.bossAttack;
+      if (bossAttack && bossAttack.phase !== "cooldown") {
+        const tuning = OVERMIND_BALANCE;
+        if (bossAttack.pattern === "slam") {
+          const radius =
+            bossAttack.phase === "windup"
+              ? tuning.slamRadius
+              : tuning.slamRadius *
+                (1 - bossAttack.remainingMs / tuning.slamDurationMs);
+          indicators
+            .lineStyle(bossAttack.phase === "windup" ? 3 : 10, 0xffe790, 1)
+            .strokeCircle(enemy.x, enemy.y, radius);
+        } else if (bossAttack.pattern === "fan") {
+          indicators.lineStyle(3, 0xffa1c0, 1);
+          for (const angle of overmindFanAngles(bossAttack.dx, bossAttack.dy)) {
+            indicators.lineBetween(
+              enemy.x,
+              enemy.y,
+              enemy.x + Math.cos(angle) * 200,
+              enemy.y + Math.sin(angle) * 200,
+            );
+          }
+        } else {
+          indicators.lineStyle(5, 0xc4ff99, 1);
+          for (const offset of [-65, 65])
+            indicators.strokeCircle(enemy.x + offset, enemy.y, 20);
+        }
+        if (bossAttack.phase === "windup")
+          indicators
+            .fillStyle(0xffffff, 1)
+            .fillRect(
+              enemy.x - 30,
+              enemy.y - enemy.radius - 18,
+              (60 * bossAttack.remainingMs) / tuning.windupMs,
+              6,
+            );
       }
       const y = enemy.y - enemy.radius - 12;
       if (enemy.slowRemainingMs > 0) {

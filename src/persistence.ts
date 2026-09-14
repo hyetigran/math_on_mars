@@ -1,4 +1,4 @@
-import { ENEMY_BALANCE } from "../content/balance/enemies";
+import { ENEMY_BALANCE, OVERMIND_BALANCE } from "../content/balance/enemies";
 import { NARRATION_CLIPS } from "./narration-manifest";
 import {
   AMMO_TYPES,
@@ -237,7 +237,37 @@ function combat(value: unknown, run: RecordValue): void {
     boolean(enemy.boss, "enemy.boss");
     if (enemy.kind !== undefined) {
       ensure(state.version === 2, "enemy kind version");
-      choice(enemy.kind, ["drifter", "spitter", "charger"], "enemy.kind");
+      choice(
+        enemy.kind,
+        ["drifter", "spitter", "charger", "splitter", "mini", "overmind"],
+        "enemy.kind",
+      );
+    }
+    if (enemy.bossAttack !== undefined) {
+      ensure(state.version === 2 && enemy.boss === true, "boss attack owner");
+      const attack = record(enemy.bossAttack, "boss attack");
+      choice(attack.pattern, ["slam", "fan", "summon"], "boss pattern");
+      choice(attack.phase, ["cooldown", "windup", "active"], "boss phase");
+      ensure(
+        attack.phase !== "active" || attack.pattern === "slam",
+        "active boss pattern",
+      );
+      const duration =
+        attack.phase === "cooldown"
+          ? OVERMIND_BALANCE.cooldownMs
+          : attack.phase === "windup"
+            ? OVERMIND_BALANCE.windupMs
+            : OVERMIND_BALANCE.slamDurationMs;
+      number(attack.remainingMs, "boss attack duration", 0, duration);
+      number(attack.dx, "boss aim x", -1, 1);
+      number(attack.dy, "boss aim y", -1, 1);
+      ensure(
+        Math.abs(Math.hypot(attack.dx as number, attack.dy as number) - 1) <
+          1e-6,
+        "boss aim",
+      );
+      boolean(attack.hit, "boss attack hit");
+      integer(attack.summons, "boss summons", 0, OVERMIND_BALANCE.summonLimit);
     }
     if (enemy.attack !== undefined) {
       ensure(
