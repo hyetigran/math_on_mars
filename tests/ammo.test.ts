@@ -241,3 +241,54 @@ test("a selected batch merges only chosen pairs and leaves other cartridges avai
   assert.ok(retained.every((id) => run.ammo.some((a) => a.id === id)));
   assert.equal(run.ammo.filter((a) => a.tier === 4).length, 1);
 });
+
+test("forge selection is atomic, preserves overflow and duplicates, and cannot repeat after resume", () => {
+  const { session, id, repository, fail } = setup();
+  const profiles = session.profiles;
+  const run = profiles[0].activeRun!;
+  run.phase = "shop";
+  const types = [
+    "Piercing",
+    "Multi Shot",
+    "Electric Chain",
+    "Frost",
+    "Fiery",
+  ] as const;
+  run.ammo.push(
+    ...types.map((type, index) => ({
+      id: `purple-${index}`,
+      type,
+      tier: 4 as const,
+    })),
+  );
+  run.ammo.push({ id: "spare", type: "Frost", tier: 4 });
+  const originalActive = [...run.activeAmmoIds];
+  const selected = {
+    runId: run.id,
+    revision: run.interactionRevision ?? 0,
+    ingredientIds: types.map((_, index) => `purple-${index}`),
+  };
+  const forgeSession = new RunSession(profiles, repository);
+  fail(true);
+  assert.throws(() => forgeSession.forge(id, selected));
+  assert.deepEqual(forgeSession.profiles, profiles);
+  fail(false);
+  forgeSession.forge(id, {
+    ...selected,
+    ingredientIds: selected.ingredientIds.slice(1),
+  });
+  assert.deepEqual(forgeSession.profiles, profiles);
+  forgeSession.forge(id, selected);
+  const forged = forgeSession.profile(id).activeRun!;
+  assert.equal(forged.forgedOmni, true);
+  assert.equal(forged.activeAmmoIds.length, 1);
+  assert.ok(
+    forged.ammo.find((a) => a.id === forged.activeAmmoIds[0])!.legendary,
+  );
+  assert.ok(forged.ammo.some((a) => a.id === originalActive[0]));
+  assert.ok(forged.ammo.some((a) => a.id === "spare"));
+  const resumed = new RunSession(repository.load(), repository);
+  const before = resumed.profiles;
+  resumed.forge(id, selected);
+  assert.deepEqual(resumed.profiles, before);
+});

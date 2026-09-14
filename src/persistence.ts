@@ -42,6 +42,10 @@ function inventoryRecord(value: unknown): void {
   const ammo = list(inventory.ammo, "ammo inventory items");
   uniqueIds(ammo, "ammo inventory");
   ammo.forEach(ammoRecord);
+  ensure(
+    ammo.filter((a) => ammoRecord(a).legendary).length <= 1,
+    "multiple legendary cartridges",
+  );
   const active = list(inventory.activeAmmoIds, "equipped ammo");
   ensure(
     active.length <= (inventory.ammoCapacity as number) &&
@@ -361,6 +365,7 @@ export function decodeProfiles(raw: string): Profile[] {
     integer(run.medkits, "run.medkits");
     integer(run.ammoCapacity, "run.ammoCapacity", 1, 4);
     boolean(run.cacheClaimed, "run.cacheClaimed");
+    if (run.forgedOmni !== undefined) boolean(run.forgedOmni, "forged flag");
     for (const id of list(run.shopBought, "run.shopBought"))
       string(id, "shop offer ID");
     if (run.shop !== undefined) {

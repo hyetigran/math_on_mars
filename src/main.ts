@@ -1,3 +1,10 @@
+import {
+  previewForge,
+  retainedForgeLoadout,
+  omniEquipped,
+  omniRateBonus,
+} from "./forge";
+import { AMMO_BALANCE } from "../content/balance/ammo";
 import { ammoSellPrice, previewMerges } from "./ammo";
 import { rerollPrice } from "./shop";
 import { CheckpointQueue } from "./checkpoint-queue";
@@ -690,8 +697,8 @@ function renderShop(message = ""): void {
       <div class="shop-offers">${offers.map((offer, i) => (offer.purchased ? `<article class="shop-offer bought"><span>0${i + 1}</span><p>Purchased · slot empty</p></article>` : `<article class="shop-offer ${run.shopBought.includes(offer.id) ? "bought" : ""}"><span>0${i + 1}</span><div class="shop-offer-icon ${offer.kind}" aria-hidden="true"><i></i></div><h3>${escapeHtml(offer.title)}</h3>${offer.kind === "module" ? `<p>${QUALITY_LABEL[offer.module.quality]} ${qualityPips(offer.module.quality)} · ${moduleStatus(offer.module, run.modules)}</p>` : ""}<p>${offer.module ? statText(offer.module) : offer.detail}</p>${offer.module ? `<p>${rewardPreview(offer.module, run)}</p>` : ""}<button class="button secondary" data-buy="${escapeHtml(offer.id)}" ${offer.disabled || run.shopBought.includes(offer.id) ? "disabled" : ""}>${run.shopBought.includes(offer.id) ? "Bought" : `Buy · ${offer.price} salvage`}</button></article>`)).join("")}</div>
       <button id="reroll-shop" class="button secondary">Reroll unpurchased · ${rerollPrice(run)} salvage</button><p>Buy all four for a free refill. Purchased slots stay empty until then.</p>
     </section>
-    <section class="loadout"><details><summary>Marine stats</summary><p>${marineStats(run)}</p></details><div class="loadout-heading"><div><p class="eyebrow">YOUR EQUIPMENT</p><h2>Pulse Blaster</h2><p>Tap Equip on any ammo card. When your active slots are full, it replaces the rightmost ammo.</p></div>${purpleTypes > 0 || canForge(run) ? `<div class="omni-progress"><small>OMNI AMMO</small><b>${purpleTypes} / 5</b><button id="forge-button" class="button forge" ${canForge(run) ? "" : "disabled"}>${canForge(run) ? "Forge Omni" : "Collect 5 Purple types"}</button></div>` : ""}</div>
-      <div class="weapon-dock"><div class="blaster-card"><div class="blaster-icon" aria-hidden="true"><i></i></div><div><small>ONE WEAPON</small><b>Pulse Blaster</b></div></div><div class="loaded-ammo"><small>ACTIVE AMMO · ${activeAmmo.length}/${run.ammoCapacity}</small><div>${activeAmmo.map((ammo) => `<span>${ammo.legendary ? "Omni" : ammo.type} T${ammo.tier}</span>`).join("") || "<em>No ammo equipped</em>"}${Array.from({ length: Math.max(0, run.ammoCapacity - activeAmmo.length) }, () => "<i>Empty</i>").join("")}</div></div></div>
+    <section class="loadout"><details><summary>Marine stats</summary><p>${marineStats(run)}</p></details><div class="loadout-heading"><div><p class="eyebrow">YOUR EQUIPMENT</p><h2>Pulse Blaster</h2><p>Tap Equip on any ammo card. When your active slots are full, it replaces the rightmost ammo.</p></div>${purpleTypes > 0 || canForge(run) ? `<div class="omni-progress"><small>OMNI AMMO</small><b>${purpleTypes} / 5</b><button id="forge-button" class="button forge" >View forge recipe</button></div>` : ""}</div>
+      <div class="weapon-dock"><div class="blaster-card"><div class="blaster-icon" aria-hidden="true"><i></i></div><div><small>ONE WEAPON</small><b>Pulse Blaster</b></div></div><div class="loaded-ammo"><small>ACTIVE AMMO · ${activeAmmo.length}/${run.ammoCapacity}</small>${omniEquipped(run) ? `<p>Omni stabilizer: +${Math.round(omniRateBonus(run) * 100)}% firing rate. Extra normal ammo adds no power.</p>` : ""}<div>${activeAmmo.map((ammo) => `<span>${ammo.legendary ? "Omni" : ammo.type} T${ammo.tier}</span>`).join("") || "<em>No ammo equipped</em>"}${Array.from({ length: Math.max(0, run.ammoCapacity - activeAmmo.length) }, () => "<i>Empty</i>").join("")}</div></div></div>
       <div class="reserve"><div class="panel-heading compact"><div><p class="eyebrow">AMMO LOCKER</p><h3>Owned ammo</h3></div><span>${run.ammo.length} cartridge${run.ammo.length === 1 ? "" : "s"}</span></div><div class="reserve-grid">${reserveStacks(run)}</div></div>
       ${merges ? `<div class="merge-row"><div><p class="eyebrow">READY TO UPGRADE</p><span>Combine two matching cartridges into one stronger cartridge.</span></div><details><summary>Preview ${mergePreview.pairs.length} merge${mergePreview.pairs.length === 1 ? "" : "s"}</summary><ul>${merges}</ul><p>Only these pairs are combined. New results stay available for your next merge.</p><button id="confirm-merges" class="button secondary">Confirm merges</button></details></div>` : ""}
     </section>
@@ -788,11 +795,53 @@ function reserveStacks(run: RunState): string {
 }
 
 function forgeOmni(): void {
-  if (!paused)
-    perform(
-      () => session.forge(activeProfileId!),
-      () => renderShop("Legendary Omni forged: all five effects in one slot."),
-    );
+  if (paused) return;
+  cleanup();
+  const run = activeRun();
+  const preview = previewForge(run);
+  app.innerHTML = shell(
+    `<section class="shop-screen" id="content"><p class="eyebrow">LEGENDARY FORGE</p><h1>Legendary Omni Ammo</h1><p>Combine five purple cartridges into all five effects in one slot. Once per run.</p>
+    ${AMMO_TYPES.map((type) => {
+      const copies = run.ammo.filter(
+        (a) => !a.legendary && a.type === type && a.tier === 4,
+      );
+      return `<label class="forge-ingredient">${type} · Purple ●●●● <select data-forge-type="${type}" ${copies.length ? "" : "disabled"}>${copies.length ? copies.map((a, index) => `<option value="${escapeHtml(a.id)}">Copy ${index + 1}${run.activeAmmoIds.includes(a.id) ? " · equipped" : " · reserve"}</option>`).join("") : '<option value="">Missing ingredient</option>'}</select></label>`;
+    }).join("")}
+    <p id="forge-loadout"></p><p>Omni stabilizer: +${Math.round((run.ammoCapacity - 1) * AMMO_BALANCE.omniRatePerExtraSlot * 100)}% firing rate while equipped. Normal ammo adds no extra effects alongside Omni.</p><p>Unconsumed cartridges stay owned, including any moved out of active slots.</p>
+    <button id="confirm-forge" class="button forge" ${canForge(run) ? "" : "disabled"}>${run.forgedOmni || run.ammo.some((a) => a.legendary) ? "Already forged this run" : "Forge selected cartridges"}</button><button id="back-shop" class="text-button">Back to shop</button><button id="save-exit" class="text-button">Save & exit</button></section>`,
+    "shop-shell",
+  );
+  const selected = () =>
+    Array.from(
+      document.querySelectorAll<HTMLSelectElement>("[data-forge-type]"),
+    ).map((select) => select.value);
+  const updatePreview = () => {
+    const retained = retainedForgeLoadout(run, selected());
+    document.querySelector("#forge-loadout")!.textContent =
+      `Resulting active slots, in priority order: Omni${retained
+        .map((id) => {
+          const ammo = run.ammo.find((a) => a.id === id)!;
+          return ` → ${ammo.type} T${ammo.tier} (redundant)`;
+        })
+        .join("")}.`;
+  };
+  document
+    .querySelectorAll("[data-forge-type]")
+    .forEach((select) => select.addEventListener("change", updatePreview));
+  updatePreview();
+  document.querySelector("#confirm-forge")!.addEventListener("click", () => {
+    const choice = { ...preview, ingredientIds: selected() };
+    if (!paused)
+      void perform(
+        () => session.forge(activeProfileId!, choice),
+        () => renderShop("Forge selection resolved."),
+      );
+  });
+  document
+    .querySelector("#back-shop")!
+    .addEventListener("click", () => renderShop());
+  document.querySelector("#save-exit")!.addEventListener("click", saveAndExit);
+  bindHome();
 }
 
 function endRun(victory: boolean, state?: CombatSnapshot): void {

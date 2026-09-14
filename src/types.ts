@@ -195,6 +195,7 @@ export interface AmmoInventory {
   ammoBag?: AmmoType[];
 }
 export interface RunState extends AmmoInventory {
+  forgedOmni?: boolean;
   choiceCache?: ChoiceCache;
   shop?: ShopState;
   interactionRevision?: number;

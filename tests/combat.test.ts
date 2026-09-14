@@ -470,3 +470,43 @@ test("Frost and Fiery tiers retain exact status reservoirs and tick progress acr
     }
   }
 });
+
+test("Omni applies each effect once and capacity stabilizes firing rate only while equipped", () => {
+  for (const capacity of [1, 2, 3, 4]) {
+    const ammo = [
+      {
+        id: "omni",
+        type: "Piercing" as const,
+        tier: 4 as const,
+        legendary: true,
+      },
+      { id: "normal", type: "Multi Shot" as const, tier: 4 as const },
+    ];
+    const sim = new CombatSimulation({
+      ...options,
+      ammo,
+      ammoCapacity: capacity,
+      activeAmmoIds: capacity > 1 ? ["omni", "normal"] : ["omni"],
+    });
+    assert.ok(
+      Math.abs(sim.shotDelay - 520 / (1 + (capacity - 1) * 0.04)) < 1e-8,
+    );
+    sim.state.enemies = [enemy(1, 850, 270)];
+    sim.state.spawned = 1;
+    sim.state.spawnTotal = 1;
+    sim.state.nextEnemyId = 2;
+    sim.advance(STEP);
+    assert.equal(sim.state.bolts.length, 5);
+    assert.equal(sim.state.shots[0].chainRemaining, 4);
+    assert.equal(sim.state.shots[0].frost, 4);
+    assert.equal(sim.state.shots[0].fiery, 4);
+    assert.ok(Math.abs(sim.state.shots[0].burnFunds - 16.2) < 1e-8);
+    const ordinary = new CombatSimulation({
+      ...options,
+      ammo,
+      ammoCapacity: capacity,
+      activeAmmoIds: ["normal"],
+    });
+    assert.equal(ordinary.shotDelay, 520);
+  }
+});

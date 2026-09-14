@@ -1,6 +1,7 @@
 /** MVP ammo economy v1. Optional drops supplement the guaranteed cache route. */
 export const AMMO_BALANCE = {
   version: 1,
+  omniRatePerExtraSlot: 0.04,
   standardCacheWaves: [1, 3, 5, 7, 8],
   shortCacheWaves: [1, 2, 3, 4, 5],
   dropEveryEnemyId: 4,

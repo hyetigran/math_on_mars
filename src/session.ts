@@ -1,3 +1,5 @@
+import { applyForge, previewForge, type ForgePreview } from "./forge";
+export { canForge } from "./forge";
 import { AMMO_BALANCE } from "../content/balance/ammo";
 import {
   acquireAmmo,
@@ -56,14 +58,6 @@ export function timeQuality(remaining: number): Quality {
       : remaining > 0
         ? "green"
         : "white";
-}
-export function canForge(run: RunState): boolean {
-  return (
-    !run.ammo.some((a) => a.legendary) &&
-    AMMO_TYPES.every((type) =>
-      run.ammo.some((a) => a.type === type && a.tier === 4),
-    )
-  );
 }
 function newRun(grade: Grade): RunState {
   const starter: Ammo = { id: uid("ammo"), type: "Piercing", tier: 1 };
@@ -486,25 +480,9 @@ export class RunSession {
       return "Cartridge sold.";
     });
   }
-  forge(id: string): void {
+  forge(id: string, preview?: ForgePreview): void {
     this.command(id, "shop", (run) => {
-      if (!canForge(run)) return;
-      const consumed = AMMO_TYPES.map(
-        (type) => run.ammo.find((a) => a.type === type && a.tier === 4)!.id,
-      );
-      run.ammo = run.ammo.filter((a) => !consumed.includes(a.id));
-      run.activeAmmoIds = run.activeAmmoIds.filter(
-        (active) => !consumed.includes(active),
-      );
-      const omni: Ammo = {
-        id: uid("ammo"),
-        type: "Piercing",
-        tier: 4,
-        legendary: true,
-      };
-      run.ammo.push(omni);
-      if (run.activeAmmoIds.length >= run.ammoCapacity) run.activeAmmoIds.pop();
-      run.activeAmmoIds.unshift(omni.id);
+      applyForge(run, preview ?? previewForge(run));
     });
   }
   nextWave(id: string): void {
