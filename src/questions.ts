@@ -294,26 +294,61 @@ export function makeQuestions(
     }
     if (grade === "5") {
       if (i % 2) {
-        const a = pickInt(rand, 11, 49);
-        const b = pickInt(rand, 11, 39);
+        const first = pickInt(rand, 11, 49),
+          second = pickInt(rand, 11, 39);
+        const subtract = i === 3;
+        const a = subtract ? Math.max(first, second) : first;
+        const b = subtract ? Math.min(first, second) : second;
+        const result = subtract ? a - b : a + b;
         return q(
           i,
-          `${(a / 10).toFixed(1)} + ${(b / 10).toFixed(1)} = ?`,
-          fraction(a + b, 10),
-          "Line up the decimal points.",
-          `${(a / 10).toFixed(1)} plus ${(b / 10).toFixed(1)} equals ${((a + b) / 10).toFixed(1)}.`,
+          `${(a / 10).toFixed(1)} ${subtract ? "−" : "+"} ${(b / 10).toFixed(1)} = ?`,
+          fraction(result, 10),
+          "Line up the decimal points and work in tenths.",
+          `${a} tenths ${subtract ? "minus" : "plus"} ${b} tenths is ${result} tenths, or ${(result / 10).toFixed(1)}.`,
         );
       }
-      const d1 = pickInt(rand, 2, 5);
-      const d2 = pickInt(rand, 2, 5);
+      let d1 = pickInt(rand, 2, 9);
+      let d2 = 2 + ((d1 - 2 + pickInt(rand, 1, 7)) % 8);
+      let n1 = pickInt(rand, 1, d1 - 1),
+        n2 = pickInt(rand, 1, d2 - 1);
+      const subtract = i === 2;
+      if (subtract && n1 * d2 < n2 * d1) {
+        [n1, n2] = [n2, n1];
+        [d1, d2] = [d2, d1];
+      }
+      const result = n1 * d2 + (subtract ? -n2 * d1 : n2 * d1);
       return q(
         i,
-        `1/${d1} + 1/${d2} = ?`,
-        fraction(d1 + d2, d1 * d2),
+        `${n1}/${d1} ${subtract ? "−" : "+"} ${n2}/${d2} = ?`,
+        fraction(result, d1 * d2),
         "Find a common denominator first.",
-        `A common denominator is ${d1 * d2}; the sum is ${d1 + d2}/${d1 * d2}.`,
+        `Rewrite the fractions as ${n1 * d2}/${d1 * d2} and ${n2 * d1}/${d1 * d2}. ${subtract ? "Subtract" : "Add"} the numerators to get ${result}/${d1 * d2}.`,
         undefined,
         "fraction",
+      );
+    }
+    if (i === 4) {
+      const fuel = pickInt(rand, 1, 6),
+        coolant = pickInt(rand, 1, 6),
+        scale = pickInt(rand, 2, 6);
+      return q(
+        i,
+        `Fuel and coolant use the ratio ${fuel}:${coolant}. For ${fuel * scale} fuel cells, how many coolant cells?`,
+        [coolant * scale, 1],
+        `Multiply both parts of the ratio by the same number.`,
+        `${fuel * scale} is ${scale} times ${fuel}, so coolant is ${scale} times ${coolant}, or ${coolant * scale}.`,
+      );
+    }
+    if (i === 3) {
+      const x = pickInt(rand, 2, 12),
+        factor = pickInt(rand, 2, 9);
+      return q(
+        i,
+        `${factor} × x = ${factor * x}. x = ?`,
+        [x, 1],
+        `Undo multiplication by dividing both sides by ${factor}.`,
+        `${factor * x} divided by ${factor} is ${x}, so x equals ${x}.`,
       );
     }
     if (i % 3 === 0) {
