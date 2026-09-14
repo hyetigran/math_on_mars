@@ -1,3 +1,4 @@
+import { STATUS_BALANCE } from "../content/balance/status";
 import { CHAIN_BALANCE } from "../content/balance/chain";
 import { AMMO_BALANCE } from "../content/balance/ammo";
 import { acquireAmmo, drawAmmo } from "./ammo";
@@ -49,8 +50,6 @@ export interface ChainFlash {
   to: Position;
 }
 const STEP_MS = 1000 / 60;
-const BURN_FRACTION = [0, 0.3, 0.45, 0.6, 0.9];
-const SLOW_FRACTION = [0, 0.2, 0.25, 0.3, 0.4];
 const distance = (a: Position, b: Position): number =>
   Math.hypot(a.x - b.x, a.y - b.y);
 const clamp = (n: number, min: number, max: number): number =>
@@ -231,7 +230,7 @@ export class CombatSimulation {
       chainRemaining: tiers["Electric Chain"],
       chainStarted: false,
       chainVisited: [],
-      burnFunds: BURN_FRACTION[tiers.Fiery] * this.baseDamage,
+      burnFunds: STATUS_BALANCE.burnFractions[tiers.Fiery] * this.baseDamage,
       frost: tiers.Frost,
       fiery: tiers.Fiery,
     };
@@ -270,18 +269,23 @@ export class CombatSimulation {
     if (shot.frost) {
       enemy.slowAmount = Math.max(
         enemy.slowRemainingMs > 0 ? enemy.slowAmount : 0,
-        SLOW_FRACTION[shot.frost] * (enemy.boss ? 0.5 : 1),
+        STATUS_BALANCE.slowFractions[shot.frost] *
+          (enemy.boss ? STATUS_BALANCE.bossSlowMultiplier : 1),
       );
-      enemy.slowRemainingMs = 2000;
+      enemy.slowRemainingMs = STATUS_BALANCE.slowDurationMs;
     }
     if (shot.fiery && shot.burnFunds > 0) {
       const rate = Math.max(
         enemy.burnRate,
-        (BURN_FRACTION[shot.fiery] * damage) / 3,
+        (STATUS_BALANCE.burnFractions[shot.fiery] * damage) /
+          STATUS_BALANCE.burnDurationSeconds,
       );
       const added = Math.min(
         shot.burnFunds,
-        Math.max(0, 3 * rate - enemy.burnRemainingDamage),
+        Math.max(
+          0,
+          STATUS_BALANCE.burnDurationSeconds * rate - enemy.burnRemainingDamage,
+        ),
       );
       if (added > 0) {
         shot.burnFunds -= added;

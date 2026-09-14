@@ -426,3 +426,47 @@ test("Electric Chain adds no extra damage against an isolated boss", () => {
   assert.equal(sim.state.enemies[0].hp, 982);
   assert.equal(sim.drainChainFlashes().length, 0);
 });
+
+test("Frost and Fiery tiers retain exact status reservoirs and tick progress across resume", () => {
+  for (const tier of [1, 2, 3, 4] as const) {
+    for (const boss of [false, true]) {
+      const sim = fixture([{ ...enemy(1, 530, 270), boss }]);
+      const budget = 18 * [0.3, 0.45, 0.6, 0.9][tier - 1];
+      sim.state.shots = [shot({ frost: tier, fiery: tier, burnFunds: budget })];
+      sim.state.bolts = [
+        {
+          id: 1,
+          shotId: 1,
+          x: 480,
+          y: 270,
+          vx: 5600,
+          vy: 0,
+          damage: 18,
+          pierce: 0,
+          hitIds: [],
+        },
+      ];
+      sim.advance(STEP);
+      const target = sim.state.enemies[0];
+      assert.equal(
+        target.slowAmount,
+        [0.2, 0.25, 0.3, 0.4][tier - 1] * (boss ? 0.5 : 1),
+      );
+      assert.equal(target.slowRemainingMs, 2000);
+      assert.ok(Math.abs(target.burnRemainingDamage - budget) < 1e-8);
+      sim.advance(7);
+      const resumed = new CombatSimulation({
+        ...options,
+        restore: sim.serialize(),
+      });
+      for (let i = 0; i < 181; i++) {
+        sim.advance(STEP);
+        resumed.advance(STEP);
+      }
+      assert.deepEqual(resumed.serialize(), sim.serialize());
+      assert.equal(resumed.state.enemies[0].slowRemainingMs, 0);
+      assert.equal(resumed.state.enemies[0].burnRemainingDamage, 0);
+      assert.ok(Math.abs(resumed.state.enemies[0].hp - (982 - budget)) < 1e-7);
+    }
+  }
+});

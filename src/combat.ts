@@ -1,3 +1,4 @@
+import { STATUS_BALANCE } from "../content/balance/status";
 import { CHAIN_BALANCE } from "../content/balance/chain";
 import Phaser from "phaser";
 import type { CombatSave } from "./types";
@@ -73,6 +74,7 @@ export class CombatController {
 }
 
 class MarsCombatScene extends Phaser.Scene {
+  private statusIndicators?: Phaser.GameObjects.Graphics;
   private marine!: Phaser.GameObjects.Container;
   private enemies = new Map<number, Phaser.GameObjects.Container>();
   private pickups = new Map<number, Phaser.GameObjects.Rectangle>();
@@ -186,6 +188,10 @@ class MarsCombatScene extends Phaser.Scene {
 
   private renderState(): void {
     const state = this.simulation.state;
+    const indicators = (this.statusIndicators ??= this.add
+      .graphics()
+      .setDepth(6));
+    indicators.clear();
     this.marine.setPosition(state.marine.x, state.marine.y);
     const enemyIds = new Set(state.enemies.map((e) => e.id));
     for (const [id, body] of this.enemies)
@@ -200,6 +206,47 @@ class MarsCombatScene extends Phaser.Scene {
         this.enemies.set(enemy.id, body);
       }
       body.setPosition(enemy.x, enemy.y);
+      const y = enemy.y - enemy.radius - 12;
+      if (enemy.slowRemainingMs > 0) {
+        const x = enemy.x - 11;
+        indicators.lineStyle(2, STATUS_BALANCE.frostColor, 1);
+        for (let spoke = 0; spoke < 3; spoke++) {
+          const angle = (spoke * Math.PI) / 3;
+          const dx = Math.cos(angle) * 5,
+            dy = Math.sin(angle) * 5;
+          indicators.lineBetween(x - dx, y - dy, x + dx, y + dy);
+        }
+        indicators
+          .fillStyle(STATUS_BALANCE.frostColor, 1)
+          .fillRect(
+            x - 7,
+            y + 8,
+            14 *
+              Math.min(
+                1,
+                enemy.slowRemainingMs / STATUS_BALANCE.slowDurationMs,
+              ),
+            2,
+          );
+      }
+      if (enemy.burnRemainingDamage > 0 && enemy.burnRate > 0) {
+        const x = enemy.x + 11;
+        indicators
+          .fillStyle(STATUS_BALANCE.burnColor, 1)
+          .fillTriangle(x, y - 6, x - 5, y + 4, x + 5, y + 4);
+        indicators
+          .fillStyle(0xffedb4, 1)
+          .fillTriangle(x, y - 1, x - 2, y + 4, x + 2, y + 4);
+        const remaining = enemy.burnRemainingDamage / enemy.burnRate;
+        indicators
+          .fillStyle(STATUS_BALANCE.burnColor, 1)
+          .fillRect(
+            x - 7,
+            y + 8,
+            14 * Math.min(1, remaining / STATUS_BALANCE.burnDurationSeconds),
+            2,
+          );
+      }
     }
     const pickupIds = new Set((state.pickups ?? []).map((p) => p.id));
     for (const [id, body] of this.pickups) {
