@@ -164,7 +164,19 @@ export interface CombatSaveV2 extends Omit<
 
 export type CombatSave = CombatSaveV1 | CombatSaveV2;
 
+export type ShopItem = { id: string; title: string; price: number } & (
+  | { kind: "module"; module: Module; ammoType?: never }
+  | { kind: "ammo"; ammoType: AmmoType; module?: never }
+  | { kind: "medkit" | "expand" | "repair"; module?: never; ammoType?: never }
+);
+export interface ShopState {
+  round: number;
+  paidRerolls: number;
+  offers: ShopItem[];
+}
+
 export interface RunState {
+  shop?: ShopState;
   interactionRevision?: number;
   id: string;
   grade: Grade;

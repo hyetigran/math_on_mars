@@ -1,4 +1,12 @@
-import { rewardModules, moduleTotal } from "./modules";
+import {
+  createShop,
+  migrateShop,
+  refreshShop,
+  rerollShop,
+  shopOffers,
+} from "./shop";
+export { shopOffers } from "./shop";
+import { rewardModules, installModule } from "./modules";
 import { isCorrect, makeQuestions, parseNumericAnswer } from "./questions";
 import {
   AMMO_TYPES,
@@ -21,13 +29,6 @@ export interface CombatOutcome {
   hp: number;
   salvage: number;
   medkits: number;
-}
-export interface ShopOffer {
-  id: string;
-  title: string;
-  detail: string;
-  price: number;
-  disabled: boolean;
 }
 export interface Checkpoint {
   runId?: string;
@@ -52,41 +53,6 @@ export function canForge(run: RunState): boolean {
       run.ammo.some((a) => a.type === type && a.tier === 4),
     )
   );
-}
-export function shopOffers(run: RunState): ShopOffer[] {
-  return [
-    {
-      id: "expand",
-      title: "Ammo Expander",
-      detail:
-        run.ammoCapacity < 4
-          ? `Equip ${run.ammoCapacity + 1} ammo effects at once`
-          : "Active ammo slots are full",
-      price: [8, 16, 24][run.ammoCapacity - 1] ?? 24,
-      disabled: run.ammoCapacity >= 4,
-    },
-    {
-      id: "medkit",
-      title: "Med-gel",
-      detail: "Carry one extra heal into combat",
-      price: 5,
-      disabled: false,
-    },
-    {
-      id: "ammo",
-      title: `${AMMO_TYPES[run.wave % AMMO_TYPES.length]} Ammo`,
-      detail: "Add one White T1 cartridge to your locker",
-      price: 6,
-      disabled: false,
-    },
-    {
-      id: "repair",
-      title: "Suit Repair",
-      detail: "Restore 30 Suit Integrity",
-      price: 4,
-      disabled: run.hp >= run.maxHp,
-    },
-  ];
 }
 function newRun(grade: Grade): RunState {
   const starter: Ammo = { id: uid("ammo"), type: "Piercing", tier: 1 };
@@ -317,11 +283,7 @@ export class RunSession {
       const module = quiz.rewardChoices?.find((m) => m.id === rewardId);
       if (!module) return;
       quiz.selectedReward = rewardId;
-      const previousHpBonus = moduleTotal(run.modules, "maxHp");
-      run.modules.push(module);
-      const hpGain = moduleTotal(run.modules, "maxHp") - previousHpBonus;
-      run.maxHp += hpGain;
-      run.hp += hpGain;
+      installModule(run, module);
       run.phase = quiz.attempts.some((a) => !a.corrected)
         ? "correction"
         : "cache";
@@ -380,25 +342,30 @@ export class RunSession {
         });
       run.cacheClaimed = true;
       run.phase = "shop";
+      createShop(run);
     });
+  }
+  openShop(id: string): void {
+    this.command(id, "shop", (run) => migrateShop(run));
+  }
+  reroll(id: string): string | undefined {
+    return this.command(id, "shop", (run) => rerollShop(run));
   }
   buy(id: string, offerId: string): string | undefined {
     return this.command(id, "shop", (run) => {
       const offer = shopOffers(run).find((o) => o.id === offerId);
-      if (!offer || offer.disabled || run.shopBought.includes(offerId))
+      if (!offer || offer.disabled || offer.purchased)
         return "That offer is unavailable.";
       if (run.salvage < offer.price) return "Not enough salvage yet.";
       run.salvage -= offer.price;
-      run.shopBought.push(offerId);
-      if (offerId === "expand") run.ammoCapacity++;
-      if (offerId === "medkit") run.medkits++;
-      if (offerId === "ammo")
-        run.ammo.push({
-          id: uid("ammo"),
-          type: AMMO_TYPES[run.wave % AMMO_TYPES.length],
-          tier: 1,
-        });
-      if (offerId === "repair") run.hp = Math.min(run.maxHp, run.hp + 30);
+      run.shopBought.push(offer.id);
+      if (offer.kind === "expand") run.ammoCapacity++;
+      if (offer.kind === "medkit") run.medkits++;
+      if (offer.kind === "repair") run.hp = Math.min(run.maxHp, run.hp + 30);
+      if (offer.kind === "ammo")
+        run.ammo.push({ id: uid("ammo"), type: offer.ammoType!, tier: 1 });
+      if (offer.kind === "module") installModule(run, offer.module);
+      refreshShop(run);
       return "Purchase installed.";
     });
   }
@@ -478,6 +445,7 @@ export class RunSession {
       run.combatSave = undefined;
       run.cacheClaimed = false;
       run.shopBought = [];
+      run.shop = undefined;
     });
   }
   end(

@@ -3,6 +3,7 @@ import {
   type Modifier,
   type Stat,
   type Quality,
+  type RunState,
   uid,
 } from "./types";
 
@@ -132,7 +133,7 @@ const CATALOG: Variant[] = [
   ),
 ];
 /** Store exact, positive gains at offer creation; legacy single-stat modules retain their values. */
-export function rewardModules(
+export function moduleCandidates(
   quality: Quality,
   wave: number,
   owned: Module[],
@@ -166,10 +167,30 @@ export function rewardModules(
       },
     ];
   });
+  return eligible;
+}
+
+export function rewardModules(
+  quality: Quality,
+  wave: number,
+  owned: Module[],
+): Module[] {
+  const eligible = moduleCandidates(quality, wave, owned);
   const first = eligible[0];
   const different = eligible.find((m) => m.stat !== first?.stat);
   const third = eligible.find((m) => m !== first && m !== different);
   if (!first || !different || !third)
     throw new Error("No three useful reward variants available.");
   return [first, different, third];
+}
+
+export function installModule(
+  run: Pick<RunState, "modules" | "hp" | "maxHp">,
+  module: Module,
+): void {
+  const before = moduleTotal(run.modules, "maxHp");
+  run.modules.push(module);
+  const gain = moduleTotal(run.modules, "maxHp") - before;
+  run.maxHp += gain;
+  run.hp += gain;
 }

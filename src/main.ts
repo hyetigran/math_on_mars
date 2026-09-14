@@ -1,3 +1,4 @@
+import { rerollPrice } from "./shop";
 import { CheckpointQueue } from "./checkpoint-queue";
 import { modifiers, moduleTotal } from "./modules";
 import "./style.css";
@@ -518,7 +519,7 @@ function renderReward(): void {
   app.innerHTML = shell(
     `<section class="reward-screen" id="content">
     <div class="reward-heading"><p class="eyebrow warm">FABRICATOR ONLINE</p><h1>Choose one upgrade</h1><p>${formatTime(quiz.remainingMs)} seconds remaining · Reward strengths are prototype tuning.</p><div class="outcome-row"><div><small>Time tier</small><b>${QUALITY_LABEL[candidate]}</b></div><span>− ${wrong} ${wrong === 1 ? "miss" : "misses"}</span><div class="quality-badge ${quality}">${qualityPips(quality)}<b>${QUALITY_LABEL[quality]}</b></div></div></div>
-    <div class="reward-grid">${quiz.rewardChoices!.map((module, i) => `<article class="reward-card ${quality}"><div class="card-index">0${i + 1}</div><div class="module-icon ${module.stat}" aria-hidden="true"><i></i></div><p class="eyebrow">${moduleStatus(module, run.modules)}</p><h2>${module.name}</h2><div class="card-quality">${QUALITY_LABEL[quality]} ${qualityPips(quality)}</div><p class="stat-gain">${statText(module)}</p><p>${moduleDescription(module.stat)}</p><p>${rewardPreview(module, run)}</p><button class="button primary" data-reward="${module.id}">Choose module</button></article>`).join("")}</div>
+    <div class="reward-grid">${quiz.rewardChoices!.map((module, i) => `<article class="reward-card ${quality}"><div class="card-index">0${i + 1}</div><div class="module-icon ${module.stat}" aria-hidden="true"><i></i></div><p class="eyebrow">${moduleStatus(module, run.modules)}</p><h2>${escapeHtml(module.name)}</h2><div class="card-quality">${QUALITY_LABEL[quality]} ${qualityPips(quality)}</div><p class="stat-gain">${statText(module)}</p><p>${moduleDescription(module.stat)}</p><p>${rewardPreview(module, run)}</p><button class="button primary" data-reward="${module.id}">Choose module</button></article>`).join("")}</div>
     <button id="save-exit" class="text-button centered">Save & exit</button>
   </section>`,
     "reward-shell",
@@ -650,6 +651,13 @@ function renderCache(): void {
 function renderShop(message = ""): void {
   cleanup();
   const run = activeRun();
+  if (!run.shop) {
+    void perform(
+      () => session.openShop(activeProfileId!),
+      () => renderShop(),
+    );
+    return;
+  }
   const offers = shopOffers(run);
   const activeAmmo = run.activeAmmoIds
     .map((id) => run.ammo.find((ammo) => ammo.id === id))
@@ -663,7 +671,8 @@ function renderShop(message = ""): void {
   app.innerHTML = shell(
     `<section class="shop-screen" id="content"><div class="shop-top"><div><p class="eyebrow warm">BETWEEN WAVES</p><h1>Gear up for wave ${run.wave + 1}</h1><p>Everything here is optional. Your current gear is ready to go.</p></div><div class="salvage-chip"><small>SALVAGE</small><b>${run.salvage}</b></div></div><p class="shop-message" role="status">${escapeHtml(message)}</p>
     <section class="market-panel" aria-labelledby="shop-title"><div class="panel-heading"><div><p class="eyebrow">OUTPOST SHOP</p><h2 id="shop-title">Buy an upgrade</h2></div><span>Four choices</span></div>
-      <div class="shop-offers">${offers.map((offer, i) => `<article class="shop-offer ${run.shopBought.includes(offer.id) ? "bought" : ""}"><span>0${i + 1}</span><div class="shop-offer-icon ${offer.id}" aria-hidden="true"><i></i></div><h3>${offer.title}</h3><p>${offer.detail}</p><button class="button secondary" data-buy="${offer.id}" ${offer.disabled || run.shopBought.includes(offer.id) ? "disabled" : ""}>${run.shopBought.includes(offer.id) ? "Bought" : `Buy · ${offer.price} salvage`}</button></article>`).join("")}</div>
+      <div class="shop-offers">${offers.map((offer, i) => (offer.purchased ? `<article class="shop-offer bought"><span>0${i + 1}</span><p>Purchased · slot empty</p></article>` : `<article class="shop-offer ${run.shopBought.includes(offer.id) ? "bought" : ""}"><span>0${i + 1}</span><div class="shop-offer-icon ${offer.kind}" aria-hidden="true"><i></i></div><h3>${escapeHtml(offer.title)}</h3>${offer.kind === "module" ? `<p>${QUALITY_LABEL[offer.module.quality]} ${qualityPips(offer.module.quality)} · ${moduleStatus(offer.module, run.modules)}</p>` : ""}<p>${offer.module ? statText(offer.module) : offer.detail}</p>${offer.module ? `<p>${rewardPreview(offer.module, run)}</p>` : ""}<button class="button secondary" data-buy="${escapeHtml(offer.id)}" ${offer.disabled || run.shopBought.includes(offer.id) ? "disabled" : ""}>${run.shopBought.includes(offer.id) ? "Bought" : `Buy · ${offer.price} salvage`}</button></article>`)).join("")}</div>
+      <button id="reroll-shop" class="button secondary">Reroll unpurchased · ${rerollPrice(run)} salvage</button><p>Buy all four for a free refill. Purchased slots stay empty until then.</p>
     </section>
     <section class="loadout"><details><summary>Marine stats</summary><p>${marineStats(run)}</p></details><div class="loadout-heading"><div><p class="eyebrow">YOUR EQUIPMENT</p><h2>Pulse Blaster</h2><p>Tap Equip on any ammo card. When your active slots are full, it replaces the rightmost ammo.</p></div>${purpleTypes > 0 || canForge(run) ? `<div class="omni-progress"><small>OMNI AMMO</small><b>${purpleTypes} / 5</b><button id="forge-button" class="button forge" ${canForge(run) ? "" : "disabled"}>${canForge(run) ? "Forge Omni" : "Collect 5 Purple types"}</button></div>` : ""}</div>
       <div class="weapon-dock"><div class="blaster-card"><div class="blaster-icon" aria-hidden="true"><i></i></div><div><small>ONE WEAPON</small><b>Pulse Blaster</b></div></div><div class="loaded-ammo"><small>ACTIVE AMMO · ${activeAmmo.length}/${run.ammoCapacity}</small><div>${activeAmmo.map((ammo) => `<span>${ammo.legendary ? "Omni" : ammo.type} T${ammo.tier}</span>`).join("") || "<em>No ammo equipped</em>"}${Array.from({ length: Math.max(0, run.ammoCapacity - activeAmmo.length) }, () => "<i>Empty</i>").join("")}</div></div></div>
@@ -675,6 +684,12 @@ function renderShop(message = ""): void {
     "shop-shell",
   );
   bindHome();
+  document.querySelector("#reroll-shop")!.addEventListener("click", () => {
+    void perform(
+      () => session.reroll(activeProfileId!),
+      (message) => renderShop(message ?? ""),
+    );
+  });
   document
     .querySelectorAll<HTMLElement>("[data-buy]")
     .forEach((button) =>
