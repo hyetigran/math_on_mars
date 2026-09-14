@@ -12,6 +12,7 @@ import {
 } from "./types";
 
 export interface CombatSnapshot {
+  simulationTick?: number;
   hp: number;
   maxHp: number;
   salvage: number;
@@ -461,6 +462,7 @@ export class CombatSimulation {
   }
   snapshot(): CombatSnapshot {
     return {
+      simulationTick: this.state.simulationTick ?? 0,
       hp: this.state.hp,
       maxHp: this.options.maxHp,
       salvage: this.state.salvage,
