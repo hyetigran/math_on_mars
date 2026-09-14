@@ -1,3 +1,4 @@
+import { EQUIPMENT_CLIPS } from "./equipment-narration-manifest";
 import {
   missionLengthForWaves,
   type MissionLength,
@@ -7,7 +8,7 @@ import {
   fractionFields,
   bindFractionInput,
 } from "./fraction-input";
-import { InstalledNarration } from "./narration";
+import { InstalledNarration, type NarrationStatus } from "./narration";
 import {
   previewForge,
   retainedForgeLoadout,
@@ -54,6 +55,10 @@ const announcer = document.querySelector<HTMLElement>("#announcer")!;
 let repository: IndexedProfileRepository;
 let session: RunSession;
 const narration = new InstalledNarration();
+const equipmentNarration = new InstalledNarration(
+  EQUIPMENT_CLIPS,
+  "/audio/equipment",
+);
 let narrationLoading = false;
 let screenGeneration = 0;
 let quizDraft = "";
@@ -96,6 +101,7 @@ function cleanup(): void {
   screenGeneration++;
   narrationLoading = false;
   narration.stop();
+  equipmentNarration.stop();
   resetTouch?.();
   resetTouch = null;
   if (timerId !== null) window.clearInterval(timerId);
@@ -128,6 +134,7 @@ function shell(content: string, screenClass = ""): string {
 }
 
 function bindHome(): void {
+  bindEquipmentGuidance();
   document.querySelector("#home-link")?.addEventListener("click", (event) => {
     event.preventDefault();
     if (activeProfileId && activeProfile().activeRun) {
@@ -434,18 +441,22 @@ function currentElapsed(): number {
 }
 
 function prepareNarration(question: Question, ready: () => void): boolean {
-  if (!question.speechClips?.length || narration.playable) return true;
+  if (!question.speechClips?.length) return true;
+  return prepareSpeech(narration, ready);
+}
+function prepareSpeech(player: InstalledNarration, ready: () => void): boolean {
+  if (player.playable) return true;
   narrationLoading = true;
   quizElapsedAtStart = activeRun().quiz?.elapsedMs ?? 0;
   const generation = screenGeneration;
   app.innerHTML = shell(
-    `<section class="terminal"><h1>Loading task audio</h1><p id="audio-loading-status" role="status">The task stays hidden and its timer is stopped while audio loads.</p><button id="enable-audio" class="button primary" hidden>Enable speech</button><button id="retry-audio" class="button secondary" hidden>Retry audio</button><button id="save-exit" class="text-button">Save & exit</button></section>`,
+    `<section class="terminal"><h1>Loading speech</h1><p id="audio-loading-status" role="status">This screen stays unavailable while its speech loads. Any question timer is stopped.</p><button id="enable-audio" class="button primary" hidden>Enable speech</button><button id="retry-audio" class="button secondary" hidden>Retry audio</button><button id="save-exit" class="text-button">Save & exit</button></section>`,
   );
   bindHome();
   document.querySelector("#save-exit")!.addEventListener("click", saveAndExit);
   document.querySelector("#retry-audio")!.addEventListener("click", ready);
   document.querySelector("#enable-audio")!.addEventListener("click", () => {
-    void narration
+    void player
       .enable()
       .then(() => {
         if (screenGeneration === generation && !paused) ready();
@@ -458,16 +469,16 @@ function prepareNarration(question: Question, ready: () => void): boolean {
             "Speech could not start. Tap Enable speech to try again.";
       });
   });
-  void narration
+  void player
     .load()
     .then(() => {
       if (screenGeneration !== generation || paused) return;
-      if (narration.playable) ready();
+      if (player.playable) ready();
       else {
         document.querySelector<HTMLButtonElement>("#enable-audio")!.hidden =
           false;
         document.querySelector("#audio-loading-status")!.textContent =
-          "Speech is loaded. Tap Enable speech to begin. Your timer has not started.";
+          "Speech is loaded. Tap Enable speech to continue.";
       }
     })
     .catch(() => {
@@ -482,13 +493,21 @@ function narrationControls(question: Question, correction = false): string {
   if (!question.speechClips?.length) return "";
   return `<div class="quiz-tools"><button id="replay-task" class="button secondary" type="button">Replay task</button>${correction && question.hintClips?.length ? '<button id="replay-hint" class="button secondary" type="button">Read hint</button>' : ""}<span id="speech-status" role="status"></span></div>`;
 }
+function speechStatusText(status: NarrationStatus): string {
+  return {
+    unavailable: "Speech is unavailable. Reload this screen to retry.",
+    ready: "Choose a speech button to listen again.",
+    playing: "Speech is playing. You can keep using this screen.",
+    enable: "Tap a speech button to enable audio.",
+  }[status];
+}
 function bindNarration(question: Question): void {
   if (!question.speechClips?.length) return;
   const play = (clips: string[]) => {
     if (paused) return;
     void narration.play(clips, (message) => {
       const status = document.querySelector("#speech-status");
-      if (status) status.textContent = message;
+      if (status) status.textContent = speechStatusText(message);
     });
   };
   document
@@ -644,17 +663,68 @@ function submitInitial(value: string, occurrenceId: string): void {
   );
 }
 
+const equipmentLabels: Record<string, string> = {
+  "power-white": "White power",
+  "power-green": "Green power",
+  "power-blue": "Blue power",
+  "power-purple": "Purple power",
+  cache: "Cache choices",
+  buy: "Buying",
+  equip: "Equipping",
+  merge: "Merging",
+  forge: "Legendary Omni forge",
+  "next-wave": "Next wave",
+  "save-exit": "Save & exit",
+  piercing: "Piercing",
+  "multi-shot": "Multi Shot",
+  "electric-chain": "Electric Chain",
+  frost: "Frost",
+  fiery: "Fiery",
+  armor: "Armor",
+  reroll: "Reroll",
+  sell: "Selling",
+};
+function moduleSpeechButton(module: Module): string {
+  const clips = [
+    module.stat,
+    ...(module.additionalModifiers ?? []).map((modifier) => modifier.stat),
+  ].map((stat) => `stat-${stat}`);
+  return `<button class="button secondary" type="button" data-equipment-speech="${clips.join(",")}" aria-label="Hear effects of ${escapeHtml(module.name)}">Hear upgrade effects</button>`;
+}
+function equipmentGuidance(ids: string[]): string {
+  return `<section class="equipment-guidance" aria-label="Spoken equipment help"><details><summary>Listen to equipment help</summary><div class="quiz-tools">${ids.map((id) => `<button class="button secondary" type="button" data-equipment-speech="${id}">${equipmentLabels[id]}</button>`).join("")}</div></details><p id="equipment-speech-status" role="status"></p></section>`;
+}
+function bindEquipmentGuidance(): void {
+  const generation = screenGeneration;
+  document
+    .querySelectorAll<HTMLButtonElement>("[data-equipment-speech]")
+    .forEach((button) => {
+      button.addEventListener("click", () => {
+        if (paused) return;
+        void equipmentNarration.play(
+          button.dataset.equipmentSpeech!.split(","),
+          (message) => {
+            if (generation !== screenGeneration) return;
+            const status = document.querySelector("#equipment-speech-status");
+            if (status) status.textContent = speechStatusText(message);
+          },
+        );
+      });
+    });
+}
+
 function renderReward(): void {
   cleanup();
+  if (!prepareSpeech(equipmentNarration, renderReward)) return;
   const run = activeRun();
   const quiz = run.quiz!;
   const quality = quiz.rewardQuality!;
   const wrong = quiz.attempts.filter((a) => !a.correct).length;
   const candidate = timeQuality(quiz.remainingMs);
   app.innerHTML = shell(
-    `<section class="reward-screen" id="content">
+    `<section class="reward-screen" id="content">${equipmentGuidance([`power-${quality}`, "save-exit"])}
     <div class="reward-heading"><p class="eyebrow warm">FABRICATOR ONLINE</p><h1>Choose one upgrade</h1><p>${formatTime(quiz.remainingMs)} seconds remaining · Reward strengths are prototype tuning.</p><div class="outcome-row"><div><small>Time tier</small><b>${QUALITY_LABEL[candidate]}</b></div><span>− ${wrong} ${wrong === 1 ? "miss" : "misses"}</span><div class="quality-badge ${quality}">${qualityPips(quality)}<b>${QUALITY_LABEL[quality]}</b></div></div></div>
-    <div class="reward-grid">${quiz.rewardChoices!.map((module, i) => `<article class="reward-card ${quality}"><div class="card-index">0${i + 1}</div><div class="module-icon ${module.stat}" aria-hidden="true"><i></i></div><p class="eyebrow">${moduleStatus(module, run.modules)}</p><h2>${escapeHtml(module.name)}</h2><div class="card-quality">${QUALITY_LABEL[quality]} ${qualityPips(quality)}</div><p class="stat-gain">${statText(module)}</p><p>${moduleDescription(module.stat)}</p><p>${rewardPreview(module, run)}</p><button class="button primary" data-reward="${module.id}">Choose module</button></article>`).join("")}</div>
+    <div class="reward-grid">${quiz.rewardChoices!.map((module, i) => `<article class="reward-card ${quality}"><div class="card-index">0${i + 1}</div><div class="module-icon ${module.stat}" aria-hidden="true"><i></i></div><p class="eyebrow">${moduleStatus(module, run.modules)}</p><h2>${escapeHtml(module.name)}</h2><div class="card-quality">${QUALITY_LABEL[quality]} ${qualityPips(quality)}</div><p class="stat-gain">${statText(module)}</p><p>${moduleDescription(module.stat)}</p><p>${rewardPreview(module, run)}</p>${moduleSpeechButton(module)}<button class="button primary" data-reward="${module.id}">Choose module</button></article>`).join("")}</div>
     <button id="save-exit" class="text-button centered">Save & exit</button>
   </section>`,
     "reward-shell",
@@ -759,6 +829,7 @@ function renderCorrection(message = ""): void {
 
 function renderCache(): void {
   cleanup();
+  if (!prepareSpeech(equipmentNarration, renderCache)) return;
   const run = activeRun();
   if (run.cacheClaimed) {
     renderShop();
@@ -770,7 +841,7 @@ function renderCache(): void {
   }
   const cache = run.choiceCache;
   app.innerHTML = shell(
-    `<section class="cache-screen" id="content"><div class="cache-heading"><p class="eyebrow warm">FREE SUPPLY DROP</p><h1>Choose one bundle</h1><p>Accept one upgrade or sell its complete bundle for salvage. All other choices close.</p></div>
+    `<section class="cache-screen" id="content">${equipmentGuidance(["cache", "piercing", "multi-shot", "electric-chain", "frost", "fiery", "armor", "save-exit"])}<div class="cache-heading"><p class="eyebrow warm">FREE SUPPLY DROP</p><h1>Choose one bundle</h1><p>Accept one upgrade or sell its complete bundle for salvage. All other choices close.</p></div>
     <div class="cache-grid">${cache.options
       .map((option) => {
         const type = option.kind === "ammo" ? option.ammo[0].type : undefined;
@@ -805,6 +876,7 @@ function renderCache(): void {
 
 function renderShop(message = ""): void {
   cleanup();
+  if (!prepareSpeech(equipmentNarration, () => renderShop(message))) return;
   const run = activeRun();
   if (run.forgeIngredientIds) {
     forgeOmni();
@@ -837,9 +909,9 @@ function renderShop(message = ""): void {
       .map((ammo) => ammo.type),
   ).size;
   app.innerHTML = shell(
-    `<section class="shop-screen" id="content"><div class="shop-top"><div><p class="eyebrow warm">BETWEEN WAVES</p><h1>Gear up for wave ${run.wave + 1}</h1><p>Everything here is optional. Your current gear is ready to go.</p></div><div class="salvage-chip"><small>SALVAGE</small><b>${run.salvage}</b></div></div><p class="shop-message" role="status">${escapeHtml(message)}</p>
+    `<section class="shop-screen" id="content">${equipmentGuidance(["buy", "reroll", "equip", "merge", "sell", "forge", "next-wave", "save-exit"])}<div class="shop-top"><div><p class="eyebrow warm">BETWEEN WAVES</p><h1>Gear up for wave ${run.wave + 1}</h1><p>Everything here is optional. Your current gear is ready to go.</p></div><div class="salvage-chip"><small>SALVAGE</small><b>${run.salvage}</b></div></div><p class="shop-message" role="status">${escapeHtml(message)}</p>
     <section class="market-panel" aria-labelledby="shop-title"><div class="panel-heading"><div><p class="eyebrow">OUTPOST SHOP</p><h2 id="shop-title">Buy an upgrade</h2></div><span>Four choices</span></div>
-      <div class="shop-offers">${offers.map((offer, i) => (offer.purchased ? `<article class="shop-offer bought"><span>0${i + 1}</span><p>Purchased · slot empty</p></article>` : `<article class="shop-offer ${run.shopBought.includes(offer.id) ? "bought" : ""}"><span>0${i + 1}</span><div class="shop-offer-icon ${offer.kind}" aria-hidden="true"><i></i></div><h3>${escapeHtml(offer.title)}</h3>${offer.kind === "module" ? `<p>${QUALITY_LABEL[offer.module.quality]} ${qualityPips(offer.module.quality)} · ${moduleStatus(offer.module, run.modules)}</p>` : ""}<p>${offer.module ? statText(offer.module) : offer.detail}</p>${offer.module ? `<p>${rewardPreview(offer.module, run)}</p>` : ""}<button class="button secondary" data-buy="${escapeHtml(offer.id)}" ${offer.disabled || run.shopBought.includes(offer.id) ? "disabled" : ""}>${run.shopBought.includes(offer.id) ? "Bought" : `Buy · ${offer.price} salvage`}</button></article>`)).join("")}</div>
+      <div class="shop-offers">${offers.map((offer, i) => (offer.purchased ? `<article class="shop-offer bought"><span>0${i + 1}</span><p>Purchased · slot empty</p></article>` : `<article class="shop-offer ${run.shopBought.includes(offer.id) ? "bought" : ""}"><span>0${i + 1}</span><div class="shop-offer-icon ${offer.kind}" aria-hidden="true"><i></i></div><h3>${escapeHtml(offer.title)}</h3>${offer.kind === "module" ? `<p>${QUALITY_LABEL[offer.module.quality]} ${qualityPips(offer.module.quality)} · ${moduleStatus(offer.module, run.modules)}</p>` : ""}<p>${offer.module ? statText(offer.module) : offer.detail}</p>${offer.module ? `<p>${rewardPreview(offer.module, run)}</p>${moduleSpeechButton(offer.module)}` : ""}<button class="button secondary" data-buy="${escapeHtml(offer.id)}" ${offer.disabled || run.shopBought.includes(offer.id) ? "disabled" : ""}>${run.shopBought.includes(offer.id) ? "Bought" : `Buy · ${offer.price} salvage`}</button></article>`)).join("")}</div>
       <button id="reroll-shop" class="button secondary">Reroll unpurchased · ${rerollPrice(run)} salvage</button><p>Buy all four for a free refill. Purchased slots stay empty until then.</p>
     </section>
     <section class="loadout"><details><summary>Marine stats</summary><p>${marineStats(run)}</p></details><div class="loadout-heading"><div><p class="eyebrow">YOUR EQUIPMENT</p><h2>Pulse Blaster</h2><p>Tap Equip on any ammo card. When your active slots are full, it replaces the rightmost ammo.</p></div>${purpleTypes > 0 || canForge(run) ? `<div class="omni-progress"><small>OMNI AMMO</small><b>${purpleTypes} / 5</b><button id="forge-button" class="button forge" >View forge recipe</button></div>` : ""}</div>
@@ -942,6 +1014,7 @@ function reserveStacks(run: RunState): string {
 function forgeOmni(): void {
   if (paused) return;
   cleanup();
+  if (!prepareSpeech(equipmentNarration, forgeOmni)) return;
   const run = activeRun();
   if (!run.forgeIngredientIds) {
     void perform(
@@ -952,7 +1025,7 @@ function forgeOmni(): void {
   }
   const preview = previewForge(run);
   app.innerHTML = shell(
-    `<section class="shop-screen" id="content"><p class="eyebrow">LEGENDARY FORGE</p><h1>Legendary Omni Ammo</h1><p>Combine five purple cartridges into all five effects in one slot. Once per run.</p>
+    `<section class="shop-screen" id="content">${equipmentGuidance(["forge", "save-exit"])}<p class="eyebrow">LEGENDARY FORGE</p><h1>Legendary Omni Ammo</h1><p>Combine five purple cartridges into all five effects in one slot. Once per run.</p>
     ${AMMO_TYPES.map((type) => {
       const copies = run.ammo.filter(
         (a) => !a.legendary && a.type === type && a.tier === 4,
@@ -1058,6 +1131,7 @@ function setBlocked(blocked: boolean): void {
   app.inert = blocked;
   if (blocked) {
     narration.stop();
+    equipmentNarration.stop();
     resetTouch?.();
     if (timerId !== null) window.clearInterval(timerId);
     timerId = null;
@@ -1189,6 +1263,8 @@ function showPause(title: string): void {
               : undefined;
         if (
           narrationLoading ||
+          (["reward", "cache", "shop"].includes(run.phase) &&
+            !equipmentNarration.playable) ||
           (pendingQuestion?.speechClips?.length && !narration.playable)
         ) {
           resumeRun();

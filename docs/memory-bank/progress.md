@@ -74,3 +74,16 @@ Ticket 13: grade 5 includes decimal addition/subtraction and guaranteed unlike-d
 - Final-wave Overmind alternates warned expanding slam rings, projectile fans, and limited summons. Boss attack phases, locked aim, hit ledger, and summon count survive save/resume; boss defeat removes remaining minions and shots. Frost slows cooldown pursuit while committed warnings remain stationary.
 - Setup independently selects Easy/Standard combat and six-wave Short/ten-wave Standard missions. Short uses a smaller wave budget; all grades/presets retain five required questions and one 30-second countdown. Retry retains mission settings. Summaries report this mission's answer accuracy; final victory/defeat ends directly without a quiz.
 - Validation: 83 tests, production build, and Prettier check pass. Spec and standards reviews completed; Frost control, shared fan geometry, and preset-lookup findings fixed. Browser/device readability and practical combat balance remain unverified. Existing bundle-size warning persists.
+
+### Owner scope update — art tickets handled manually
+
+The owner instructed: “skip any ticket that references game art, I will manually handle those tickets.” Ticket 16 / issue #5 and its draft PR #36 remain owner-managed and unmerged. Ticket 20 / issue #23 explicitly depends on Mars visual style and is also left to the owner. Continue non-art tickets 17 (spoken equipment guidance), 18 (profile recovery), and 19 (offline infrastructure). Do not wait for reference-sheet approval or produce/integrate game art in this workflow.
+
+### Ticket 17 — spoken equipment guidance
+
+- Added 27 fixed installed MP3 clips for four power levels, cache choices, ammo descriptions, buying, equipping, merging, forging, selling, rerolling, Next wave and Save & Exit. Dynamic quantities remain text.
+- Reward/cache/shop/forge screens load and enable required speech before exposing actions. Missing audio permits retry or Save & Exit; screen transitions, pause, rotation and app-switch cancellation share the existing lifecycle.
+- Generalized installed narration to separate clip packs; authored equipment audio is generated at build-authoring time with the existing local voice toolchain, never runtime synthesis.
+- Validation: 84 tests, production build and Prettier pass; ffprobe validates all 27 clips. Audible playback and device interaction have not been verified in a connected browser/device.
+
+- Spec and standards reviews completed; added per-card spoken module effects and replaced text-rewriting callbacks with typed playback status.

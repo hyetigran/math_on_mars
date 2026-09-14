@@ -83,3 +83,46 @@ test("decoded speech stays unready for scored exposure until enabled; stop cance
     });
   }
 });
+
+test("a missing equipment clip keeps its pack unready and retry loads the missing clip", async () => {
+  const originalContext = globalThis.AudioContext;
+  const originalFetch = globalThis.fetch;
+  const requested: string[] = [];
+  let missing = true;
+  class AudioContextFixture {
+    state = "running";
+    async decodeAudioData() {
+      return { duration: 1 };
+    }
+  }
+  Object.assign(globalThis, {
+    AudioContext: AudioContextFixture,
+    fetch: async (url: string) => {
+      requested.push(url);
+      return {
+        ok: !(missing && url.endsWith("/forge.mp3")),
+        arrayBuffer: async () => new ArrayBuffer(1),
+      };
+    },
+  });
+  try {
+    const narration = new InstalledNarration(
+      ["buy", "forge"],
+      "/audio/equipment",
+    );
+    await assert.rejects(narration.load(), /could not be loaded/);
+    assert.equal(narration.ready, false);
+    assert.equal(narration.playable, false);
+    missing = false;
+    await narration.load();
+    assert.equal(narration.ready, true);
+    assert.equal(narration.playable, true);
+    assert.ok(requested.every((url) => url.startsWith("/audio/equipment/")));
+    assert.equal(requested.filter((url) => url.endsWith("/buy.mp3")).length, 1);
+  } finally {
+    Object.assign(globalThis, {
+      AudioContext: originalContext,
+      fetch: originalFetch,
+    });
+  }
+});
