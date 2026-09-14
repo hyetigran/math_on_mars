@@ -30,6 +30,7 @@ function worker(
 ) {
   const listeners = new Map<string, (event: any) => void>();
   let network = true;
+  let clientVersion: string | undefined;
   let broken = "";
   const manifest = {
     version,
@@ -43,7 +44,13 @@ function worker(
     {
       self: {
         registration: { scope },
-        clients: { claim: async () => {}, get: async () => undefined },
+        clients: {
+          claim: async () => {},
+          get: async () =>
+            clientVersion
+              ? { url: scope + "?build=" + clientVersion }
+              : undefined,
+        },
         addEventListener: (name: string, listener: (event: any) => void) =>
           listeners.set(name, listener),
       },
@@ -101,9 +108,11 @@ function worker(
       await pending!;
       return result!;
     },
-    async fetch(path: string, navigate = false) {
+    async fetch(path: string, navigate = false, clientBuild?: string) {
+      clientVersion = clientBuild;
       let response: Promise<Response>;
       listeners.get("fetch")!({
+        clientId: clientBuild ? "client" : undefined,
         request: {
           method: "GET",
           url: scope + path,
@@ -146,6 +155,10 @@ test("complete packs serve shell and required speech offline, with old builds re
     "old speech",
   );
   assert.equal(await (await next.fetch("", true)).text(), "new shell");
+  assert.equal(
+    await (await next.fetch("audio/task.mp3", false, oldVersion)).text(),
+    "old speech",
+  );
 });
 
 test("interrupted or corrupted installs stay unready; missing pinned files never fall through to newer network content", async () => {

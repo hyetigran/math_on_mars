@@ -95,3 +95,10 @@ The owner instructed: “skip any ticket that references game art, I will manual
 - Added exclusive browser profile leases for opening/resuming and importing. An occupied profile shows an in-use message; leaving it releases the lease. Revision checks remain the fallback and secondary guard. Late acquisitions and repeated UI actions cannot retain abandoned leases.
 - Escaped imported profile/equipment IDs in HTML attributes. Shared history-recovery validation across import and IndexedDB.
 - Validation: 89 tests, production build, and Prettier pass. Separate spec/standards reviews completed; browser-lock and duplication findings resolved. Actual browser file dialogs, downloads and multi-tab lock interaction remain unverified without a connected browser.
+
+### Ticket 19 — offline play
+
+- Static builds now produce a hashed 69-file manifest and service worker. Complete verified caches gate launch/retry/resume; missing current files can be repaired and incomplete installs remain unready.
+- Saved runs pin the entire release (content, balance, simulation/reward rules and assets). Old packs remain cached, old runs open the matching shell, and versioned page/speech requests prevent substitution from a newer release. Existing supported legacy saves gain a pin without altering recorded state.
+- Updates install separately and never force activation over a live page. No gameplay backend or art generation added. See `docs/OFFLINE.md` for build/use semantics.
+- Validation: 92 tests, production build, Prettier pass; both spec and standards reviews cleared. Worker tests execute old/new offline routing, readiness failure and repair. Browser discovery returned no connected browsers; published installation/offline reload/device lifecycle remain unverified. Owner-managed ticket20 retains publication/integration work.

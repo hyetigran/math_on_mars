@@ -1646,6 +1646,8 @@ window.addEventListener("orientationchange", () => {
 });
 
 async function boot(): Promise<void> {
+  if (!import.meta.env.DEV)
+    history.replaceState(null, "", releaseLocation(BUILD_VERSION));
   try {
     repository?.close();
     repository = new IndexedProfileRepository(
