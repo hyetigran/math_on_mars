@@ -179,3 +179,59 @@ test("saved loot cannot share an ID with a living enemy", () => {
   run.combatSave = save;
   assert.throws(() => repository.commit(profiles), /pickup ID/);
 });
+
+test("enemy warnings and flying shots survive profile storage and reject malformed attacks", () => {
+  const storage = new MemoryStorage();
+  const repository = new ProfileRepository(storage, key);
+  const session = new RunSession([sample()], repository);
+  session.start("cadet", "3");
+  const profiles = session.profiles;
+  const run = profiles[0].activeRun!;
+  const simulation = new CombatSimulation({ ...run, seed: 1 });
+  for (let i = 0; i < 6; i++) simulation.advance(100);
+  const save = simulation.serialize();
+  assert.equal(save.version, 2);
+  if (save.version !== 2) throw new Error("Expected current save format");
+  save.enemies[0].kind = "charger";
+  save.enemies[0].attack = {
+    phase: "windup",
+    remainingMs: 600,
+    dx: 1,
+    dy: 0,
+    hit: false,
+  };
+  save.nextEnemyProjectileId = 2;
+  save.enemyProjectiles = [
+    { id: 1, x: 100, y: 100, vx: 180, vy: 0, damage: 10, remainingMs: 2000 },
+  ];
+  run.combatSave = save;
+  repository.commit(profiles);
+  assert.deepEqual(repository.load()[0].activeRun!.combatSave, save);
+  const mutations = [
+    (s: typeof save) => {
+      s.enemies[0].attack!.dx = 0;
+    },
+    (s: typeof save) => {
+      s.enemies[0].attack!.remainingMs = -1;
+    },
+    (s: typeof save) => {
+      s.enemies[0].kind = "drifter";
+    },
+    (s: typeof save) => {
+      s.enemyProjectiles![0].id = 2;
+    },
+    (s: typeof save) => {
+      s.enemyProjectiles!.push({ ...s.enemyProjectiles![0] });
+    },
+    (s: typeof save) => {
+      s.enemyProjectiles![0].remainingMs = -1;
+    },
+  ];
+  for (const mutate of mutations) {
+    const malformed = structuredClone(save);
+    mutate(malformed);
+    run.combatSave = malformed;
+    assert.throws(() => repository.commit(profiles), /Invalid saved profile/);
+    assert.deepEqual(repository.load()[0].activeRun!.combatSave, save);
+  }
+});

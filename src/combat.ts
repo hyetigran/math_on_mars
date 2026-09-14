@@ -1,7 +1,8 @@
+import { ENEMY_BALANCE } from "../content/balance/enemies";
 import { STATUS_BALANCE } from "../content/balance/status";
 import { CHAIN_BALANCE } from "../content/balance/chain";
 import Phaser from "phaser";
-import type { CombatSave } from "./types";
+import type { CombatSave, CombatEnemySaveV2 } from "./types";
 import {
   CombatSimulation,
   type CombatRulesOptions,
@@ -151,7 +152,34 @@ class MarsCombatScene extends Phaser.Scene {
     y: number,
     boss: boolean,
     radius: number,
+    kind: CombatEnemySaveV2["kind"],
   ): Phaser.GameObjects.Container {
+    if (kind === "charger" || kind === "spitter") {
+      const shape = this.add.graphics();
+      shape.lineStyle(4, 0x241d2e, 1);
+      if (kind === "charger") {
+        shape.fillStyle(0xffba49, 1);
+        shape.fillTriangle(-radius, radius, radius, radius, 0, -radius);
+        shape.strokeTriangle(-radius, radius, radius, radius, 0, -radius);
+        shape.lineBetween(-radius * 0.5, 0, radius * 0.5, 0);
+        shape.lineBetween(
+          -radius * 0.7,
+          radius * 0.5,
+          radius * 0.7,
+          radius * 0.5,
+        );
+      } else {
+        shape
+          .fillStyle(0xd19aff, 1)
+          .fillEllipse(0, 3, radius * 1.7, radius * 2.2);
+        shape.strokeEllipse(0, 3, radius * 1.7, radius * 2.2);
+        shape
+          .fillStyle(0x241d2e, 1)
+          .fillRoundedRect(-6, -radius - 7, 12, 18, 4);
+      }
+      shape.fillStyle(0xffffff, 1).fillCircle(-6, -3, 3).fillCircle(6, -3, 3);
+      return this.add.container(x, y, [shape]).setDepth(4);
+    }
     const color = boss
       ? 0xc147a3
       : this.options.wave === 2
@@ -202,10 +230,59 @@ class MarsCombatScene extends Phaser.Scene {
     for (const enemy of state.enemies) {
       let body = this.enemies.get(enemy.id);
       if (!body) {
-        body = this.makeEnemyBody(enemy.x, enemy.y, enemy.boss, enemy.radius);
+        body = this.makeEnemyBody(
+          enemy.x,
+          enemy.y,
+          enemy.boss,
+          enemy.radius,
+          enemy.kind,
+        );
         this.enemies.set(enemy.id, body);
       }
       body.setPosition(enemy.x, enemy.y);
+      if (
+        enemy.attack?.phase === "windup" &&
+        enemy.kind &&
+        enemy.kind !== "drifter"
+      ) {
+        const attack = enemy.attack;
+        const length =
+          enemy.kind === "charger"
+            ? (ENEMY_BALANCE.charger.speed * ENEMY_BALANCE.charger.activeMs) /
+              1000
+            : ENEMY_BALANCE.spitter.range;
+        const tx = enemy.x + attack.dx * length;
+        const ty = enemy.y + attack.dy * length;
+        indicators
+          .lineStyle(enemy.kind === "charger" ? 18 : 8, 0x241d2e, 0.75)
+          .lineBetween(enemy.x, enemy.y, tx, ty);
+        indicators
+          .lineStyle(4, 0xffec91, 1)
+          .lineBetween(enemy.x, enemy.y, tx, ty);
+        indicators.lineBetween(
+          tx,
+          ty,
+          tx - attack.dx * 18 - attack.dy * 12,
+          ty - attack.dy * 18 + attack.dx * 12,
+        );
+        indicators.lineBetween(
+          tx,
+          ty,
+          tx - attack.dx * 18 + attack.dy * 12,
+          ty - attack.dy * 18 - attack.dx * 12,
+        );
+        indicators
+          .lineStyle(4, 0xffffff, 1)
+          .strokeCircle(enemy.x, enemy.y, enemy.radius + 7);
+        indicators
+          .fillStyle(0xffec91, 1)
+          .fillRect(
+            enemy.x - 18,
+            enemy.y + enemy.radius + 10,
+            (36 * attack.remainingMs) / ENEMY_BALANCE[enemy.kind].windupMs,
+            5,
+          );
+      }
       const y = enemy.y - enemy.radius - 12;
       if (enemy.slowRemainingMs > 0) {
         const x = enemy.x - 11;
@@ -247,6 +324,11 @@ class MarsCombatScene extends Phaser.Scene {
             2,
           );
       }
+    }
+    for (const shot of state.enemyProjectiles ?? []) {
+      indicators.fillStyle(0x241d2e, 1).fillCircle(shot.x, shot.y, 9);
+      indicators.fillStyle(0xff759d, 1).fillCircle(shot.x, shot.y, 6);
+      indicators.fillStyle(0xffffff, 1).fillCircle(shot.x - 2, shot.y - 2, 2);
     }
     const pickupIds = new Set((state.pickups ?? []).map((p) => p.id));
     for (const [id, body] of this.pickups) {

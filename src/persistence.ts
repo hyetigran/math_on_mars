@@ -234,6 +234,56 @@ function combat(value: unknown, run: RecordValue): void {
       : ["burnRemainingDamage", "burnRate"])
       number(enemy[key], `enemy.${key}`);
     boolean(enemy.boss, "enemy.boss");
+    if (enemy.kind !== undefined) {
+      ensure(state.version === 2, "enemy kind version");
+      choice(enemy.kind, ["drifter", "spitter", "charger"], "enemy.kind");
+    }
+    if (enemy.attack !== undefined) {
+      ensure(
+        state.version === 2 &&
+          (enemy.kind === "spitter" || enemy.kind === "charger"),
+        "enemy attack kind",
+      );
+      const attack = record(enemy.attack, "enemy.attack");
+      choice(
+        attack.phase,
+        enemy.kind === "spitter"
+          ? ["windup", "cooldown"]
+          : ["windup", "active", "cooldown"],
+        "attack.phase",
+      );
+      number(attack.remainingMs, "attack.remainingMs", 0, 2400);
+      number(attack.dx, "attack.dx", -1, 1);
+      number(attack.dy, "attack.dy", -1, 1);
+      ensure(
+        Math.abs(Math.hypot(attack.dx as number, attack.dy as number) - 1) <
+          1e-6,
+        "attack direction",
+      );
+      boolean(attack.hit, "attack.hit");
+    }
+  }
+  if (
+    state.enemyProjectiles !== undefined ||
+    state.nextEnemyProjectileId !== undefined
+  ) {
+    ensure(state.version === 2, "enemy projectile version");
+    integer(state.nextEnemyProjectileId, "next enemy projectile ID", 1);
+    const ids = new Set<unknown>();
+    for (const value of list(state.enemyProjectiles, "enemy projectiles")) {
+      const shot = record(value, "enemy projectile");
+      integer(shot.id, "enemy projectile ID", 1);
+      ensure(
+        !ids.has(shot.id) &&
+          (shot.id as number) < (state.nextEnemyProjectileId as number),
+        "enemy projectile ID",
+      );
+      ids.add(shot.id);
+      for (const key of ["x", "y", "vx", "vy"])
+        number(shot[key], `enemy projectile.${key}`, -Infinity);
+      number(shot.damage, "enemy projectile damage");
+      number(shot.remainingMs, "enemy projectile lifetime", 0, 7000);
+    }
   }
   if (state.pickups !== undefined) {
     const ids = new Set<unknown>();

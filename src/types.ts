@@ -142,6 +142,14 @@ export interface CombatEnemySaveV2 extends Omit<
 > {
   burnRemainingDamage: number;
   burnRate: number;
+  kind?: "drifter" | "spitter" | "charger";
+  attack?: {
+    phase: "windup" | "active" | "cooldown";
+    remainingMs: number;
+    dx: number;
+    dy: number;
+    hit: boolean;
+  };
 }
 
 export interface CombatBoltSaveV2 extends Omit<
@@ -157,6 +165,16 @@ export interface CombatSaveV2 extends Omit<
   "version" | "enemies" | "bolts"
 > {
   version: 2;
+  enemyProjectiles?: {
+    id: number;
+    x: number;
+    y: number;
+    vx: number;
+    vy: number;
+    damage: number;
+    remainingMs: number;
+  }[];
+  nextEnemyProjectileId?: number;
   simulationTick?: number;
   ammoInventory?: AmmoInventory;
   pickups?: { id: number; x: number; y: number; value: number; ammo?: Ammo }[];

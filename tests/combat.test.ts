@@ -510,3 +510,88 @@ test("Omni applies each effect once and capacity stabilizes firing rate only whi
     assert.equal(ordinary.shotDelay, 520);
   }
 });
+
+test("each scheduled ammo bag cycle yields all five valid types before refilling", () => {
+  for (const seed of [42, 1000, 12345, 999999]) {
+    const sim = fixture(
+      Array.from({ length: 20 }, (_, i) => ({
+        ...enemy(i + 1, 900, 500),
+        hp: 0,
+      })),
+    );
+    sim.state.rngState = seed;
+    sim.advance(STEP);
+    const ammo = sim.snapshot().ammoInventory!.ammo;
+    assert.equal(ammo.length, 5);
+    assert.deepEqual(
+      new Set(ammo.map((a) => a.type)),
+      new Set(["Piercing", "Multi Shot", "Electric Chain", "Frost", "Fiery"]),
+    );
+    assert.ok(ammo.every((a) => a.tier >= 1 && a.tier <= 4));
+  }
+});
+
+test("Charger retains its full warning and locked direction across mid-windup resume", () => {
+  const sim = fixture([
+    {
+      ...enemy(1, 700, 270),
+      kind: "charger",
+      attack: { phase: "windup", remainingMs: 1200, dx: -1, dy: 0, hit: false },
+    },
+    enemy(2, 900, 500),
+  ]);
+  for (let i = 0; i < 60; i++) sim.advance(STEP);
+  assert.equal(sim.state.enemies[0].x, 700);
+  assert.equal(sim.state.enemies[0].attack!.phase, "windup");
+  const restored = new CombatSimulation({
+    ...options,
+    restore: sim.serialize(),
+  });
+  for (let i = 0; i < 50; i++) {
+    sim.advance(STEP);
+    restored.advance(STEP);
+  }
+  assert.deepEqual(restored.serialize(), sim.serialize());
+  assert.ok(restored.state.hp <= 82);
+  assert.equal(restored.state.enemies[0].attack!.hit, true);
+});
+
+test("Spitter projectiles resume in flight and spend damage once", () => {
+  const sim = fixture([
+    {
+      ...enemy(1, 700, 270),
+      kind: "spitter",
+      attack: { phase: "windup", remainingMs: 100, dx: -1, dy: 0, hit: false },
+    },
+    enemy(2, 900, 500),
+  ]);
+  for (let i = 0; i < 15; i++) sim.advance(STEP);
+  assert.equal(sim.state.enemyProjectiles!.length, 1);
+  const restored = new CombatSimulation({
+    ...options,
+    restore: sim.serialize(),
+  });
+  for (let i = 0; i < 90; i++) {
+    sim.advance(STEP);
+    restored.advance(STEP);
+  }
+  assert.deepEqual(restored.serialize(), sim.serialize());
+  assert.equal(restored.state.hp, 90);
+  assert.equal(restored.state.enemyProjectiles!.length, 0);
+});
+
+test("enemy projectiles are cleared on both wave victory and defeat", () => {
+  for (const outcome of ["victory", "defeat"] as const) {
+    const sim = fixture([
+      { ...enemy(1, 900, 500), hp: outcome === "victory" ? 0 : 100 },
+    ]);
+    sim.state.enemyProjectiles = [
+      { id: 1, x: 100, y: 100, vx: 1, vy: 0, damage: 10, remainingMs: 2000 },
+    ];
+    sim.state.nextEnemyProjectileId = 2;
+    if (outcome === "defeat") sim.state.hp = 0;
+    sim.advance(STEP);
+    assert.equal(sim.outcome, outcome);
+    assert.deepEqual(sim.state.enemyProjectiles, []);
+  }
+});
