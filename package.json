@@ -8,8 +8,8 @@
     "build": "tsc && vite build",
     "preview": "vite preview",
     "test": "node scripts/test.mjs",
-    "format": "prettier --write src tests scripts \"*.{html,json,ts,yaml}\"",
-    "format:check": "prettier --check src tests scripts \"*.{html,json,ts,yaml}\""
+    "format": "prettier --write src tests scripts content \"*.{html,json,ts,yaml}\"",
+    "format:check": "prettier --check src tests scripts content \"*.{html,json,ts,yaml}\""
   },
   "dependencies": {
     "phaser": "4.2.1"

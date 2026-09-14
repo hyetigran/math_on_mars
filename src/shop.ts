@@ -1,3 +1,5 @@
+import { AMMO_BALANCE } from "../content/balance/ammo";
+import { ammoDropTier } from "./ammo";
 import { moduleCandidates, modifiers, moduleTotal, STAT_CAPS } from "./modules";
 import {
   AMMO_TYPES,
@@ -21,6 +23,18 @@ function createOffer(run: RunState, slot: number): ShopItem {
     (run.shop?.round ?? 0) * 4 +
     (run.shop?.paidRerolls ?? 0) * 7 +
     slot;
+  if (slot === 2) {
+    const ammoType = AMMO_TYPES[seed % AMMO_TYPES.length];
+    const ammoTier = ammoDropTier(run.wave, ((seed * 37) % 100) / 100);
+    return {
+      id: uid("offer"),
+      kind: "ammo",
+      title: `${ammoType} Ammo`,
+      ammoType,
+      ammoTier,
+      price: AMMO_BALANCE.buyPrices[ammoTier - 1],
+    };
+  }
   const quality = QUALITY_ORDER[seed % 4];
   const module = moduleCandidates(quality, seed, run.modules)[0];
   if (slot === 3 || !module)
@@ -125,7 +139,7 @@ export function shopOffers(run: RunState) {
           : o.kind === "repair"
             ? "Restore 30 Suit Integrity"
             : o.kind === "ammo"
-              ? "Add one White T1 cartridge"
+              ? `Add one ${QUALITY_ORDER[(o.ammoTier ?? 1) - 1]} T${o.ammoTier ?? 1} cartridge`
               : "Passive module",
     purchased: run.shopBought.includes(o.id),
   }));

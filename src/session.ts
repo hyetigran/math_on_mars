@@ -1,3 +1,12 @@
+import { AMMO_BALANCE } from "../content/balance/ammo";
+import {
+  acquireAmmo,
+  createChoiceCache,
+  ammoSellPrice,
+  previewMerges,
+  applyMerges,
+  type MergePreview,
+} from "./ammo";
 import {
   createShop,
   migrateShop,
@@ -13,6 +22,7 @@ import {
   QUALITY_ORDER,
   uid,
   type Ammo,
+  type AmmoInventory,
   type AmmoType,
   type CombatSave,
   type Grade,
@@ -26,6 +36,7 @@ export interface ProfileStore {
   commit(profiles: Profile[]): void;
 }
 export interface CombatOutcome {
+  ammoInventory?: AmmoInventory;
   hp: number;
   salvage: number;
   medkits: number;
@@ -188,6 +199,8 @@ export class RunSession {
       if (snapshot.combat && snapshot.combat.wave !== run.wave) return;
       if (snapshot.combat && run.phase === "combat") {
         run.combatSave = snapshot.combat;
+        if (snapshot.combat.version === 2 && snapshot.combat.ammoInventory)
+          Object.assign(run, structuredClone(snapshot.combat.ammoInventory));
         run.hp = snapshot.combat.hp;
         run.salvage = snapshot.combat.salvage;
         run.medkits = snapshot.combat.medkits;
@@ -210,7 +223,9 @@ export class RunSession {
   }
   finishWave(id: string, outcome: CombatOutcome): void {
     this.command(id, "combat", (run) => {
-      Object.assign(run, outcome);
+      const { ammoInventory, ...stats } = outcome;
+      Object.assign(run, stats);
+      if (ammoInventory) Object.assign(run, structuredClone(ammoInventory));
       run.salvage = Math.max(run.salvage, run.wave === 1 ? 8 : 0);
       run.combatSave = undefined;
       run.phase = "quiz";
@@ -287,6 +302,7 @@ export class RunSession {
       run.phase = quiz.attempts.some((a) => !a.corrected)
         ? "correction"
         : "cache";
+      if (run.phase === "cache") this.enterSupply(run);
     });
   }
   correct(
@@ -320,30 +336,76 @@ export class RunSession {
       attempt.corrected = true;
       quiz.correctionDraft = "";
       history.corrected = true;
-      if (quiz.attempts.every((a) => a.corrected)) run.phase = "cache";
+      if (quiz.attempts.every((a) => a.corrected)) {
+        this.enterSupply(run);
+      }
       return "Correct — repair complete.";
     });
   }
-  claimCache(id: string, type?: AmmoType): void {
-    this.command(id, "cache", (run) => {
-      if (run.cacheClaimed) return;
-      if (type)
-        run.ammo.push(
-          { id: uid("ammo"), type, tier: 3 },
-          { id: uid("ammo"), type, tier: 3 },
-        );
-      else
-        run.modules.push({
-          id: uid("module"),
-          name: "Field Plating",
-          stat: "armor",
-          value: 2,
-          quality: "green",
-        });
-      run.cacheClaimed = true;
+  private enterSupply(run: RunState): void {
+    const milestones =
+      run.totalWaves === 6
+        ? AMMO_BALANCE.shortCacheWaves
+        : AMMO_BALANCE.standardCacheWaves;
+    if (milestones.some((wave) => wave === run.wave)) {
+      run.phase = "cache";
+      createChoiceCache(run);
+    } else {
       run.phase = "shop";
       createShop(run);
+    }
+  }
+  openCache(id: string): void {
+    this.command(id, "cache", (run) => createChoiceCache(run));
+  }
+  claimCache(id: string, type?: AmmoType): void {
+    // Compatibility for existing callers; settlement still uses the saved bundle.
+    this.command(id, "cache", (run) => {
+      createChoiceCache(run);
+      const option = run.choiceCache!.options.find((o) =>
+        type
+          ? o.kind === "ammo" && o.ammo[0].type === type
+          : o.kind === "module",
+      );
+      if (option) this.applyCache(run, option.id, "accept");
     });
+  }
+  settleCache(
+    id: string,
+    cacheId: string,
+    optionId: string,
+    disposition: "accept" | "sell",
+  ): void {
+    this.command(id, "cache", (run) => {
+      if (run.choiceCache?.id !== cacheId) return;
+      this.applyCache(run, optionId, disposition);
+    });
+  }
+  private applyCache(
+    run: RunState,
+    optionId: string,
+    disposition: "accept" | "sell",
+  ): void {
+    const cache = run.choiceCache;
+    if (
+      !cache ||
+      cache.kind !== "choice" ||
+      cache.selectedOptionId ||
+      run.cacheClaimed
+    )
+      return;
+    if (disposition !== "accept" && disposition !== "sell") return;
+    const option = cache.options.find((o) => o.id === optionId);
+    if (!option) return;
+    if (disposition === "sell") run.salvage += option.sellPrice;
+    else if (option.kind === "ammo")
+      acquireAmmo(run, structuredClone(option.ammo));
+    else installModule(run, structuredClone(option.module));
+    cache.selectedOptionId = optionId;
+    cache.disposition = disposition;
+    run.cacheClaimed = true;
+    run.phase = "shop";
+    createShop(run);
   }
   openShop(id: string): void {
     this.command(id, "shop", (run) => migrateShop(run));
@@ -363,7 +425,9 @@ export class RunSession {
       if (offer.kind === "medkit") run.medkits++;
       if (offer.kind === "repair") run.hp = Math.min(run.maxHp, run.hp + 30);
       if (offer.kind === "ammo")
-        run.ammo.push({ id: uid("ammo"), type: offer.ammoType!, tier: 1 });
+        acquireAmmo(run, [
+          { id: uid("ammo"), type: offer.ammoType!, tier: offer.ammoTier ?? 1 },
+        ]);
       if (offer.kind === "module") installModule(run, offer.module);
       refreshShop(run);
       return "Purchase installed.";
@@ -393,27 +457,33 @@ export class RunSession {
       return "Loadout updated.";
     });
   }
+  previewMerges(id: string): MergePreview {
+    return previewMerges(this.profile(id).activeRun!);
+  }
+  mergePreview(id: string, preview: MergePreview): string | undefined {
+    return this.command(id, "shop", (run) =>
+      applyMerges(run, preview)
+        ? "Cartridges combined."
+        : "Loadout changed. Review the merge again.",
+    );
+  }
   merge(id: string, type: AmmoType, tier: number): void {
     this.command(id, "shop", (run) => {
-      if (tier < 1 || tier > 3) return;
-      const pair = run.ammo
-        .filter((a) => !a.legendary && a.type === type && a.tier === tier)
-        .slice(0, 2);
-      if (pair.length !== 2) return;
-      const activeIndex = run.activeAmmoIds.findIndex((active) =>
-        pair.some((a) => a.id === active),
-      );
-      run.ammo = run.ammo.filter((a) => !pair.some((p) => p.id === a.id));
-      run.activeAmmoIds = run.activeAmmoIds.filter(
-        (active) => !pair.some((p) => p.id === active),
-      );
-      const result: Ammo = {
-        id: uid("ammo"),
-        type,
-        tier: (tier + 1) as 2 | 3 | 4,
-      };
-      run.ammo.push(result);
-      if (activeIndex >= 0) run.activeAmmoIds.splice(activeIndex, 0, result.id);
+      if (!Number.isInteger(tier) || tier < 1 || tier > 3) return;
+      const preview = previewMerges(run, type, tier);
+      preview.pairs = preview.pairs.slice(0, 1);
+      applyMerges(run, preview);
+    });
+  }
+  sellAmmo(id: string, ammoId: string): string | undefined {
+    return this.command(id, "shop", (run) => {
+      const ammo = run.ammo.find((a) => a.id === ammoId);
+      if (!ammo || ammo.legendary) return "That cartridge cannot be sold.";
+      if (run.activeAmmoIds.includes(ammoId))
+        return "Unequip this cartridge before selling it.";
+      run.salvage += ammoSellPrice(ammo);
+      run.ammo = run.ammo.filter((a) => a.id !== ammoId);
+      return "Cartridge sold.";
     });
   }
   forge(id: string): void {
@@ -444,6 +514,7 @@ export class RunSession {
       run.quiz = undefined;
       run.combatSave = undefined;
       run.cacheClaimed = false;
+      run.choiceCache = undefined;
       run.shopBought = [];
       run.shop = undefined;
     });

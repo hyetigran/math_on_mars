@@ -1,7 +1,10 @@
+import { AMMO_BALANCE } from "../content/balance/ammo";
+import { acquireAmmo, drawAmmo } from "./ammo";
 import { moduleTotal } from "./modules";
 import {
   AMMO_TYPES,
   type Ammo,
+  type AmmoInventory,
   type AmmoType,
   type CombatBoltSaveV2,
   type CombatEnemySaveV2,
@@ -12,6 +15,7 @@ import {
 } from "./types";
 
 export interface CombatSnapshot {
+  ammoInventory?: AmmoInventory;
   simulationTick?: number;
   hp: number;
   maxHp: number;
@@ -29,6 +33,8 @@ export interface CombatRulesOptions {
   maxHp: number;
   salvage: number;
   medkits: number;
+  ammoBag?: AmmoType[];
+  ammoCapacity?: number;
   ammo: Ammo[];
   activeAmmoIds: string[];
   modules: Module[];
@@ -145,6 +151,12 @@ export class CombatSimulation {
             enemies: [],
             bolts: [],
           };
+    this.state.ammoInventory ??= structuredClone({
+      ammo: options.ammo,
+      activeAmmoIds: options.activeAmmoIds,
+      ammoCapacity: options.ammoCapacity ?? 1,
+      ammoBag: options.ammoBag ?? [],
+    });
   }
 
   private spawnDelay(): number {
@@ -190,8 +202,8 @@ export class CombatSimulation {
       Frost: 0,
       Fiery: 0,
     };
-    for (const id of this.options.activeAmmoIds) {
-      const ammo = this.options.ammo.find((a) => a.id === id);
+    for (const id of this.state.ammoInventory!.activeAmmoIds) {
+      const ammo = this.state.ammoInventory!.ammo.find((a) => a.id === id);
       if (!ammo) continue;
       if (ammo.legendary) for (const type of AMMO_TYPES) tiers[type] = 4;
       else tiers[ammo.type] = Math.max(tiers[ammo.type], ammo.tier);
@@ -410,6 +422,16 @@ export class CombatSimulation {
           x: enemy.x,
           y: enemy.y,
           value: enemy.boss ? 12 : 1,
+          ...(enemy.id % AMMO_BALANCE.dropEveryEnemyId === 0
+            ? {
+                ammo: drawAmmo(
+                  state.ammoInventory!,
+                  this.options.wave,
+                  () => this.randomBetween(0, 1),
+                  `drop-${this.options.wave}-${enemy.id}`,
+                ),
+              }
+            : {}),
         });
       else if (distance(enemy, state.marine) < enemy.radius + 20) {
         const armor = Math.min(20, moduleTotal(this.options.modules, "armor"));
@@ -424,6 +446,7 @@ export class CombatSimulation {
       )
         return true;
       state.salvage += pickup.value;
+      if (pickup.ammo) acquireAmmo(state.ammoInventory!, [pickup.ammo]);
       return false;
     });
     state.hp = Math.max(0, state.hp);
@@ -433,6 +456,8 @@ export class CombatSimulation {
         (sum, pickup) => sum + pickup.value,
         0,
       );
+      for (const pickup of state.pickups)
+        if (pickup.ammo) acquireAmmo(state.ammoInventory!, [pickup.ammo]);
       state.pickups = [];
       this.outcome = "victory";
     }
@@ -462,6 +487,7 @@ export class CombatSimulation {
   }
   snapshot(): CombatSnapshot {
     return {
+      ammoInventory: structuredClone(this.state.ammoInventory),
       simulationTick: this.state.simulationTick ?? 0,
       hp: this.state.hp,
       maxHp: this.options.maxHp,
