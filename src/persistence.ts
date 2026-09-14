@@ -157,6 +157,25 @@ function question(value: unknown): void {
   integer(answer[1], "question denominator", 1);
   if (item.visualCount !== undefined)
     integer(item.visualCount, "question.visualCount", 1, 1000);
+  if (item.visualGroups !== undefined) {
+    const groups = list(item.visualGroups, "question groups");
+    ensure(groups.length === 2, "comparison group count");
+    groups.forEach((n) => integer(n, "comparison count", 1, 10));
+  }
+  for (const key of ["speechClips", "hintClips"]) {
+    if (item[key] === undefined) continue;
+    const clips = list(item[key], key);
+    ensure(clips.length > 0 && clips.length <= 8, "speech sequence length");
+    for (const clip of clips) {
+      string(clip, "speech clip");
+      ensure(
+        /^(?:n(?:[0-9]|1[0-9]|20)|count|compare|what|plus|minus|missing|makes|count-hint|compare-hint|add-hint|subtract-hint|missing-hint)$/.test(
+          clip,
+        ),
+        "installed speech clip",
+      );
+    }
+  }
 }
 function combat(value: unknown, run: RecordValue): void {
   const state = record(value, "combat");

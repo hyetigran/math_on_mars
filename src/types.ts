@@ -52,6 +52,9 @@ export interface Question {
   hint: string;
   explanation: string;
   visualCount?: number;
+  visualGroups?: number[];
+  speechClips?: string[];
+  hintClips?: string[];
 }
 
 export interface Attempt {
