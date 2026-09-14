@@ -1,3 +1,4 @@
+import { modifiers, moduleTotal } from "./modules";
 import "./style.css";
 import { CombatController, type CombatSnapshot } from "./combat";
 import { parseNumericAnswer } from "./questions";
@@ -10,6 +11,7 @@ import {
 } from "./session";
 import { ProfileRepository } from "./persistence";
 import {
+  uid,
   AMMO_TYPES,
   GRADES,
   QUALITY_LABEL,
@@ -492,8 +494,8 @@ function renderReward(): void {
   const candidate = timeQuality(quiz.remainingMs);
   app.innerHTML = shell(
     `<section class="reward-screen" id="content">
-    <div class="reward-heading"><p class="eyebrow warm">FABRICATOR ONLINE</p><h1>Choose one upgrade</h1><div class="outcome-row"><div><small>Time tier</small><b>${QUALITY_LABEL[candidate]}</b></div><span>− ${wrong} ${wrong === 1 ? "miss" : "misses"}</span><div class="quality-badge ${quality}">${qualityPips(quality)}<b>${QUALITY_LABEL[quality]}</b></div></div></div>
-    <div class="reward-grid">${quiz.rewardChoices!.map((module, i) => `<article class="reward-card ${quality}"><div class="card-index">0${i + 1}</div><div class="module-icon ${module.stat}" aria-hidden="true"><i></i></div><p class="eyebrow">TECH MODULE</p><h2>${module.name}</h2><div class="card-quality">${QUALITY_LABEL[quality]} ${qualityPips(quality)}</div><p class="stat-gain">${statText(module)}</p><p>${moduleDescription(module.stat)}</p><button class="button primary" data-reward="${module.id}">Choose module</button></article>`).join("")}</div>
+    <div class="reward-heading"><p class="eyebrow warm">FABRICATOR ONLINE</p><h1>Choose one upgrade</h1><p>${formatTime(quiz.remainingMs)} seconds remaining · Reward strengths are prototype tuning.</p><div class="outcome-row"><div><small>Time tier</small><b>${QUALITY_LABEL[candidate]}</b></div><span>− ${wrong} ${wrong === 1 ? "miss" : "misses"}</span><div class="quality-badge ${quality}">${qualityPips(quality)}<b>${QUALITY_LABEL[quality]}</b></div></div></div>
+    <div class="reward-grid">${quiz.rewardChoices!.map((module, i) => `<article class="reward-card ${quality}"><div class="card-index">0${i + 1}</div><div class="module-icon ${module.stat}" aria-hidden="true"><i></i></div><p class="eyebrow">${moduleStatus(module, run.modules)}</p><h2>${module.name}</h2><div class="card-quality">${QUALITY_LABEL[quality]} ${qualityPips(quality)}</div><p class="stat-gain">${statText(module)}</p><p>${moduleDescription(module.stat)}</p><p>${rewardPreview(module, run)}</p><button class="button primary" data-reward="${module.id}">Choose module</button></article>`).join("")}</div>
     <button id="save-exit" class="text-button centered">Save & exit</button>
   </section>`,
     "reward-shell",
@@ -526,7 +528,7 @@ function renderCorrection(message = ""): void {
   const attempt = misses[0];
   app.innerHTML = shell(
     `<section class="correction-screen" id="content"><div class="correction-copy"><p class="eyebrow warm">UNTIMED CORRECTION</p><h1>Let’s repair this one.</h1><p>Rewards are locked in. Work it through before the next wave.</p></div>
-    <div class="correction-card"><div><span class="correction-count">${quiz.attempts.filter((a) => !a.correct).length - misses.length + 1} / ${quiz.attempts.filter((a) => !a.correct).length}</span><p class="prompt">${escapeHtml(attempt.question.prompt)}</p>${attempt.question.visualCount ? `<div class="cell-grid">${Array.from({ length: attempt.question.visualCount }, () => "<i></i>").join("")}</div>` : ""}<div class="hint-box"><b>Mission hint</b><p>${escapeHtml(attempt.question.hint)}</p></div></div>
+    <div class="correction-card"><div><span class="correction-count">${quiz.attempts.filter((a) => !a.correct).length - misses.length + 1} / ${quiz.attempts.filter((a) => !a.correct).length}</span><p class="prompt">${escapeHtml(attempt.question.prompt)}</p>${attempt.question.visualCount ? `<div class="cell-grid">${Array.from({ length: attempt.question.visualCount }, () => "<i></i>").join("")}</div>` : ""}<div class="hint-box"><b>Mission hint</b><p>${escapeHtml(attempt.question.hint)}</p></div><details><summary>Show worked explanation</summary><p>${escapeHtml(attempt.question.explanation)}</p></details></div>
       <div><label for="correction-input">Correct answer</label><input id="correction-input" inputmode="none" autocomplete="off" value="${escapeHtml(quiz.correctionDraft ?? "")}"><div class="keypad correction-keypad" aria-label="Correction number keypad">${["7", "8", "9", "4", "5", "6", "1", "2", "3", ".", "0", "/", "back", "clear", "-"].map((key) => `<button type="button" data-correction-key="${key}" aria-label="${key === "/" ? "Fraction bar" : key === "back" ? "Backspace" : key === "-" ? "Minus" : key}">${key === "back" ? "⌫" : key === "clear" ? "Clear" : key}</button>`).join("")}</div><p class="input-error" id="correction-error">${escapeHtml(message)}</p><button id="correction-check" class="button primary">Check answer</button></div></div>
     <button id="save-exit" class="text-button centered">Save & exit</button></section>`,
     "correction-shell",
@@ -542,8 +544,15 @@ function renderCorrection(message = ""): void {
         "Enter a complete number or fraction.";
       return;
     }
+    const correctionId = uid("correction");
     perform(
-      () => session.correct(activeProfileId!, attempt.question.id, value),
+      () =>
+        session.correct(
+          activeProfileId!,
+          attempt.question.id,
+          value,
+          correctionId,
+        ),
       (message) => {
         if (activeRun().phase === "correction") renderCorrection(message ?? "");
         else resumeRun();
@@ -633,7 +642,7 @@ function renderShop(message = ""): void {
     <section class="market-panel" aria-labelledby="shop-title"><div class="panel-heading"><div><p class="eyebrow">OUTPOST SHOP</p><h2 id="shop-title">Buy an upgrade</h2></div><span>Four choices</span></div>
       <div class="shop-offers">${offers.map((offer, i) => `<article class="shop-offer ${run.shopBought.includes(offer.id) ? "bought" : ""}"><span>0${i + 1}</span><div class="shop-offer-icon ${offer.id}" aria-hidden="true"><i></i></div><h3>${offer.title}</h3><p>${offer.detail}</p><button class="button secondary" data-buy="${offer.id}" ${offer.disabled || run.shopBought.includes(offer.id) ? "disabled" : ""}>${run.shopBought.includes(offer.id) ? "Bought" : `Buy · ${offer.price} salvage`}</button></article>`).join("")}</div>
     </section>
-    <section class="loadout"><div class="loadout-heading"><div><p class="eyebrow">YOUR EQUIPMENT</p><h2>Pulse Blaster</h2><p>Tap Equip on any ammo card. When your active slots are full, it replaces the rightmost ammo.</p></div>${purpleTypes > 0 || canForge(run) ? `<div class="omni-progress"><small>OMNI AMMO</small><b>${purpleTypes} / 5</b><button id="forge-button" class="button forge" ${canForge(run) ? "" : "disabled"}>${canForge(run) ? "Forge Omni" : "Collect 5 Purple types"}</button></div>` : ""}</div>
+    <section class="loadout"><details><summary>Marine stats</summary><p>${marineStats(run)}</p></details><div class="loadout-heading"><div><p class="eyebrow">YOUR EQUIPMENT</p><h2>Pulse Blaster</h2><p>Tap Equip on any ammo card. When your active slots are full, it replaces the rightmost ammo.</p></div>${purpleTypes > 0 || canForge(run) ? `<div class="omni-progress"><small>OMNI AMMO</small><b>${purpleTypes} / 5</b><button id="forge-button" class="button forge" ${canForge(run) ? "" : "disabled"}>${canForge(run) ? "Forge Omni" : "Collect 5 Purple types"}</button></div>` : ""}</div>
       <div class="weapon-dock"><div class="blaster-card"><div class="blaster-icon" aria-hidden="true"><i></i></div><div><small>ONE WEAPON</small><b>Pulse Blaster</b></div></div><div class="loaded-ammo"><small>ACTIVE AMMO · ${activeAmmo.length}/${run.ammoCapacity}</small><div>${activeAmmo.map((ammo) => `<span>${ammo.legendary ? "Omni" : ammo.type} T${ammo.tier}</span>`).join("") || "<em>No ammo equipped</em>"}${Array.from({ length: Math.max(0, run.ammoCapacity - activeAmmo.length) }, () => "<i>Empty</i>").join("")}</div></div></div>
       <div class="reserve"><div class="panel-heading compact"><div><p class="eyebrow">AMMO LOCKER</p><h3>Owned ammo</h3></div><span>${run.ammo.length} cartridge${run.ammo.length === 1 ? "" : "s"}</span></div><div class="reserve-grid">${run.ammo.map((ammo) => ammoChip(ammo, run.activeAmmoIds.includes(ammo.id))).join("")}</div></div>
       ${merges ? `<div class="merge-row"><div><p class="eyebrow">READY TO UPGRADE</p><span>Combine two matching cartridges into one stronger cartridge.</span></div><div>${merges}</div></div>` : ""}
@@ -888,9 +897,73 @@ function downloadProfiles(text: string): void {
 }
 
 function statText(module: Module): string {
-  if (module.stat === "maxHp" || module.stat === "armor")
-    return `+${Math.round(module.value)} ${module.stat === "maxHp" ? "max integrity" : "armor"}`;
-  return `+${Math.round(module.value * 100)}% ${({ damage: "damage", attackSpeed: "attack speed", moveSpeed: "move speed", healing: "healing" } as Record<string, string>)[module.stat]}`;
+  return modifiers(module)
+    .map((m) => {
+      const absolute = m.stat === "maxHp" || m.stat === "armor";
+      const label = {
+        maxHp: "max integrity",
+        armor: "armor",
+        damage: "damage",
+        attackSpeed: "attack speed",
+        moveSpeed: "move speed",
+        healing: "healing",
+        projectileSpeed: "projectile speed",
+        pickupRadius: "pickup radius",
+      }[m.stat];
+      return `+${Number((m.value * (absolute ? 1 : 100)).toFixed(2))}${absolute ? "" : "%"} ${label}`;
+    })
+    .join(" · ");
+}
+
+function moduleStatus(module: Module, owned: Module[]): string {
+  if (owned.some((m) => m.name === module.name)) return "Add another";
+  const family = module.name.split(" ").at(-1);
+  return owned.some((m) => m.name.split(" ").at(-1) === family)
+    ? "New variant"
+    : "New module";
+}
+function marineStats(run: RunState): string {
+  return [
+    `${run.hp.toFixed(1)} / ${run.maxHp} integrity`,
+    ...(
+      [
+        "damage",
+        "attackSpeed",
+        "projectileSpeed",
+        "moveSpeed",
+        "pickupRadius",
+        "healing",
+        "armor",
+      ] as Module["stat"][]
+    ).map((stat) =>
+      statText({
+        id: "summary",
+        name: "",
+        quality: "white",
+        stat,
+        value: moduleTotal(run.modules, stat),
+      }),
+    ),
+  ].join(" · ");
+}
+
+function rewardPreview(module: Module, run: RunState): string {
+  return (
+    "After install: " +
+    modifiers(module)
+      .map((m) => {
+        const total = moduleTotal([...run.modules, module], m.stat);
+        if (m.stat === "maxHp")
+          return `${run.maxHp + total - moduleTotal(run.modules, "maxHp")} max integrity`;
+        return statText({
+          ...module,
+          stat: m.stat,
+          value: total,
+          additionalModifiers: [],
+        });
+      })
+      .join(" · ")
+  );
 }
 
 function moduleDescription(stat: Module["stat"]): string {
@@ -901,6 +974,8 @@ function moduleDescription(stat: Module["stat"]): string {
     armor: "Reduce damage from contact and projectiles.",
     moveSpeed: "Quicker dodges across the arena.",
     healing: "Med-gel restores more integrity.",
+    projectileSpeed: "Shots reach slimes sooner.",
+    pickupRadius: "Collect salvage from farther away.",
   }[stat];
 }
 

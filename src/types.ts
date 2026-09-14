@@ -19,10 +19,27 @@ export interface Ammo {
   legendary?: boolean;
 }
 
+export const STAT_NAMES = [
+  "damage",
+  "attackSpeed",
+  "maxHp",
+  "armor",
+  "moveSpeed",
+  "healing",
+  "projectileSpeed",
+  "pickupRadius",
+] as const;
+export type Stat = (typeof STAT_NAMES)[number];
+export interface Modifier {
+  stat: Stat;
+  value: number;
+}
+
 export interface Module {
   id: string;
   name: string;
-  stat: "damage" | "attackSpeed" | "maxHp" | "armor" | "moveSpeed" | "healing";
+  stat: Stat;
+  additionalModifiers?: Modifier[];
   value: number;
   quality: Quality;
 }
@@ -168,6 +185,12 @@ export interface RunState {
 }
 
 export interface HistoryEntry {
+  correctionAttempts?: {
+    id: string;
+    input: string;
+    correct: boolean;
+    at: number;
+  }[];
   occurrenceId: string;
   question: string;
   grade: Grade;

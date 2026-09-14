@@ -167,3 +167,68 @@ test("shop, equipped merge, forge, next wave and end stay behind committed comma
   assert.equal(restored.profile(id).activeRun, undefined);
   assert.equal(restored.profile(id).history.length, 25);
 });
+
+test("reward rarity adds saved modifiers instead of multiplying one stat", () => {
+  for (const [elapsed, count] of [
+    [30000, 1],
+    [25000, 1],
+    [15000, 2],
+    [5000, 3],
+  ]) {
+    const { session, id, repository } = setup();
+    for (let i = 0; i < 5; i++) answer(session, id, true, elapsed);
+    const choices = session.profile(id).activeRun!.quiz!.rewardChoices!;
+    assert.equal(choices.length, 3);
+    for (const choice of choices)
+      assert.equal(1 + (choice.additionalModifiers?.length ?? 0), count);
+    const first = choices[0];
+    session.chooseReward(id, first.id);
+    assert.deepEqual(repository.load()[0].activeRun!.modules[0], first);
+  }
+});
+
+test("secondary maximum integrity gain preserves missing health and settles once", () => {
+  const { session, id, repository } = setup();
+  const profiles = session.profiles;
+  profiles[0].activeRun!.hp = 60;
+  profiles[0].activeRun!.wave = 4;
+  const restored = new RunSession(profiles, repository);
+  for (let i = 0; i < 5; i++) answer(restored, id, true);
+  const choice = restored
+    .profile(id)
+    .activeRun!.quiz!.rewardChoices!.find((m) => m.name === "Plating Shield")!;
+  assert.ok(choice);
+  restored.chooseReward(id, choice.id);
+  restored.chooseReward(id, choice.id);
+  const run = restored.profile(id).activeRun!;
+  assert.equal(run.maxHp, 110);
+  assert.equal(run.hp, 70);
+  assert.equal(run.modules.length, 1);
+});
+
+test("correction retries persist separately, deduplicate commands and survive failed saves", () => {
+  const { session, id, repository, setFailure } = setup();
+  for (let i = 0; i < 5; i++) answer(session, id, false);
+  session.chooseReward(
+    id,
+    session.profile(id).activeRun!.quiz!.rewardChoices![0].id,
+  );
+  const q = session.profile(id).activeRun!.quiz!.questions[0];
+  session.correct(id, q.id, "999", "retry-1");
+  session.correct(id, q.id, "999", "retry-1");
+  assert.equal(session.profile(id).history[0].correctionAttempts!.length, 1);
+  setFailure(true);
+  assert.throws(() =>
+    session.correct(id, q.id, `${q.answer[0]}/${q.answer[1]}`, "retry-2"),
+  );
+  assert.equal(session.profile(id).history[0].correctionAttempts!.length, 1);
+  setFailure(false);
+  session.correct(id, q.id, `${q.answer[0]}/${q.answer[1]}`, "retry-2");
+  const history = repository.load()[0].history[0];
+  assert.deepEqual(
+    history.correctionAttempts!.map((a) => a.correct),
+    [false, true],
+  );
+  assert.equal(history.correctInitially, false);
+  assert.equal(history.corrected, true);
+});

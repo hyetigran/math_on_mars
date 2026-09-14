@@ -8,7 +8,9 @@ The plans and WizardGenie prompt pack reflect the personal MVP and confirmed fiv
 
 ## Sequential ticket work
 
-Ticket 1 (`ticket/01-combat-foundation`) adds collectible salvage with saved positions and a wave-clear sweep, floating touch origin and cancellation, mobile instructions, and a pause-menu handedness setting. Preserve the owner’s grade-only ten-wave mission, which supersedes the early three-wave slice. Automated checks pass; current browser discovery returns no connected browser, so new visual and physical-device checks are unverified. Review findings are being resolved before PR merge. Next in order is ticket 2, complete math loop.
+Ticket 1 merged as PR #1 (83e1931). It adds saved collectible salvage, wave-clear sweep, floating touch movement/cancellation, mobile instructions, and pause-menu handedness controls. Preserve the grade-only ten-wave mission.
+
+Ticket 2 (`ticket/02-math-loop`) now implements the authored multi-stat rarity policy, exact capped offers, projectile-speed/pickup-radius effects, saved correction attempts with retry IDs, worked explanations, reward identity labels and cumulative marine stats. All 30 tests, production build, Prettier and diff checks pass; both review axes report no blockers. Exhaustive nine-purple reward paths with armor caches preserve three choices. Browser/physical-device verification remains unavailable. PR creation/merge is next; ticket 3 follows for local profiles/intermission persistence. User explicitly approved merging this and subsequent ticket PRs after review and fixes.
 
 ## Next implementation work
 

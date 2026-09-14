@@ -1,4 +1,10 @@
-import { AMMO_TYPES, GRADES, QUALITY_ORDER, type Profile } from "./types";
+import {
+  AMMO_TYPES,
+  GRADES,
+  QUALITY_ORDER,
+  STAT_NAMES,
+  type Profile,
+} from "./types";
 
 export interface ProfileStorage {
   getItem(key: string): string | null;
@@ -78,13 +84,25 @@ function moduleRecord(value: unknown): void {
   const item = record(value, "module");
   string(item.id, "module.id");
   string(item.name, "module.name");
-  choice(
-    item.stat,
-    ["damage", "attackSpeed", "maxHp", "armor", "moveSpeed", "healing"],
-    "module.stat",
-  );
+  choice(item.stat, STAT_NAMES, "module.stat");
   number(item.value, "module.value");
   choice(item.quality, QUALITY_ORDER, "module.quality");
+  if (item.additionalModifiers !== undefined) {
+    const seen = new Set([item.stat]);
+    for (const value of list(
+      item.additionalModifiers,
+      "module.additionalModifiers",
+    )) {
+      const modifier = record(value, "modifier");
+      choice(modifier.stat, STAT_NAMES, "modifier.stat");
+      number(modifier.value, "modifier.value");
+      ensure(
+        (modifier.value as number) > 0 && !seen.has(modifier.stat),
+        "modifier gain/stat",
+      );
+      seen.add(modifier.stat);
+    }
+  }
 }
 function question(value: unknown): void {
   const item = record(value, "question");
@@ -236,6 +254,19 @@ function decode(raw: string): Profile[] {
       boolean(entry.correctInitially, "history.correctInitially");
       boolean(entry.corrected, "history.corrected");
       number(entry.at, "history.at");
+      if (entry.correctionAttempts !== undefined) {
+        const corrections = list(
+          entry.correctionAttempts,
+          "history.correctionAttempts",
+        );
+        uniqueIds(corrections, "correctionAttempts");
+        for (const value of corrections) {
+          const correction = record(value, "correction");
+          string(correction.input, "correction.input");
+          boolean(correction.correct, "correction.correct");
+          number(correction.at, "correction.at");
+        }
+      }
       if (entry.occurrenceId === undefined)
         entry.occurrenceId = `legacy:${profile.id}:${index}`;
       string(entry.occurrenceId, "history.occurrenceId");

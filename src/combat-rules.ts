@@ -1,3 +1,4 @@
+import { moduleTotal } from "./modules";
 import {
   AMMO_TYPES,
   type Ammo,
@@ -46,9 +47,6 @@ const distance = (a: Position, b: Position): number =>
   Math.hypot(a.x - b.x, a.y - b.y);
 const clamp = (n: number, min: number, max: number): number =>
   Math.max(min, Math.min(max, n));
-const moduleTotal = (modules: Module[], stat: Module["stat"]): number =>
-  modules.filter((m) => m.stat === stat).reduce((sum, m) => sum + m.value, 0);
-
 // A swept collision returns the first entry time along a projectile's segment.
 function collisionTime(
   from: Position,
@@ -234,8 +232,14 @@ export class CombatSimulation {
         id: state.nextBoltId++,
         shotId: shot.id,
         ...origin,
-        vx: Math.cos(angle + spread) * 560,
-        vy: Math.sin(angle + spread) * 560,
+        vx:
+          Math.cos(angle + spread) *
+          560 *
+          (1 + moduleTotal(this.options.modules, "projectileSpeed")),
+        vy:
+          Math.sin(angle + spread) *
+          560 *
+          (1 + moduleTotal(this.options.modules, "projectileSpeed")),
         damage,
         pierce: tiers.Piercing,
         hitIds: [],
@@ -412,7 +416,11 @@ export class CombatSimulation {
     }
     state.enemies = state.enemies.filter((e) => e.hp > 0);
     state.pickups = state.pickups.filter((pickup) => {
-      if (distance(pickup, state.marine) > 48) return true;
+      if (
+        distance(pickup, state.marine) >
+        48 * (1 + moduleTotal(this.options.modules, "pickupRadius"))
+      )
+        return true;
       state.salvage += pickup.value;
       return false;
     });
