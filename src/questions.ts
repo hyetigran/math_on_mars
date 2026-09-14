@@ -254,6 +254,18 @@ export function makeQuestions(
           );
     }
     if (grade === "4") {
+      if (i === 2) {
+        const denominator = pickInt(rand, 2, 10);
+        const numerator = pickInt(rand, 1, denominator - 1);
+        const scale = pickInt(rand, 2, 5);
+        return q(
+          i,
+          `Complete the equivalent fraction: ${numerator}/${denominator} = ?/${denominator * scale}. Enter the missing numerator.`,
+          [numerator * scale, 1],
+          `The denominator was multiplied by ${scale}. Multiply the numerator by the same number.`,
+          `${numerator}/${denominator} equals ${numerator * scale}/${denominator * scale}, because both parts were multiplied by ${scale}.`,
+        );
+      }
       if (i % 2) {
         const d = pickInt(rand, 3, 8);
         const a = pickInt(rand, 1, d - 1);
