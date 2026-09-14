@@ -58,11 +58,13 @@ function q(
   hint: string,
   explanation: string,
   visualCount?: number,
+  answerInput: Question["answerInput"] = "number",
 ): Question {
   return {
     id: `q-${index}-${prompt.replace(/\W/g, "").slice(0, 10)}`,
     prompt,
     spoken: prompt,
+    answerInput,
     answer,
     hint,
     explanation,
@@ -254,6 +256,18 @@ export function makeQuestions(
           );
     }
     if (grade === "4") {
+      if (i === 2) {
+        const denominator = pickInt(rand, 2, 10);
+        const numerator = pickInt(rand, 1, denominator - 1);
+        const scale = pickInt(rand, 2, 5);
+        return q(
+          i,
+          `Complete the equivalent fraction: ${numerator}/${denominator} = ?/${denominator * scale}. Enter the missing numerator.`,
+          [numerator * scale, 1],
+          `The denominator was multiplied by ${scale}. Multiply the numerator by the same number.`,
+          `${numerator}/${denominator} equals ${numerator * scale}/${denominator * scale}, because both parts were multiplied by ${scale}.`,
+        );
+      }
       if (i % 2) {
         const d = pickInt(rand, 3, 8);
         const a = pickInt(rand, 1, d - 1);
@@ -264,6 +278,8 @@ export function makeQuestions(
           fraction(a + b, d),
           "Keep the denominator and add the numerators.",
           `${a} plus ${b} is ${a + b}, so the answer is ${a + b}/${d}.`,
+          undefined,
+          "fraction",
         );
       }
       const a = pickInt(rand, 12, 35);
@@ -296,6 +312,8 @@ export function makeQuestions(
         fraction(d1 + d2, d1 * d2),
         "Find a common denominator first.",
         `A common denominator is ${d1 * d2}; the sum is ${d1 + d2}/${d1 * d2}.`,
+        undefined,
+        "fraction",
       );
     }
     if (i % 3 === 0) {
@@ -328,6 +346,8 @@ export function makeQuestions(
       fraction(d2, d1),
       "Multiply by the reciprocal of the second fraction.",
       `1/${d1} times ${d2}/1 equals ${d2}/${d1}.`,
+      undefined,
+      "fraction",
     );
   });
 }

@@ -2451,3 +2451,25 @@ legend {
 #app[inert] .correction-card {
   visibility: hidden;
 }
+
+.fraction-fields {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: end;
+  gap: 0.5rem;
+  margin-block: 1rem;
+}
+.fraction-fields label {
+  min-width: 0;
+}
+.fraction-fields input {
+  width: 100%;
+  min-width: 0;
+  min-height: 48px;
+}
+.fraction-fields input:focus {
+  outline: 3px solid #ffcb66;
+}
+.answer-field[hidden] {
+  display: none;
+}

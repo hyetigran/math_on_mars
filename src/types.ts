@@ -45,6 +45,7 @@ export interface Module {
 }
 
 export interface Question {
+  answerInput?: "number" | "fraction";
   id: string;
   prompt: string;
   spoken: string;
