@@ -14,7 +14,11 @@ Ticket 2 merged as PR #2 (3d8193d), completing multi-stat rewards, capped gains,
 
 Ticket 3 merged as PR #3 (635bcb1), adding IndexedDB transactions, private publication, receipts and backup recovery.
 
-Ticket 4 (`ticket/04-combat-resume`) was implemented in `/tmp/mathonmars-ticket4` to preserve unrelated uncommitted instruction/memory edits in the original checkout. Periodic checkpoints now run in the background every 300 active simulation ticks, coalesce waiting snapshots and retain failed jobs/receipt IDs. Critical actions freeze immediately, drain pending saves, then commit their current state. Snapshots reject stale run/wave identities. All 43 tests, build, Prettier and diff checks pass; both reviews found no remaining production blockers. Integration covers delayed saves before wave transitions/defeat, sibling isolation, terminal backup invalidation and deterministic resumed combat. Live browser/device checks remain outstanding. PR/merge follows, then ticket 5’s salvage shop. User approval to merge subsequent reviewed PRs remains in force.
+Ticket 4 merged as PR #24 (72c8af5), closing published issue #12. Published issue #11 was reconciled with merged PR #3 and closed.
+
+Ticket 5 (`ticket/05-salvage-shop`, issue #13) adds saved four-slot offers, full passive catalog/rarities, empty purchased slots, a free refill after four buys, paid rerolls that preserve purchased slots and the first guaranteed Expander, and capped-offer replacement. Shared module installation preserves missing HP. Shop labels show rarity, ownership status and exact gains. Saved payload validation and escaping protect rendered shop data; legacy shops preserve prior purchased slots. Prototype prices are 6/9/14/20 salvage for white/green/blue/purple modules, 5 for med-gel, and 2 plus prior paid rerolls for rerolls. All 50 tests, build, formatting and diff checks pass; both review axes report no blockers. Nine nine-wave spending routes retain useful math choices. Browser touch/keyboard checks remain outstanding. PR/merge follows, then draft ticket 6 / issue #15 ammo progression.
+
+Continue using the isolated `/tmp/mathonmars-ticket4` worktree while the original checkout has unrelated user edits. User approval to merge reviewed ticket PRs remains in force.
 
 ## Next implementation work
 

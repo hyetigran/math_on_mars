@@ -295,6 +295,40 @@ export function decodeProfiles(raw: string): Profile[] {
     boolean(run.cacheClaimed, "run.cacheClaimed");
     for (const id of list(run.shopBought, "run.shopBought"))
       string(id, "shop offer ID");
+    if (run.shop !== undefined) {
+      const shop = record(run.shop, "shop");
+      integer(shop.round, "shop.round");
+      integer(shop.paidRerolls, "shop.paidRerolls");
+      const offers = list(shop.offers, "shop.offers");
+      ensure(offers.length === 4, "shop offer count");
+      uniqueIds(offers, "shop.offers");
+      for (const value of offers) {
+        const offer = record(value, "shop offer");
+        choice(
+          offer.kind,
+          ["module", "medkit", "expand", "ammo", "repair"],
+          "shop kind",
+        );
+        string(offer.title, "shop title");
+        integer(offer.price, "shop price", 1);
+        if (offer.kind === "module") moduleRecord(offer.module);
+        else ensure(offer.module === undefined, "unexpected shop module");
+        if (offer.kind !== "ammo")
+          ensure(offer.ammoType === undefined, "unexpected shop ammo");
+        if (offer.kind === "ammo")
+          choice(offer.ammoType, AMMO_TYPES, "shop ammo type");
+      }
+      const purchased = list(run.shopBought, "shopBought");
+      ensure(
+        new Set(purchased).size === purchased.length && purchased.length < 4,
+        "shop purchased slots",
+      );
+      for (const id of purchased)
+        ensure(
+          offers.some((o) => record(o, "offer").id === id),
+          "purchased offer reference",
+        );
+    }
     const ammo = list(run.ammo, "run.ammo");
     uniqueIds(ammo, "ammo");
     for (const value of ammo) {

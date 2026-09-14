@@ -41,3 +41,5 @@ The pending agent-instruction filename choice belongs to the separate engineerin
 Tickets 1 and 2 merged through PRs #1 and #2. Ticket 3 now implements IndexedDB transactions, legacy migration, command receipts, private publication, and backup recovery. All 39 automated tests, build and formatting checks pass. Live browser save-delay/rotation and physical-device verification remain outstanding.
 
 Ticket 4: background/coalesced combat checkpoints and critical-save ordering implemented; 43 tests pass, including durable combat replay and delayed checkpoint terminal/profile isolation. Build and formatting pass. Live browser/device verification remains outstanding. Work uses an isolated worktree to preserve unrelated local edits.
+
+Ticket 5: saved shop offers, passive catalog purchases, empty slots/free refill, paid rerolls and capped-offer replacement now implemented. All 50 tests pass, including nine-wave purchase routes, failed saves, stale purchase IDs and legacy-shop migration. Build/formatting pass; browser interactions remain unverified.
