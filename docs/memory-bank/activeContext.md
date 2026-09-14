@@ -10,7 +10,9 @@ The plans and WizardGenie prompt pack reflect the personal MVP and confirmed fiv
 
 Ticket 1 merged as PR #1 (83e1931). It adds saved collectible salvage, wave-clear sweep, floating touch movement/cancellation, mobile instructions, and pause-menu handedness controls. Preserve the grade-only ten-wave mission.
 
-Ticket 2 (`ticket/02-math-loop`) now implements the authored multi-stat rarity policy, exact capped offers, projectile-speed/pickup-radius effects, saved correction attempts with retry IDs, worked explanations, reward identity labels and cumulative marine stats. All 30 tests, production build, Prettier and diff checks pass; both review axes report no blockers. Exhaustive nine-purple reward paths with armor caches preserve three choices. Browser/physical-device verification remains unavailable. PR creation/merge is next; ticket 3 follows for local profiles/intermission persistence. User explicitly approved merging this and subsequent ticket PRs after review and fixes.
+Ticket 2 merged as PR #2 (3d8193d), completing multi-stat rewards, capped gains, correction attempt history and worked explanations.
+
+Ticket 3 (`ticket/03-profile-saves`) replaces runtime localStorage writes with IndexedDB profile envelopes, atomic post-command backups/receipts and storage revisions. Existing localStorage profiles migrate once without changing their original bytes. RunSession prepares private candidates and rejects stale publication; UI pauses dependent input through transaction completion and retries the same candidate/command ID. Interaction revisions and simulation ticks remain separate from storage revisions. Recovery and raw export read IndexedDB; legacy backup recovery remains available. All 39 tests, build, formatting and diff checks pass. Both review axes' findings are fixed; final PR/merge is next. Ticket 4 follows for combat interruption/resume coverage. Browser/physical-device checks remain unverified. User approved merging subsequent ticket PRs after review and fixes.
 
 ## Next implementation work
 
@@ -18,7 +20,7 @@ The eight code-review findings are now addressed: committed RunSession commands,
 
 1. Exercise the complete ten-wave flow in WizardGenie Play and on physical phones/tablets, then fix runtime/input issues found there.
 2. Add reviewed, installed K–1 narration assets; browser speech synthesis is already removed.
-3. Expand persistence from localStorage snapshots to the IndexedDB transaction contracts in [ARCHITECTURE.md](../ARCHITECTURE.md).
+3. Extend IndexedDB persistence with ticket 18’s full profile transfer and conflicting-tab recovery UI.
 4. Continue enemy, content, economy, offline, and real-device verification in [GAME_PLAN.md](../GAME_PLAN.md).
 
 Keep routine tuning adjustable and proceed with the personal MVP; formal educational review or learner evidence is not a prerequisite.

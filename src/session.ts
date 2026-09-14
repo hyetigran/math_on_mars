@@ -113,6 +113,8 @@ function newRun(grade: Grade): RunState {
 export class RunSession {
   private state: Profile[];
   private paused = false;
+  private prepared?: Profile[];
+  private preparing = false;
   constructor(
     profiles: Profile[],
     private readonly store: ProfileStore,
@@ -136,9 +138,38 @@ export class RunSession {
   setPaused(paused: boolean): void {
     this.paused = paused;
   }
+  prepare<T>(action: () => T): {
+    profiles: Profile[];
+    result: T;
+    publish: () => void;
+  } {
+    if (this.preparing) throw new Error("A command is already being prepared.");
+    const base = this.state;
+    this.preparing = true;
+    try {
+      const result = action();
+      const candidate = this.prepared ?? structuredClone(this.state);
+      return {
+        profiles: structuredClone(candidate),
+        result,
+        publish: () => {
+          if (this.state !== base && this.state !== candidate)
+            throw new Error("Prepared state is stale.");
+          this.state = candidate;
+        },
+      };
+    } finally {
+      this.preparing = false;
+      this.prepared = undefined;
+    }
+  }
   private change<T>(operation: (profiles: Profile[]) => T): T {
-    const candidate = structuredClone(this.state);
+    const candidate = structuredClone(this.prepared ?? this.state);
     const result = operation(candidate);
+    if (this.preparing) {
+      this.prepared = candidate;
+      return result;
+    }
     this.store.commit(candidate);
     this.state = candidate;
     return result;
@@ -153,7 +184,11 @@ export class RunSession {
       const profile = profiles.find((p) => p.id === id);
       const run = profile?.activeRun;
       if (!profile || !run || (phase && run.phase !== phase)) return;
-      return operation(run, profile);
+      const before = JSON.stringify([run, profile.history]);
+      const result = operation(run, profile);
+      if (before !== JSON.stringify([run, profile.history]))
+        run.interactionRevision = (run.interactionRevision ?? 0) + 1;
+      return result;
     });
   }
   createProfile(name: string): string {

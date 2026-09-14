@@ -9,7 +9,7 @@ import {
   timeQuality,
   type Checkpoint,
 } from "./session";
-import { ProfileRepository } from "./persistence";
+import { IndexedProfileRepository } from "./indexeddb";
 import {
   uid,
   AMMO_TYPES,
@@ -30,7 +30,7 @@ const STORAGE_KEY =
   "math-on-mars-profiles-v1";
 const app = document.querySelector<HTMLElement>("#app")!;
 const announcer = document.querySelector<HTMLElement>("#announcer")!;
-let repository: ProfileRepository;
+let repository: IndexedProfileRepository;
 let session: RunSession;
 let quizDraft = "";
 let quizElapsedAtStart = 0;
@@ -39,6 +39,8 @@ let combat: CombatController | null = null;
 let timerId: number | null = null;
 let quizStartedAt = 0;
 let paused = false;
+let saving = false;
+let pendingPause: string | null = null;
 let quizKeyHandler: ((event: KeyboardEvent) => void) | null = null;
 let combatCheckpointId: number | null = null;
 let resetTouch: (() => void) | null = null;
@@ -777,42 +779,59 @@ function setBlocked(blocked: boolean): void {
   }
 }
 
-function perform<T>(action: () => T, after: (result: T) => void): void {
-  let result: T;
-  try {
-    result = action();
-  } catch (error) {
-    setBlocked(true);
-    const previousPause = document.querySelector<HTMLElement>("#pause-overlay");
-    previousPause?.remove();
-    const overlay = document.createElement("div");
-    overlay.id = "pause-overlay";
-    overlay.className = "pause-overlay";
-    overlay.innerHTML = `<div class="pause-dialog" role="alertdialog" aria-modal="true"><h2>Progress could not be saved</h2><p>${escapeHtml(error instanceof Error ? error.message : "Storage is unavailable.")}</p><p>The change has not been applied. Free device space or allow storage, then retry.</p><button class="button primary" id="retry-save">Retry save</button><button class="text-button" id="export-safe">Export last saved progress</button></div>`;
-    document.body.append(overlay);
-    overlay.querySelector<HTMLButtonElement>("#retry-save")!.focus();
-    overlay.querySelector("#retry-save")!.addEventListener("click", () => {
-      session.setPaused(false);
-      let retried: T;
-      try {
-        retried = action();
-      } catch (retryError) {
-        session.setPaused(true);
-        const text = overlay.querySelector("p");
-        if (text)
-          text.textContent =
-            retryError instanceof Error
-              ? retryError.message
-              : "Storage is still unavailable.";
-        return;
-      }
-      overlay.remove();
-      setBlocked(Boolean(previousPause));
-      if (previousPause) document.body.append(previousPause);
-      after(retried);
-      previousPause
-        ?.querySelector<HTMLButtonElement>("#resume-button")
-        ?.focus();
+async function perform<T>(
+  action: () => T,
+  after: (result: T) => void,
+): Promise<void> {
+  if (saving) return;
+  const wasPaused = paused;
+  const previousPause = document.querySelector<HTMLElement>("#pause-overlay");
+  const commandId = uid("command");
+  let prepared:
+    { profiles: Profile[]; result: T; publish: () => void } | undefined;
+  const attempt = async () => {
+    if (saving) return;
+    saving = true;
+    try {
+      // Capture domain changes once; retries retain generated offers, time and IDs.
+      if (!prepared) prepared = session.prepare(action);
+      setBlocked(true);
+      if (previousPause) previousPause.inert = true;
+      await repository.commit(prepared.profiles, commandId);
+    } catch (error) {
+      saving = false;
+      setBlocked(true);
+      document.querySelector("#pause-overlay")?.remove();
+      const overlay = document.createElement("div");
+      overlay.id = "pause-overlay";
+      overlay.className = "pause-overlay";
+      overlay.innerHTML = `<div class="pause-dialog" role="alertdialog" aria-modal="true"><h2>Progress could not be saved</h2><p>${escapeHtml(error instanceof Error ? error.message : "Storage is unavailable.")}</p><p>The change has not been applied. Retry saving before continuing.</p><button class="button primary" id="retry-save">Retry save</button><button class="text-button" id="export-safe">Export last saved progress</button></div>`;
+      document.body.append(overlay);
+      overlay.querySelector<HTMLButtonElement>("#retry-save")!.focus();
+      overlay.querySelector("#retry-save")!.addEventListener("click", () => {
+        void attempt();
+      });
+      overlay
+        .querySelector("#export-safe")!
+        .addEventListener("click", () =>
+          downloadProfiles(JSON.stringify(session.profiles)),
+        );
+      return;
+    }
+    prepared.publish();
+    document.querySelector("#pause-overlay")?.remove();
+    setBlocked(wasPaused);
+    if (previousPause) {
+      previousPause.inert = false;
+      document.body.append(previousPause);
+    }
+    saving = false;
+    after(prepared.result);
+    if (pendingPause) {
+      const title = pendingPause;
+      pendingPause = null;
+      showPause(title);
+    } else {
       if (combat && !paused) combat.resume();
       if (
         !paused &&
@@ -821,18 +840,17 @@ function perform<T>(action: () => T, after: (result: T) => void): void {
         timerId === null
       )
         renderQuiz();
-    });
-    overlay
-      .querySelector("#export-safe")!
-      .addEventListener("click", () =>
-        downloadProfiles(JSON.stringify(session.profiles)),
-      );
-    return;
-  }
-  after(result);
+    }
+    previousPause?.querySelector<HTMLButtonElement>("#resume-button")?.focus();
+  };
+  await attempt();
 }
 
 function showPause(title: string): void {
+  if (saving) {
+    pendingPause = title;
+    return;
+  }
   if (paused || !activeProfileId || !activeProfile().activeRun) return;
   const elapsed = currentElapsed();
   const data = checkpoint();
@@ -864,6 +882,7 @@ function showPause(title: string): void {
           );
         });
       overlay.querySelector("#resume-button")!.addEventListener("click", () => {
+        if (saving) return;
         overlay.remove();
         setBlocked(false);
         combat?.resume();
@@ -874,6 +893,7 @@ function showPause(title: string): void {
         }
       });
       overlay.querySelector("#pause-exit")!.addEventListener("click", () => {
+        if (saving) return;
         overlay.remove();
         renderProfiles();
       });
@@ -1051,32 +1071,48 @@ window.addEventListener("orientationchange", () => {
   if (activeProfileId && activeProfile().activeRun) showPause("Screen rotated");
 });
 
-function boot(): void {
+async function boot(): Promise<void> {
   try {
-    repository = new ProfileRepository(localStorage, STORAGE_KEY);
-    session = new RunSession(repository.load(), repository);
+    repository = new IndexedProfileRepository(
+      indexedDB,
+      STORAGE_KEY,
+      localStorage,
+    );
+    session = new RunSession(await repository.load(), {
+      commit: () => {
+        throw new Error("Use a durable command.");
+      },
+    });
     renderProfiles();
   } catch (error) {
     app.inert = false;
     app.innerHTML = `<section class="terminal"><h1>Saved progress needs attention</h1><p>${escapeHtml(error instanceof Error ? error.message : "Storage is unavailable.")}</p><p>Your stored data has not been overwritten.</p><button id="reload-save" class="button primary">Retry loading</button><button id="recover-save" class="button secondary">Restore last valid backup</button><button id="export-raw" class="text-button">Export stored data</button><p id="recovery-error" role="alert"></p></section>`;
     document.querySelector("#reload-save")!.addEventListener("click", boot);
-    document.querySelector("#recover-save")!.addEventListener("click", () => {
-      try {
-        session = new RunSession(repository.recoverBackup(), repository);
-        renderProfiles();
-      } catch (failure) {
-        document.querySelector("#recovery-error")!.textContent =
-          String(failure);
-      }
-    });
-    document.querySelector("#export-raw")!.addEventListener("click", () => {
-      try {
-        downloadProfiles(localStorage.getItem(STORAGE_KEY) ?? "[]");
-      } catch (failure) {
-        document.querySelector("#recovery-error")!.textContent =
-          String(failure);
-      }
-    });
+    document
+      .querySelector("#recover-save")!
+      .addEventListener("click", async () => {
+        try {
+          session = new RunSession(await repository.recoverBackup(), {
+            commit: () => {
+              throw new Error("Use a durable command.");
+            },
+          });
+          renderProfiles();
+        } catch (failure) {
+          document.querySelector("#recovery-error")!.textContent =
+            String(failure);
+        }
+      });
+    document
+      .querySelector("#export-raw")!
+      .addEventListener("click", async () => {
+        try {
+          downloadProfiles(await repository.exportStored());
+        } catch (failure) {
+          document.querySelector("#recovery-error")!.textContent =
+            String(failure);
+        }
+      });
   }
 }
 boot();

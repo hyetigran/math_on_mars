@@ -326,6 +326,7 @@ export class CombatSimulation {
   private step(movement: Position): void {
     const state = this.state,
       dt = STEP_MS / 1000;
+    state.simulationTick = (state.simulationTick ?? 0) + 1;
     state.spawnCooldownMs = Math.max(0, state.spawnCooldownMs - STEP_MS);
     if (state.spawned < state.spawnTotal && state.spawnCooldownMs === 0) {
       this.spawnEnemy();
