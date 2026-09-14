@@ -1,3 +1,4 @@
+import { decodeProfiles } from "./persistence";
 import {
   MISSION_PRESETS,
   type MissionLength,
@@ -107,6 +108,23 @@ export class RunSession {
     const result = this.state.find((p) => p.id === id);
     if (!result) throw new Error("No active profile");
     return structuredClone(result);
+  }
+  importProfile(profile: Profile, disposition: "add" | "replace"): void {
+    if (this.paused) return;
+    const incoming = decodeProfiles(JSON.stringify([profile]))[0];
+    this.change((profiles) => {
+      const index = profiles.findIndex(
+        (existing) => existing.id === incoming.id,
+      );
+      if (index >= 0 && disposition !== "replace")
+        throw new Error(
+          "Choose whether to replace the existing profile or keep it.",
+        );
+      if (index < 0 && disposition === "replace")
+        throw new Error("The profile to replace is no longer available.");
+      if (index >= 0) profiles[index] = incoming;
+      else profiles.push(incoming);
+    });
   }
   setHandedness(id: string, handedness: Profile["handedness"]): void {
     this.change((profiles) => {
