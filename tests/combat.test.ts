@@ -271,3 +271,23 @@ test("version-one migration preserves old resources and burns without new legacy
   assert.equal(migrated.shots[0].chainRemaining, 0);
   assert.equal(migrated.bolts[0].shotId, migrated.shots[0].id);
 });
+
+test("salvage stays on the ground until collected and remaining drops sweep on clear", () => {
+  const sim = fixture([enemy(1, 100, 100), enemy(2, 800, 400)]);
+  sim.state.enemies[0].hp = 0;
+  sim.advance(STEP);
+  assert.equal(sim.snapshot().salvage, 0);
+  assert.equal(sim.serialize().pickups?.length, 1);
+  const restored = new CombatSimulation({
+    ...options,
+    restore: sim.serialize(),
+  });
+  restored.state.marine = { x: 100, y: 100 };
+  restored.advance(STEP);
+  assert.equal(restored.snapshot().salvage, 1);
+  restored.state.enemies[0].hp = 0;
+  restored.advance(STEP);
+  assert.equal(restored.outcome, "victory");
+  assert.equal(restored.snapshot().salvage, 2);
+  assert.deepEqual(restored.serialize().pickups, []);
+});

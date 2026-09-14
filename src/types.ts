@@ -135,6 +135,7 @@ export interface CombatSaveV2 extends Omit<
   "version" | "enemies" | "bolts"
 > {
   version: 2;
+  pickups?: { id: number; x: number; y: number; value: number }[];
   nextShotId: number;
   nextBoltId: number;
   stepRemainderMs: number;
