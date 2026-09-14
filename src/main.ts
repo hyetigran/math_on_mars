@@ -1,3 +1,8 @@
+import {
+  usesFractionInput,
+  fractionFields,
+  bindFractionInput,
+} from "./fraction-input";
 import { InstalledNarration } from "./narration";
 import {
   previewForge,
@@ -509,7 +514,7 @@ function renderQuiz(message = ""): void {
       <div class="quiz-topline"><div><p class="eyebrow warm">REACTOR RECHARGE</p><h1>Question ${quiz.index + 1} <span>of 5</span></h1></div><div class="countdown" id="countdown" aria-label="Time remaining"><small>SHARED TIME</small><b>${formatTime(quiz.remainingMs)}</b></div></div>
       <div class="mobile-tier-strip" id="mobile-tier">${qualityPips(timeQuality(quiz.remainingMs))}<b>${QUALITY_LABEL[timeQuality(quiz.remainingMs)]}</b><span>candidate</span></div>
       <div class="question-panel"><div class="question-copy"><p class="prompt">${escapeHtml(question.prompt)}</p>${questionVisuals(question)}${narrationControls(question)}
-        <label for="answer">Your answer</label><output id="answer" class="answer-field" aria-live="polite">&nbsp;</output><p class="input-error" id="input-error">${escapeHtml(message)}</p>
+        ${usesFractionInput(question) ? fractionFields : '<label for="answer">Your answer</label>'}<output id="answer" class="answer-field" aria-live="polite" ${usesFractionInput(question) ? "hidden" : ""}>&nbsp;</output><p class="input-error" id="input-error">${escapeHtml(message)}</p>
         <div class="quiz-tools"><span>Take your best shot.</span><button id="save-exit" class="text-button" type="button">Save & exit</button></div></div>
         <div class="keypad" aria-label="Number keypad">${[7, 8, 9, 4, 5, 6, 1, 2, 3].map((n) => `<button data-key="${n}" aria-label="${n}">${n}</button>`).join("")}
           <button data-key="." aria-label="Decimal point">.</button><button data-key="0" aria-label="0">0</button><button data-key="/" aria-label="Fraction bar">⁄</button>
@@ -526,10 +531,26 @@ function renderQuiz(message = ""): void {
   const updateDraft = () => {
     output.textContent = quizDraft || " ";
   };
+  const editFraction = usesFractionInput(question)
+    ? bindFractionInput(
+        quizDraft,
+        (draft) => {
+          quizDraft = draft;
+          updateDraft();
+        },
+        () => {
+          if (!paused) submitInitial(quizDraft, question.id);
+        },
+      )
+    : undefined;
   const press = (key: string) => {
     if (paused || activeRun().phase !== "quiz") return;
     if (key === "check") {
       submitInitial(quizDraft, question.id);
+      return;
+    }
+    if (editFraction) {
+      editFraction(key);
       return;
     }
     if (key === "back") quizDraft = quizDraft.slice(0, -1);
@@ -657,14 +678,14 @@ function renderCorrection(message = ""): void {
   app.innerHTML = shell(
     `<section class="correction-screen" id="content"><div class="correction-copy"><p class="eyebrow warm">UNTIMED CORRECTION</p><h1>Let’s repair this one.</h1><p>Rewards are locked in. Work it through before the next wave.</p></div>
     <div class="correction-card"><div><span class="correction-count">${quiz.attempts.filter((a) => !a.correct).length - misses.length + 1} / ${quiz.attempts.filter((a) => !a.correct).length}</span><p class="prompt">${escapeHtml(attempt.question.prompt)}</p>${questionVisuals(attempt.question)}${narrationControls(attempt.question, true)}<div class="hint-box"><b>Mission hint</b><p>${escapeHtml(attempt.question.hint)}</p></div><details><summary>Show worked explanation</summary><p>${escapeHtml(attempt.question.explanation)}</p></details></div>
-      <div><label for="correction-input">Correct answer</label><input id="correction-input" inputmode="none" autocomplete="off" value="${escapeHtml(quiz.correctionDraft ?? "")}"><div class="keypad correction-keypad" aria-label="Correction number keypad">${["7", "8", "9", "4", "5", "6", "1", "2", "3", ".", "0", "/", "back", "clear", "-"].map((key) => `<button type="button" data-correction-key="${key}" aria-label="${key === "/" ? "Fraction bar" : key === "back" ? "Backspace" : key === "-" ? "Minus" : key}">${key === "back" ? "⌫" : key === "clear" ? "Clear" : key}</button>`).join("")}</div><p class="input-error" id="correction-error">${escapeHtml(message)}</p><button id="correction-check" class="button primary">Check answer</button></div></div>
+      <div>${usesFractionInput(attempt.question) ? fractionFields : '<label for="correction-input">Correct answer</label>'}<input id="correction-input" ${usesFractionInput(attempt.question) ? "hidden" : ""} inputmode="none" autocomplete="off" value="${escapeHtml(quiz.correctionDraft ?? "")}"><div class="keypad correction-keypad" aria-label="Correction number keypad">${["7", "8", "9", "4", "5", "6", "1", "2", "3", ".", "0", "/", "back", "clear", "-"].map((key) => `<button type="button" data-correction-key="${key}" aria-label="${key === "/" ? "Fraction bar" : key === "back" ? "Backspace" : key === "-" ? "Minus" : key}">${key === "back" ? "⌫" : key === "clear" ? "Clear" : key}</button>`).join("")}</div><p class="input-error" id="correction-error">${escapeHtml(message)}</p><button id="correction-check" class="button primary">Check answer</button></div></div>
     <button id="save-exit" class="text-button centered">Save & exit</button></section>`,
     "correction-shell",
   );
   bindHome();
   const input = document.querySelector<HTMLInputElement>("#correction-input")!;
   bindNarration(attempt.question);
-  input.focus();
+  if (!usesFractionInput(attempt.question)) input.focus();
   const submit = () => {
     if (paused || activeRun().phase !== "correction") return;
     const value = input.value;
@@ -688,12 +709,25 @@ function renderCorrection(message = ""): void {
       },
     );
   };
+  const editFraction = usesFractionInput(attempt.question)
+    ? bindFractionInput(
+        input.value,
+        (draft) => {
+          input.value = draft;
+        },
+        submit,
+      )
+    : undefined;
   document
     .querySelectorAll<HTMLElement>("[data-correction-key]")
     .forEach((button) =>
       button.addEventListener("click", () => {
         if (paused) return;
         const key = button.dataset.correctionKey!;
+        if (editFraction) {
+          editFraction(key);
+          return;
+        }
         if (key === "back") input.value = input.value.slice(0, -1);
         else if (key === "clear") input.value = "";
         else if (input.value.length < 18) input.value += key;

@@ -150,6 +150,8 @@ function moduleRecord(value: unknown): void {
 }
 function question(value: unknown): void {
   const item = record(value, "question");
+  if (item.answerInput !== undefined)
+    choice(item.answerInput, ["number", "fraction"], "question input kind");
   for (const key of ["id", "prompt", "spoken", "hint", "explanation"])
     string(item[key], `question.${key}`);
   const answer = list(item.answer, "question.answer");
