@@ -193,27 +193,50 @@ export function makeQuestions(
       };
     }
     if (grade === "2") {
-      const a = pickInt(rand, 20, 79);
-      const b = pickInt(rand, 5, 20);
-      return i % 2
+      if (i === 2) {
+        const value = pickInt(rand, 10, 99);
+        const tens = Math.floor(value / 10);
+        return q(
+          i,
+          `What is the value of the digit ${tens} in the tens place of ${value}?`,
+          [tens * 10, 1],
+          "The tens digit counts groups of ten.",
+          `${value} has ${tens} tens and ${value % 10} ones. The digit ${tens} in the tens place is worth ${tens * 10}.`,
+        );
+      }
+      if (i === 4) {
+        const tens = pickInt(rand, 0, 9),
+          ones = pickInt(rand, 0, 9);
+        return q(
+          i,
+          `${tens} tens and ${ones} ones make what number?`,
+          [tens * 10 + ones, 1],
+          "Each ten is worth 10. Add the ones.",
+          `${tens} tens is ${tens * 10}; adding ${ones} ones makes ${tens * 10 + ones}.`,
+        );
+      }
+      const a = pickInt(rand, 0, 100);
+      const subtract = i % 2 === 1;
+      const b = pickInt(rand, 0, subtract ? a : 100 - a);
+      return subtract
         ? q(
             i,
             `${a} − ${b} = ?`,
             [a - b, 1],
-            "Subtract the ones, then the tens.",
+            "Subtract the tens, then the ones. Regroup a ten if needed.",
             `${a} minus ${b} equals ${a - b}.`,
           )
         : q(
             i,
             `${a} + ${b} = ?`,
             [a + b, 1],
-            "Add ones and tens separately.",
+            "Add the ones and tens. Regroup ten ones as one ten if needed.",
             `${a} plus ${b} equals ${a + b}.`,
           );
     }
     if (grade === "3") {
-      const a = pickInt(rand, 2, 10);
-      const b = pickInt(rand, 2, 10);
+      const a = pickInt(rand, 1, 10);
+      const b = pickInt(rand, 0, 10);
       return i % 2
         ? q(
             i,
