@@ -1,3 +1,4 @@
+import { recoverProfileHistory } from "./profile-transfer";
 import {
   decodeProfiles,
   ProfileStorageError,
@@ -213,9 +214,7 @@ export class IndexedProfileRepository {
           } catch (error) {
             if (!historyOnly) throw error;
             const withoutRun = (value: unknown): Profile => {
-              if (!value || typeof value !== "object") throw error;
-              const { activeRun: _run, ...history } = value as Profile;
-              return validated(history);
+              return validated(recoverProfileHistory(value));
             };
             try {
               return withoutRun(e.data);

@@ -31,10 +31,13 @@ export function readProfileTransfer(raw: string): {
       !value.profile.activeRun
     )
       throw error;
-    const { activeRun: _run, ...history } = value.profile;
-    return {
-      profile: decodeProfiles(JSON.stringify([history]))[0],
-      historyOnly: true,
-    };
+    return { profile: recoverProfileHistory(value.profile), historyOnly: true };
   }
+}
+
+export function recoverProfileHistory(value: unknown): Profile {
+  if (!value || typeof value !== "object" || Array.isArray(value))
+    throw new ProfileStorageError("No valid profile history is available.");
+  const { activeRun: _run, ...history } = value as Profile;
+  return decodeProfiles(JSON.stringify([history]))[0];
 }

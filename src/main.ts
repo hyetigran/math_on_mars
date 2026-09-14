@@ -1,3 +1,4 @@
+import { ProfileLease } from "./profile-lease";
 import { exportProfile, readProfileTransfer } from "./profile-transfer";
 import { EQUIPMENT_CLIPS } from "./equipment-narration-manifest";
 import {
@@ -54,6 +55,7 @@ const STORAGE_KEY =
 const app = document.querySelector<HTMLElement>("#app")!;
 const announcer = document.querySelector<HTMLElement>("#announcer")!;
 let repository: IndexedProfileRepository;
+const profileLease = new ProfileLease(navigator.locks, STORAGE_KEY);
 let session: RunSession;
 const narration = new InstalledNarration();
 const equipmentNarration = new InstalledNarration(
@@ -147,6 +149,7 @@ function bindHome(): void {
 }
 
 function renderProfiles(): void {
+  profileLease.release();
   cleanup();
   activeProfileId = null;
   const cards = session.profiles
@@ -188,7 +191,7 @@ function renderProfiles(): void {
   bindHome();
   const importControl = document.createElement("div");
   importControl.innerHTML =
-    '<label class="button secondary">Import profile <input id="import-profile-file" type="file" accept="application/json,.json"></label><p id="import-error" role="alert"></p>';
+    '<label class="button secondary">Import profile <input id="import-profile-file" type="file" accept="application/json,.json"></label><p id="profile-status" role="alert"></p>';
   document.querySelector(".profile-section")!.append(importControl);
   document
     .querySelector<HTMLInputElement>("#import-profile-file")!
@@ -206,7 +209,7 @@ function renderProfiles(): void {
         renderImportPreview(incoming);
       } catch (error) {
         if (generation === screenGeneration)
-          document.querySelector("#import-error")!.textContent =
+          document.querySelector("#profile-status")!.textContent =
             error instanceof Error
               ? error.message
               : "Could not read this profile.";
@@ -225,9 +228,7 @@ function renderProfiles(): void {
     .querySelectorAll<HTMLElement>("[data-open-profile]")
     .forEach((button) =>
       button.addEventListener("click", () => {
-        activeProfileId = button.dataset.openProfile!;
-        const profile = activeProfile();
-        profile.activeRun ? resumeRun() : renderSetup();
+        void openProfile(button.dataset.openProfile!);
       }),
     );
   document
@@ -245,11 +246,38 @@ function renderProfiles(): void {
       perform(
         () => session.createProfile(name),
         (id) => {
-          activeProfileId = id;
-          renderSetup();
+          void openProfile(id);
         },
       );
     });
+}
+
+let openingProfile = false;
+async function openProfile(id: string): Promise<void> {
+  if (openingProfile) return;
+  openingProfile = true;
+  const generation = screenGeneration;
+  try {
+    const acquired = await profileLease.acquire(id);
+    if (generation !== screenGeneration) {
+      if (acquired) profileLease.release();
+      return;
+    }
+    if (!acquired) {
+      document.querySelector("#profile-status")!.textContent =
+        "This profile is in use in another tab. Save and exit there, then try again.";
+      return;
+    }
+    activeProfileId = id;
+    const profile = activeProfile();
+    profile.activeRun ? resumeRun() : renderSetup();
+  } catch (error) {
+    if (generation === screenGeneration)
+      document.querySelector("#profile-status")!.textContent =
+        error instanceof Error ? error.message : "Could not open this profile.";
+  } finally {
+    openingProfile = false;
+  }
 }
 
 function renderImportPreview(
@@ -260,7 +288,7 @@ function renderImportPreview(
     (profile) => profile.id === incoming.profile.id,
   );
   app.innerHTML = shell(
-    `<section class="terminal"><h1>Import ${escapeHtml(incoming.profile.name)}?</h1><p>${incoming.profile.history.length} saved answers · ${incoming.profile.victories} victories</p><p>${incoming.historyOnly ? "This file's mission cannot resume. Only its validated profile and learning history will be imported." : incoming.profile.activeRun ? `Includes a mission saved at wave ${incoming.profile.activeRun.wave}.` : "No active mission."}</p>${existing ? `<p>This replaces ${escapeHtml(existing.name)}, including its current mission and learning history. Export that profile first if you want to retain it.</p><button id="export-existing" class="text-button">Export existing profile</button>` : ""}<button id="accept-import" class="button primary">${existing ? "Replace existing profile" : "Import profile"}</button><button id="cancel-import" class="button secondary">${existing ? "Keep existing profile" : "Cancel"}</button></section>`,
+    `<section class="terminal"><h1>Import ${escapeHtml(incoming.profile.name)}?</h1><p>${incoming.profile.history.length} saved answers · ${incoming.profile.victories} victories</p><p>${incoming.historyOnly ? "This file's mission cannot resume. Only its validated profile and learning history will be imported." : incoming.profile.activeRun ? `Includes a mission saved at wave ${incoming.profile.activeRun.wave}.` : "No active mission."}</p>${existing ? `<p>This replaces ${escapeHtml(existing.name)}, including its current mission and learning history. Export that profile first if you want to retain it.</p><button id="export-existing" class="text-button">Export existing profile</button>` : ""}<p id="import-lock-status" role="alert"></p><button id="accept-import" class="button primary">${existing ? "Replace existing profile" : "Import profile"}</button><button id="cancel-import" class="button secondary">${existing ? "Keep existing profile" : "Cancel"}</button></section>`,
   );
   document
     .querySelector("#export-existing")
@@ -270,13 +298,41 @@ function renderImportPreview(
   document
     .querySelector("#cancel-import")!
     .addEventListener("click", renderProfiles);
-  document.querySelector("#accept-import")!.addEventListener("click", () => {
-    void perform(
-      () =>
-        session.importProfile(incoming.profile, existing ? "replace" : "add"),
-      renderProfiles,
-    );
-  });
+  document
+    .querySelector("#accept-import")!
+    .addEventListener("click", async () => {
+      const generation = screenGeneration;
+      const button =
+        document.querySelector<HTMLButtonElement>("#accept-import")!;
+      if (button.disabled) return;
+      button.disabled = true;
+      try {
+        const acquired = await profileLease.acquire(incoming.profile.id);
+        if (generation !== screenGeneration) {
+          if (acquired) profileLease.release();
+          return;
+        }
+        if (!acquired) {
+          document.querySelector("#import-lock-status")!.textContent =
+            "This profile is in use in another tab. Save and exit there before importing.";
+          return;
+        }
+        await perform(
+          () =>
+            session.importProfile(
+              incoming.profile,
+              existing ? "replace" : "add",
+            ),
+          renderProfiles,
+        );
+      } catch (error) {
+        if (generation === screenGeneration)
+          document.querySelector("#import-lock-status")!.textContent =
+            String(error);
+      } finally {
+        if (generation === screenGeneration) button.disabled = false;
+      }
+    });
   bindHome();
 }
 
