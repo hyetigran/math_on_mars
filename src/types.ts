@@ -152,6 +152,7 @@ export interface CombatSaveV2 extends Omit<
   "version" | "enemies" | "bolts"
 > {
   version: 2;
+  simulationTick?: number;
   pickups?: { id: number; x: number; y: number; value: number }[];
   nextShotId: number;
   nextBoltId: number;
@@ -164,6 +165,7 @@ export interface CombatSaveV2 extends Omit<
 export type CombatSave = CombatSaveV1 | CombatSaveV2;
 
 export interface RunState {
+  interactionRevision?: number;
   id: string;
   grade: Grade;
   wave: number;

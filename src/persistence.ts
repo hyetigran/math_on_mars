@@ -117,6 +117,8 @@ function question(value: unknown): void {
 }
 function combat(value: unknown, run: RecordValue): void {
   const state = record(value, "combat");
+  if (state.simulationTick !== undefined)
+    integer(state.simulationTick, "combat.simulationTick");
   choice(state.version, [1, 2], "combat.version");
   ensure(state.wave === run.wave, "combat.wave");
   number(state.hp, "combat.hp", 0, run.maxHp as number);
@@ -228,7 +230,7 @@ function combat(value: unknown, run: RecordValue): void {
 }
 
 /** Parse into a fresh value; legacy migrations never mutate a caller's candidate. */
-function decode(raw: string): Profile[] {
+export function decodeProfiles(raw: string): Profile[] {
   let value: unknown;
   try {
     value = JSON.parse(raw);
@@ -273,6 +275,8 @@ function decode(raw: string): Profile[] {
     }
     if (profile.activeRun === undefined) continue;
     const run = record(profile.activeRun, "run");
+    if (run.interactionRevision !== undefined)
+      integer(run.interactionRevision, "run.interactionRevision");
     string(run.id, "run.id");
     choice(run.grade, GRADES, "run.grade");
     choice(run.difficulty, ["easy", "standard"], "run.difficulty");
@@ -407,7 +411,7 @@ export class ProfileRepository {
   load(): Profile[] {
     try {
       const raw = this.storage.getItem(this.key);
-      return raw === null ? [] : decode(raw);
+      return raw === null ? [] : decodeProfiles(raw);
     } catch (cause) {
       if (cause instanceof ProfileStorageError) throw cause;
       throw new ProfileStorageError(
@@ -418,12 +422,12 @@ export class ProfileRepository {
   }
 
   commit(profiles: Profile[]): void {
-    const candidate = JSON.stringify(decode(JSON.stringify(profiles)));
+    const candidate = JSON.stringify(decodeProfiles(JSON.stringify(profiles)));
     try {
       const previous = this.storage.getItem(this.key);
       if (previous !== null) {
         // A corrupt primary must never overwrite the last valid backup.
-        const validatedPrevious = JSON.stringify(decode(previous));
+        const validatedPrevious = JSON.stringify(decodeProfiles(previous));
         this.storage.setItem(`${this.key}-backup`, validatedPrevious);
       }
       this.storage.setItem(this.key, candidate);
@@ -441,7 +445,7 @@ export class ProfileRepository {
       const raw = this.storage.getItem(`${this.key}-backup`);
       if (raw === null)
         throw new ProfileStorageError("No valid backup is available.");
-      const profiles = decode(raw);
+      const profiles = decodeProfiles(raw);
       this.storage.setItem(this.key, JSON.stringify(profiles));
       return profiles;
     } catch (cause) {

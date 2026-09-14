@@ -19,7 +19,7 @@ Snapshot: September 13, 2026, after fixes for the eight code-review findings.
 
 ## Not implemented
 
-Transactional IndexedDB saves, authored/installed K–1 narration, production art/animation, the full enemy roster, complete versioned content packs, service-worker delivery, and deployment.
+Authored/installed K–1 narration, production art/animation, the full enemy roster, complete versioned content packs, service-worker delivery, and deployment.
 
 ## Verification status
 
@@ -35,3 +35,7 @@ Earlier scaffold verification: a server-free Chrome smoke check boots the produc
 - Device coverage and behavior verified once a runnable build exists.
 
 The pending agent-instruction filename choice belongs to the separate engineering-skills setup, not to game readiness.
+
+## Sequential implementation update
+
+Tickets 1 and 2 merged through PRs #1 and #2. Ticket 3 now implements IndexedDB transactions, legacy migration, command receipts, private publication, and backup recovery. All 39 automated tests, build and formatting checks pass. Live browser save-delay/rotation and physical-device verification remain outstanding.

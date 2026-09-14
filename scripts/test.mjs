@@ -6,12 +6,18 @@ import {
   writeFile,
   mkdir,
   rm,
+  symlink,
 } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { spawnSync } from "node:child_process";
 const output = await mkdtemp(join(tmpdir(), "math-on-mars-tests-"));
 try {
+  await symlink(
+    join(process.cwd(), "node_modules"),
+    join(output, "node_modules"),
+    "dir",
+  );
   await writeFile(join(output, "package.json"), '{"type":"commonjs"}');
   for (const folder of ["src", "tests"]) {
     await mkdir(join(output, folder));

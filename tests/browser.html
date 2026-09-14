@@ -19,8 +19,14 @@
     <script type="module">
       import { RunSession } from "../src/session.ts";
       import { ProfileRepository } from "../src/persistence.ts";
+      import { IndexedProfileRepository } from "../src/indexeddb.ts";
       const key = document.documentElement.dataset.profileStorageKey;
       async function launch(kind) {
+        await new Promise((resolve, reject) => {
+          const deletion = indexedDB.deleteDatabase(key);
+          deletion.onsuccess = resolve;
+          deletion.onerror = () => reject(deletion.error);
+        });
         const store = new ProfileRepository(localStorage, key);
         const session = new RunSession([], store);
         const id = session.createProfile("Regression fixture");
@@ -50,13 +56,20 @@
             correctedSession.profile(id).activeRun.quiz.rewardChoices[0].id,
           );
         }
+        const migration = new IndexedProfileRepository(
+          indexedDB,
+          key,
+          localStorage,
+        );
+        await migration.load();
+        migration.close();
         if (kind === "failure") {
-          const original = Storage.prototype.setItem;
+          const original = IDBDatabase.prototype.transaction;
           let fail = true;
-          Storage.prototype.setItem = function (name, value) {
-            if (name.startsWith(key) && fail)
+          IDBDatabase.prototype.transaction = function (...args) {
+            if (this.name === key && args[1] === "readwrite" && fail)
               throw new Error("Test storage failure");
-            return original.call(this, name, value);
+            return original.apply(this, args);
           };
           const restore = document.createElement("button");
           restore.textContent = "Allow test saves";
