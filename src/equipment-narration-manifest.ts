@@ -1,0 +1,22 @@
+// Generated from content/narration/equipment-en.json by build-narration.mjs.
+export const EQUIPMENT_CLIPS: string[] = [
+  "power-white",
+  "power-green",
+  "power-blue",
+  "power-purple",
+  "cache",
+  "buy",
+  "equip",
+  "merge",
+  "forge",
+  "next-wave",
+  "save-exit",
+  "piercing",
+  "multi-shot",
+  "electric-chain",
+  "frost",
+  "fiery",
+  "armor",
+  "reroll",
+  "sell",
+];

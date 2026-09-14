@@ -8,8 +8,12 @@ export class InstalledNarration {
   private loading?: Promise<void>;
   private sources: AudioBufferSourceNode[] = [];
   private generation = 0;
+  constructor(
+    private readonly clips: readonly string[] = NARRATION_CLIPS,
+    private readonly basePath = "/audio/k1",
+  ) {}
   get ready(): boolean {
-    return this.buffers.size === NARRATION_CLIPS.length;
+    return this.buffers.size === this.clips.length;
   }
   get playable(): boolean {
     return this.ready && this.context?.state === "running";
@@ -24,9 +28,9 @@ export class InstalledNarration {
     this.context ??= new AudioContext();
     const context = this.context;
     this.loading = Promise.all(
-      NARRATION_CLIPS.map(async (id) => {
+      this.clips.map(async (id) => {
         if (this.buffers.has(id)) return;
-        const response = await fetch(`/audio/k1/${id}.mp3`, {
+        const response = await fetch(`${this.basePath}/${id}.mp3`, {
           signal: AbortSignal.timeout(15000),
         });
         if (!response.ok)

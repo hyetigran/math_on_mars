@@ -4,11 +4,14 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 
 // Author-time only: the game ships MP3 files and never synthesizes live speech.
+const pack = process.argv[2] ?? "k1";
+if (!["k1", "equipment"].includes(pack))
+  throw new Error("Unknown narration pack");
 const clips = JSON.parse(
-  await readFile("content/narration/k1-en.json", "utf8"),
+  await readFile(`content/narration/${pack}-en.json`, "utf8"),
 );
 const temporary = await mkdtemp(join(tmpdir(), "mars-narration-"));
-await mkdir("public/audio/k1", { recursive: true });
+await mkdir(`public/audio/${pack}`, { recursive: true });
 try {
   for (const [id, text] of Object.entries(clips)) {
     const source = join(temporary, `${id}.aiff`);
@@ -26,7 +29,7 @@ try {
           "libmp3lame",
           "-b:a",
           "64k",
-          `public/audio/k1/${id}.mp3`,
+          `public/audio/${pack}/${id}.mp3`,
         ],
       ],
     ]) {
@@ -40,6 +43,8 @@ try {
 }
 
 await writeFile(
-  "src/narration-manifest.ts",
-  `// Generated from content/narration/k1-en.json by build-narration.mjs.\nexport const NARRATION_CLIPS: string[] = ${JSON.stringify(Object.keys(clips), null, 2)};\n`,
+  pack === "k1"
+    ? "src/narration-manifest.ts"
+    : "src/equipment-narration-manifest.ts",
+  `// Generated from content/narration/${pack}-en.json by build-narration.mjs.\nexport const ${pack === "k1" ? "NARRATION_CLIPS" : "EQUIPMENT_CLIPS"}: string[] = ${JSON.stringify(Object.keys(clips), null, 2)};\n`,
 );
