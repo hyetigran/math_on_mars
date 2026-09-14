@@ -1,3 +1,5 @@
+import { ProfileLease } from "./profile-lease";
+import { exportProfile, readProfileTransfer } from "./profile-transfer";
 import { EQUIPMENT_CLIPS } from "./equipment-narration-manifest";
 import {
   missionLengthForWaves,
@@ -53,6 +55,7 @@ const STORAGE_KEY =
 const app = document.querySelector<HTMLElement>("#app")!;
 const announcer = document.querySelector<HTMLElement>("#announcer")!;
 let repository: IndexedProfileRepository;
+const profileLease = new ProfileLease(navigator.locks, STORAGE_KEY);
 let session: RunSession;
 const narration = new InstalledNarration();
 const equipmentNarration = new InstalledNarration(
@@ -146,6 +149,7 @@ function bindHome(): void {
 }
 
 function renderProfiles(): void {
+  profileLease.release();
   cleanup();
   activeProfileId = null;
   const cards = session.profiles
@@ -161,8 +165,8 @@ function renderProfiles(): void {
       <div class="avatar" aria-hidden="true"><span></span></div>
       <div class="profile-copy"><p class="eyebrow">CADET PROFILE</p><h2>${escapeHtml(profile.name)}</h2>
         <p>Grade ${profile.grade} · ${profile.history.length} answers · ${accuracy}% first try</p></div>
-      <button class="button primary" data-open-profile="${profile.id}">${profile.activeRun ? `Resume wave ${profile.activeRun.wave}` : "Choose mission"}</button>
-    </article>`;
+      <button class="button primary" data-open-profile="${escapeHtml(profile.id)}">${profile.activeRun ? `Resume wave ${profile.activeRun.wave}` : "Choose mission"}</button>
+    <button class="text-button" data-export-profile="${escapeHtml(profile.id)}">Export profile</button></article>`;
     })
     .join("");
   app.innerHTML = shell(
@@ -185,13 +189,46 @@ function renderProfiles(): void {
     "home-screen",
   );
   bindHome();
+  const importControl = document.createElement("div");
+  importControl.innerHTML =
+    '<label class="button secondary">Import profile <input id="import-profile-file" type="file" accept="application/json,.json"></label><p id="profile-status" role="alert"></p>';
+  document.querySelector(".profile-section")!.append(importControl);
+  document
+    .querySelector<HTMLInputElement>("#import-profile-file")!
+    .addEventListener("change", async (event) => {
+      const file = (event.target as HTMLInputElement).files?.[0];
+      if (!file) return;
+      const generation = screenGeneration;
+      try {
+        if (file.size > 10 * 1024 * 1024)
+          throw new Error(
+            "This file is too large. Choose a single profile export under 10 MB.",
+          );
+        const incoming = readProfileTransfer(await file.text());
+        if (generation !== screenGeneration) return;
+        renderImportPreview(incoming);
+      } catch (error) {
+        if (generation === screenGeneration)
+          document.querySelector("#profile-status")!.textContent =
+            error instanceof Error
+              ? error.message
+              : "Could not read this profile.";
+      }
+    });
+  document
+    .querySelectorAll<HTMLButtonElement>("[data-export-profile]")
+    .forEach((button) =>
+      button.addEventListener("click", () =>
+        downloadProfiles(
+          exportProfile(session.profile(button.dataset.exportProfile!)),
+        ),
+      ),
+    );
   document
     .querySelectorAll<HTMLElement>("[data-open-profile]")
     .forEach((button) =>
       button.addEventListener("click", () => {
-        activeProfileId = button.dataset.openProfile!;
-        const profile = activeProfile();
-        profile.activeRun ? resumeRun() : renderSetup();
+        void openProfile(button.dataset.openProfile!);
       }),
     );
   document
@@ -209,11 +246,94 @@ function renderProfiles(): void {
       perform(
         () => session.createProfile(name),
         (id) => {
-          activeProfileId = id;
-          renderSetup();
+          void openProfile(id);
         },
       );
     });
+}
+
+let openingProfile = false;
+async function openProfile(id: string): Promise<void> {
+  if (openingProfile) return;
+  openingProfile = true;
+  const generation = screenGeneration;
+  try {
+    const acquired = await profileLease.acquire(id);
+    if (generation !== screenGeneration) {
+      if (acquired) profileLease.release();
+      return;
+    }
+    if (!acquired) {
+      document.querySelector("#profile-status")!.textContent =
+        "This profile is in use in another tab. Save and exit there, then try again.";
+      return;
+    }
+    activeProfileId = id;
+    const profile = activeProfile();
+    profile.activeRun ? resumeRun() : renderSetup();
+  } catch (error) {
+    if (generation === screenGeneration)
+      document.querySelector("#profile-status")!.textContent =
+        error instanceof Error ? error.message : "Could not open this profile.";
+  } finally {
+    openingProfile = false;
+  }
+}
+
+function renderImportPreview(
+  incoming: ReturnType<typeof readProfileTransfer>,
+): void {
+  cleanup();
+  const existing = session.profiles.find(
+    (profile) => profile.id === incoming.profile.id,
+  );
+  app.innerHTML = shell(
+    `<section class="terminal"><h1>Import ${escapeHtml(incoming.profile.name)}?</h1><p>${incoming.profile.history.length} saved answers · ${incoming.profile.victories} victories</p><p>${incoming.historyOnly ? "This file's mission cannot resume. Only its validated profile and learning history will be imported." : incoming.profile.activeRun ? `Includes a mission saved at wave ${incoming.profile.activeRun.wave}.` : "No active mission."}</p>${existing ? `<p>This replaces ${escapeHtml(existing.name)}, including its current mission and learning history. Export that profile first if you want to retain it.</p><button id="export-existing" class="text-button">Export existing profile</button>` : ""}<p id="import-lock-status" role="alert"></p><button id="accept-import" class="button primary">${existing ? "Replace existing profile" : "Import profile"}</button><button id="cancel-import" class="button secondary">${existing ? "Keep existing profile" : "Cancel"}</button></section>`,
+  );
+  document
+    .querySelector("#export-existing")
+    ?.addEventListener("click", () =>
+      downloadProfiles(exportProfile(existing!)),
+    );
+  document
+    .querySelector("#cancel-import")!
+    .addEventListener("click", renderProfiles);
+  document
+    .querySelector("#accept-import")!
+    .addEventListener("click", async () => {
+      const generation = screenGeneration;
+      const button =
+        document.querySelector<HTMLButtonElement>("#accept-import")!;
+      if (button.disabled) return;
+      button.disabled = true;
+      try {
+        const acquired = await profileLease.acquire(incoming.profile.id);
+        if (generation !== screenGeneration) {
+          if (acquired) profileLease.release();
+          return;
+        }
+        if (!acquired) {
+          document.querySelector("#import-lock-status")!.textContent =
+            "This profile is in use in another tab. Save and exit there before importing.";
+          return;
+        }
+        await perform(
+          () =>
+            session.importProfile(
+              incoming.profile,
+              existing ? "replace" : "add",
+            ),
+          renderProfiles,
+        );
+      } catch (error) {
+        if (generation === screenGeneration)
+          document.querySelector("#import-lock-status")!.textContent =
+            String(error);
+      } finally {
+        if (generation === screenGeneration) button.disabled = false;
+      }
+    });
+  bindHome();
 }
 
 function renderSetup(): void {
@@ -724,7 +844,7 @@ function renderReward(): void {
   app.innerHTML = shell(
     `<section class="reward-screen" id="content">${equipmentGuidance([`power-${quality}`, "save-exit"])}
     <div class="reward-heading"><p class="eyebrow warm">FABRICATOR ONLINE</p><h1>Choose one upgrade</h1><p>${formatTime(quiz.remainingMs)} seconds remaining · Reward strengths are prototype tuning.</p><div class="outcome-row"><div><small>Time tier</small><b>${QUALITY_LABEL[candidate]}</b></div><span>− ${wrong} ${wrong === 1 ? "miss" : "misses"}</span><div class="quality-badge ${quality}">${qualityPips(quality)}<b>${QUALITY_LABEL[quality]}</b></div></div></div>
-    <div class="reward-grid">${quiz.rewardChoices!.map((module, i) => `<article class="reward-card ${quality}"><div class="card-index">0${i + 1}</div><div class="module-icon ${module.stat}" aria-hidden="true"><i></i></div><p class="eyebrow">${moduleStatus(module, run.modules)}</p><h2>${escapeHtml(module.name)}</h2><div class="card-quality">${QUALITY_LABEL[quality]} ${qualityPips(quality)}</div><p class="stat-gain">${statText(module)}</p><p>${moduleDescription(module.stat)}</p><p>${rewardPreview(module, run)}</p>${moduleSpeechButton(module)}<button class="button primary" data-reward="${module.id}">Choose module</button></article>`).join("")}</div>
+    <div class="reward-grid">${quiz.rewardChoices!.map((module, i) => `<article class="reward-card ${quality}"><div class="card-index">0${i + 1}</div><div class="module-icon ${module.stat}" aria-hidden="true"><i></i></div><p class="eyebrow">${moduleStatus(module, run.modules)}</p><h2>${escapeHtml(module.name)}</h2><div class="card-quality">${QUALITY_LABEL[quality]} ${qualityPips(quality)}</div><p class="stat-gain">${statText(module)}</p><p>${moduleDescription(module.stat)}</p><p>${rewardPreview(module, run)}</p>${moduleSpeechButton(module)}<button class="button primary" data-reward="${escapeHtml(module.id)}">Choose module</button></article>`).join("")}</div>
     <button id="save-exit" class="text-button centered">Save & exit</button>
   </section>`,
     "reward-shell",
@@ -1172,8 +1292,11 @@ async function perform<T>(
       const overlay = document.createElement("div");
       overlay.id = "pause-overlay";
       overlay.className = "pause-overlay";
-      overlay.innerHTML = `<div class="pause-dialog" role="alertdialog" aria-modal="true"><h2>Progress could not be saved</h2><p>${escapeHtml(error instanceof Error ? error.message : "Storage is unavailable.")}</p><p>The change has not been applied. Retry saving before continuing.</p><button class="button primary" id="retry-save">Retry save</button><button class="text-button" id="export-safe">Export last saved progress</button></div>`;
+      overlay.innerHTML = `<div class="pause-dialog" role="alertdialog" aria-modal="true"><h2>Progress could not be saved</h2><p>${escapeHtml(error instanceof Error ? error.message : "Storage is unavailable.")}</p><p>The change has not been applied. Retry saving before continuing.</p><button class="button primary" id="retry-save">Retry save</button><button class="text-button" id="export-safe">Export last saved progress</button><button class="button secondary" id="reload-saved">Reload saved profiles</button></div>`;
       document.body.append(overlay);
+      overlay
+        .querySelector("#reload-saved")!
+        .addEventListener("click", () => location.reload());
       overlay.querySelector<HTMLButtonElement>("#retry-save")!.focus();
       overlay.querySelector("#retry-save")!.addEventListener("click", () => {
         void attempt();
@@ -1385,7 +1508,7 @@ function moduleDescription(stat: Module["stat"]): string {
 
 function ammoChip(ammo: Ammo, active: boolean): string {
   const quality = ammo.legendary ? "purple" : qualityFromTier(ammo.tier);
-  return `<button class="ammo-chip ${ammo.legendary ? "legendary" : `tier-${ammo.tier}`} ${active ? "active" : ""}" data-ammo-id="${ammo.id}"><span class="ammo-icon ${ammo.legendary ? "omni" : ammoClass(ammo.type)}"><i></i></span><span class="ammo-copy"><b>${ammo.legendary ? "Legendary Omni" : ammo.type}</b><small>${ammo.legendary ? "All five effects" : `${QUALITY_LABEL[quality]} · T${ammo.tier}`}</small></span><span class="ammo-action">${active ? "Unequip" : "Equip"}</span></button>`;
+  return `<button class="ammo-chip ${ammo.legendary ? "legendary" : `tier-${ammo.tier}`} ${active ? "active" : ""}" data-ammo-id="${escapeHtml(ammo.id)}"><span class="ammo-icon ${ammo.legendary ? "omni" : ammoClass(ammo.type)}"><i></i></span><span class="ammo-copy"><b>${ammo.legendary ? "Legendary Omni" : ammo.type}</b><small>${ammo.legendary ? "All five effects" : `${QUALITY_LABEL[quality]} · T${ammo.tier}`}</small></span><span class="ammo-action">${active ? "Unequip" : "Equip"}</span></button>`;
 }
 
 function ammoClass(type: AmmoType): string {
@@ -1457,6 +1580,7 @@ window.addEventListener("orientationchange", () => {
 
 async function boot(): Promise<void> {
   try {
+    repository?.close();
     repository = new IndexedProfileRepository(
       indexedDB,
       STORAGE_KEY,
@@ -1470,13 +1594,28 @@ async function boot(): Promise<void> {
     renderProfiles();
   } catch (error) {
     app.inert = false;
-    app.innerHTML = `<section class="terminal"><h1>Saved progress needs attention</h1><p>${escapeHtml(error instanceof Error ? error.message : "Storage is unavailable.")}</p><p>Your stored data has not been overwritten.</p><button id="reload-save" class="button primary">Retry loading</button><button id="recover-save" class="button secondary">Restore last valid backup</button><button id="export-raw" class="text-button">Export stored data</button><p id="recovery-error" role="alert"></p></section>`;
+    app.innerHTML = `<section class="terminal"><h1>Saved progress needs attention</h1><p>${escapeHtml(error instanceof Error ? error.message : "Storage is unavailable.")}</p><p>Your stored data has not been overwritten.</p><button id="reload-save" class="button primary">Retry loading</button><button id="recover-save" class="button secondary">Restore last valid backup</button><button id="recover-history" class="button secondary">Recover valid history without unresumable missions</button><button id="export-raw" class="text-button">Export stored data</button><p id="recovery-error" role="alert"></p></section>`;
     document.querySelector("#reload-save")!.addEventListener("click", boot);
     document
       .querySelector("#recover-save")!
       .addEventListener("click", async () => {
         try {
           session = new RunSession(await repository.recoverBackup(), {
+            commit: () => {
+              throw new Error("Use a durable command.");
+            },
+          });
+          renderProfiles();
+        } catch (failure) {
+          document.querySelector("#recovery-error")!.textContent =
+            String(failure);
+        }
+      });
+    document
+      .querySelector("#recover-history")!
+      .addEventListener("click", async () => {
+        try {
+          session = new RunSession(await repository.recoverBackup(true), {
             commit: () => {
               throw new Error("Use a durable command.");
             },

@@ -87,3 +87,11 @@ The owner instructed: “skip any ticket that references game art, I will manual
 - Validation: 84 tests, production build and Prettier pass; ffprobe validates all 27 clips. Audible playback and device interaction have not been verified in a connected browser/device.
 
 - Spec and standards reviews completed; added per-card spoken module effects and replaced text-rewriting callbacks with typed playback status.
+
+### Ticket 18 — profile recovery and transfer
+
+- Added selected-profile JSON export and validated import previews. Identity collisions require an explicit Replace or Keep decision, with export of the existing profile available before replacement. Invalid mission state can be omitted only through the explicitly described history-only import path; malformed history is rejected.
+- Backup/raw export remain available when startup cannot decode an envelope. Explicit history recovery retains validated history if neither primary nor backup mission can resume. Failed writes now expose Reload saved profiles alongside retry/export for conflict recovery.
+- Added exclusive browser profile leases for opening/resuming and importing. An occupied profile shows an in-use message; leaving it releases the lease. Revision checks remain the fallback and secondary guard. Late acquisitions and repeated UI actions cannot retain abandoned leases.
+- Escaped imported profile/equipment IDs in HTML attributes. Shared history-recovery validation across import and IndexedDB.
+- Validation: 89 tests, production build, and Prettier pass. Separate spec/standards reviews completed; browser-lock and duplication findings resolved. Actual browser file dialogs, downloads and multi-tab lock interaction remain unverified without a connected browser.

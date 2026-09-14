@@ -1,3 +1,4 @@
+import { recoverProfileHistory } from "./profile-transfer";
 import {
   decodeProfiles,
   ProfileStorageError,
@@ -177,7 +178,7 @@ export class IndexedProfileRepository {
       return this.legacy.getItem(this.name) ?? "[]";
     return JSON.stringify(envelopes);
   }
-  async recoverBackup(): Promise<Profile[]> {
+  async recoverBackup(historyOnly = false): Promise<Profile[]> {
     const database = await this.open();
     const tx = database.transaction("profiles", "readonly");
     const done = completed(tx);
@@ -208,7 +209,19 @@ export class IndexedProfileRepository {
         try {
           return validated(e.data);
         } catch {
-          return validated(e.previous);
+          try {
+            return validated(e.previous);
+          } catch (error) {
+            if (!historyOnly) throw error;
+            const withoutRun = (value: unknown): Profile => {
+              return validated(recoverProfileHistory(value));
+            };
+            try {
+              return withoutRun(e.data);
+            } catch {
+              return withoutRun(e.previous);
+            }
+          }
         }
       });
     }

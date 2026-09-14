@@ -229,3 +229,48 @@ test("combat checkpoint reload retains simulation state and deterministic future
     assert.deepEqual(resumed.serialize(), live.serialize());
   }
 });
+
+test("unresumable primary and backup retain exact valid history only after explicit history recovery", async () => {
+  const factory = new IDBFactory();
+  const repo = new IndexedProfileRepository(factory, "history-recovery");
+  await repo.load();
+  const saved = {
+    ...profile("a"),
+    history: [
+      {
+        occurrenceId: "run:1:0",
+        question: "2 + 2",
+        grade: "3" as const,
+        correctInitially: false,
+        corrected: true,
+        at: 1234,
+      },
+    ],
+  };
+  await repo.commit([saved], "create");
+  const database = await new Promise<IDBDatabase>((resolve, reject) => {
+    const opening = factory.open("history-recovery");
+    opening.onsuccess = () => resolve(opening.result);
+    opening.onerror = () => reject(opening.error);
+  });
+  const corrupt = { ...saved, activeRun: { version: 999 } };
+  await new Promise<void>((resolve, reject) => {
+    const tx = database.transaction("profiles", "readwrite");
+    tx.objectStore("profiles").put({
+      id: "a",
+      revision: 1,
+      data: corrupt,
+      previous: corrupt,
+    });
+    tx.oncomplete = () => resolve();
+    tx.onabort = () => reject(tx.error);
+  });
+  database.close();
+  const raw = await repo.exportStored();
+  await assert.rejects(repo.load());
+  await assert.rejects(repo.recoverBackup());
+  assert.equal(await repo.exportStored(), raw);
+  const recovered = await repo.recoverBackup(true);
+  assert.deepEqual(recovered, [saved]);
+  assert.deepEqual(await repo.load(), [saved]);
+});
