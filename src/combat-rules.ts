@@ -1,3 +1,5 @@
+import { ENEMY_SPAWNS } from "../content/balance/enemies";
+import { moveEnemy, advanceEnemyProjectiles } from "./enemy-attacks";
 import { omniRateBonus } from "./forge";
 import { STATUS_BALANCE } from "../content/balance/status";
 import { CHAIN_BALANCE } from "../content/balance/chain";
@@ -170,11 +172,12 @@ export class CombatSimulation {
   private spawnDelay(): number {
     return this.options.wave === this.options.totalWaves ? 100 : 560;
   }
-  private randomBetween(min: number, max: number): number {
+  private random(): number {
     this.state.rngState = (this.state.rngState * 1664525 + 1013904223) >>> 0;
-    return (
-      Math.floor((this.state.rngState / 4294967296) * (max - min + 1)) + min
-    );
+    return this.state.rngState / 4294967296;
+  }
+  private randomBetween(min: number, max: number): number {
+    return Math.floor(this.random() * (max - min + 1)) + min;
   }
 
   private spawnEnemy(): void {
@@ -183,6 +186,9 @@ export class CombatSimulation {
     const x = edge === 0 ? 40 : edge === 1 ? 920 : this.randomBetween(40, 920);
     const y = edge === 2 ? 40 : edge === 3 ? 500 : this.randomBetween(40, 500);
     const hp = boss ? 620 : 42 + this.options.wave * 10;
+    const schedule =
+      this.options.totalWaves === 6 ? "shortWave" : "standardWave";
+    const cycleIndex = this.state.spawned % ENEMY_SPAWNS.cycleLength;
     this.state.enemies.push({
       id: this.state.nextEnemyId++,
       x,
@@ -191,6 +197,16 @@ export class CombatSimulation {
       maxHp: hp,
       radius: boss ? 58 : 24,
       boss,
+      kind:
+        !boss &&
+        this.options.wave >= ENEMY_SPAWNS.charger[schedule] &&
+        cycleIndex === ENEMY_SPAWNS.charger.cycleIndex
+          ? "charger"
+          : !boss &&
+              this.options.wave >= ENEMY_SPAWNS.spitter[schedule] &&
+              cycleIndex === ENEMY_SPAWNS.spitter.cycleIndex
+            ? "spitter"
+            : "drifter",
       speed:
         (boss ? 32 : 45 + this.options.wave * 7) *
         (this.options.difficulty === "easy" ? 0.82 : 1),
@@ -375,16 +391,16 @@ export class CombatSimulation {
       enemy.hp -= burn;
       enemy.burnRemainingDamage -= burn;
       if (enemy.burnRemainingDamage <= 0) enemy.burnRate = 0;
-      const angle = Math.atan2(
-        state.marine.y - enemy.y,
-        state.marine.x - enemy.x,
-      );
       const slow = enemy.slowRemainingMs > 0 ? 1 - enemy.slowAmount : 1;
       enemy.slowRemainingMs = Math.max(0, enemy.slowRemainingMs - STEP_MS);
-      if (enemy.hp > 0) {
-        enemy.x += Math.cos(angle) * enemy.speed * slow * dt;
-        enemy.y += Math.sin(angle) * enemy.speed * slow * dt;
-      }
+      if (enemy.hp > 0)
+        moveEnemy(
+          enemy,
+          state,
+          STEP_MS,
+          slow,
+          20 / (20 + Math.min(20, moduleTotal(this.options.modules, "armor"))),
+        );
     }
     state.shotCooldownMs = Math.max(0, state.shotCooldownMs - STEP_MS);
     this.fire();
@@ -440,7 +456,7 @@ export class CombatSimulation {
                 ammo: drawAmmo(
                   state.ammoInventory!,
                   this.options.wave,
-                  () => this.randomBetween(0, 1),
+                  () => this.random(),
                   `drop-${this.options.wave}-${enemy.id}`,
                 ),
               }
@@ -462,9 +478,19 @@ export class CombatSimulation {
       if (pickup.ammo) acquireAmmo(state.ammoInventory!, [pickup.ammo]);
       return false;
     });
+    advanceEnemyProjectiles(
+      state,
+      STEP_MS,
+      20 / (20 + Math.min(20, moduleTotal(this.options.modules, "armor"))),
+    );
     state.hp = Math.max(0, state.hp);
-    if (state.hp === 0) this.outcome = "defeat";
-    else if (state.spawned >= state.spawnTotal && state.enemies.length === 0) {
+    if (state.hp === 0) {
+      state.enemyProjectiles = [];
+      this.outcome = "defeat";
+    } else if (
+      state.spawned >= state.spawnTotal &&
+      state.enemies.length === 0
+    ) {
       state.salvage += state.pickups.reduce(
         (sum, pickup) => sum + pickup.value,
         0,
@@ -472,6 +498,7 @@ export class CombatSimulation {
       for (const pickup of state.pickups)
         if (pickup.ammo) acquireAmmo(state.ammoInventory!, [pickup.ammo]);
       state.pickups = [];
+      state.enemyProjectiles = [];
       this.outcome = "victory";
     }
   }
