@@ -227,6 +227,7 @@ export interface AmmoInventory {
   ammoBag?: AmmoType[];
 }
 export interface RunState extends AmmoInventory {
+  releaseVersion?: string;
   forgedOmni?: boolean;
   forgeIngredientIds?: string[];
   choiceCache?: ChoiceCache;

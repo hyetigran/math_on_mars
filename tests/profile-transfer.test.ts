@@ -47,3 +47,20 @@ test("invalid active missions may retain validated history, but malformed histor
     /supported/,
   );
 });
+
+test("profile transfer retains pinned release versions; legacy migration only adds a version", () => {
+  const { session, profile } = sample();
+  assert.match(profile.activeRun!.releaseVersion!, /^[a-f0-9]{16}$/);
+  const incoming = readProfileTransfer(exportProfile(profile));
+  assert.equal(
+    incoming.profile.activeRun!.releaseVersion,
+    profile.activeRun!.releaseVersion,
+  );
+  delete incoming.profile.activeRun!.releaseVersion;
+  session.importProfile(incoming.profile, "replace");
+  session.pinLegacyRelease(profile.id);
+  assert.deepEqual(
+    session.profile(profile.id),
+    JSON.parse(JSON.stringify(profile)),
+  );
+});

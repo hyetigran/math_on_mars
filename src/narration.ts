@@ -13,6 +13,7 @@ export class InstalledNarration {
   constructor(
     private readonly clips: readonly string[] = NARRATION_CLIPS,
     private readonly basePath = "/audio/k1",
+    private readonly version?: string,
   ) {}
   get ready(): boolean {
     return this.buffers.size === this.clips.length;
@@ -32,9 +33,12 @@ export class InstalledNarration {
     this.loading = Promise.all(
       this.clips.map(async (id) => {
         if (this.buffers.has(id)) return;
-        const response = await fetch(`${this.basePath}/${id}.mp3`, {
-          signal: AbortSignal.timeout(15000),
-        });
+        const response = await fetch(
+          `${this.basePath}/${id}.mp3${this.version ? `?build=${this.version}` : ""}`,
+          {
+            signal: AbortSignal.timeout(15000),
+          },
+        );
         if (!response.ok)
           throw new Error("Installed narration could not be loaded.");
         const buffer = await context.decodeAudioData(
