@@ -17,5 +17,13 @@
   "fiery": "Fiery burns enemies over time.",
   "armor": "Armor reduces damage when enemies hit you.",
   "reroll": "Reroll spends salvage to replace unpurchased shop choices. The price is shown on the button.",
-  "sell": "Sell removes the selected cartridge and gives you the salvage shown. Check the quantity before selling."
+  "sell": "Sell removes the selected cartridge and gives you the salvage shown. Check the quantity before selling.",
+  "stat-damage": "Damage makes each blaster hit stronger.",
+  "stat-attackSpeed": "Firing speed makes the blaster shoot more often.",
+  "stat-projectileSpeed": "Projectile speed makes shots reach enemies sooner.",
+  "stat-moveSpeed": "Movement speed helps you move and dodge faster.",
+  "stat-pickupRadius": "Pickup range lets you collect supplies from farther away.",
+  "stat-healing": "Healing makes each med kit restore more suit health.",
+  "stat-maxHp": "Maximum health gives your suit more room to take damage.",
+  "stat-armor": "Armor reduces damage from enemy hits."
 }

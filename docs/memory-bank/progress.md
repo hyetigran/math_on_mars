@@ -81,7 +81,9 @@ The owner instructed: “skip any ticket that references game art, I will manual
 
 ### Ticket 17 — spoken equipment guidance
 
-- Added 19 fixed installed MP3 clips for four power levels, cache choices, ammo descriptions, buying, equipping, merging, forging, selling, rerolling, Next wave and Save & Exit. Dynamic quantities remain text.
+- Added 27 fixed installed MP3 clips for four power levels, cache choices, ammo descriptions, buying, equipping, merging, forging, selling, rerolling, Next wave and Save & Exit. Dynamic quantities remain text.
 - Reward/cache/shop/forge screens load and enable required speech before exposing actions. Missing audio permits retry or Save & Exit; screen transitions, pause, rotation and app-switch cancellation share the existing lifecycle.
 - Generalized installed narration to separate clip packs; authored equipment audio is generated at build-authoring time with the existing local voice toolchain, never runtime synthesis.
-- Validation: 84 tests, production build and Prettier pass; ffprobe validates all 19 clips. Audible playback and device interaction have not been verified in a connected browser/device.
+- Validation: 84 tests, production build and Prettier pass; ffprobe validates all 27 clips. Audible playback and device interaction have not been verified in a connected browser/device.
+
+- Spec and standards reviews completed; added per-card spoken module effects and replaced text-rewriting callbacks with typed playback status.

@@ -1,6 +1,8 @@
 import { NARRATION_CLIPS } from "./narration-manifest";
 export { NARRATION_CLIPS } from "./narration-manifest";
 
+export type NarrationStatus = "unavailable" | "ready" | "playing" | "enable";
+
 /** Installed audio only. Decode before exposing the timed task; playback never locks input. */
 export class InstalledNarration {
   private context?: AudioContext;
@@ -56,15 +58,18 @@ export class InstalledNarration {
     }
     this.sources = [];
   }
-  async play(ids: string[], status: (message: string) => void): Promise<void> {
+  async play(
+    ids: string[],
+    status: (message: NarrationStatus) => void,
+  ): Promise<void> {
     this.stop();
     const generation = this.generation;
     const context = this.context;
     if (!context || ids.some((id) => !this.buffers.has(id))) {
-      status("Speech is unavailable. Reload the task to try again.");
+      status("unavailable");
       return;
     }
-    status("If you cannot hear the task, tap Replay.");
+    status("ready");
     try {
       await context.resume();
       if (generation !== this.generation) return;
@@ -83,12 +88,11 @@ export class InstalledNarration {
           if (generation !== this.generation) return;
           this.sources.forEach((source) => source.disconnect());
           this.sources = [];
-          status("Replay is available.");
+          status("ready");
         };
-      status("Reading the task. You can answer now.");
+      status("playing");
     } catch {
-      if (generation === this.generation)
-        status("Tap Replay to enable speech.");
+      if (generation === this.generation) status("enable");
     }
   }
 }

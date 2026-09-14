@@ -19,4 +19,12 @@ export const EQUIPMENT_CLIPS: string[] = [
   "armor",
   "reroll",
   "sell",
+  "stat-damage",
+  "stat-attackSpeed",
+  "stat-projectileSpeed",
+  "stat-moveSpeed",
+  "stat-pickupRadius",
+  "stat-healing",
+  "stat-maxHp",
+  "stat-armor",
 ];
