@@ -1,3 +1,4 @@
+import { rewardModules, moduleTotal } from "./modules";
 import { isCorrect, makeQuestions, parseNumericAnswer } from "./questions";
 import {
   AMMO_TYPES,
@@ -34,16 +35,6 @@ export interface Checkpoint {
   correctionDraft?: string;
   combat?: CombatSave;
 }
-const catalog: Array<
-  Omit<Module, "id" | "value" | "quality"> & { base: number }
-> = [
-  { name: "Rapid Overclock", stat: "attackSpeed", base: 0.06 },
-  { name: "Ballistic Overclock", stat: "damage", base: 0.08 },
-  { name: "Integrity Plating", stat: "maxHp", base: 10 },
-  { name: "Reactive Plating", stat: "armor", base: 2 },
-  { name: "Thruster Drive", stat: "moveSpeed", base: 0.05 },
-  { name: "Med-service Loop", stat: "healing", base: 0.12 },
-];
 export function timeQuality(remaining: number): Quality {
   return remaining > 20000
     ? "purple"
@@ -52,18 +43,6 @@ export function timeQuality(remaining: number): Quality {
       : remaining > 0
         ? "green"
         : "white";
-}
-function rewards(quality: Quality, wave: number): Module[] {
-  return Array.from({ length: 3 }, (_, i) => {
-    const item = catalog[(wave * 2 + i) % catalog.length];
-    return {
-      id: uid("module"),
-      name: item.name,
-      stat: item.stat,
-      value: item.base * [0.5, 1, 1.35, 1.7][QUALITY_ORDER.indexOf(quality)],
-      quality,
-    };
-  });
 }
 export function canForge(run: RunState): boolean {
   return (
@@ -282,7 +261,11 @@ export class RunSession {
               QUALITY_ORDER.indexOf(timeQuality(quiz.remainingMs)) - wrong,
             )
           ];
-        quiz.rewardChoices = rewards(quiz.rewardQuality, run.wave);
+        quiz.rewardChoices = rewardModules(
+          quiz.rewardQuality,
+          run.wave,
+          run.modules,
+        );
         run.phase = "reward";
       }
       return correct
@@ -297,17 +280,22 @@ export class RunSession {
       const module = quiz.rewardChoices?.find((m) => m.id === rewardId);
       if (!module) return;
       quiz.selectedReward = rewardId;
+      const previousHpBonus = moduleTotal(run.modules, "maxHp");
       run.modules.push(module);
-      if (module.stat === "maxHp") {
-        run.maxHp += module.value;
-        run.hp += module.value;
-      }
+      const hpGain = moduleTotal(run.modules, "maxHp") - previousHpBonus;
+      run.maxHp += hpGain;
+      run.hp += hpGain;
       run.phase = quiz.attempts.some((a) => !a.corrected)
         ? "correction"
         : "cache";
     });
   }
-  correct(id: string, occurrenceId: string, input: string): string | undefined {
+  correct(
+    id: string,
+    occurrenceId: string,
+    input: string,
+    commandId = uid("correction"),
+  ): string | undefined {
     if (!parseNumericAnswer(input))
       return "Enter a complete number or fraction.";
     return this.command(id, "correction", (run, profile) => {
@@ -315,15 +303,24 @@ export class RunSession {
       const index = quiz.attempts.findIndex((a) => !a.corrected);
       const attempt = quiz.attempts[index];
       if (!attempt || attempt.question.id !== occurrenceId) return;
+      const history = profile.history.find(
+        (h) => h.occurrenceId === occurrenceId,
+      );
+      if (!history) throw new Error("Missing initial answer history.");
+      history.correctionAttempts ??= [];
+      if (history.correctionAttempts.some((a) => a.id === commandId)) return;
+      const correct = isCorrect(input, attempt.question.answer);
+      history.correctionAttempts.push({
+        id: commandId,
+        input,
+        correct,
+        at: Date.now(),
+      });
       quiz.correctionDraft = input;
-      if (!isCorrect(input, attempt.question.answer))
-        return "Try again. Use the hint and take your time.";
+      if (!correct) return "Try again. Use the hint and take your time.";
       attempt.corrected = true;
       quiz.correctionDraft = "";
-      const history = profile.history.find(
-        (h) => h.occurrenceId === `${run.id}:${run.wave}:${index}`,
-      );
-      if (history) history.corrected = true;
+      history.corrected = true;
       if (quiz.attempts.every((a) => a.corrected)) run.phase = "cache";
       return "Correct — repair complete.";
     });

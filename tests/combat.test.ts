@@ -291,3 +291,29 @@ test("salvage stays on the ground until collected and remaining drops sweep on c
   assert.equal(restored.snapshot().salvage, 2);
   assert.deepEqual(restored.serialize().pickups, []);
 });
+
+test("secondary projectile speed and pickup radius modifiers affect combat", () => {
+  const module = {
+    id: "compound",
+    name: "Compound",
+    stat: "damage" as const,
+    value: 0.1,
+    quality: "purple" as const,
+    additionalModifiers: [
+      { stat: "projectileSpeed" as const, value: 0.5 },
+      { stat: "pickupRadius" as const, value: 1 },
+    ],
+  };
+  const sim = new CombatSimulation({ ...options, modules: [module] });
+  sim.state.enemies = [enemy(1, 680, 270)];
+  sim.state.spawned = 1;
+  sim.state.nextEnemyId = 3;
+  sim.state.pickups = [{ id: 2, x: 560, y: 270, value: 1 }];
+  sim.advance(STEP);
+  assert.equal(sim.snapshot().salvage, 1);
+  assert.ok(
+    Math.abs(Math.hypot(sim.state.bolts[0].vx, sim.state.bolts[0].vy) - 840) <
+      1e-8,
+  );
+  assert.ok(Math.abs(sim.state.bolts[0].damage - 19.8) < 1e-8);
+});
