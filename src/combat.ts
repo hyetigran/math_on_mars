@@ -1,3 +1,4 @@
+import { CHAIN_BALANCE } from "../content/balance/chain";
 import Phaser from "phaser";
 import type { CombatSave } from "./types";
 import {
@@ -246,15 +247,30 @@ class MarsCombatScene extends Phaser.Scene {
       body.setPosition(bolt.x, bolt.y);
     }
     for (const { from, to } of this.simulation.drainChainFlashes()) {
-      const arc = this.add
-        .line(0, 0, from.x, from.y, to.x, to.y, 0x8cf7ff, 0.9)
-        .setOrigin(0)
-        .setLineWidth(2)
-        .setDepth(7);
+      const arc = this.add.graphics().setDepth(7);
+      const dx = to.x - from.x;
+      const dy = to.y - from.y;
+      const length = Math.hypot(dx, dy) || 1;
+      // Stable zigzags make each jump readable without consuming gameplay RNG.
+      for (const [width, color, alpha] of [
+        [7, CHAIN_BALANCE.arcGlowColor, 0.45],
+        [2, CHAIN_BALANCE.arcColor, 1],
+      ]) {
+        arc.lineStyle(width, color, alpha).beginPath().moveTo(from.x, from.y);
+        for (let segment = 1; segment < 4; segment++) {
+          const offset = segment % 2 ? 5 : -5;
+          arc.lineTo(
+            from.x + (dx * segment) / 4 - (dy / length) * offset,
+            from.y + (dy * segment) / 4 + (dx / length) * offset,
+          );
+        }
+        arc.lineTo(to.x, to.y).strokePath();
+      }
+      arc.fillStyle(CHAIN_BALANCE.arcColor, 1).fillCircle(to.x, to.y, 4);
       this.tweens.add({
         targets: arc,
         alpha: 0,
-        duration: 120,
+        duration: CHAIN_BALANCE.arcDurationMs,
         onComplete: () => arc.destroy(),
       });
     }
