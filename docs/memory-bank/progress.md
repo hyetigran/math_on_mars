@@ -74,3 +74,11 @@ Ticket 13: grade 5 includes decimal addition/subtraction and guaranteed unlike-d
 - Final-wave Overmind alternates warned expanding slam rings, projectile fans, and limited summons. Boss attack phases, locked aim, hit ledger, and summon count survive save/resume; boss defeat removes remaining minions and shots. Frost slows cooldown pursuit while committed warnings remain stationary.
 - Setup independently selects Easy/Standard combat and six-wave Short/ten-wave Standard missions. Short uses a smaller wave budget; all grades/presets retain five required questions and one 30-second countdown. Retry retains mission settings. Summaries report this mission's answer accuracy; final victory/defeat ends directly without a quiz.
 - Validation: 83 tests, production build, and Prettier check pass. Spec and standards reviews completed; Frost control, shared fan geometry, and preset-lookup findings fixed. Browser/device readability and practical combat balance remain unverified. Existing bundle-size warning persists.
+
+### Ticket 16 — reference direction pending owner selection
+
+- Created `ticket/16-mars-visual-style` from merged ticket15 (`208ace3`).
+- Found newer owner art notes and marine v004 / twin-barrel weapon candidates in the original checkout's `tmp_assets`. Preserved those sources on this branch without modifying the original checkout.
+- Generated reference sheet v2 with built-in image_gen, then corrected weapon placement and rarity pips in v3. Candidate: `tmp_assets/00_reference/sheets/reference-sheet-v3.png`; exact prompts and review notes are adjacent.
+- Owner approval is still required by issue #5 before production art/animation. The candidate is not a runtime screenshot or device-verification result. No ticket16 production art has been integrated or merged.
+- Newer art notes describe two equipped ammo types, conflicting with the current four-slot gameplay plan. Appearance is proposed here; loadout rules still need reconciliation before that gameplay change is implemented.

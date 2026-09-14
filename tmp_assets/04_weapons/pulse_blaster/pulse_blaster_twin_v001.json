@@ -1,0 +1,11 @@
+{
+  "status": "candidate",
+  "generator": "built-in image_gen",
+  "date": "2026-09-14",
+  "prompt": "Create a single isolated twin-barrel Pulse Blaster for the Math on Mars game. The attached marine is a STYLE, PALETTE and CAMERA reference only; do not include the marine in the output. This is the marine's one separate shoulder-mounted weapon, with exactly TWO parallel barrels, one for each of two equipped ammo types. Both barrels must be clearly distinguishable at small gameplay size: two chunky short parallel tubes side by side with two distinct cyan muzzle openings, joined to ONE compact common off-white and navy receiver. Barrels point screen-right in a slight three-quarter view so both openings are readable. Match the reference's approximate 30-degree downward orthographic-like view, smooth simple cartoon illustration, thick clean dark outlines, broad flat color areas, off-white armor shell, navy inset surfaces and one small orange accent. No glare or reflections, no gradients, no intricate seams, no tiny technical fittings. Minimal hard-edged overlap shadow only. Friendly compact chunky sci-fi energy blaster proportions suited to a chibi explorer; short barrel length, no realistic gun detail, no ammunition belts, no arrows, no bullets. Include a small simple underside mounting bracket as part of the single whole weapon. Empty isolated asset, no hands, character, separate objects, firing beams, muzzle flashes, text, labels, numbers or watermark. Center the whole blaster with generous margin on a square flat solid bright green key background, no floor or cast shadow. Do not bake particular fire/frost/etc elemental effects into the barrels: this blaster supports any pair of ammo types. Exactly two barrels, not a single barrel and not three or more.",
+  "reference_paths": [
+    "tmp_assets/03_characters/marine/marine_master_v004_source.png"
+  ],
+  "background": "green key plate; not extracted",
+  "notes": "One common receiver, two visibly stacked barrels in generated result. Separate shoulder-mounted asset. No runtime integration or verified pivot/muzzle metadata yet."
+}
