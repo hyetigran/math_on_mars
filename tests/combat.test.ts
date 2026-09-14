@@ -611,3 +611,108 @@ test("Spitters and Chargers enter the documented standard and short waves", () =
     }
   }
 });
+
+test("a dying Splitter creates exactly two weaker children that must be cleared", () => {
+  const sim = fixture([{ ...enemy(1, 700, 300), kind: "splitter", hp: 0 }]);
+  sim.advance(STEP);
+  assert.equal(sim.outcome, null);
+  assert.equal(sim.state.enemies.length, 2);
+  assert.ok(
+    sim.state.enemies.every(
+      (e) => e.kind === "mini" && e.maxHp === 300 && e.radius === 14,
+    ),
+  );
+  assert.equal(new Set(sim.state.enemies.map((e) => e.id)).size, 2);
+  const restored = new CombatSimulation({
+    ...options,
+    restore: sim.serialize(),
+  });
+  for (const child of restored.state.enemies) child.hp = 0;
+  restored.advance(STEP);
+  assert.equal(restored.outcome, "victory");
+  assert.equal(restored.state.enemies.length, 0);
+});
+
+test("Overmind slam, fan, and bounded summons survive resumed combat", () => {
+  for (const pattern of ["slam", "fan", "summon"] as const) {
+    const boss = {
+      ...enemy(1, 480, 170),
+      boss: true,
+      kind: "overmind" as const,
+      bossAttack: {
+        pattern,
+        phase: "windup" as const,
+        remainingMs: 100,
+        dx: 0,
+        dy: 1,
+        hit: false,
+        summons: 0,
+      },
+    };
+    const sim = fixture([boss]);
+    const restored = new CombatSimulation({
+      ...options,
+      restore: sim.serialize(),
+    });
+    for (let i = 0; i < 100; i++) {
+      sim.advance(STEP);
+      restored.advance(STEP);
+    }
+    assert.deepEqual(restored.serialize(), sim.serialize());
+    if (pattern === "slam") {
+      assert.equal(sim.state.hp, 84);
+      assert.equal(sim.state.enemies[0].bossAttack!.pattern, "fan");
+    }
+    if (pattern === "fan") assert.ok(sim.state.hp < 100);
+    if (pattern === "summon") {
+      assert.equal(
+        sim.state.enemies.filter((e) => e.kind === "mini").length,
+        2,
+      );
+      assert.equal(sim.state.enemies[0].bossAttack!.summons, 2);
+      Object.assign(sim.state.enemies[0].bossAttack!, {
+        pattern: "summon",
+        phase: "windup",
+        remainingMs: 0,
+        summons: 4,
+      });
+      sim.advance(STEP);
+      assert.equal(
+        sim.state.enemies.filter((e) => e.kind === "mini").length,
+        2,
+      );
+    }
+    sim.state.enemies[0].hp = 0;
+    sim.advance(STEP);
+    assert.equal(sim.outcome, "victory");
+    assert.deepEqual(sim.state.enemies, []);
+    assert.deepEqual(sim.state.enemyProjectiles, []);
+  }
+});
+
+test("mission presets tune Short counts and put Overmind only on the final wave", () => {
+  const standard = new CombatSimulation({ ...options, totalWaves: 10 });
+  const short = new CombatSimulation({ ...options, totalWaves: 6 });
+  assert.ok(short.state.spawnTotal < standard.state.spawnTotal);
+  for (const totalWaves of [6, 10]) {
+    const boss = new CombatSimulation({
+      ...options,
+      wave: totalWaves,
+      totalWaves,
+    });
+    boss.advance(100);
+    assert.equal(boss.state.spawnTotal, 1);
+    assert.equal(boss.state.enemies[0].kind, "overmind");
+    const splitter = new CombatSimulation({
+      ...options,
+      wave: totalWaves === 6 ? 4 : 6,
+      totalWaves,
+    });
+    splitter.state.shotCooldownMs = 1e6;
+    for (let i = 0; i < 4; i++) {
+      splitter.state.spawnCooldownMs = 0;
+      splitter.advance(STEP);
+    }
+    assert.equal(splitter.state.enemies[3].kind, "splitter");
+  }
+});

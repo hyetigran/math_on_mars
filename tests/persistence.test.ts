@@ -235,3 +235,49 @@ test("enemy warnings and flying shots survive profile storage and reject malform
     assert.deepEqual(repository.load()[0].activeRun!.combatSave, save);
   }
 });
+
+test("Overmind active rings and summon limits round trip through profile storage", () => {
+  const storage = new MemoryStorage();
+  const repository = new ProfileRepository(storage, key);
+  const session = new RunSession([sample()], repository);
+  session.start("cadet", "3", "short", "easy");
+  const profiles = session.profiles;
+  const run = profiles[0].activeRun!;
+  run.wave = run.totalWaves;
+  const simulation = new CombatSimulation({ ...run, seed: 1 });
+  simulation.advance(100);
+  const save = simulation.serialize();
+  if (save.version !== 2) throw new Error("Expected current save format");
+  save.enemies[0].bossAttack = {
+    pattern: "slam",
+    phase: "active",
+    remainingMs: 550,
+    dx: 0,
+    dy: 1,
+    hit: true,
+    summons: 2,
+  };
+  run.combatSave = save;
+  repository.commit(profiles);
+  assert.deepEqual(repository.load()[0].activeRun!.combatSave, save);
+  for (const mutation of [
+    (s: typeof save) => {
+      s.enemies[0].bossAttack!.summons = 5;
+    },
+    (s: typeof save) => {
+      s.enemies[0].bossAttack!.pattern = "fan";
+    },
+    (s: typeof save) => {
+      s.enemies[0].bossAttack!.remainingMs = 2000;
+    },
+    (s: typeof save) => {
+      s.enemies[0].boss = false;
+    },
+  ]) {
+    const malformed = structuredClone(save);
+    mutation(malformed);
+    run.combatSave = malformed;
+    assert.throws(() => repository.commit(profiles), /Invalid saved profile/);
+    assert.deepEqual(repository.load()[0].activeRun!.combatSave, save);
+  }
+});

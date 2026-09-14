@@ -1,3 +1,4 @@
+import type { MissionLength } from "../content/balance/missions";
 import {
   usesFractionInput,
   fractionFields,
@@ -210,10 +211,12 @@ function renderSetup(): void {
   const profile = activeProfile();
   app.innerHTML = shell(
     `<section class="terminal" id="content">
-    <div class="terminal-heading"><p class="eyebrow warm">MISSION TERMINAL</p><h1>Ready, ${escapeHtml(profile.name)}?</h1><p>Choose the grade-level math track for this mission.</p></div>
+    <div class="terminal-heading"><p class="eyebrow warm">MISSION TERMINAL</p><h1>Ready, ${escapeHtml(profile.name)}?</h1><p>Choose your math track, combat difficulty, and mission length.</p></div>
     <form id="mission-form">
       <fieldset><legend>Math track</legend><div class="grade-grid">${GRADES.map((grade) => `<label class="choice-tile"><input type="radio" name="grade" value="${grade}" ${profile.grade === grade ? "checked" : ""}><span><b>${grade}</b><small>${gradeLabel(grade)}</small></span></label>`).join("")}</div></fieldset>
-      <div class="mission-brief"><div><span class="mission-number">10</span><p><b>Waves</b><small>Nine recharges, then the Overmind</small></p></div><div><span class="mission-number">01</span><p><b>Pulse Blaster</b><small>White Piercing equipped</small></p></div></div>
+      <fieldset><legend>Combat difficulty</legend><div class="grade-grid"><label class="choice-tile"><input type="radio" name="difficulty" value="easy"><span><b>Easy</b><small>Slower enemies</small></span></label><label class="choice-tile"><input type="radio" name="difficulty" value="standard" checked><span><b>Standard</b><small>Full enemy speed</small></span></label></div></fieldset>
+      <fieldset><legend>Mission length</legend><div class="grade-grid"><label class="choice-tile"><input type="radio" name="mission" value="standard" checked><span><b>Standard</b><small>10 waves · boss on wave 10</small></span></label><label class="choice-tile"><input type="radio" name="mission" value="short"><span><b>Short</b><small>6 waves · boss on wave 6</small></span></label></div></fieldset>
+      <p>Both missions use five required questions and one 30-second countdown between waves. Start with a Pulse Blaster and white Piercing ammo.</p>
       <button class="button launch" type="submit"><span>Launch mission</span><i aria-hidden="true">→</i></button>
     </form>
   </section>`,
@@ -226,7 +229,13 @@ function renderSetup(): void {
       event.preventDefault();
       const data = new FormData(event.currentTarget as HTMLFormElement);
       perform(
-        () => session.start(profile.id, data.get("grade") as Grade),
+        () =>
+          session.start(
+            profile.id,
+            data.get("grade") as Grade,
+            data.get("mission") as MissionLength,
+            data.get("difficulty") as "easy" | "standard",
+          ),
         renderCombat,
       );
     });
@@ -1002,10 +1011,13 @@ function endRun(victory: boolean, state?: CombatSnapshot): void {
       cleanup();
       const profile = activeProfile();
       const run = summary;
-      const accuracy = profile.history.length
+      const missionHistory = profile.history.filter((entry) =>
+        entry.occurrenceId.startsWith(`${run.id}:`),
+      );
+      const accuracy = missionHistory.length
         ? Math.round(
-            (profile.history.filter((h) => h.correctInitially).length /
-              profile.history.length) *
+            (missionHistory.filter((h) => h.correctInitially).length /
+              missionHistory.length) *
               100,
           )
         : 0;
@@ -1019,7 +1031,16 @@ function endRun(victory: boolean, state?: CombatSnapshot): void {
       document
         .querySelector("#retry-mission")
         ?.addEventListener("click", () =>
-          perform(() => session.start(profile.id, profile.grade), renderCombat),
+          perform(
+            () =>
+              session.start(
+                profile.id,
+                run.grade,
+                run.totalWaves === 6 ? "short" : "standard",
+                run.difficulty,
+              ),
+            renderCombat,
+          ),
         );
       document
         .querySelector("#return-home")!

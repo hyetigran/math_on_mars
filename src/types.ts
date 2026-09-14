@@ -142,7 +142,16 @@ export interface CombatEnemySaveV2 extends Omit<
 > {
   burnRemainingDamage: number;
   burnRate: number;
-  kind?: "drifter" | "spitter" | "charger";
+  kind?: "drifter" | "spitter" | "charger" | "splitter" | "mini" | "overmind";
+  bossAttack?: {
+    pattern: "slam" | "fan" | "summon";
+    phase: "cooldown" | "windup" | "active";
+    remainingMs: number;
+    dx: number;
+    dy: number;
+    hit: boolean;
+    summons: number;
+  };
   attack?: {
     phase: "windup" | "active" | "cooldown";
     remainingMs: number;

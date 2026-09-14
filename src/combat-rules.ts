@@ -1,4 +1,6 @@
-import { ENEMY_SPAWNS } from "../content/balance/enemies";
+import { MISSION_PRESETS } from "../content/balance/missions";
+import { splitEnemy } from "./overmind";
+import { ENEMY_SPAWNS, SPLITTER_BALANCE } from "../content/balance/enemies";
 import { moveEnemy, advanceEnemyProjectiles } from "./enemy-attacks";
 import { omniRateBonus } from "./forge";
 import { STATUS_BALANCE } from "../content/balance/status";
@@ -134,6 +136,10 @@ export class CombatSimulation {
             ammoCapacity: options.ammoCapacity ?? 1,
           })));
     this.moveSpeed = 220 * (1 + moduleTotal(options.modules, "moveSpeed"));
+    const mission =
+      options.totalWaves === 6
+        ? MISSION_PRESETS.short
+        : MISSION_PRESETS.standard;
     this.state =
       options.restore?.wave === options.wave
         ? migrateCombatSave(options.restore)
@@ -148,7 +154,10 @@ export class CombatSimulation {
             spawnTotal:
               options.wave === options.totalWaves
                 ? 1
-                : Math.min(10 + options.wave * 3, 34),
+                : Math.min(
+                    mission.baseEnemies + options.wave * mission.enemiesPerWave,
+                    mission.maximumEnemies,
+                  ),
             nextEnemyId: 1,
             rngState: options.seed,
             spawnCooldownMs: this.spawnDelay(),
@@ -191,22 +200,26 @@ export class CombatSimulation {
     const cycleIndex = this.state.spawned % ENEMY_SPAWNS.cycleLength;
     this.state.enemies.push({
       id: this.state.nextEnemyId++,
-      x,
-      y,
+      x: boss ? 480 : x,
+      y: boss ? 220 : y,
       hp,
       maxHp: hp,
       radius: boss ? 58 : 24,
       boss,
-      kind:
-        !boss &&
-        this.options.wave >= ENEMY_SPAWNS.charger[schedule] &&
-        cycleIndex === ENEMY_SPAWNS.charger.cycleIndex
-          ? "charger"
+      kind: boss
+        ? "overmind"
+        : this.options.wave >= SPLITTER_BALANCE[schedule] &&
+            cycleIndex === SPLITTER_BALANCE.cycleIndex
+          ? "splitter"
           : !boss &&
-              this.options.wave >= ENEMY_SPAWNS.spitter[schedule] &&
-              cycleIndex === ENEMY_SPAWNS.spitter.cycleIndex
-            ? "spitter"
-            : "drifter",
+              this.options.wave >= ENEMY_SPAWNS.charger[schedule] &&
+              cycleIndex === ENEMY_SPAWNS.charger.cycleIndex
+            ? "charger"
+            : !boss &&
+                this.options.wave >= ENEMY_SPAWNS.spitter[schedule] &&
+                cycleIndex === ENEMY_SPAWNS.spitter.cycleIndex
+              ? "spitter"
+              : "drifter",
       speed:
         (boss ? 32 : 45 + this.options.wave * 7) *
         (this.options.difficulty === "easy" ? 0.82 : 1),
@@ -444,6 +457,14 @@ export class CombatSimulation {
     const activeShotIds = new Set(surviving.map((b) => b.shotId));
     state.shots = state.shots.filter((s) => activeShotIds.has(s.id));
     state.pickups ??= [];
+    const bossDefeated = state.enemies.some(
+      (enemy) => enemy.boss && enemy.hp <= 0,
+    );
+    const children = state.enemies.flatMap((enemy) =>
+      enemy.hp <= 0 && enemy.kind === "splitter"
+        ? splitEnemy(enemy, state)
+        : [],
+    );
     for (const enemy of state.enemies) {
       if (enemy.hp <= 0)
         state.pickups.push({
@@ -467,7 +488,9 @@ export class CombatSimulation {
         state.hp -= (((enemy.boss ? 26 : 11) * 20) / (20 + armor)) * dt;
       }
     }
-    state.enemies = state.enemies.filter((e) => e.hp > 0);
+    state.enemies = bossDefeated
+      ? []
+      : [...state.enemies.filter((e) => e.hp > 0), ...children];
     state.pickups = state.pickups.filter((pickup) => {
       if (
         distance(pickup, state.marine) >

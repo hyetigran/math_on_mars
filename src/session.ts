@@ -1,3 +1,7 @@
+import {
+  MISSION_PRESETS,
+  type MissionLength,
+} from "../content/balance/missions";
 import { applyForge, previewForge, type ForgePreview } from "./forge";
 export { canForge } from "./forge";
 import { AMMO_BALANCE } from "../content/balance/ammo";
@@ -58,14 +62,18 @@ export function timeQuality(remaining: number): Quality {
         ? "green"
         : "white";
 }
-function newRun(grade: Grade): RunState {
+function newRun(
+  grade: Grade,
+  mission: MissionLength,
+  difficulty: RunState["difficulty"],
+): RunState {
   const starter: Ammo = { id: uid("ammo"), type: "Piercing", tier: 1 };
   return {
     id: uid("run"),
     grade,
     wave: 1,
-    totalWaves: 10,
-    difficulty: "standard",
+    totalWaves: MISSION_PRESETS[mission].waves,
+    difficulty,
     hp: 100,
     maxHp: 100,
     salvage: 0,
@@ -176,13 +184,18 @@ export class RunSession {
       return profile.id;
     });
   }
-  start(id: string, grade: Grade): void {
+  start(
+    id: string,
+    grade: Grade,
+    mission: MissionLength = "standard",
+    difficulty: RunState["difficulty"] = "standard",
+  ): void {
     if (this.paused) return;
     this.change((profiles) => {
       const profile = profiles.find((p) => p.id === id)!;
       if (profile.activeRun) throw new Error("Resume the active run first.");
       profile.grade = grade;
-      profile.activeRun = newRun(grade);
+      profile.activeRun = newRun(grade, mission, difficulty);
     });
   }
   checkpoint(id: string, snapshot: Checkpoint): void {
@@ -216,6 +229,8 @@ export class RunSession {
   }
   finishWave(id: string, outcome: CombatOutcome): void {
     this.command(id, "combat", (run) => {
+      if (run.wave >= run.totalWaves)
+        throw new Error("The final wave ends the mission.");
       const { ammoInventory, ...stats } = outcome;
       Object.assign(run, stats);
       if (ammoInventory) Object.assign(run, structuredClone(ammoInventory));
