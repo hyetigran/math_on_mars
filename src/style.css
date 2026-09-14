@@ -2432,3 +2432,17 @@ legend {
 .correction-keypad {
   margin: 0.8rem 0;
 }
+
+.forge-ingredient {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-block: 1rem;
+}
+.forge-ingredient select {
+  max-width: 100%;
+  min-height: 44px;
+  padding: 0.5rem;
+}

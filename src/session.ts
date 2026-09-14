@@ -1,3 +1,5 @@
+import { applyForge, previewForge, type ForgePreview } from "./forge";
+export { canForge } from "./forge";
 import { AMMO_BALANCE } from "../content/balance/ammo";
 import {
   acquireAmmo,
@@ -18,7 +20,6 @@ export { shopOffers } from "./shop";
 import { rewardModules, installModule } from "./modules";
 import { isCorrect, makeQuestions, parseNumericAnswer } from "./questions";
 import {
-  AMMO_TYPES,
   QUALITY_ORDER,
   uid,
   type Ammo,
@@ -56,14 +57,6 @@ export function timeQuality(remaining: number): Quality {
       : remaining > 0
         ? "green"
         : "white";
-}
-export function canForge(run: RunState): boolean {
-  return (
-    !run.ammo.some((a) => a.legendary) &&
-    AMMO_TYPES.every((type) =>
-      run.ammo.some((a) => a.type === type && a.tier === 4),
-    )
-  );
 }
 function newRun(grade: Grade): RunState {
   const starter: Ammo = { id: uid("ammo"), type: "Piercing", tier: 1 };
@@ -486,29 +479,34 @@ export class RunSession {
       return "Cartridge sold.";
     });
   }
-  forge(id: string): void {
+  selectForgeIngredients(id: string, ingredientIds?: string[]): void {
     this.command(id, "shop", (run) => {
-      if (!canForge(run)) return;
-      const consumed = AMMO_TYPES.map(
-        (type) => run.ammo.find((a) => a.type === type && a.tier === 4)!.id,
-      );
-      run.ammo = run.ammo.filter((a) => !consumed.includes(a.id));
-      run.activeAmmoIds = run.activeAmmoIds.filter(
-        (active) => !consumed.includes(active),
-      );
-      const omni: Ammo = {
-        id: uid("ammo"),
-        type: "Piercing",
-        tier: 4,
-        legendary: true,
-      };
-      run.ammo.push(omni);
-      if (run.activeAmmoIds.length >= run.ammoCapacity) run.activeAmmoIds.pop();
-      run.activeAmmoIds.unshift(omni.id);
+      const ids = ingredientIds ?? previewForge(run).ingredientIds;
+      if (
+        ids.length > 5 ||
+        new Set(ids).size !== ids.length ||
+        ids.some(
+          (id) =>
+            !run.ammo.some((a) => a.id === id && a.tier === 4 && !a.legendary),
+        )
+      )
+        return;
+      run.forgeIngredientIds = [...ids];
+    });
+  }
+  cancelForge(id: string): void {
+    this.command(id, "shop", (run) => {
+      run.forgeIngredientIds = undefined;
+    });
+  }
+  forge(id: string, preview?: ForgePreview): void {
+    this.command(id, "shop", (run) => {
+      applyForge(run, preview ?? previewForge(run));
     });
   }
   nextWave(id: string): void {
     this.command(id, "shop", (run) => {
+      run.forgeIngredientIds = undefined;
       run.wave++;
       run.phase = "combat";
       run.quiz = undefined;

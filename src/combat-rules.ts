@@ -1,3 +1,4 @@
+import { omniRateBonus } from "./forge";
 import { STATUS_BALANCE } from "../content/balance/status";
 import { CHAIN_BALANCE } from "../content/balance/chain";
 import { AMMO_BALANCE } from "../content/balance/ammo";
@@ -122,7 +123,14 @@ export class CombatSimulation {
 
   constructor(private readonly options: CombatRulesOptions) {
     this.baseDamage = 18 * (1 + moduleTotal(options.modules, "damage"));
-    this.shotDelay = 520 / (1 + moduleTotal(options.modules, "attackSpeed"));
+    this.shotDelay =
+      520 /
+      ((1 + moduleTotal(options.modules, "attackSpeed")) *
+        (1 +
+          omniRateBonus({
+            ...options,
+            ammoCapacity: options.ammoCapacity ?? 1,
+          })));
     this.moveSpeed = 220 * (1 + moduleTotal(options.modules, "moveSpeed"));
     this.state =
       options.restore?.wave === options.wave
