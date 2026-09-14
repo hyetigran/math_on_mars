@@ -1,3 +1,4 @@
+import { CHAIN_BALANCE } from "../content/balance/chain";
 import { AMMO_BALANCE } from "../content/balance/ammo";
 import { acquireAmmo, drawAmmo } from "./ammo";
 import { moduleTotal } from "./modules";
@@ -304,7 +305,7 @@ export class CombatSimulation {
           (e) =>
             e.hp > 0 &&
             !shot.chainVisited.includes(e.id) &&
-            distance(preceding, e) <= 120,
+            distance(preceding, e) <= CHAIN_BALANCE.range,
         )
         .sort(
           (a, b) =>
@@ -313,7 +314,7 @@ export class CombatSimulation {
       if (!target) break;
       shot.chainRemaining--;
       shot.chainVisited.push(target.id);
-      const damage = shot.baseDamage * 0.2;
+      const damage = shot.baseDamage * CHAIN_BALANCE.damageFraction;
       target.hp -= damage;
       this.applyEffects(shot, target, damage);
       this.chainFlashes.push({

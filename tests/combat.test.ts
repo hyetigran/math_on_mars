@@ -367,3 +367,41 @@ test("Piercing and Multi Shot combine at every tier without consuming cartridges
     assert.deepEqual(sim.snapshot().ammoInventory!.ammo, ammo);
   }
 });
+
+test("every Electric Chain tier restores its in-flight budget and hits each nearby target once", () => {
+  for (const tier of [1, 2, 3, 4] as const) {
+    const settings = {
+      ...options,
+      ammo: [{ id: "chain", type: "Electric Chain" as const, tier }],
+      activeAmmoIds: ["chain"],
+    };
+    const sim = new CombatSimulation(settings);
+    sim.state.enemies = Array.from({ length: 6 }, (_, i) =>
+      enemy(i + 1, 620 + i * 45, 270),
+    );
+    sim.state.spawned = 6;
+    sim.state.spawnTotal = 6;
+    sim.state.nextEnemyId = 7;
+    sim.advance(STEP);
+    assert.equal(sim.state.shots[0].chainRemaining, tier);
+    assert.equal(sim.state.shots[0].chainStarted, false);
+    sim.state.shotCooldownMs = 1e6;
+    const restored = new CombatSimulation({
+      ...settings,
+      restore: sim.serialize(),
+    });
+    let flashes = 0;
+    for (let i = 0; i < 25; i++) {
+      sim.advance(STEP);
+      restored.advance(STEP);
+      flashes += restored.drainChainFlashes().length;
+    }
+    assert.deepEqual(restored.serialize(), sim.serialize());
+    assert.equal(flashes, tier);
+    assert.equal(restored.state.enemies[0].hp, 982);
+    for (let i = 1; i <= tier; i++)
+      assert.equal(restored.state.enemies[i].hp, 996.4);
+    for (let i = tier + 1; i < 6; i++)
+      assert.equal(restored.state.enemies[i].hp, 1000);
+  }
+});
