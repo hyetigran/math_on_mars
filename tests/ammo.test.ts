@@ -1,3 +1,4 @@
+import { CombatSimulation } from "../src/combat-rules";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { RunSession } from "../src/session";
@@ -184,4 +185,59 @@ test("three Expanders stop at capacity four and stale offers never charge for a 
     repository.load(),
     JSON.parse(JSON.stringify(session.profiles)),
   );
+});
+
+test("combat inventory and remaining bag commit together and resume without duplication", () => {
+  const { session, id, repository, fail } = setup();
+  const run = session.profile(id).activeRun!;
+  const simulation = new CombatSimulation({ ...run, seed: 42 });
+  const state = simulation.serialize();
+  const cartridge = {
+    id: "drop-1-4",
+    type: "Multi Shot" as const,
+    tier: 2 as const,
+  };
+  state.ammoInventory!.ammo.push(cartridge);
+  state.ammoInventory!.ammoBag = ["Frost", "Fiery"];
+  fail(true);
+  assert.throws(() => session.checkpoint(id, { runId: run.id, combat: state }));
+  assert.deepEqual(session.profile(id).activeRun, run);
+  fail(false);
+  session.checkpoint(id, { runId: run.id, combat: state });
+  const restored = new RunSession(repository.load(), repository);
+  const saved = restored.profile(id).activeRun!;
+  assert.deepEqual(saved.ammo.at(-1), cartridge);
+  assert.deepEqual(saved.ammoBag, ["Frost", "Fiery"]);
+  const resumed = new CombatSimulation({
+    ...saved,
+    restore: saved.combatSave,
+    seed: 999,
+  });
+  restored.finishWave(id, resumed.snapshot());
+  assert.equal(
+    restored.profile(id).activeRun!.ammo.filter((a) => a.id === cartridge.id)
+      .length,
+    1,
+  );
+  assert.deepEqual(
+    repository.load(),
+    JSON.parse(JSON.stringify(restored.profiles)),
+  );
+});
+
+test("a selected batch merges only chosen pairs and leaves other cartridges available", () => {
+  const { session, id } = setup();
+  for (let wave = 1; wave <= 3; wave++) {
+    clear(session, id);
+    if (wave === 1) session.claimCache(id, "Multi Shot");
+    if (wave === 3) session.claimCache(id, "Frost");
+    if (wave < 3) session.nextWave(id);
+  }
+  const preview = session.previewMerges(id);
+  assert.equal(preview.pairs.length, 2);
+  const retained = preview.pairs[1];
+  session.mergePreview(id, { ...preview, pairs: [preview.pairs[0]] });
+  const run = session.profile(id).activeRun!;
+  assert.ok(retained.every((id) => run.ammo.some((a) => a.id === id)));
+  assert.equal(run.ammo.filter((a) => a.tier === 4).length, 1);
 });

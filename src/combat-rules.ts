@@ -1,3 +1,4 @@
+import { AMMO_BALANCE } from "../content/balance/ammo";
 import { acquireAmmo, drawAmmo } from "./ammo";
 import { moduleTotal } from "./modules";
 import {
@@ -421,7 +422,7 @@ export class CombatSimulation {
           x: enemy.x,
           y: enemy.y,
           value: enemy.boss ? 12 : 1,
-          ...(enemy.id % 4 === 0
+          ...(enemy.id % AMMO_BALANCE.dropEveryEnemyId === 0
             ? {
                 ammo: drawAmmo(
                   state.ammoInventory!,

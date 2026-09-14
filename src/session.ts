@@ -1,3 +1,4 @@
+import { AMMO_BALANCE } from "../content/balance/ammo";
 import {
   acquireAmmo,
   createChoiceCache,
@@ -342,8 +343,11 @@ export class RunSession {
     });
   }
   private enterSupply(run: RunState): void {
-    const milestones = run.totalWaves === 6 ? [1, 2, 3, 4, 5] : [1, 3, 5, 7, 8];
-    if (milestones.includes(run.wave)) {
+    const milestones =
+      run.totalWaves === 6
+        ? AMMO_BALANCE.shortCacheWaves
+        : AMMO_BALANCE.standardCacheWaves;
+    if (milestones.some((wave) => wave === run.wave)) {
       run.phase = "cache";
       createChoiceCache(run);
     } else {

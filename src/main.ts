@@ -671,12 +671,12 @@ function renderShop(message = ""): void {
     .filter((ammo): ammo is Ammo => Boolean(ammo));
   const mergePreview = previewMerges(run);
   const merges = mergePreview.pairs
-    .map(([firstId, secondId]) => {
+    .map(([firstId, secondId], index) => {
       const first = run.ammo.find((a) => a.id === firstId)!;
       const equipped =
         run.activeAmmoIds.includes(firstId) ||
         run.activeAmmoIds.includes(secondId);
-      return `<li>2 × ${first.type} T${first.tier} → 1 × T${first.tier + 1}${equipped ? " · replaces equipped ingredient in its slot" : " · stays in reserve"}</li>`;
+      return `<li><label><input type="checkbox" data-merge-pair="${index}" checked> 2 × ${first.type} T${first.tier} → 1 × T${first.tier + 1}${equipped ? " · replaces equipped ingredient in its slot" : " · stays in reserve"}</label></li>`;
     })
     .join("");
   const purpleTypes = new Set(
@@ -721,7 +721,16 @@ function renderShop(message = ""): void {
   document.querySelector("#confirm-merges")?.addEventListener("click", () => {
     if (!paused)
       void perform(
-        () => session.mergePreview(activeProfileId!, mergePreview),
+        () =>
+          session.mergePreview(activeProfileId!, {
+            ...mergePreview,
+            pairs: mergePreview.pairs.filter(
+              (_, index) =>
+                document.querySelector<HTMLInputElement>(
+                  `[data-merge-pair="${index}"]`,
+                )?.checked,
+            ),
+          }),
         (message) => renderShop(message),
       );
   });

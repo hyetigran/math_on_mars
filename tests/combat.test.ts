@@ -342,3 +342,28 @@ test("scheduled ammo contents and shuffle bag survive resume and wave-clear swee
   ]);
   assert.equal(resumed.serialize().pickups!.length, 0);
 });
+
+test("Piercing and Multi Shot combine at every tier without consuming cartridges", () => {
+  for (const tier of [1, 2, 3, 4] as const) {
+    const ammo = [
+      { id: "piercing", type: "Piercing" as const, tier },
+      { id: "multi", type: "Multi Shot" as const, tier },
+    ];
+    const sim = new CombatSimulation({
+      ...options,
+      ammo,
+      activeAmmoIds: ["piercing", "multi"],
+      ammoCapacity: 2,
+    });
+    sim.state.enemies = [enemy(1, 850, 270)];
+    sim.state.spawned = 1;
+    sim.state.spawnTotal = 1;
+    sim.state.nextEnemyId = 2;
+    sim.advance(STEP);
+    assert.equal(sim.state.bolts.length, tier + 1);
+    const total = sim.state.bolts.reduce((sum, bolt) => sum + bolt.damage, 0);
+    assert.ok(Math.abs(total - 18 * [1.15, 1.3, 1.45, 1.6][tier - 1]) < 1e-8);
+    assert.ok(sim.state.bolts.every((bolt) => bolt.pierce === tier));
+    assert.deepEqual(sim.snapshot().ammoInventory!.ammo, ammo);
+  }
+});

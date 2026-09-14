@@ -1,3 +1,4 @@
+import { AMMO_BALANCE } from "../content/balance/ammo";
 import { ammoDropTier } from "./ammo";
 import { moduleCandidates, modifiers, moduleTotal, STAT_CAPS } from "./modules";
 import {
@@ -31,7 +32,7 @@ function createOffer(run: RunState, slot: number): ShopItem {
       title: `${ammoType} Ammo`,
       ammoType,
       ammoTier,
-      price: [6, 10, 18, 30][ammoTier - 1],
+      price: AMMO_BALANCE.buyPrices[ammoTier - 1],
     };
   }
   const quality = QUALITY_ORDER[seed % 4];

@@ -19,8 +19,8 @@ try {
     "dir",
   );
   await writeFile(join(output, "package.json"), '{"type":"commonjs"}');
-  for (const folder of ["src", "tests"]) {
-    await mkdir(join(output, folder));
+  for (const folder of ["src", "tests", "content/balance"]) {
+    await mkdir(join(output, folder), { recursive: true });
     for (const file of await readdir(folder)) {
       if (!file.endsWith(".ts") || file.endsWith(".d.ts")) continue;
       const compiled = ts.transpileModule(

@@ -1,3 +1,4 @@
+import { AMMO_BALANCE } from "../content/balance/ammo";
 import {
   AMMO_TYPES,
   uid,
@@ -26,7 +27,7 @@ export function createChoiceCache(run: RunState): void {
       ...AMMO_TYPES.map((type) => ({
         id: uid("option"),
         kind: "ammo" as const,
-        sellPrice: 16,
+        sellPrice: AMMO_BALANCE.cachePairSale,
         ammo: [
           { id: uid("ammo"), type, tier: 3 as const },
           { id: uid("ammo"), type, tier: 3 as const },
@@ -35,7 +36,7 @@ export function createChoiceCache(run: RunState): void {
       {
         id: uid("option"),
         kind: "module",
-        sellPrice: 4,
+        sellPrice: AMMO_BALANCE.cacheModuleSale,
         module: {
           id: uid("module"),
           name: "Field Plating",
@@ -49,7 +50,7 @@ export function createChoiceCache(run: RunState): void {
 }
 
 export const ammoSellPrice = (ammo: Ammo): number =>
-  [2, 4, 8, 16][ammo.tier - 1];
+  AMMO_BALANCE.sellPrices[ammo.tier - 1];
 export interface MergePreview {
   runId: string;
   revision: number;
@@ -118,8 +119,9 @@ export function applyMerges(run: RunState, preview: MergePreview): boolean {
 
 /** Tuning v1: weighted tiers progress with waves; one saved bag cycle covers all types. */
 export function ammoDropTier(wave: number, roll: number): Ammo["tier"] {
-  const weights =
-    wave < 4 ? [85, 15, 0, 0] : wave < 7 ? [45, 35, 20, 0] : [20, 30, 35, 15];
+  const weights = AMMO_BALANCE.tierWeights.find(
+    (entry) => wave <= entry.throughWave,
+  )!.weights;
   let threshold = 0;
   for (let i = 0; i < weights.length; i++) {
     threshold += weights[i];
