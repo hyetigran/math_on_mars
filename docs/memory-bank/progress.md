@@ -59,3 +59,11 @@ Ticket 11: Grade 2 now includes bounded addition/subtraction and digit-value/ten
 Ticket 12: grade 4 equivalent-fraction missing-numerator practice added alongside multiplication and like-denominator sums. Fraction answers now use labelled numerator/denominator fields in quizzes and corrections; templates save explicit input kinds with legacy fallback. Sixty-nine tests pass, including malformed-input neutrality, equivalent rational answers, partial drafts, field selection and corrected history across reload. Both review axes pass after UI fixes; build/Prettier pass. Browser keyboard/focus interaction remains unverified.
 
 Ticket 13: grade 5 includes decimal addition/subtraction and guaranteed unlike-denominator fraction addition/subtraction; grade 6 includes ratio scaling, unit rates, positive-fraction division and addition/multiplication equations. Seventy tests pass, including 60 seeded upper-grade runs checking exact rational answers, equivalent forms, zero-denominator rejection and saved correction history. Both review axes pass; build/Prettier pass.
+
+### Ticket 14 — Spitter and Charger
+
+- Added Spitters on standard wave 3 / short wave 2 and Chargers on standard wave 5 / short wave 3, with schedules and attack tuning in `content/balance/enemies.ts`.
+- Spitters fire visible, finite-lived shots after a telegraph. Chargers lock a direction, warn for 1.2 seconds, then dash with one direct attack hit. Temporary silhouettes, directional arrows, and warning countdowns distinguish both enemies.
+- Saves retain warning/active/cooldown state, locked direction, hit ledger, and flying enemy projectiles. Profile validation rejects malformed attacks; projectiles clear on victory and defeat.
+- Fixed ammo shuffle RNG returning integer endpoints, which could produce an undefined ammo type; regression covers complete five-type bags across multiple seeds.
+- Validation: 76 tests, production build, and Prettier check pass. Separate spec and standards reviews completed; balance-location and duplicated-validation-limit findings fixed. Phone portrait/landscape visual readability remains unverified because no connected browser/device is available. Existing Phaser bundle-size warning remains.

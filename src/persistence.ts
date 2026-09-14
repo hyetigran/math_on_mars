@@ -1,3 +1,4 @@
+import { ENEMY_BALANCE } from "../content/balance/enemies";
 import { NARRATION_CLIPS } from "./narration-manifest";
 import {
   AMMO_TYPES,
@@ -252,7 +253,14 @@ function combat(value: unknown, run: RecordValue): void {
           : ["windup", "active", "cooldown"],
         "attack.phase",
       );
-      number(attack.remainingMs, "attack.remainingMs", 0, 2400);
+      const tuning = ENEMY_BALANCE[enemy.kind as "spitter" | "charger"];
+      const duration =
+        attack.phase === "windup"
+          ? tuning.windupMs
+          : attack.phase === "active"
+            ? ENEMY_BALANCE.charger.activeMs
+            : tuning.cooldownMs;
+      number(attack.remainingMs, "attack.remainingMs", 0, duration);
       number(attack.dx, "attack.dx", -1, 1);
       number(attack.dy, "attack.dy", -1, 1);
       ensure(
@@ -282,7 +290,12 @@ function combat(value: unknown, run: RecordValue): void {
       for (const key of ["x", "y", "vx", "vy"])
         number(shot[key], `enemy projectile.${key}`, -Infinity);
       number(shot.damage, "enemy projectile damage");
-      number(shot.remainingMs, "enemy projectile lifetime", 0, 7000);
+      number(
+        shot.remainingMs,
+        "enemy projectile lifetime",
+        0,
+        ENEMY_BALANCE.spitter.projectileLifeMs,
+      );
     }
   }
   if (state.pickups !== undefined) {

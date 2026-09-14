@@ -595,3 +595,19 @@ test("enemy projectiles are cleared on both wave victory and defeat", () => {
     assert.deepEqual(sim.state.enemyProjectiles, []);
   }
 });
+
+test("Spitters and Chargers enter the documented standard and short waves", () => {
+  for (const totalWaves of [10, 6]) {
+    for (const wave of [1, 2, 3, 4, 5]) {
+      const sim = new CombatSimulation({ ...options, wave, totalWaves });
+      sim.state.shotCooldownMs = 1e6;
+      for (let spawn = 0; spawn < 3; spawn++) {
+        sim.state.spawnCooldownMs = 0;
+        sim.advance(STEP);
+      }
+      const kinds = new Set(sim.state.enemies.map((e) => e.kind));
+      assert.equal(kinds.has("spitter"), wave >= (totalWaves === 6 ? 2 : 3));
+      assert.equal(kinds.has("charger"), wave >= (totalWaves === 6 ? 3 : 5));
+    }
+  }
+});

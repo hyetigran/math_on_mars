@@ -1,3 +1,4 @@
+import { ENEMY_SPAWNS } from "../content/balance/enemies";
 import { moveEnemy, advanceEnemyProjectiles } from "./enemy-attacks";
 import { omniRateBonus } from "./forge";
 import { STATUS_BALANCE } from "../content/balance/status";
@@ -185,6 +186,9 @@ export class CombatSimulation {
     const x = edge === 0 ? 40 : edge === 1 ? 920 : this.randomBetween(40, 920);
     const y = edge === 2 ? 40 : edge === 3 ? 500 : this.randomBetween(40, 500);
     const hp = boss ? 620 : 42 + this.options.wave * 10;
+    const schedule =
+      this.options.totalWaves === 6 ? "shortWave" : "standardWave";
+    const cycleIndex = this.state.spawned % ENEMY_SPAWNS.cycleLength;
     this.state.enemies.push({
       id: this.state.nextEnemyId++,
       x,
@@ -195,12 +199,12 @@ export class CombatSimulation {
       boss,
       kind:
         !boss &&
-        this.options.wave >= (this.options.totalWaves === 6 ? 3 : 5) &&
-        this.state.spawned % 4 === 2
+        this.options.wave >= ENEMY_SPAWNS.charger[schedule] &&
+        cycleIndex === ENEMY_SPAWNS.charger.cycleIndex
           ? "charger"
           : !boss &&
-              this.options.wave >= (this.options.totalWaves === 6 ? 2 : 3) &&
-              this.state.spawned % 4 === 1
+              this.options.wave >= ENEMY_SPAWNS.spitter[schedule] &&
+              cycleIndex === ENEMY_SPAWNS.spitter.cycleIndex
             ? "spitter"
             : "drifter",
       speed:
