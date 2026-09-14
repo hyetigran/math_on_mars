@@ -19,12 +19,14 @@ export function previewForge(run: RunState): ForgePreview {
   return {
     runId: run.id,
     revision: run.interactionRevision ?? 0,
-    ingredientIds: AMMO_TYPES.flatMap((type) => {
-      const item = run.ammo.find(
-        (a) => !a.legendary && a.type === type && a.tier === 4,
-      );
-      return item ? [item.id] : [];
-    }),
+    ingredientIds:
+      run.forgeIngredientIds ??
+      AMMO_TYPES.flatMap((type) => {
+        const item = run.ammo.find(
+          (a) => !a.legendary && a.type === type && a.tier === 4,
+        );
+        return item ? [item.id] : [];
+      }),
   };
 }
 export function retainedForgeLoadout(run: RunState, ids: string[]): string[] {
@@ -61,6 +63,7 @@ export function applyForge(run: RunState, preview: ForgePreview): boolean {
   run.ammo.push(omni);
   run.activeAmmoIds = [omni.id, ...retained];
   run.forgedOmni = true;
+  run.forgeIngredientIds = undefined;
   return true;
 }
 export function omniEquipped(inventory: AmmoInventory): boolean {
@@ -69,9 +72,13 @@ export function omniEquipped(inventory: AmmoInventory): boolean {
   );
 }
 
+export function capacityRateBonus(capacity: number): number {
+  return (
+    Math.max(0, Math.min(3, capacity - 1)) * AMMO_BALANCE.omniRatePerExtraSlot
+  );
+}
 export function omniRateBonus(inventory: AmmoInventory): number {
   return omniEquipped(inventory)
-    ? Math.max(0, Math.min(3, inventory.ammoCapacity - 1)) *
-        AMMO_BALANCE.omniRatePerExtraSlot
+    ? capacityRateBonus(inventory.ammoCapacity)
     : 0;
 }

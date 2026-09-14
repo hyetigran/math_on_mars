@@ -20,7 +20,6 @@ export { shopOffers } from "./shop";
 import { rewardModules, installModule } from "./modules";
 import { isCorrect, makeQuestions, parseNumericAnswer } from "./questions";
 import {
-  AMMO_TYPES,
   QUALITY_ORDER,
   uid,
   type Ammo,
@@ -480,6 +479,26 @@ export class RunSession {
       return "Cartridge sold.";
     });
   }
+  selectForgeIngredients(id: string, ingredientIds?: string[]): void {
+    this.command(id, "shop", (run) => {
+      const ids = ingredientIds ?? previewForge(run).ingredientIds;
+      if (
+        ids.length > 5 ||
+        new Set(ids).size !== ids.length ||
+        ids.some(
+          (id) =>
+            !run.ammo.some((a) => a.id === id && a.tier === 4 && !a.legendary),
+        )
+      )
+        return;
+      run.forgeIngredientIds = [...ids];
+    });
+  }
+  cancelForge(id: string): void {
+    this.command(id, "shop", (run) => {
+      run.forgeIngredientIds = undefined;
+    });
+  }
   forge(id: string, preview?: ForgePreview): void {
     this.command(id, "shop", (run) => {
       applyForge(run, preview ?? previewForge(run));
@@ -487,6 +506,7 @@ export class RunSession {
   }
   nextWave(id: string): void {
     this.command(id, "shop", (run) => {
+      run.forgeIngredientIds = undefined;
       run.wave++;
       run.phase = "combat";
       run.quiz = undefined;

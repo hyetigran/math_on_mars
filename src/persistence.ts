@@ -466,6 +466,22 @@ export function decodeProfiles(raw: string): Profile[] {
       }
     }
     inventoryRecord(run);
+    if (run.forgeIngredientIds !== undefined) {
+      ensure(run.phase === "shop", "pending forge phase");
+      const ids = list(run.forgeIngredientIds, "forge ingredients");
+      ensure(
+        ids.length <= 5 && new Set(ids).size === ids.length,
+        "forge selection duplicates",
+      );
+      for (const id of ids)
+        ensure(
+          list(run.ammo, "ammo").some((a) => {
+            const item = ammoRecord(a);
+            return item.id === id && item.tier === 4 && !item.legendary;
+          }),
+          "forge selection ownership",
+        );
+    }
     const modules = list(run.modules, "run.modules");
     uniqueIds(modules, "modules");
     modules.forEach(moduleRecord);

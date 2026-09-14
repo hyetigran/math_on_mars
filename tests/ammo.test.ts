@@ -278,8 +278,32 @@ test("forge selection is atomic, preserves overflow and duplicates, and cannot r
     ingredientIds: selected.ingredientIds.slice(1),
   });
   assert.deepEqual(forgeSession.profiles, profiles);
-  forgeSession.forge(id, selected);
-  const forged = forgeSession.profile(id).activeRun!;
+  forgeSession.forge(id, {
+    ...selected,
+    ingredientIds: [originalActive[0], ...selected.ingredientIds.slice(1)],
+  });
+  assert.deepEqual(forgeSession.profiles, profiles);
+  forgeSession.forge(id, {
+    ...selected,
+    ingredientIds: ["purple-0", "purple-1", "spare", "purple-3", "purple-4"],
+  });
+  assert.deepEqual(forgeSession.profiles, profiles);
+  forgeSession.selectForgeIngredients(
+    id,
+    [...selected.ingredientIds].reverse(),
+  );
+  const pending = new RunSession(repository.load(), repository);
+  assert.deepEqual(
+    pending.profile(id).activeRun!.forgeIngredientIds,
+    [...selected.ingredientIds].reverse(),
+  );
+  const pendingPreview = {
+    ...selected,
+    revision: pending.profile(id).activeRun!.interactionRevision!,
+    ingredientIds: pending.profile(id).activeRun!.forgeIngredientIds!,
+  };
+  pending.forge(id, pendingPreview);
+  const forged = pending.profile(id).activeRun!;
   assert.equal(forged.forgedOmni, true);
   assert.equal(forged.activeAmmoIds.length, 1);
   assert.ok(

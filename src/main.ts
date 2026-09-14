@@ -3,8 +3,8 @@ import {
   retainedForgeLoadout,
   omniEquipped,
   omniRateBonus,
+  capacityRateBonus,
 } from "./forge";
-import { AMMO_BALANCE } from "../content/balance/ammo";
 import { ammoSellPrice, previewMerges } from "./ammo";
 import { rerollPrice } from "./shop";
 import { CheckpointQueue } from "./checkpoint-queue";
@@ -665,6 +665,10 @@ function renderCache(): void {
 function renderShop(message = ""): void {
   cleanup();
   const run = activeRun();
+  if (run.forgeIngredientIds) {
+    forgeOmni();
+    return;
+  }
   if (!run.shop) {
     void perform(
       () => session.openShop(activeProfileId!),
@@ -798,6 +802,13 @@ function forgeOmni(): void {
   if (paused) return;
   cleanup();
   const run = activeRun();
+  if (!run.forgeIngredientIds) {
+    void perform(
+      () => session.selectForgeIngredients(activeProfileId!),
+      forgeOmni,
+    );
+    return;
+  }
   const preview = previewForge(run);
   app.innerHTML = shell(
     `<section class="shop-screen" id="content"><p class="eyebrow">LEGENDARY FORGE</p><h1>Legendary Omni Ammo</h1><p>Combine five purple cartridges into all five effects in one slot. Once per run.</p>
@@ -805,9 +816,9 @@ function forgeOmni(): void {
       const copies = run.ammo.filter(
         (a) => !a.legendary && a.type === type && a.tier === 4,
       );
-      return `<label class="forge-ingredient">${type} · Purple ●●●● <select data-forge-type="${type}" ${copies.length ? "" : "disabled"}>${copies.length ? copies.map((a, index) => `<option value="${escapeHtml(a.id)}">Copy ${index + 1}${run.activeAmmoIds.includes(a.id) ? " · equipped" : " · reserve"}</option>`).join("") : '<option value="">Missing ingredient</option>'}</select></label>`;
+      return `<label class="forge-ingredient">${type} · Purple ●●●● <select data-forge-type="${type}" ${copies.length ? "" : "disabled"}>${copies.length ? copies.map((a, index) => `<option value="${escapeHtml(a.id)}" ${preview.ingredientIds.includes(a.id) ? "selected" : ""}>Copy ${index + 1}${run.activeAmmoIds.includes(a.id) ? " · equipped" : " · reserve"}</option>`).join("") : '<option value="">Missing ingredient</option>'}</select></label>`;
     }).join("")}
-    <p id="forge-loadout"></p><p>Omni stabilizer: +${Math.round((run.ammoCapacity - 1) * AMMO_BALANCE.omniRatePerExtraSlot * 100)}% firing rate while equipped. Normal ammo adds no extra effects alongside Omni.</p><p>Unconsumed cartridges stay owned, including any moved out of active slots.</p>
+    <p id="forge-loadout"></p><p>Omni stabilizer: +${Math.round(capacityRateBonus(run.ammoCapacity) * 100)}% firing rate while equipped. Normal ammo adds no extra effects alongside Omni.</p><p>Unconsumed cartridges stay owned, including any moved out of active slots.</p>
     <button id="confirm-forge" class="button forge" ${canForge(run) ? "" : "disabled"}>${run.forgedOmni || run.ammo.some((a) => a.legendary) ? "Already forged this run" : "Forge selected cartridges"}</button><button id="back-shop" class="text-button">Back to shop</button><button id="save-exit" class="text-button">Save & exit</button></section>`,
     "shop-shell",
   );
@@ -825,9 +836,16 @@ function forgeOmni(): void {
         })
         .join("")}.`;
   };
-  document
-    .querySelectorAll("[data-forge-type]")
-    .forEach((select) => select.addEventListener("change", updatePreview));
+  document.querySelectorAll("[data-forge-type]").forEach((select) =>
+    select.addEventListener("change", () => {
+      const ids = selected().filter(Boolean);
+      if (!paused)
+        void perform(
+          () => session.selectForgeIngredients(activeProfileId!, ids),
+          forgeOmni,
+        );
+    }),
+  );
   updatePreview();
   document.querySelector("#confirm-forge")!.addEventListener("click", () => {
     const choice = { ...preview, ingredientIds: selected() };
@@ -837,9 +855,12 @@ function forgeOmni(): void {
         () => renderShop("Forge selection resolved."),
       );
   });
-  document
-    .querySelector("#back-shop")!
-    .addEventListener("click", () => renderShop());
+  document.querySelector("#back-shop")!.addEventListener("click", () => {
+    void perform(
+      () => session.cancelForge(activeProfileId!),
+      () => renderShop(),
+    );
+  });
   document.querySelector("#save-exit")!.addEventListener("click", saveAndExit);
   bindHome();
 }
