@@ -417,20 +417,41 @@ function currentElapsed(): number {
 }
 
 function prepareNarration(question: Question, ready: () => void): boolean {
-  if (!question.speechClips?.length || narration.ready) return true;
+  if (!question.speechClips?.length || narration.playable) return true;
   narrationLoading = true;
   quizElapsedAtStart = activeRun().quiz?.elapsedMs ?? 0;
   const generation = screenGeneration;
   app.innerHTML = shell(
-    `<section class="terminal"><h1>Loading task audio</h1><p id="audio-loading-status" role="status">The task stays hidden and its timer is stopped while audio loads.</p><button id="retry-audio" class="button secondary" hidden>Retry audio</button><button id="save-exit" class="text-button">Save & exit</button></section>`,
+    `<section class="terminal"><h1>Loading task audio</h1><p id="audio-loading-status" role="status">The task stays hidden and its timer is stopped while audio loads.</p><button id="enable-audio" class="button primary" hidden>Enable speech</button><button id="retry-audio" class="button secondary" hidden>Retry audio</button><button id="save-exit" class="text-button">Save & exit</button></section>`,
   );
   bindHome();
   document.querySelector("#save-exit")!.addEventListener("click", saveAndExit);
   document.querySelector("#retry-audio")!.addEventListener("click", ready);
+  document.querySelector("#enable-audio")!.addEventListener("click", () => {
+    void narration
+      .enable()
+      .then(() => {
+        if (screenGeneration === generation && !paused) ready();
+      })
+      .catch(() => {
+        if (screenGeneration !== generation) return;
+        const status = document.querySelector("#audio-loading-status");
+        if (status)
+          status.textContent =
+            "Speech could not start. Tap Enable speech to try again.";
+      });
+  });
   void narration
     .load()
     .then(() => {
-      if (screenGeneration === generation && !paused) ready();
+      if (screenGeneration !== generation || paused) return;
+      if (narration.playable) ready();
+      else {
+        document.querySelector<HTMLButtonElement>("#enable-audio")!.hidden =
+          false;
+        document.querySelector("#audio-loading-status")!.textContent =
+          "Speech is loaded. Tap Enable speech to begin. Your timer has not started.";
+      }
     })
     .catch(() => {
       if (screenGeneration !== generation) return;
@@ -465,11 +486,11 @@ function bindNarration(question: Question): void {
 function questionVisuals(question: Question): string {
   const groups =
     question.visualGroups ??
-    (question.visualCount ? [question.visualCount] : []);
+    (question.visualCount !== undefined ? [question.visualCount] : []);
   return groups
     .map(
       (count, index) =>
-        `<div>${groups.length > 1 ? `<p>Group ${index + 1}</p>` : ""}<div class="cell-grid" aria-label="${count} energy cells">${Array.from({ length: count }, () => "<i></i>").join("")}</div></div>`,
+        `<div>${groups.length > 1 ? `<p>${escapeHtml(question.visualGroupLabels?.[index] ?? `Group ${index + 1}`)}</p>` : ""}<div class="cell-grid" aria-label="${count} energy cells">${count === 0 ? "<span>No cells</span>" : Array.from({ length: count }, () => "<i></i>").join("")}</div></div>`,
     )
     .join("");
 }
@@ -479,6 +500,7 @@ function renderQuiz(message = ""): void {
   const run = activeRun();
   const quiz = run.quiz!;
   const question = quiz.questions[quiz.index];
+  quizDraft = quiz.draft ?? "";
   if (!prepareNarration(question, () => renderQuiz(message))) return;
   app.innerHTML = shell(
     `<section class="quiz-layout" id="content">
@@ -1099,7 +1121,18 @@ function showPause(title: string): void {
         overlay.remove();
         setBlocked(false);
         combat?.resume();
-        if (narrationLoading) {
+        const run = activeRun();
+        const pendingQuestion =
+          run.phase === "quiz"
+            ? run.quiz?.questions[run.quiz.index]
+            : run.phase === "correction"
+              ? run.quiz?.attempts.find((attempt) => !attempt.corrected)
+                  ?.question
+              : undefined;
+        if (
+          narrationLoading ||
+          (pendingQuestion?.speechClips?.length && !narration.playable)
+        ) {
           resumeRun();
           return;
         }

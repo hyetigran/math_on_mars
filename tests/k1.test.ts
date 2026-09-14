@@ -34,13 +34,21 @@ test("K–1 missions use exact deterministic tasks, installed speech and persist
     assert.deepEqual(questions, replay.profile(id).activeRun!.quiz!.questions);
     assert.equal(questions.length, 5);
     if (grade === "K") {
-      assert.ok(questions[0].visualCount);
+      assert.notEqual(questions[0].visualCount, undefined);
       assert.equal(questions[1].visualGroups!.length, 2);
-      for (const q of questions)
-        assert.equal(
-          q.answer[0],
-          q.visualCount ?? Math.max(...q.visualGroups!),
-        );
+      for (const [index, q] of questions.entries()) {
+        const groups = q.visualGroups;
+        const expected =
+          q.visualCount ??
+          (index === 1
+            ? Math.max(...groups!)
+            : index === 2
+              ? groups![0] + groups![1]
+              : groups![0] - groups![1]);
+        assert.equal(q.answer[0], expected);
+        if (index === 2 || index === 3)
+          assert.ok(expected >= 0 && expected <= 5);
+      }
     } else {
       assert.match(questions[0].prompt, /\+/);
       assert.match(questions[1].prompt, /−/);

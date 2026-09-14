@@ -31,5 +31,11 @@
   "compare-hint": "Count each group. Choose the number that is larger.",
   "add-hint": "Start with the first number and count on.",
   "subtract-hint": "Start with the first number and count back.",
-  "missing-hint": "Count up from the first number to the total."
+  "missing-hint": "Count up from the first number to the total.",
+  "compose": "How many energy cells are in both groups altogether?",
+  "compose-hint": "Count the first group, then count on through the second group.",
+  "started": "There were",
+  "take-away": "energy cells. Take away",
+  "remain": "How many energy cells remain?",
+  "decompose-hint": "Count the starting cells. Remove the cells taken away. Count what is left."
 }

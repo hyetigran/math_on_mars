@@ -53,6 +53,7 @@ export interface Question {
   explanation: string;
   visualCount?: number;
   visualGroups?: number[];
+  visualGroupLabels?: string[];
   speechClips?: string[];
   hintClips?: string[];
 }

@@ -1,4 +1,4 @@
-import { readFile, mkdir, mkdtemp, rm } from "node:fs/promises";
+import { readFile, writeFile, mkdir, mkdtemp, rm } from "node:fs/promises";
 import { spawnSync } from "node:child_process";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -38,3 +38,8 @@ try {
 } finally {
   await rm(temporary, { recursive: true, force: true });
 }
+
+await writeFile(
+  "src/narration-manifest.ts",
+  `// Generated from content/narration/k1-en.json by build-narration.mjs.\nexport const NARRATION_CLIPS: string[] = ${JSON.stringify(Object.keys(clips), null, 2)};\n`,
+);

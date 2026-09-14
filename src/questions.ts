@@ -82,8 +82,8 @@ export function makeQuestions(
   const rand = seeded(seed);
   return Array.from({ length: 5 }, (_, i) => {
     if (grade === "K") {
-      const n = pickInt(rand, 1, 10);
-      if (i % 2) {
+      const n = pickInt(rand, 0, 10);
+      if (i === 1) {
         const other = ((n + pickInt(rand, 1, 9) - 1) % 10) + 1;
         return {
           ...q(
@@ -96,6 +96,45 @@ export function makeQuestions(
           visualGroups: [n, other],
           speechClips: ["compare"],
           hintClips: ["compare-hint"],
+        };
+      }
+      if (i === 2) {
+        const a = pickInt(rand, 0, 5),
+          b = pickInt(rand, 0, 5 - a);
+        return {
+          ...q(
+            i,
+            "How many energy cells are in both groups altogether?",
+            [a + b, 1],
+            "Count the first group, then count on through the second group.",
+            `${a} plus ${b} equals ${a + b}.`,
+          ),
+          visualGroups: [a, b],
+          speechClips: ["compose"],
+          hintClips: ["compose-hint"],
+        };
+      }
+      if (i === 3) {
+        const total = pickInt(rand, 0, 5),
+          removed = pickInt(rand, 0, total);
+        return {
+          ...q(
+            i,
+            `${total} cells started. ${removed} were taken away. How many remain?`,
+            [total - removed, 1],
+            "Count the starting cells. Remove the cells taken away. Count what is left.",
+            `${total} minus ${removed} equals ${total - removed}.`,
+          ),
+          visualGroups: [total, removed],
+          visualGroupLabels: ["Starting cells", "Taken away"],
+          speechClips: [
+            "started",
+            `n${total}`,
+            "take-away",
+            `n${removed}`,
+            "remain",
+          ],
+          hintClips: ["decompose-hint"],
         };
       }
       return {

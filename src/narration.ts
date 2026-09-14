@@ -1,18 +1,5 @@
-export const NARRATION_CLIPS = [
-  ...Array.from({ length: 21 }, (_, n) => `n${n}`),
-  "count",
-  "compare",
-  "what",
-  "plus",
-  "minus",
-  "missing",
-  "makes",
-  "count-hint",
-  "compare-hint",
-  "add-hint",
-  "subtract-hint",
-  "missing-hint",
-];
+import { NARRATION_CLIPS } from "./narration-manifest";
+export { NARRATION_CLIPS } from "./narration-manifest";
 
 /** Installed audio only. Decode before exposing the timed task; playback never locks input. */
 export class InstalledNarration {
@@ -23,6 +10,13 @@ export class InstalledNarration {
   private generation = 0;
   get ready(): boolean {
     return this.buffers.size === NARRATION_CLIPS.length;
+  }
+  get playable(): boolean {
+    return this.ready && this.context?.state === "running";
+  }
+  async enable(): Promise<void> {
+    if (!this.context) throw new Error("Load speech first.");
+    await this.context.resume();
   }
   async load(): Promise<void> {
     if (this.ready) return Promise.resolve();
