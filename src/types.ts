@@ -55,8 +55,6 @@ export interface Question {
   visualCount?: number;
   visualGroups?: number[];
   visualGroupLabels?: string[];
-  speechClips?: string[];
-  hintClips?: string[];
 }
 
 export interface Attempt {

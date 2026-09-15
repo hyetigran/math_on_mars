@@ -2,17 +2,11 @@ import { BUILD_VERSION } from "./build-version";
 import { requireOfflinePack, releaseLocation } from "./offline";
 import { ProfileLease } from "./profile-lease";
 import { exportProfile, readProfileTransfer } from "./profile-transfer";
-import { EQUIPMENT_CLIPS } from "./equipment-narration-manifest";
-import {
-  missionLengthForWaves,
-  type MissionLength,
-} from "../content/balance/missions";
 import {
   usesFractionInput,
   fractionFields,
   bindFractionInput,
 } from "./fraction-input";
-import { InstalledNarration, type NarrationStatus } from "./narration";
 import {
   previewForge,
   retainedForgeLoadout,
@@ -59,17 +53,6 @@ const announcer = document.querySelector<HTMLElement>("#announcer")!;
 let repository: IndexedProfileRepository;
 const profileLease = new ProfileLease(navigator.locks, STORAGE_KEY);
 let session: RunSession;
-const narration = new InstalledNarration(
-  undefined,
-  new URL("audio/k1", document.baseURI).pathname,
-  BUILD_VERSION,
-);
-const equipmentNarration = new InstalledNarration(
-  EQUIPMENT_CLIPS,
-  new URL("audio/equipment", document.baseURI).pathname,
-  BUILD_VERSION,
-);
-let narrationLoading = false;
 let screenGeneration = 0;
 let quizDraft = "";
 let quizElapsedAtStart = 0;
@@ -109,9 +92,7 @@ function announce(message: string): void {
 
 function cleanup(): void {
   screenGeneration++;
-  narrationLoading = false;
-  narration.stop();
-  equipmentNarration.stop();
+
   resetTouch?.();
   resetTouch = null;
   if (timerId !== null) window.clearInterval(timerId);
@@ -144,7 +125,6 @@ function shell(content: string, screenClass = ""): string {
 }
 
 function bindHome(): void {
-  bindEquipmentGuidance();
   document.querySelector("#home-link")?.addEventListener("click", (event) => {
     event.preventDefault();
     if (activeProfileId && activeProfile().activeRun) {
@@ -370,13 +350,11 @@ function renderSetup(): void {
   const profile = activeProfile();
   app.innerHTML = shell(
     `<section class="terminal" id="content">
-    <div class="terminal-heading"><p class="eyebrow warm">MISSION TERMINAL</p><h1>Ready, ${escapeHtml(profile.name)}?</h1><p>Choose your math track, combat difficulty, and mission length.</p></div>
+    <div class="terminal-heading"><p class="eyebrow warm">MISSION TERMINAL</p><h1>Ready, ${escapeHtml(profile.name)}?</h1><p>Choose the grade-level math track for this mission.</p></div>
     <form id="mission-form">
       <fieldset><legend>Math track</legend><div class="grade-grid">${GRADES.map((grade) => `<label class="choice-tile"><input type="radio" name="grade" value="${grade}" ${profile.grade === grade ? "checked" : ""}><span><b>${grade}</b><small>${gradeLabel(grade)}</small></span></label>`).join("")}</div></fieldset>
-      <fieldset><legend>Combat difficulty</legend><div class="grade-grid"><label class="choice-tile"><input type="radio" name="difficulty" value="easy"><span><b>Easy</b><small>Slower enemies</small></span></label><label class="choice-tile"><input type="radio" name="difficulty" value="standard" checked><span><b>Standard</b><small>Full enemy speed</small></span></label></div></fieldset>
-      <fieldset><legend>Mission length</legend><div class="grade-grid"><label class="choice-tile"><input type="radio" name="mission" value="standard" checked><span><b>Standard</b><small>10 waves · boss on wave 10</small></span></label><label class="choice-tile"><input type="radio" name="mission" value="short"><span><b>Short</b><small>6 waves · boss on wave 6</small></span></label></div></fieldset>
-      <p>Both missions use five required questions and one 30-second countdown between waves. Start with a Pulse Blaster and white Piercing ammo.</p>
-      <p id="offline-status" role="status">The complete game content is installed before launch.</p><button class="button launch" type="submit"><span>Launch mission</span><i aria-hidden="true">→</i></button>
+      <div class="mission-brief"><div><span class="mission-number">10</span><p><b>Waves</b><small>Nine recharges, then the Overmind</small></p></div><div><span class="mission-number">01</span><p><b>Pulse Blaster</b><small>White Piercing equipped</small></p></div></div>
+      <p id="offline-status" role="status">Five questions and one 30-second countdown appear between waves.</p><button class="button launch" type="submit"><span>Launch mission</span><i aria-hidden="true">→</i></button>
     </form>
   </section>`,
     "terminal-screen",
@@ -394,18 +372,12 @@ function renderSetup(): void {
       if (button.disabled) return;
       button.disabled = true;
       document.querySelector("#offline-status")!.textContent =
-        "Installing and checking complete offline content…";
+        "Preparing mission content…";
       try {
         await requireOfflinePack();
         if (generation !== screenGeneration) return;
         await perform(
-          () =>
-            session.start(
-              profile.id,
-              data.get("grade") as Grade,
-              data.get("mission") as MissionLength,
-              data.get("difficulty") as "easy" | "standard",
-            ),
+          () => session.start(profile.id, data.get("grade") as Grade),
           renderCombat,
         );
       } catch (error) {
@@ -603,89 +575,8 @@ function currentElapsed(): number {
   return Math.min(
     30000,
     quizElapsedAtStart +
-      (paused || narrationLoading
-        ? 0
-        : Math.max(0, performance.now() - quizStartedAt)),
+      (paused ? 0 : Math.max(0, performance.now() - quizStartedAt)),
   );
-}
-
-function prepareNarration(question: Question, ready: () => void): boolean {
-  if (!question.speechClips?.length) return true;
-  return prepareSpeech(narration, ready);
-}
-function prepareSpeech(player: InstalledNarration, ready: () => void): boolean {
-  if (player.playable) return true;
-  narrationLoading = true;
-  quizElapsedAtStart = activeRun().quiz?.elapsedMs ?? 0;
-  const generation = screenGeneration;
-  app.innerHTML = shell(
-    `<section class="terminal"><h1>Loading speech</h1><p id="audio-loading-status" role="status">This screen stays unavailable while its speech loads. Any question timer is stopped.</p><button id="enable-audio" class="button primary" hidden>Enable speech</button><button id="retry-audio" class="button secondary" hidden>Retry audio</button><button id="save-exit" class="text-button">Save & exit</button></section>`,
-  );
-  bindHome();
-  document.querySelector("#save-exit")!.addEventListener("click", saveAndExit);
-  document.querySelector("#retry-audio")!.addEventListener("click", ready);
-  document.querySelector("#enable-audio")!.addEventListener("click", () => {
-    void player
-      .enable()
-      .then(() => {
-        if (screenGeneration === generation && !paused) ready();
-      })
-      .catch(() => {
-        if (screenGeneration !== generation) return;
-        const status = document.querySelector("#audio-loading-status");
-        if (status)
-          status.textContent =
-            "Speech could not start. Tap Enable speech to try again.";
-      });
-  });
-  void player
-    .load()
-    .then(() => {
-      if (screenGeneration !== generation || paused) return;
-      if (player.playable) ready();
-      else {
-        document.querySelector<HTMLButtonElement>("#enable-audio")!.hidden =
-          false;
-        document.querySelector("#audio-loading-status")!.textContent =
-          "Speech is loaded. Tap Enable speech to continue.";
-      }
-    })
-    .catch(() => {
-      if (screenGeneration !== generation) return;
-      document.querySelector("#audio-loading-status")!.textContent =
-        "Audio could not load. Retry when the installed files are available.";
-      document.querySelector<HTMLButtonElement>("#retry-audio")!.hidden = false;
-    });
-  return false;
-}
-function narrationControls(question: Question, correction = false): string {
-  if (!question.speechClips?.length) return "";
-  return `<div class="quiz-tools"><button id="replay-task" class="button secondary" type="button">Replay task</button>${correction && question.hintClips?.length ? '<button id="replay-hint" class="button secondary" type="button">Read hint</button>' : ""}<span id="speech-status" role="status"></span></div>`;
-}
-function speechStatusText(status: NarrationStatus): string {
-  return {
-    unavailable: "Speech is unavailable. Reload this screen to retry.",
-    ready: "Choose a speech button to listen again.",
-    playing: "Speech is playing. You can keep using this screen.",
-    enable: "Tap a speech button to enable audio.",
-  }[status];
-}
-function bindNarration(question: Question): void {
-  if (!question.speechClips?.length) return;
-  const play = (clips: string[]) => {
-    if (paused) return;
-    void narration.play(clips, (message) => {
-      const status = document.querySelector("#speech-status");
-      if (status) status.textContent = speechStatusText(message);
-    });
-  };
-  document
-    .querySelector("#replay-task")!
-    .addEventListener("click", () => play(question.speechClips!));
-  document
-    .querySelector("#replay-hint")
-    ?.addEventListener("click", () => play(question.hintClips!));
-  play(question.speechClips);
 }
 
 function questionVisuals(question: Question): string {
@@ -706,14 +597,13 @@ function renderQuiz(message = ""): void {
   const quiz = run.quiz!;
   const question = quiz.questions[quiz.index];
   quizDraft = quiz.draft ?? "";
-  if (!prepareNarration(question, () => renderQuiz(message))) return;
   app.innerHTML = shell(
     `<section class="quiz-layout" id="content">
     <aside class="rarity-rail" aria-label="Reward power bands"><div class="rail-title">POWER LEVEL</div>${["purple", "blue", "green", "white"].map((q) => `<div class="rail-step ${q}" data-quality="${q}">${qualityPips(q as Quality)}<b>${QUALITY_LABEL[q as Quality]}</b><small>${q === "purple" ? "> 20s" : q === "blue" ? "> 10s" : q === "green" ? "> 0s" : "0s"}</small></div>`).join("")}</aside>
     <div class="quiz-main">
       <div class="quiz-topline"><div><p class="eyebrow warm">REACTOR RECHARGE</p><h1>Question ${quiz.index + 1} <span>of 5</span></h1></div><div class="countdown" id="countdown" aria-label="Time remaining"><small>SHARED TIME</small><b>${formatTime(quiz.remainingMs)}</b></div></div>
       <div class="mobile-tier-strip" id="mobile-tier">${qualityPips(timeQuality(quiz.remainingMs))}<b>${QUALITY_LABEL[timeQuality(quiz.remainingMs)]}</b><span>candidate</span></div>
-      <div class="question-panel"><div class="question-copy"><p class="prompt">${escapeHtml(question.prompt)}</p>${questionVisuals(question)}${narrationControls(question)}
+      <div class="question-panel"><div class="question-copy"><p class="prompt">${escapeHtml(question.prompt)}</p>${questionVisuals(question)}
         ${usesFractionInput(question) ? fractionFields : '<label for="answer">Your answer</label>'}<output id="answer" class="answer-field" aria-live="polite" ${usesFractionInput(question) ? "hidden" : ""}>&nbsp;</output><p class="input-error" id="input-error">${escapeHtml(message)}</p>
         <div class="quiz-tools"><span>Take your best shot.</span><button id="save-exit" class="text-button" type="button">Save & exit</button></div></div>
         <div class="keypad" aria-label="Number keypad">${[7, 8, 9, 4, 5, 6, 1, 2, 3].map((n) => `<button data-key="${n}" aria-label="${n}">${n}</button>`).join("")}
@@ -787,7 +677,7 @@ function renderQuiz(message = ""): void {
   quizElapsedAtStart = quiz.elapsedMs;
   quizStartedAt = performance.now();
   timerId = window.setInterval(updateTimer, 50);
-  bindNarration(question);
+
   updateTierRail();
 }
 
@@ -832,68 +722,17 @@ function submitInitial(value: string, occurrenceId: string): void {
   );
 }
 
-const equipmentLabels: Record<string, string> = {
-  "power-white": "White power",
-  "power-green": "Green power",
-  "power-blue": "Blue power",
-  "power-purple": "Purple power",
-  cache: "Cache choices",
-  buy: "Buying",
-  equip: "Equipping",
-  merge: "Merging",
-  forge: "Legendary Omni forge",
-  "next-wave": "Next wave",
-  "save-exit": "Save & exit",
-  piercing: "Piercing",
-  "multi-shot": "Multi Shot",
-  "electric-chain": "Electric Chain",
-  frost: "Frost",
-  fiery: "Fiery",
-  armor: "Armor",
-  reroll: "Reroll",
-  sell: "Selling",
-};
-function moduleSpeechButton(module: Module): string {
-  const clips = [
-    module.stat,
-    ...(module.additionalModifiers ?? []).map((modifier) => modifier.stat),
-  ].map((stat) => `stat-${stat}`);
-  return `<button class="button secondary" type="button" data-equipment-speech="${clips.join(",")}" aria-label="Hear effects of ${escapeHtml(module.name)}">Hear upgrade effects</button>`;
-}
-function equipmentGuidance(ids: string[]): string {
-  return `<section class="equipment-guidance" aria-label="Spoken equipment help"><details><summary>Listen to equipment help</summary><div class="quiz-tools">${ids.map((id) => `<button class="button secondary" type="button" data-equipment-speech="${id}">${equipmentLabels[id]}</button>`).join("")}</div></details><p id="equipment-speech-status" role="status"></p></section>`;
-}
-function bindEquipmentGuidance(): void {
-  const generation = screenGeneration;
-  document
-    .querySelectorAll<HTMLButtonElement>("[data-equipment-speech]")
-    .forEach((button) => {
-      button.addEventListener("click", () => {
-        if (paused) return;
-        void equipmentNarration.play(
-          button.dataset.equipmentSpeech!.split(","),
-          (message) => {
-            if (generation !== screenGeneration) return;
-            const status = document.querySelector("#equipment-speech-status");
-            if (status) status.textContent = speechStatusText(message);
-          },
-        );
-      });
-    });
-}
-
 function renderReward(): void {
   cleanup();
-  if (!prepareSpeech(equipmentNarration, renderReward)) return;
   const run = activeRun();
   const quiz = run.quiz!;
   const quality = quiz.rewardQuality!;
   const wrong = quiz.attempts.filter((a) => !a.correct).length;
   const candidate = timeQuality(quiz.remainingMs);
   app.innerHTML = shell(
-    `<section class="reward-screen" id="content">${equipmentGuidance([`power-${quality}`, "save-exit"])}
+    `<section class="reward-screen" id="content">
     <div class="reward-heading"><p class="eyebrow warm">FABRICATOR ONLINE</p><h1>Choose one upgrade</h1><p>${formatTime(quiz.remainingMs)} seconds remaining · Reward strengths are prototype tuning.</p><div class="outcome-row"><div><small>Time tier</small><b>${QUALITY_LABEL[candidate]}</b></div><span>− ${wrong} ${wrong === 1 ? "miss" : "misses"}</span><div class="quality-badge ${quality}">${qualityPips(quality)}<b>${QUALITY_LABEL[quality]}</b></div></div></div>
-    <div class="reward-grid">${quiz.rewardChoices!.map((module, i) => `<article class="reward-card ${quality}"><div class="card-index">0${i + 1}</div><div class="module-icon ${module.stat}" aria-hidden="true"><i></i></div><p class="eyebrow">${moduleStatus(module, run.modules)}</p><h2>${escapeHtml(module.name)}</h2><div class="card-quality">${QUALITY_LABEL[quality]} ${qualityPips(quality)}</div><p class="stat-gain">${statText(module)}</p><p>${moduleDescription(module.stat)}</p><p>${rewardPreview(module, run)}</p>${moduleSpeechButton(module)}<button class="button primary" data-reward="${escapeHtml(module.id)}">Choose module</button></article>`).join("")}</div>
+    <div class="reward-grid">${quiz.rewardChoices!.map((module, i) => `<article class="reward-card ${quality}"><div class="card-index">0${i + 1}</div><div class="module-icon ${module.stat}" aria-hidden="true"><i></i></div><p class="eyebrow">${moduleStatus(module, run.modules)}</p><h2>${escapeHtml(module.name)}</h2><div class="card-quality">${QUALITY_LABEL[quality]} ${qualityPips(quality)}</div><p class="stat-gain">${statText(module)}</p><p>${moduleDescription(module.stat)}</p><p>${rewardPreview(module, run)}</p><button class="button primary" data-reward="${escapeHtml(module.id)}">Choose module</button></article>`).join("")}</div>
     <button id="save-exit" class="text-button centered">Save & exit</button>
   </section>`,
     "reward-shell",
@@ -924,18 +763,16 @@ function renderCorrection(message = ""): void {
     return;
   }
   const attempt = misses[0];
-  if (!prepareNarration(attempt.question, () => renderCorrection(message)))
-    return;
   app.innerHTML = shell(
     `<section class="correction-screen" id="content"><div class="correction-copy"><p class="eyebrow warm">UNTIMED CORRECTION</p><h1>Let’s repair this one.</h1><p>Rewards are locked in. Work it through before the next wave.</p></div>
-    <div class="correction-card"><div><span class="correction-count">${quiz.attempts.filter((a) => !a.correct).length - misses.length + 1} / ${quiz.attempts.filter((a) => !a.correct).length}</span><p class="prompt">${escapeHtml(attempt.question.prompt)}</p>${questionVisuals(attempt.question)}${narrationControls(attempt.question, true)}<div class="hint-box"><b>Mission hint</b><p>${escapeHtml(attempt.question.hint)}</p></div><details><summary>Show worked explanation</summary><p>${escapeHtml(attempt.question.explanation)}</p></details></div>
+    <div class="correction-card"><div><span class="correction-count">${quiz.attempts.filter((a) => !a.correct).length - misses.length + 1} / ${quiz.attempts.filter((a) => !a.correct).length}</span><p class="prompt">${escapeHtml(attempt.question.prompt)}</p>${questionVisuals(attempt.question)}<div class="hint-box"><b>Mission hint</b><p>${escapeHtml(attempt.question.hint)}</p></div><details><summary>Show worked explanation</summary><p>${escapeHtml(attempt.question.explanation)}</p></details></div>
       <div>${usesFractionInput(attempt.question) ? fractionFields : '<label for="correction-input">Correct answer</label>'}<input id="correction-input" ${usesFractionInput(attempt.question) ? "hidden" : ""} inputmode="none" autocomplete="off" value="${escapeHtml(quiz.correctionDraft ?? "")}"><div class="keypad correction-keypad" aria-label="Correction number keypad">${["7", "8", "9", "4", "5", "6", "1", "2", "3", ".", "0", "/", "back", "clear", "-"].map((key) => `<button type="button" data-correction-key="${key}" aria-label="${key === "/" ? "Fraction bar" : key === "back" ? "Backspace" : key === "-" ? "Minus" : key}">${key === "back" ? "⌫" : key === "clear" ? "Clear" : key}</button>`).join("")}</div><p class="input-error" id="correction-error">${escapeHtml(message)}</p><button id="correction-check" class="button primary">Check answer</button></div></div>
     <button id="save-exit" class="text-button centered">Save & exit</button></section>`,
     "correction-shell",
   );
   bindHome();
   const input = document.querySelector<HTMLInputElement>("#correction-input")!;
-  bindNarration(attempt.question);
+
   if (!usesFractionInput(attempt.question)) input.focus();
   const submit = () => {
     if (paused || activeRun().phase !== "correction") return;
@@ -998,7 +835,6 @@ function renderCorrection(message = ""): void {
 
 function renderCache(): void {
   cleanup();
-  if (!prepareSpeech(equipmentNarration, renderCache)) return;
   const run = activeRun();
   if (run.cacheClaimed) {
     renderShop();
@@ -1010,7 +846,7 @@ function renderCache(): void {
   }
   const cache = run.choiceCache;
   app.innerHTML = shell(
-    `<section class="cache-screen" id="content">${equipmentGuidance(["cache", "piercing", "multi-shot", "electric-chain", "frost", "fiery", "armor", "save-exit"])}<div class="cache-heading"><p class="eyebrow warm">FREE SUPPLY DROP</p><h1>Choose one bundle</h1><p>Accept one upgrade or sell its complete bundle for salvage. All other choices close.</p></div>
+    `<section class="cache-screen" id="content"><div class="cache-heading"><p class="eyebrow warm">FREE SUPPLY DROP</p><h1>Choose one bundle</h1><p>Accept one upgrade or sell its complete bundle for salvage. All other choices close.</p></div>
     <div class="cache-grid">${cache.options
       .map((option) => {
         const type = option.kind === "ammo" ? option.ammo[0].type : undefined;
@@ -1045,7 +881,6 @@ function renderCache(): void {
 
 function renderShop(message = ""): void {
   cleanup();
-  if (!prepareSpeech(equipmentNarration, () => renderShop(message))) return;
   const run = activeRun();
   if (run.forgeIngredientIds) {
     forgeOmni();
@@ -1078,9 +913,9 @@ function renderShop(message = ""): void {
       .map((ammo) => ammo.type),
   ).size;
   app.innerHTML = shell(
-    `<section class="shop-screen" id="content">${equipmentGuidance(["buy", "reroll", "equip", "merge", "sell", "forge", "next-wave", "save-exit"])}<div class="shop-top"><div><p class="eyebrow warm">BETWEEN WAVES</p><h1>Gear up for wave ${run.wave + 1}</h1><p>Everything here is optional. Your current gear is ready to go.</p></div><div class="salvage-chip"><small>SALVAGE</small><b>${run.salvage}</b></div></div><p class="shop-message" role="status">${escapeHtml(message)}</p>
+    `<section class="shop-screen" id="content"><div class="shop-top"><div><p class="eyebrow warm">BETWEEN WAVES</p><h1>Gear up for wave ${run.wave + 1}</h1><p>Everything here is optional. Your current gear is ready to go.</p></div><div class="salvage-chip"><small>SALVAGE</small><b>${run.salvage}</b></div></div><p class="shop-message" role="status">${escapeHtml(message)}</p>
     <section class="market-panel" aria-labelledby="shop-title"><div class="panel-heading"><div><p class="eyebrow">OUTPOST SHOP</p><h2 id="shop-title">Buy an upgrade</h2></div><span>Four choices</span></div>
-      <div class="shop-offers">${offers.map((offer, i) => (offer.purchased ? `<article class="shop-offer bought"><span>0${i + 1}</span><p>Purchased · slot empty</p></article>` : `<article class="shop-offer ${run.shopBought.includes(offer.id) ? "bought" : ""}"><span>0${i + 1}</span><div class="shop-offer-icon ${offer.kind}" aria-hidden="true"><i></i></div><h3>${escapeHtml(offer.title)}</h3>${offer.kind === "module" ? `<p>${QUALITY_LABEL[offer.module.quality]} ${qualityPips(offer.module.quality)} · ${moduleStatus(offer.module, run.modules)}</p>` : ""}<p>${offer.module ? statText(offer.module) : offer.detail}</p>${offer.module ? `<p>${rewardPreview(offer.module, run)}</p>${moduleSpeechButton(offer.module)}` : ""}<button class="button secondary" data-buy="${escapeHtml(offer.id)}" ${offer.disabled || run.shopBought.includes(offer.id) ? "disabled" : ""}>${run.shopBought.includes(offer.id) ? "Bought" : `Buy · ${offer.price} salvage`}</button></article>`)).join("")}</div>
+      <div class="shop-offers">${offers.map((offer, i) => (offer.purchased ? `<article class="shop-offer bought"><span>0${i + 1}</span><p>Purchased · slot empty</p></article>` : `<article class="shop-offer ${run.shopBought.includes(offer.id) ? "bought" : ""}"><span>0${i + 1}</span><div class="shop-offer-icon ${offer.kind}" aria-hidden="true"><i></i></div><h3>${escapeHtml(offer.title)}</h3>${offer.kind === "module" ? `<p>${QUALITY_LABEL[offer.module.quality]} ${qualityPips(offer.module.quality)} · ${moduleStatus(offer.module, run.modules)}</p>` : ""}<p>${offer.module ? statText(offer.module) : offer.detail}</p>${offer.module ? `<p>${rewardPreview(offer.module, run)}</p>` : ""}<button class="button secondary" data-buy="${escapeHtml(offer.id)}" ${offer.disabled || run.shopBought.includes(offer.id) ? "disabled" : ""}>${run.shopBought.includes(offer.id) ? "Bought" : `Buy · ${offer.price} salvage`}</button></article>`)).join("")}</div>
       <button id="reroll-shop" class="button secondary">Reroll unpurchased · ${rerollPrice(run)} salvage</button><p>Buy all four for a free refill. Purchased slots stay empty until then.</p>
     </section>
     <section class="loadout"><details><summary>Marine stats</summary><p>${marineStats(run)}</p></details><div class="loadout-heading"><div><p class="eyebrow">YOUR EQUIPMENT</p><h2>Pulse Blaster</h2><p>Tap Equip on any ammo card. When your active slots are full, it replaces the rightmost ammo.</p></div>${purpleTypes > 0 || canForge(run) ? `<div class="omni-progress"><small>OMNI AMMO</small><b>${purpleTypes} / 5</b><button id="forge-button" class="button forge" >View forge recipe</button></div>` : ""}</div>
@@ -1183,7 +1018,6 @@ function reserveStacks(run: RunState): string {
 function forgeOmni(): void {
   if (paused) return;
   cleanup();
-  if (!prepareSpeech(equipmentNarration, forgeOmni)) return;
   const run = activeRun();
   if (!run.forgeIngredientIds) {
     void perform(
@@ -1194,7 +1028,7 @@ function forgeOmni(): void {
   }
   const preview = previewForge(run);
   app.innerHTML = shell(
-    `<section class="shop-screen" id="content">${equipmentGuidance(["forge", "save-exit"])}<p class="eyebrow">LEGENDARY FORGE</p><h1>Legendary Omni Ammo</h1><p>Combine five purple cartridges into all five effects in one slot. Once per run.</p>
+    `<section class="shop-screen" id="content"><p class="eyebrow">LEGENDARY FORGE</p><h1>Legendary Omni Ammo</h1><p>Combine five purple cartridges into all five effects in one slot. Once per run.</p>
     ${AMMO_TYPES.map((type) => {
       const copies = run.ammo.filter(
         (a) => !a.legendary && a.type === type && a.tier === 4,
@@ -1289,13 +1123,7 @@ function endRun(victory: boolean, state?: CombatSnapshot): void {
             await requireOfflinePack();
             if (generation !== screenGeneration) return;
             await perform(
-              () =>
-                session.start(
-                  profile.id,
-                  run.grade,
-                  missionLengthForWaves(run.totalWaves),
-                  run.difficulty,
-                ),
+              () => session.start(profile.id, run.grade),
               renderCombat,
             );
           } catch (error) {
@@ -1317,8 +1145,6 @@ function setBlocked(blocked: boolean): void {
   session.setPaused(blocked);
   app.inert = blocked;
   if (blocked) {
-    narration.stop();
-    equipmentNarration.stop();
     resetTouch?.();
     if (timerId !== null) window.clearInterval(timerId);
     timerId = null;
@@ -1443,23 +1269,6 @@ function showPause(title: string): void {
         overlay.remove();
         setBlocked(false);
         combat?.resume();
-        const run = activeRun();
-        const pendingQuestion =
-          run.phase === "quiz"
-            ? run.quiz?.questions[run.quiz.index]
-            : run.phase === "correction"
-              ? run.quiz?.attempts.find((attempt) => !attempt.corrected)
-                  ?.question
-              : undefined;
-        if (
-          narrationLoading ||
-          (["reward", "cache", "shop"].includes(run.phase) &&
-            !equipmentNarration.playable) ||
-          (pendingQuestion?.speechClips?.length && !narration.playable)
-        ) {
-          resumeRun();
-          return;
-        }
         if (activeRun().phase === "quiz") {
           quizElapsedAtStart = activeRun().quiz!.elapsedMs;
           quizStartedAt = performance.now();

@@ -96,8 +96,6 @@ export function makeQuestions(
             `${Math.max(n, other)} is greater than ${Math.min(n, other)}.`,
           ),
           visualGroups: [n, other],
-          speechClips: ["compare"],
-          hintClips: ["compare-hint"],
         };
       }
       if (i === 2) {
@@ -112,8 +110,6 @@ export function makeQuestions(
             `${a} plus ${b} equals ${a + b}.`,
           ),
           visualGroups: [a, b],
-          speechClips: ["compose"],
-          hintClips: ["compose-hint"],
         };
       }
       if (i === 3) {
@@ -129,14 +125,6 @@ export function makeQuestions(
           ),
           visualGroups: [total, removed],
           visualGroupLabels: ["Starting cells", "Taken away"],
-          speechClips: [
-            "started",
-            `n${total}`,
-            "take-away",
-            `n${removed}`,
-            "remain",
-          ],
-          hintClips: ["decompose-hint"],
         };
       }
       return {
@@ -148,8 +136,6 @@ export function makeQuestions(
           `There are ${n} energy cells.`,
           n,
         ),
-        speechClips: ["count"],
-        hintClips: ["count-hint"],
       };
     }
     if (grade === "1") {
@@ -165,8 +151,6 @@ export function makeQuestions(
             `${a} plus ${b} equals ${a + b}.`,
           ),
           spoken: `What number added to ${a} makes ${a + b}?`,
-          speechClips: ["missing", `n${a}`, "makes", `n${a + b}`],
-          hintClips: ["missing-hint"],
         };
       if (i % 3 === 1)
         return {
@@ -178,8 +162,6 @@ export function makeQuestions(
             `${a + b} minus ${a} equals ${b}.`,
           ),
           spoken: `What is ${a + b} minus ${a}?`,
-          speechClips: ["what", `n${a + b}`, "minus", `n${a}`],
-          hintClips: ["subtract-hint"],
         };
       return {
         ...q(
@@ -190,8 +172,6 @@ export function makeQuestions(
           `${a} plus ${b} equals ${a + b}.`,
         ),
         spoken: `What is ${a} plus ${b}?`,
-        speechClips: ["what", `n${a}`, "plus", `n${b}`],
-        hintClips: ["add-hint"],
       };
     }
     if (grade === "2") {

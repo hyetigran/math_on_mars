@@ -22,3 +22,7 @@ _Avoid_: Consumable bullet supply
 
 **Legendary Omni Ammo**:
 An ammo type formed from the five distinct purple ammo types, combining all five effects while occupying one active ammo slot.
+
+## Presentation
+
+The owner removed all game audio and spoken-help controls. Questions and equipment guidance use text and visuals, without audio readiness gates or installed speech packs. Older audio requirements in planning documents are superseded.

@@ -281,3 +281,19 @@ test("Overmind active rings and summon limits round trip through profile storage
     assert.deepEqual(repository.load()[0].activeRun!.combatSave, save);
   }
 });
+
+test("legacy question speech references are removed without changing quiz progress", () => {
+  const storage = new MemoryStorage();
+  const repository = new ProfileRepository(storage, key);
+  const session = new RunSession([sample()], repository);
+  session.start("cadet", "K");
+  session.finishWave("cadet", { hp: 100, salvage: 8, medkits: 1 });
+  const original = JSON.parse(JSON.stringify(session.profiles));
+  const legacy = structuredClone(original);
+  legacy[0].activeRun.quiz.questions[0].speechClips = ["count"];
+  legacy[0].activeRun.quiz.questions[0].hintClips = ["count-hint"];
+  const raw = JSON.stringify(legacy);
+  storage.setItem(key, raw);
+  assert.deepEqual(repository.load(), original);
+  assert.equal(storage.getItem(key), raw);
+});

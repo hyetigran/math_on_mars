@@ -4,6 +4,10 @@ const scope = self.registration.scope;
 const prefix = `math-on-mars:${scope}:`;
 const manifestUrl = new URL("__offline_manifest__", scope).href;
 const absolute = (path) => new URL(path, scope).href;
+const scopeHostname = new URL(scope).hostname;
+const localPreview = ["localhost", "127.0.0.1", "[::1]"].includes(
+  scopeHostname,
+);
 async function digest(response) {
   const bytes = await crypto.subtle.digest(
     "SHA-256",
@@ -40,10 +44,28 @@ async function install() {
   // An interrupted install has no readiness marker. Every use rechecks actual files.
   await cache.put(manifestUrl, new Response(JSON.stringify(BUILD)));
 }
-self.addEventListener("install", (event) => event.waitUntil(install()));
-// Never force activation over a live page, and retain every previously installed pack.
+self.addEventListener("install", (event) =>
+  event.waitUntil(localPreview ? self.skipWaiting() : install()),
+);
+// Published builds never force activation over a live page; localhost workers retire themselves.
 self.addEventListener("activate", (event) =>
-  event.waitUntil(self.clients.claim()),
+  event.waitUntil(
+    localPreview
+      ? Promise.all([
+          self.clients.claim(),
+          caches
+            .keys()
+            .then((names) =>
+              Promise.all(
+                names
+                  .filter((name) => name.startsWith(prefix))
+                  .map((name) => caches.delete(name)),
+              ),
+            ),
+          self.registration.unregister(),
+        ])
+      : self.clients.claim(),
+  ),
 );
 self.addEventListener("message", (event) => {
   if (
@@ -51,6 +73,10 @@ self.addEventListener("message", (event) => {
     !event.ports[0]
   )
     return;
+  if (localPreview) {
+    event.ports[0].postMessage({ ready: true });
+    return;
+  }
   event.waitUntil(
     (async () => {
       if (
@@ -66,6 +92,7 @@ self.addEventListener("message", (event) => {
   );
 });
 self.addEventListener("fetch", (event) => {
+  if (localPreview) return;
   const url = new URL(event.request.url);
   if (event.request.method !== "GET" || !url.href.startsWith(scope)) return;
   event.respondWith(

@@ -1,0 +1,14 @@
+{
+  "name": "Flat front-facing Droplet Drifter",
+  "status": "candidate",
+  "generator": "built-in image_gen",
+  "date": "2026-09-14",
+  "prompt": "Edit the supplied front-facing Droplet Drifter image. STRICT FLAT COLOR CLEANUP ONLY. Preserve the exact silhouette, floppy crest curling image-left, front-facing eyes and smile, core position and size, outline thickness, framing and blue background. Completely REMOVE EVERY dark-green body shadow including the entire left-side stripe, underside of curled crest, and bottom rim. Fill the ENTIRE slime body inside its outer outline with ONE SINGLE UNIFORM SOLID LIME GREEN color (#A6EF32). The crest is exactly the same green as the body, no dark stripe anywhere. Fill the belly core with ONE SINGLE UNIFORM SOLID PALE YELLOW (#FFF477), with no glow or shading. Outer outline, two eyes and small smile are a single solid dark navy (#10132F). Background is ONE SINGLE UNIFORM SOLID BLUE (#008CFF). These FOUR solid colors plus normal edge antialiasing are the COMPLETE palette. Absolutely NO shadows, highlights, glare, gradients, ambient occlusion, texture, dimensional rendering or tonal variations anywhere. Do not leave the former shadow stripe as a different green. Do not add lines where shadows used to be. The result should look like clean flat-color cartoon vector art rendered as a PNG, not shaded jelly. Keep one complete centered character and no extra elements, labels or watermark.",
+  "reference_paths": [
+    "tmp_assets/03_characters/enemies/drifter/drifter_droplet_v002_front_source.png"
+  ],
+  "background": "blue key plate; not extracted",
+  "direction": "Single frontal orientation",
+  "notes": "Removed visible dark-green side, crest and base shadow regions. Flat-color target; exact pixel palette not verified.",
+  "animation": false
+}

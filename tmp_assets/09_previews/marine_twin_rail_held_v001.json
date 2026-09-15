@@ -1,0 +1,12 @@
+{
+  "generator": "built-in image_gen",
+  "date": "2026-09-14",
+  "status": "candidate pose study",
+  "prompt": "Create a full-body equipment pose concept of the exact Math on Mars marine from reference 1 HOLDING a smaller version of the Twin Rail blaster from reference 2 with BOTH HANDS. Preserve marine identity, friendly chibi proportions, off-white/navy armor, solid cyan visor WITHOUT glare, orange shoulder patch, backpack and boots. Preserve gun identity: exactly TWO squared rail barrels with cyan rectangular muzzles, white/navy body, orange swept fin and side chevron. Adapt gun underside by REPLACING the mechanical shoulder mounting bracket with a simple rear pistol grip and a broad underside foregrip/support surface. NO shoulder mount, support arm, floating weapon or third arm. Pose: standing upright, facing screen-right in three-quarter view matching marine reference's approximately 30-degree-downward viewpoint. Gun held securely across LOWER CHEST / upper waist, aimed screen-right, entirely below the visor. Rear hand wraps the rear grip; opposite supporting hand cups underside of forward receiver behind barrel mouths. Both elbows bent, arms visibly connect from shoulders to hands with believable anatomy and occlusion. Exactly two arms and two hands. Draw near glove overlapping the grip, far forearm partly occluded naturally. Weapon total length about HALF the marine's full height, compact enough not to dominate body. Both parallel barrels and muzzle openings visible and point clear of the character. Solid balanced planted stance, feet separated. Smooth simple illustrated game sprite style, bold consistent navy outlines, broad flat fills, minimal hard-edged overlap shadows only. NO glare, reflections, gradients, tiny seams or greebles. Single centered character with gun, full silhouette with generous margins, square image on flat bright green key background. No scenery, floor, cast shadow, projectiles, muzzle flash, labels, words or watermark. This is a readable two-handed gameplay holding pose study, not an action poster.",
+  "reference_paths": [
+    "/Users/tig/Desktop/tigran/mathonmars/tmp_assets/03_characters/marine/marine_master_v004_source.png",
+    "/Users/tig/Desktop/tigran/mathonmars/tmp_assets/04_weapons/pulse_blaster/pulse_blaster_rail_v002_source.png"
+  ],
+  "notes": "Two-handed held pose; visor clear, rear grip and underside supporting hand. Single flattened concept image, not separated animation layers or runtime integration.",
+  "background": "green key plate; not extracted"
+}

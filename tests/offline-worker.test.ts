@@ -8,6 +8,12 @@ const scope = "https://example.test/game/";
 const template = readFileSync("scripts/service-worker.js", "utf8");
 class StoredCaches {
   stores = new Map<string, Map<string, Response>>();
+  async keys() {
+    return [...this.stores.keys()];
+  }
+  async delete(name: string) {
+    return this.stores.delete(name);
+  }
   async has(name: string) {
     return this.stores.has(name);
   }
@@ -27,11 +33,15 @@ function worker(
   version: string,
   files: Record<string, string>,
   caches = new StoredCaches(),
+  workerScope = scope,
 ) {
   const listeners = new Map<string, (event: any) => void>();
   let network = true;
   let clientVersion: string | undefined;
   let broken = "";
+  let networkRequests = 0;
+  let skippedWaiting = 0;
+  let unregistered = 0;
   const manifest = {
     version,
     files: Object.entries(files).map(([path, body]) => ({
@@ -43,12 +53,20 @@ function worker(
     template.replace("/* BUILD_MANIFEST */ null", JSON.stringify(manifest)),
     {
       self: {
-        registration: { scope },
+        registration: {
+          scope: workerScope,
+          unregister: async () => {
+            unregistered++;
+          },
+        },
+        skipWaiting: async () => {
+          skippedWaiting++;
+        },
         clients: {
           claim: async () => {},
           get: async () =>
             clientVersion
-              ? { url: scope + "?build=" + clientVersion }
+              ? { url: workerScope + "?build=" + clientVersion }
               : undefined,
         },
         addEventListener: (name: string, listener: (event: any) => void) =>
@@ -60,9 +78,10 @@ function worker(
       Response,
       Uint8Array,
       fetch: async (url: string | Request) => {
+        networkRequests++;
         if (!network) throw new Error("Offline");
         const path = (typeof url === "string" ? url : url.url).slice(
-          scope.length,
+          workerScope.length,
         );
         return new Response(path === broken ? "wrong content" : files[path], {
           status: path in files ? 200 : 404,
@@ -72,6 +91,7 @@ function worker(
   );
   return {
     caches,
+    stats: () => ({ networkRequests, skippedWaiting, unregistered }),
     network: (enabled: boolean) => {
       network = enabled;
     },
@@ -81,6 +101,15 @@ function worker(
     async install() {
       let pending: Promise<void>;
       listeners.get("install")!({
+        waitUntil: (p: Promise<void>) => {
+          pending = p;
+        },
+      });
+      await pending!;
+    },
+    async activate() {
+      let pending: Promise<void>;
+      listeners.get("activate")!({
         waitUntil: (p: Promise<void>) => {
           pending = p;
         },
@@ -115,7 +144,7 @@ function worker(
         clientId: clientBuild ? "client" : undefined,
         request: {
           method: "GET",
-          url: scope + path,
+          url: workerScope + path,
           mode: navigate ? "navigate" : "cors",
         },
         respondWith: (p: Promise<Response>) => {
@@ -126,6 +155,21 @@ function worker(
     },
   };
 }
+
+test("localhost workers retire without precaching preview assets", async () => {
+  const preview = worker(
+    "0000000000000001",
+    { "index.html": "preview shell", "audio/task.mp3": "preview speech" },
+    new StoredCaches(),
+    "http://localhost:59927/dist/",
+  );
+  await preview.install();
+  assert.equal(preview.stats().networkRequests, 0);
+  assert.equal(preview.stats().skippedWaiting, 1);
+  assert.equal(await preview.ready(), true);
+  await preview.activate();
+  assert.equal(preview.stats().unregistered, 1);
+});
 
 test("complete packs serve shell and required speech offline, with old builds retained across updates", async () => {
   const oldVersion = "1111111111111111",

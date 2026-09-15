@@ -4,7 +4,7 @@ Updated September 13, 2026 for the personal-use MVP, confirmed countdown/correct
 
 ## Draft ticket coverage
 
-Ticket numbers below refer to the proposed 20-ticket breakdown, not published GitHub issues. Publication and final granularity remain pending owner approval. Each implementation request should complete only its named ticket, including its UI, state, persistence where available, and relevant checks.
+Ticket numbers below are the draft breakdown. Published GitHub issues (ready-for-agent) are #4–#23 on `hyetigran/math_on_mars`; issue numbers are not the draft ticket numbers. Each implementation request should complete only its named ticket, including its UI, state, persistence where available, and relevant checks.
 
 | Draft ticket | Prompt coverage | Deliverable ownership |
 | --- | --- | --- |

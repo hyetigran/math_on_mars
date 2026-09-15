@@ -34,7 +34,7 @@ Earlier scaffold verification: a server-free Chrome smoke check boots the produc
 - White reward magnitude and other explicitly provisional balance values.
 - Device coverage and behavior verified once a runnable build exists.
 
-The pending agent-instruction filename choice belongs to the separate engineering-skills setup, not to game readiness.
+Agent-skills setup is written to `AGENTS.md` and `docs/agents/`. The 20 tickets are GitHub issues #4–#23.
 
 ## Sequential implementation update
 

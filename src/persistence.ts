@@ -1,5 +1,4 @@
 import { ENEMY_BALANCE, OVERMIND_BALANCE } from "../content/balance/enemies";
-import { NARRATION_CLIPS } from "./narration-manifest";
 import {
   AMMO_TYPES,
   GRADES,
@@ -180,8 +179,9 @@ function question(value: unknown): void {
     ensure(clips.length > 0 && clips.length <= 8, "speech sequence length");
     for (const clip of clips) {
       string(clip, "speech clip");
-      ensure(NARRATION_CLIPS.includes(clip), "installed speech clip");
     }
+    // Older saves can contain audio references; current questions are text-only.
+    delete item[key];
   }
 }
 function combat(value: unknown, run: RecordValue): void {

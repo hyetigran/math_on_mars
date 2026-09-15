@@ -1,19 +1,9 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { readFileSync, existsSync } from "node:fs";
 import { RunSession } from "../src/session";
 import { ProfileRepository } from "../src/persistence";
-import { NARRATION_CLIPS } from "../src/narration";
 
-test("K–1 missions use exact deterministic tasks, installed speech and persistent correction history", () => {
-  const authored = JSON.parse(
-    readFileSync("content/narration/k1-en.json", "utf8"),
-  );
-  for (const id of NARRATION_CLIPS) {
-    assert.ok(authored[id]);
-    assert.ok(existsSync(`public/audio/k1/${id}.mp3`));
-    assert.ok(readFileSync(`public/audio/k1/${id}.mp3`).length > 1000);
-  }
+test("K–1 missions use exact deterministic text-only tasks and persistent correction history", () => {
   for (const grade of ["K", "1"] as const) {
     const data = new Map<string, string>();
     const repository = new ProfileRepository({
@@ -64,8 +54,6 @@ test("K–1 missions use exact deterministic tasks, installed speech and persist
       }
     }
     for (const q of questions) {
-      assert.ok(q.speechClips!.every((clip) => NARRATION_CLIPS.includes(clip)));
-      assert.ok(q.hintClips!.every((clip) => NARRATION_CLIPS.includes(clip)));
       session.submit(id, q.id, "999", 30000);
     }
     session.chooseReward(

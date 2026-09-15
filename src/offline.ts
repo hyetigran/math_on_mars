@@ -1,4 +1,5 @@
 import { BUILD_VERSION } from "./build-version";
+import { shouldVerifyOfflinePack } from "./offline-policy";
 
 function timeout<T>(promise: Promise<T>, ms: number): Promise<T> {
   return new Promise((resolve, reject) => {
@@ -19,7 +20,14 @@ function timeout<T>(promise: Promise<T>, ms: number): Promise<T> {
 export async function requireOfflinePack(
   version = BUILD_VERSION,
 ): Promise<void> {
-  if (import.meta.env.DEV) return;
+  if (
+    !shouldVerifyOfflinePack(
+      import.meta.env.DEV,
+      location.hostname,
+      location.search,
+    )
+  )
+    return;
   if (!navigator.serviceWorker || !isSecureContext)
     throw new Error(
       "Offline play needs HTTPS and service-worker support in this browser.",
