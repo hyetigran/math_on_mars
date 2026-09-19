@@ -42,3 +42,5 @@ Mixed loadouts fire one projectile per ammo type, except Multi Shot fires level 
 ## Wave timer reference
 
 Copied from `/Users/tig/Desktop/gauntlet/goblin-gutter/src/data/balance.json` (`wave.timerCapBands`): waves 1–3 = 30s, 4–9 = 45s, 11–19 = 60s. Goblin Gutter bosses at 10/20 are untimed; Math on Mars retains an untimed final boss (wave 10 standard, wave 6 short). Like its `WaveDirector`, cleared waves can finish early; timeout despawns survivors without kill rewards. The timer advances only with combat simulation, including saved elapsed ticks.
+
+Final boss reinforcements are configured in `content/balance/enemies.ts` under `OVERMIND_BALANCE`: 64 regular adds total, 8 alongside the boss on entry, then 4 every 1.5 seconds, with reinforcement spawning capped at 32 living adds (including summoned minis). Adds enter from the arena edges and mix all four regular enemy types. Defeating the boss ends the encounter and clears surviving adds and pending reinforcements.

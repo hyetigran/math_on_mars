@@ -732,7 +732,7 @@ test("mission presets tune Short counts and put Overmind only on the final wave"
       totalWaves,
     });
     boss.advance(100);
-    assert.equal(boss.state.spawnTotal, 1);
+    assert.equal(boss.state.spawnTotal, 65);
     assert.equal(boss.state.enemies[0].kind, "overmind");
     const splitter = new CombatSimulation({
       ...options,
@@ -1035,4 +1035,46 @@ test("spitters fire immediately when cooldown ends without a windup phase", () =
   assert.equal(sim.state.enemyProjectiles!.length, 1);
   assert.ok(sim.state.enemyProjectiles![0].vx < 0);
   assert.equal(sim.state.enemyProjectiles![0].vy, 0);
+});
+
+test("final waves surround one boss with mixed add batches and cap simultaneous reinforcements", () => {
+  for (const totalWaves of [6, 20]) {
+    const sim = new CombatSimulation({
+      ...options,
+      wave: totalWaves,
+      totalWaves,
+    });
+    sim.state.shotCooldownMs = 1e6;
+    sim.state.spawnCooldownMs = 0;
+    sim.advance(STEP);
+    assert.equal(sim.state.enemies.filter((e) => e.boss).length, 1);
+    assert.equal(sim.state.enemies.filter((e) => !e.boss).length, 8);
+    assert.deepEqual(
+      [
+        ...new Set(sim.state.enemies.filter((e) => !e.boss).map((e) => e.kind)),
+      ].sort(),
+      ["charger", "drifter", "spitter", "splitter"],
+    );
+    sim.state.spawnCooldownMs = 0;
+    sim.advance(STEP);
+    assert.equal(sim.state.enemies.filter((e) => !e.boss).length, 12);
+    for (let i = 0; i < 10; i++) {
+      sim.state.spawnCooldownMs = 0;
+      sim.advance(STEP);
+    }
+    assert.equal(sim.state.enemies.filter((e) => !e.boss).length, 32);
+    const deadAdd = sim.state.enemies.find((e) => e.kind === "drifter")!;
+    deadAdd.hp = 0;
+    sim.advance(STEP);
+    sim.state.spawnCooldownMs = 0;
+    sim.advance(STEP);
+    assert.equal(sim.state.enemies.filter((e) => !e.boss).length, 32);
+    assert.equal(sim.state.enemies.filter((e) => e.boss).length, 1);
+    assert.ok(sim.state.spawned < sim.state.spawnTotal);
+    sim.state.enemies.find((e) => e.boss)!.hp = 0;
+    sim.advance(STEP);
+    assert.equal(sim.outcome, "victory");
+    assert.equal(sim.state.enemies.length, 0);
+    assert.equal(sim.state.enemyProjectiles!.length, 0);
+  }
 });

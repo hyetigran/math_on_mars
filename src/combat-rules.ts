@@ -184,7 +184,7 @@ export class CombatSimulation {
             spawned: 0,
             spawnTotal:
               options.wave === options.totalWaves
-                ? 1
+                ? 1 + OVERMIND_BALANCE.addsTotal
                 : Math.min(
                     mission.baseEnemies + options.wave * mission.enemiesPerWave,
                     mission.maximumEnemies,
@@ -262,7 +262,8 @@ export class CombatSimulation {
   }
 
   private spawnEnemy(): void {
-    const boss = this.options.wave === this.options.totalWaves;
+    const boss =
+      this.options.wave === this.options.totalWaves && this.state.spawned === 0;
     const { x, y } = this.enemySpawnPoint();
     const hp = boss ? 620 : 42 + this.options.wave * 10;
     const schedule =
@@ -496,8 +497,25 @@ export class CombatSimulation {
     state.simulationTick = (state.simulationTick ?? 0) + 1;
     state.spawnCooldownMs = Math.max(0, state.spawnCooldownMs - STEP_MS);
     if (state.spawned < state.spawnTotal && state.spawnCooldownMs === 0) {
-      this.spawnEnemy();
-      state.spawnCooldownMs = this.spawnDelay();
+      if (this.options.wave === this.options.totalWaves) {
+        const opening = state.spawned === 0;
+        if (opening) this.spawnEnemy();
+        const aliveAdds = state.enemies.filter(
+          (e) => !e.boss && e.hp > 0,
+        ).length;
+        const count = Math.min(
+          opening
+            ? OVERMIND_BALANCE.addsOnEntry
+            : OVERMIND_BALANCE.addsPerBatch,
+          Math.max(0, OVERMIND_BALANCE.addsAliveLimit - aliveAdds),
+          state.spawnTotal - state.spawned,
+        );
+        for (let i = 0; i < count; i++) this.spawnEnemy();
+        state.spawnCooldownMs = OVERMIND_BALANCE.addsIntervalMs;
+      } else {
+        this.spawnEnemy();
+        state.spawnCooldownMs = this.spawnDelay();
+      }
     }
     const norm = Math.max(1, Math.hypot(movement.x, movement.y));
     if (this.options.boundaries) {
@@ -662,6 +680,7 @@ export class CombatSimulation {
       state.enemyProjectiles = [];
       this.outcome = "defeat";
     } else if (
+      bossDefeated ||
       (state.spawned >= state.spawnTotal && state.enemies.length === 0) ||
       this.remainingWaveMs() === 0
     ) {

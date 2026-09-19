@@ -34,6 +34,11 @@ export const SPLITTER_BALANCE = {
 };
 
 export const OVERMIND_BALANCE = {
+  addsTotal: 64,
+  addsOnEntry: 8,
+  addsPerBatch: 4,
+  addsIntervalMs: 1500,
+  addsAliveLimit: 32,
   spawnX: BATTLE_CENTER.x,
   spawnY: BATTLE_CENTER.y - 50,
   marineSpawnY: BATTLE_CENTER.y + 180,
