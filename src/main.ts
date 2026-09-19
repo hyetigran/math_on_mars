@@ -10,7 +10,7 @@ import {
 import { openBoundaryEditor } from "./camp-boundary-editor";
 import { BaseCampController, loadCampAssets, splashUrl } from "./base-camp";
 import { BUILD_VERSION } from "./build-version";
-import { requireOfflinePack } from "./offline";
+import { prepareOfflinePack } from "./offline";
 import { cleanGameLocation } from "./offline-policy";
 import { ProfileLease } from "./profile-lease";
 import {
@@ -223,7 +223,6 @@ async function openProfile(id: string): Promise<void> {
         "This profile is in use in another tab. Exit the mission there, then try again.";
       return;
     }
-    await requireOfflinePack();
     if (generation !== screenGeneration) {
       profileLease.release();
       return;
@@ -271,9 +270,13 @@ function renderBaseCamp(): void {
   if (profile) campGrade = profile.grade;
   app.innerHTML = `<section class="camp-screen" aria-label="Base camp">
     <div id="camp-world" class="camp-world"></div>
-    <header class="camp-hud">
+    ${
+      import.meta.env.DEV
+        ? `<header class="camp-hud">
       <button class="camp-edit-boundaries" id="edit-boundaries" aria-label="Edit map boundaries"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5 19 7 17 19 4 17Z" fill="none" stroke="currentColor" stroke-width="1.5"/><g fill="currentColor"><circle cx="5" cy="5" r="2"/><circle cx="19" cy="7" r="2"/><circle cx="17" cy="19" r="2"/><circle cx="4" cy="17" r="2"/></g></svg></button>
-    </header>
+    </header>`
+        : ""
+    }
     <p id="profile-status" class="sr-only" role="status"></p>
     <div class="camp-joystick" id="camp-joystick" aria-label="Drag to move"><span id="camp-stick"></span></div>
   </section>`;
@@ -281,7 +284,7 @@ function renderBaseCamp(): void {
   camp = new BaseCampController(host, () => {
     void enterCampPortal();
   });
-  document.querySelector("#edit-boundaries")!.addEventListener("click", () => {
+  document.querySelector("#edit-boundaries")?.addEventListener("click", () => {
     camp?.setPaused(true);
     const picker = document.createElement("dialog");
     picker.className = "track-dialog";
@@ -1180,10 +1183,9 @@ function endRun(victory: boolean, state?: CombatSnapshot): void {
           button.disabled = true;
           const status = document.createElement("p");
           status.setAttribute("role", "status");
-          status.textContent = "Checking installed mission content…";
+          status.textContent = "Starting mission…";
           button.parentElement!.append(status);
           try {
-            await requireOfflinePack();
             if (generation !== screenGeneration) return;
             await perform(
               () => session.start(profile.id, run.grade),
@@ -1311,7 +1313,7 @@ function showPause(title: string): void {
       const overlay = document.createElement("div");
       overlay.className = "pause-overlay mission-pause";
       overlay.id = "pause-overlay";
-      overlay.innerHTML = `<div class="pause-dialog" role="dialog" aria-modal="true" aria-labelledby="pause-title"><h2 id="pause-title">Paused</h2>${title.includes("failed") ? `<p>${escapeHtml(title)}</p>` : ""}<button id="resume-button" class="button primary">Resume</button>${activeRun().phase === "combat" ? '<button id="edit-arena-bounds" class="button secondary">Edit arena bounds</button>' : ""}<button id="pause-exit" class="text-button">Exit mission</button><p class="pause-exit-note">Exiting loses this mission’s progress.</p></div>`;
+      overlay.innerHTML = `<div class="pause-dialog" role="dialog" aria-modal="true" aria-labelledby="pause-title"><h2 id="pause-title">Paused</h2>${title.includes("failed") ? `<p>${escapeHtml(title)}</p>` : ""}<button id="resume-button" class="button primary">Resume</button>${import.meta.env.DEV && activeRun().phase === "combat" ? '<button id="edit-arena-bounds" class="button secondary">Edit arena bounds</button>' : ""}<button id="pause-exit" class="text-button">Exit mission</button><p class="pause-exit-note">Exiting loses this mission’s progress.</p></div>`;
       document.body.append(overlay);
       decorateControls(overlay);
       overlay.querySelector<HTMLButtonElement>("#resume-button")!.focus();
@@ -1472,6 +1474,7 @@ window.addEventListener("orientationchange", () => {
 });
 
 async function boot(): Promise<void> {
+  prepareOfflinePack();
   history.replaceState(history.state, "", cleanGameLocation(location.href));
   app.innerHTML = `<section class="loading-screen" aria-label="Loading Math on Mars"><img class="splash-backdrop" src="${splashUrl}" alt="" aria-hidden="true"><img src="${splashUrl}" alt="Math on Mars"><div class="loading-progress"><p id="loading-status" role="status">Loading base camp…</p><progress id="camp-progress" max="1" value="0" aria-label="Loading base camp"></progress></div></section>`;
   try {

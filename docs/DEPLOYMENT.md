@@ -8,8 +8,10 @@ https://hyetigran.github.io/math_on_mars/
 
 Local uncommitted changes and temporary asset folders are not deployed. Vite uses relative asset URLs so the game and service worker work under the repository subdirectory. HTTPS is required for offline play. Keep `sw.js` and `offline-manifest.json` beside `index.html` when using another static host.
 
-Open the game online for its first installation. Cadet profiles and practice history are stored in the current browser and origin, so localhost profiles do not automatically transfer to the published site.
+Offline installation runs in the background and never blocks arena entry. Open the game online for its first installation. Cadet profiles and practice history are stored in the current browser and origin, so localhost profiles do not automatically transfer to the published site.
 
 To restore a previous release, revert the relevant commits on `main` and let the workflow publish the result.
 
 GitHub reference: https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages
+
+Boundary-editing controls are available only in development builds. Production entry regression: serve a production build with Vite preview, then run `GAME_URL=http://localhost:4173/?verifyOffline=1 node tests/arena-entry.browser.mjs` (set `CHROME_PATH` if Chrome is elsewhere). The check simulates stalled and failed offline installation and verifies arena entry, pause/resume, and absence of production editing controls.

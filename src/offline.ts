@@ -67,3 +67,11 @@ export async function requireOfflinePack(
     );
   }
 }
+
+/** Offline availability is prepared in the background, never a gate for online play. */
+export function prepareOfflinePack(): void {
+  void requireOfflinePack().catch(() => {
+    // A slow connection or unavailable cache must not pause a playable mission.
+    // A later launch can retry installation; incomplete packs remain unverified.
+  });
+}
