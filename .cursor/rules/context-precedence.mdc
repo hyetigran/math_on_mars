@@ -1,0 +1,12 @@
+---
+description: Implemented game rules come from CONTEXT.md
+globs: src/**/*.{ts,css}, docs/**/*.md
+---
+
+When naming game concepts or deciding current behavior, use `CONTEXT.md` first.
+
+It supersedes older `GAME_PLAN.md` / `ARCHITECTURE.md` lines about: no hub, mission Save & Exit, correction-after-reward, Grade 6, supply caches, and installed spoken-help packs.
+
+The shipped loop is camp portal → combat → five answers → correction (if needed) → reward → loot → shop. Leaving camp drops the mission; profiles and history persist.
+
+Keep balance numbers in `content/balance/` labeled as prototype tuning unless the owner chose a specific value.
