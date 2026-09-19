@@ -1,28 +1,66 @@
 # Math on Mars
 
-A personal-use math game where a marine fights slime waves and answers math questions between waves to earn upgrades.
+A personal-use math game where a marine fights slime waves and answers Kindergarten–Grade 5 math questions between waves to earn upgrades. Grade 6 is retired: older profiles default to Grade 5 and any Grade 6 active mission is discarded; historical Grade 6 practice records remain intact.
 
 ## Language
 
 **Between-wave quiz**:
-Five required math questions answered between combat waves, regardless of grade, sharing one 30-second countdown. Accuracy and speed determine the reward's power level; questions cannot be skipped, including after the countdown reaches zero.
+Five required math questions answered between combat waves, regardless of grade, sharing one 30-second countdown. Accuracy and speed determine the reward's power level; questions cannot be skipped in normal play, including after the countdown reaches zero. A clearly labeled QA · Skip quiz button bypasses quiz/review for testing and goes to reward selection without adding invented answers to practice history. It preserves an already-earned reward quality, or supplies a purple test reward when skipped before scoring finishes.
 _Avoid_: Reactor charge calculation, per-question reward timer
+
+Questions are generated from grade-specific templates using the unique mission ID, grade, and wave as the seed. Each quiz retains its five-question skill mix but shuffles presentation order. New missions receive new number combinations and ordering; replaying or restoring the same mission preserves its quiz. Individual questions can still recur by chance; there is no history-based repeat filter.
 
 **Reward power level**:
 The white, green, blue, or purple quality earned from the between-wave quiz's completion time and first-attempt accuracy. Wrong initial answers lower the time-based quality, with white as the floor.
 _Avoid_: Charge
 
 **Correction round**:
-The untimed retry of incorrectly answered quiz questions after the learner chooses a reward. Corrections must be answered correctly before the next combat wave starts and do not change the selected reward.
+The untimed retry of incorrectly answered quiz questions within the quiz stage, before reward selection. Corrections must be answered correctly and do not change the reward power level earned on first attempts.
 _Avoid_: Immediate scored retry
 
 **Ammo type**:
-A reusable firing effect applied to the weapon's continuous supply of projectiles. Equipped ammo effects combine on each shot.
+A reusable firing effect applied to the weapon's continuous supply of projectiles. Each equipped ammo type fires its own projectiles in each volley. Only Piercing projectiles pass through enemies; other projectiles stop on impact. Electric Chain can jump on impact. Total direct damage per volley is shared across types.
 _Avoid_: Consumable bullet supply
 
 **Legendary Omni Ammo**:
-An ammo type formed from the five distinct purple ammo types, combining all five effects while occupying one active ammo slot.
+An ammo type formed from the five distinct purple ammo types, firing all five ammo types while occupying one active ammo slot.
 
 ## Presentation
 
-The owner removed all game audio and spoken-help controls. Questions and equipment guidance use text and visuals, without audio readiness gates or installed speech packs. Older audio requirements in planning documents are superseded.
+Typography uses locally bundled Oxanium for headings, buttons, and HUD labels, with Atkinson Hyperlegible Next for body copy and math. The archived Space Mission sheets are visual references, not font files; Oxanium approximates their geometric display style. Font files and licenses live in `src/assets/fonts/` and are included in the offline pack. Counters use tabular digits. The base camp has no headings or labels; its portal uses an E interaction bubble and the boundary-editor control uses an accessible icon.
+
+Startup shows the splash artwork while camp assets load, then opens a walkable base camp using the v3 environment. The camera fills the viewport at a closer zoom and follows the marine within the artwork bounds. The camp uses the illustrated unarmed, eight-direction marine sprites; the original 3D bake is retained as source material but is no longer the displayed character. Walking advances with ground travel and stops on a planted-foot pose. Approaching the north portal reveals an E interaction bubble; E or tapping the bubble opens track selection and starts a fresh arena mission for the selected cadet. Every portal entry creates a new instance at wave one, including when an older saved mission exists. Exiting to camp or closing/reloading the game loses mission progress; there is no Save & Exit or mission resume. Pausing within the current game still preserves its state. Cadet settings and practice history persist. This supersedes save/resume requirements in older planning documents. The camp has no track dropdown or Crew page. This supersedes older planning documents that exclude a hub from launch scope.
+
+Battle audio is enabled using the supplied music and sound effects: battle/boss loops, Mars wind, weapons, enemy attacks, damage, healing, pickups, and wave/mission results. Pausing stops combat audio and resumes the loops from their paused position; leaving the arena stops its loops and effects while the result cue can finish. Questions and equipment guidance remain text and visual, without spoken-help controls, audio readiness gates, or installed speech packs. This supersedes the earlier removal of all game audio.
+
+The between-wave flow is Quiz → Select reward → Loot drops → Shop & inventory. All revealed loot is accepted or sold on its own screen, individually or all at once. The shop opens automatically as soon as the last loot decision is settled. Waves without loot go straight to the shop. Shop offers appear above inventory, with marine stats alongside; the loot decision panel is centered. Inventory displays six slots per page, with equipped ammo first and reserve stacks with explicit quantities. Empty slots fill the grid when fewer than six stacks remain; paging keeps extra owned items accessible without extending the grid. Installed upgrades are not displayed in inventory or included in its item counts; their effects appear in the marine stats panel. Total owned ammo and med-gel and section counts are visible; equipped ammo is excluded from reserve counts. Cards use larger item artwork and four rarity border colors, without visible level badges. The stats card includes a marine portrait; on narrow screens its values open from a Marine stats button. Shop and inventory fit the standard desktop and phone viewports, with scrolling retained as a fallback for smaller windows or enlarged text. Start wave remains visible. Between-wave screens have no Exit mission button; mission exit remains in the pause menu. Merge all combines every matching pair in one click, including newly created pairs, up to purple. Dragging ammo onto matching ammo combines that pair; a reserve stack containing duplicates can be dragged onto itself. Equipped ingredients preserve the resulting ammo in the loadout. Forging opens a dialog.
+
+Pause darkens the battleground and applies a subtle 5px blur. Between-wave quiz, rewards, corrections, loot, and shop panels appear over a frozen image of the just-completed arena; combat is stopped underneath.
+
+Combat salvage drops use compact 16-unit icons and a display-density-aware canvas for crisp rendering. Item drops appear as sealed chests, concealing type and rarity. Collected chests remain separate from equipment until explicitly accepted on Loot drops, after the quiz and reward selection. Their fixed contents are revealed together, with no chest-opening sequence. Uncollected drops are swept up at wave clear. Pending loot must be accepted or sold before the next wave; the final wave proceeds directly to the victory summary.
+
+The camp includes an Edit boundaries tool. It shows the full artwork with a polygon for walkable ground and polygons for blocked scenery. Users can draw shapes, drag or add corners, undo edits, and save to test them immediately. Custom boundaries persist in local browser storage and can be exported/imported as versioned JSON. Invalid polygons and layouts that block the spawn or portal are rejected; absent or corrupt overrides use the built-in collision boundaries.
+
+The built-in camp collision layout uses the owner-edited export in `src/camp-boundary-layout.ts` (outer boundary and five blocked polygons). Restore defaults returns to this authored layout. Browser-local edits continue to override it.
+
+All finalized assets are organized by family under `src/assets/`, including approved masters, current marine source models, sprite sheets and optimized runtime files. Earlier models, experiments and reference screenshots are archived outside the repository in `../tmp_assets` (the parent `tigran` directory). Asset preparation and the playable build use only in-repository assets; see `src/assets/README.md` and `docs/ASSET_RELOCATION.json`.
+
+Battle Zone uses the approved arena background and animated enemy run/attack sheets. Its marine uses the eight-direction dual-pistol idle, run, attack, and run-attack sheets recovered from the sibling archive into `src/assets/characters/marine/armed/`; camp retains its unarmed marine. While running, the marine faces his direction of travel; run-attack is used only when that direction matches his aim, otherwise the run animation continues while auto-fire aims independently. Stationary attack facing follows the target. `scripts/prepare-armed-marine.mjs` and `scripts/prepare-battle-assets.mjs` reproduce the optimized sheets, arena WebP, and MP3 audio from in-repository masters.
+
+Battle Zone matches Goblin Gutter’s world proportions: a 2,560 × 1,440 arena with a 2,371 × 1,271 inset play area and a 1,280 × 720 reference viewport. The canvas fills the entire available screen at every aspect ratio; its backing resolution uses device density up to 2× with a 3.7-million-pixel budget to avoid excessive Canvas rendering cost on large Retina displays; the camera adjusts its visible area without stretching the art or adding side bars. The camera smoothly follows the marine and stays inside the artwork. Regular enemies enter at the arena edges at least 360 units from the marine; the boss encounter starts near the center. Movement, charges, summons, and projectile cleanup all use shared world bounds from `src/battle-world.ts`. The arena uses its full 3,840 × 2,160 source resolution for the scrolling view.
+
+The quiz power rail uses four illustrated energy-core badges in white, green, blue, and purple, with distinct silhouettes and accessible labels. Item cards retain numerical level badges.
+
+Pause → Edit arena bounds opens the arena artwork for tracing a walkable polygon and blocked scenery. Drag corners, add/remove points, undo, import/export JSON, and Save & test in arena. Custom arena geometry is stored separately from camp geometry in this browser. Saving applies to marine movement and enemy movement/spawn placement; positions outside newly drawn ground are moved to valid ground without resetting mission progress. The central spawn must remain walkable. Defaults remain active until a custom layout is saved.
+
+Supply bonuses are removed. There are no milestone ammo bundles or bonus armor choices. Progression uses quiz rewards, actual enemy loot, and shop purchases; legacy pending supply bonuses are discarded without granting items or salvage.
+
+Weapon tuning lives in `content/balance/combat.ts`, with the settings guide in `docs/BALANCE.md`. Shots have a 320-unit targeting/travel cap and direct/chain hits stay inside the camera’s visible firing area. Projectile speed upgrades do not extend range. Standard and Piercing shots are laser streaks, Multi Shot uses green darts, Electric Chain uses violet zigzags, Frost uses icy shards, and Fiery uses flame bolts; mixed loadouts fire separate projectiles with their respective visual effects.
+
+Normal waves use Goblin Gutter's timer caps: waves 1–3 are 30 seconds, 4–9 are 45 seconds, and 11–19 are 60 seconds. Clearing enemies can finish a wave early; the final boss is untimed (including the Short mission's wave 6). At expiry, surviving enemies disappear without drops and existing ground loot is swept up. The countdown uses saved simulation ticks, so pausing stops it and restoring preserves it. Source: the local Goblin Gutter `src/data/balance.json` and `src/objects/WaveDirector.js`.
+
+Luck is an upgrade stat capped at +100%, available through Lucky Salvage modules and shown in Marine stats. Base chest chance is 8% per defeated enemy, multiplied by 1 + Luck (up to 16%). Every defeated enemy retains its base salvage and rolls a Luck × 50% chance for one additional salvage. Newly generated ammo and module shop offers roll a Luck × 50% chance to increase one rarity tier, capped at purple, with the corresponding price. Existing offers retain their rolled rarity. Luck does not change quiz rewards. Tuning lives in `content/balance/luck.ts`.
+
+The camp boundary icon opens a map chooser for Base camp or Battleground. Both editors are accessible without starting a mission; arena edits from camp apply when the next battle starts. The in-battle pause editor remains available for immediate testing.
+
+The battleground is a regular rectangular fenced Mars yard, replacing the asymmetric crater. Chain-link mesh and yellow radiation signs enclose a flat rust-red floor, following Goblin Gutter’s zone composition. Runtime art is `src/assets/environment/arena/runtime/mars-arena-fence.webp`, regenerated from the v001 fence master. World size stays 2560×1440; playable bounds align to the inside of the fence (91,115)–(2462,1300). Fence boundary edits use `math-on-mars-battle-fence-boundaries-v1`; old crater overrides remain stored but no longer apply.

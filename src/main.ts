@@ -1,7 +1,17 @@
+import { bindAmmoDragging } from "./ammo-drag";
+import { arenaBackgroundUrl } from "./assets/battleAssets";
+import { BATTLE_WORLD, BATTLE_CENTER } from "./battle-world";
+import {
+  BATTLE_BOUNDARIES_KEY,
+  defaultBattleBoundaries,
+  loadBattleBoundaries,
+  validateBattleBoundaries,
+} from "./battle-boundaries";
+import { openBoundaryEditor } from "./camp-boundary-editor";
+import { BaseCampController, loadCampAssets, splashUrl } from "./base-camp";
 import { BUILD_VERSION } from "./build-version";
 import { requireOfflinePack, releaseLocation } from "./offline";
 import { ProfileLease } from "./profile-lease";
-import { exportProfile, readProfileTransfer } from "./profile-transfer";
 import {
   usesFractionInput,
   fractionFields,
@@ -9,7 +19,6 @@ import {
 } from "./fraction-input";
 import {
   previewForge,
-  retainedForgeLoadout,
   omniEquipped,
   omniRateBonus,
   capacityRateBonus,
@@ -19,6 +28,23 @@ import { rerollPrice } from "./shop";
 import { CheckpointQueue } from "./checkpoint-queue";
 import { modifiers, moduleTotal } from "./modules";
 import "./style.css";
+import "./camp.css";
+import "./assets/ui/states.css";
+import "./game-art.css";
+import "./reward.css";
+import "./shop.css";
+import "./battle-overlay.css";
+import "./manage-items.css";
+import "./typography.css";
+import "./cursors.css";
+
+import {
+  itemArt,
+  offerArt,
+  ammoArtKey,
+  moduleArtKey,
+  decorateControls,
+} from "./game-art";
 import { CombatController, type CombatSnapshot } from "./combat";
 import { parseNumericAnswer } from "./questions";
 import {
@@ -58,6 +84,9 @@ let quizDraft = "";
 let quizElapsedAtStart = 0;
 let activeProfileId: string | null = null;
 let combat: CombatController | null = null;
+let camp: BaseCampController | null = null;
+let campProfileId: string | null = null;
+let campGrade: Grade = "3";
 let timerId: number | null = null;
 let quizStartedAt = 0;
 let paused = false;
@@ -90,13 +119,36 @@ function announce(message: string): void {
   });
 }
 
-function cleanup(): void {
+function cleanup(keepBattle = false): void {
+  // Retain the last rendered battlefield before disposing of its simulation.
+  if (
+    combat &&
+    activeProfileId &&
+    activeProfile().activeRun &&
+    (keepBattle || activeRun().phase !== "combat")
+  ) {
+    const source = document.querySelector<HTMLCanvasElement>(
+      "#combat-canvas canvas",
+    );
+    if (source) {
+      document.querySelector("#battle-backdrop")?.remove();
+      const backdrop = document.createElement("canvas");
+      backdrop.id = "battle-backdrop";
+      backdrop.setAttribute("aria-hidden", "true");
+      backdrop.width = source.width;
+      backdrop.height = source.height;
+      backdrop.getContext("2d")!.drawImage(source, 0, 0);
+      app.before(backdrop);
+    }
+  }
   screenGeneration++;
 
   resetTouch?.();
   resetTouch = null;
   if (timerId !== null) window.clearInterval(timerId);
   timerId = null;
+  camp?.destroy();
+  camp = null;
   combat?.destroy();
   combat = null;
   if (quizKeyHandler) window.removeEventListener("keydown", quizKeyHandler);
@@ -106,143 +158,58 @@ function cleanup(): void {
   app.inert = false;
 }
 
-function qualityPips(quality: Quality): string {
-  const count = QUALITY_ORDER.indexOf(quality) + 1;
-  return `<span class="pips" aria-label="${count} of 4 power pips">${Array.from({ length: 4 }, (_, i) => `<i class="${i < count ? "filled" : ""}"></i>`).join("")}</span>`;
+const powerEmblems = import.meta.glob("./assets/ui/power/*.svg", {
+  query: "?url",
+  import: "default",
+  eager: true,
+}) as Record<string, string>;
+function qualityLevel(quality: Quality): string {
+  return `<img class="power-emblem" src="${powerEmblems[`./assets/ui/power/${quality}.svg`]}" alt="${QUALITY_LABEL[quality]} reward power">`;
 }
 
 function shell(content: string, screenClass = ""): string {
-  return `<div class="app-shell ${screenClass}">
-    <header class="topbar">
+  const betweenWaves =
+    activeProfileId &&
+    activeProfile().activeRun &&
+    (activeRun().phase !== "combat" || screenClass.includes("loot-shell"));
+  return `<div class="app-shell ${screenClass}${betweenWaves ? " battle-overlay" : ""}">
+    ${
+      betweenWaves
+        ? ""
+        : `<header class="topbar">
       <a class="brand" href="#" id="home-link" aria-label="Math on Mars home">
         <span class="planet-mark" aria-hidden="true"><i></i></span>
         <span><b>MATH</b><em>ON MARS</em></span>
       </a>
       <span class="build-tag">HOME MISSION // 01</span>
-    </header>
+    </header>`
+    }
     ${content}
   </div>`;
 }
 
 function bindHome(): void {
+  document.querySelector("#qa-skip-quiz")?.addEventListener("click", () => {
+    if (!paused)
+      void perform(() => session.skipQuizForQA(activeProfileId!), resumeRun);
+  });
+  decorateControls();
   document.querySelector("#home-link")?.addEventListener("click", (event) => {
     event.preventDefault();
     if (activeProfileId && activeProfile().activeRun) {
-      saveAndExit();
+      exitMission();
       return;
     }
-    renderProfiles();
+    renderBaseCamp();
   });
-}
-
-function renderProfiles(): void {
-  profileLease.release();
-  cleanup();
-  activeProfileId = null;
-  const cards = session.profiles
-    .map((profile) => {
-      const accuracy = profile.history.length
-        ? Math.round(
-            (profile.history.filter((h) => h.correctInitially).length /
-              profile.history.length) *
-              100,
-          )
-        : 0;
-      return `<article class="profile-card">
-      <div class="avatar" aria-hidden="true"><span></span></div>
-      <div class="profile-copy"><p class="eyebrow">CADET PROFILE</p><h2>${escapeHtml(profile.name)}</h2>
-        <p>Grade ${profile.grade} · ${profile.history.length} answers · ${accuracy}% first try</p></div>
-      <button class="button primary" data-open-profile="${escapeHtml(profile.id)}">${profile.activeRun ? `Resume wave ${profile.activeRun.wave}` : "Choose mission"}</button>
-    <button class="text-button" data-export-profile="${escapeHtml(profile.id)}">Export profile</button></article>`;
-    })
-    .join("");
-  app.innerHTML = shell(
-    `<section class="landing" id="content">
-    <div class="landing-copy"><p class="eyebrow warm">MARS OUTPOST // LEARNING DEFENSE</p>
-      <h1>Numbers power<br><span>the mission.</span></h1>
-      <p class="lede">Dodge alien slimes, recharge with five math questions, and build one unstoppable Pulse Blaster.</p>
-      <div class="feature-row"><span>5 questions</span><span>30 seconds</span><span>K–6 missions</span></div>
-    </div>
-    <div class="hero-art" aria-label="A space marine faces a green slime on Mars">
-      <div class="mars-moon"></div><div class="antenna"></div><div class="marine-figure"><i class="gun"></i><i class="helmet"></i><i class="visor"></i><i class="body"></i><i class="boots"></i></div>
-      <div class="slime-figure"><i></i><b></b></div><div class="terrain-lines"></div>
-    </div>
-  </section>
-  <section class="profile-section" aria-labelledby="profiles-title">
-    <div class="section-heading"><div><p class="eyebrow">LOCAL CREW</p><h2 id="profiles-title">Choose your cadet</h2></div><span>Your progress stays on this device.</span></div>
-    <div class="profile-list">${cards || `<div class="empty-card"><p>No cadet profiles yet.</p></div>`}</div>
-    <form id="new-profile" class="new-profile"><label for="cadet-name">New cadet name</label><div><input id="cadet-name" name="name" maxlength="18" autocomplete="nickname" placeholder="Cadet name"><button class="button secondary" type="submit">Create profile</button></div><p class="field-error" id="name-error"></p></form>
-  </section>`,
-    "home-screen",
-  );
-  bindHome();
-  const importControl = document.createElement("div");
-  importControl.innerHTML =
-    '<label class="button secondary">Import profile <input id="import-profile-file" type="file" accept="application/json,.json"></label><p id="profile-status" role="alert"></p>';
-  document.querySelector(".profile-section")!.append(importControl);
-  document
-    .querySelector<HTMLInputElement>("#import-profile-file")!
-    .addEventListener("change", async (event) => {
-      const file = (event.target as HTMLInputElement).files?.[0];
-      if (!file) return;
-      const generation = screenGeneration;
-      try {
-        if (file.size > 10 * 1024 * 1024)
-          throw new Error(
-            "This file is too large. Choose a single profile export under 10 MB.",
-          );
-        const incoming = readProfileTransfer(await file.text());
-        if (generation !== screenGeneration) return;
-        renderImportPreview(incoming);
-      } catch (error) {
-        if (generation === screenGeneration)
-          document.querySelector("#profile-status")!.textContent =
-            error instanceof Error
-              ? error.message
-              : "Could not read this profile.";
-      }
-    });
-  document
-    .querySelectorAll<HTMLButtonElement>("[data-export-profile]")
-    .forEach((button) =>
-      button.addEventListener("click", () =>
-        downloadProfiles(
-          exportProfile(session.profile(button.dataset.exportProfile!)),
-        ),
-      ),
-    );
-  document
-    .querySelectorAll<HTMLElement>("[data-open-profile]")
-    .forEach((button) =>
-      button.addEventListener("click", () => {
-        void openProfile(button.dataset.openProfile!);
-      }),
-    );
-  document
-    .querySelector<HTMLFormElement>("#new-profile")!
-    .addEventListener("submit", (event) => {
-      event.preventDefault();
-      const input = document.querySelector<HTMLInputElement>("#cadet-name")!;
-      const name = input.value.trim();
-      if (!name) {
-        document.querySelector("#name-error")!.textContent =
-          "Enter a cadet name to continue.";
-        input.focus();
-        return;
-      }
-      perform(
-        () => session.createProfile(name),
-        (id) => {
-          void openProfile(id);
-        },
-      );
-    });
 }
 
 let openingProfile = false;
 async function openProfile(id: string): Promise<void> {
   if (openingProfile) return;
   openingProfile = true;
+  camp?.setPaused(true);
+  app.inert = true;
   const generation = screenGeneration;
   try {
     const acquired = await profileLease.acquire(id);
@@ -252,144 +219,185 @@ async function openProfile(id: string): Promise<void> {
     }
     if (!acquired) {
       document.querySelector("#profile-status")!.textContent =
-        "This profile is in use in another tab. Save and exit there, then try again.";
+        "This profile is in use in another tab. Exit the mission there, then try again.";
       return;
     }
-    const profile = session.profile(id);
-    if (profile.activeRun) {
-      document.querySelector("#profile-status")!.textContent =
-        "Checking installed mission content…";
-      await requireOfflinePack(
-        profile.activeRun.releaseVersion ?? BUILD_VERSION,
-      );
-      if (generation !== screenGeneration) {
-        profileLease.release();
-        return;
-      }
-      if (
-        profile.activeRun.releaseVersion &&
-        profile.activeRun.releaseVersion !== BUILD_VERSION
-      ) {
-        profileLease.release();
-        location.assign(releaseLocation(profile.activeRun.releaseVersion));
-        return;
-      }
+    await requireOfflinePack();
+    if (generation !== screenGeneration) {
+      profileLease.release();
+      return;
     }
     activeProfileId = id;
-    if (profile.activeRun && !profile.activeRun.releaseVersion) {
-      await perform(() => session.pinLegacyRelease(id), resumeRun);
-    } else profile.activeRun ? resumeRun() : renderSetup();
+    await perform(() => session.start(id, campGrade), renderCombat);
   } catch (error) {
     profileLease.release();
     if (generation === screenGeneration)
       document.querySelector("#profile-status")!.textContent =
         error instanceof Error ? error.message : "Could not open this profile.";
   } finally {
+    if (generation === screenGeneration) app.inert = saving || paused;
+    if (camp && !saving && !paused) {
+      activeProfileId = null;
+      camp.setPaused(false);
+    }
     openingProfile = false;
   }
 }
 
-function renderImportPreview(
-  incoming: ReturnType<typeof readProfileTransfer>,
-): void {
-  cleanup();
-  const existing = session.profiles.find(
-    (profile) => profile.id === incoming.profile.id,
-  );
-  app.innerHTML = shell(
-    `<section class="terminal"><h1>Import ${escapeHtml(incoming.profile.name)}?</h1><p>${incoming.profile.history.length} saved answers · ${incoming.profile.victories} victories</p><p>${incoming.historyOnly ? "This file's mission cannot resume. Only its validated profile and learning history will be imported." : incoming.profile.activeRun ? `Includes a mission saved at wave ${incoming.profile.activeRun.wave}.` : "No active mission."}</p>${existing ? `<p>This replaces ${escapeHtml(existing.name)}, including its current mission and learning history. Export that profile first if you want to retain it.</p><button id="export-existing" class="text-button">Export existing profile</button>` : ""}<p id="import-lock-status" role="alert"></p><button id="accept-import" class="button primary">${existing ? "Replace existing profile" : "Import profile"}</button><button id="cancel-import" class="button secondary">${existing ? "Keep existing profile" : "Cancel"}</button></section>`,
-  );
-  document
-    .querySelector("#export-existing")
-    ?.addEventListener("click", () =>
-      downloadProfiles(exportProfile(existing!)),
-    );
-  document
-    .querySelector("#cancel-import")!
-    .addEventListener("click", renderProfiles);
-  document
-    .querySelector("#accept-import")!
-    .addEventListener("click", async () => {
-      const generation = screenGeneration;
-      const button =
-        document.querySelector<HTMLButtonElement>("#accept-import")!;
-      if (button.disabled) return;
-      button.disabled = true;
-      try {
-        const acquired = await profileLease.acquire(incoming.profile.id);
-        if (generation !== screenGeneration) {
-          if (acquired) profileLease.release();
-          return;
-        }
-        if (!acquired) {
-          document.querySelector("#import-lock-status")!.textContent =
-            "This profile is in use in another tab. Save and exit there before importing.";
-          return;
-        }
-        await perform(
-          () =>
-            session.importProfile(
-              incoming.profile,
-              existing ? "replace" : "add",
-            ),
-          renderProfiles,
-        );
-      } catch (error) {
-        if (generation === screenGeneration)
-          document.querySelector("#import-lock-status")!.textContent =
-            String(error);
-      } finally {
-        if (generation === screenGeneration) button.disabled = false;
-      }
-    });
-  bindHome();
+function arenaBoundaryOptions(): import("./camp-boundary-editor").BoundaryEditorOptions {
+  return {
+    name: "arena",
+    width: BATTLE_WORLD.width,
+    height: BATTLE_WORLD.height,
+    image: arenaBackgroundUrl,
+    key: BATTLE_BOUNDARIES_KEY,
+    markers: [[BATTLE_CENTER, "Spawn"]],
+    defaults: defaultBattleBoundaries,
+    load: loadBattleBoundaries,
+    validate: validateBattleBoundaries,
+  };
 }
 
-function renderSetup(): void {
+function renderBaseCamp(): void {
+  document.querySelector("#battle-backdrop")?.remove();
+  if (activeProfileId) campProfileId = activeProfileId;
   cleanup();
-  const profile = activeProfile();
-  app.innerHTML = shell(
-    `<section class="terminal" id="content">
-    <div class="terminal-heading"><p class="eyebrow warm">MISSION TERMINAL</p><h1>Ready, ${escapeHtml(profile.name)}?</h1><p>Choose the grade-level math track for this mission.</p></div>
-    <form id="mission-form">
-      <fieldset><legend>Math track</legend><div class="grade-grid">${GRADES.map((grade) => `<label class="choice-tile"><input type="radio" name="grade" value="${grade}" ${profile.grade === grade ? "checked" : ""}><span><b>${grade}</b><small>${gradeLabel(grade)}</small></span></label>`).join("")}</div></fieldset>
-      <div class="mission-brief"><div><span class="mission-number">10</span><p><b>Waves</b><small>Nine recharges, then the Overmind</small></p></div><div><span class="mission-number">01</span><p><b>Pulse Blaster</b><small>White Piercing equipped</small></p></div></div>
-      <p id="offline-status" role="status">Five questions and one 30-second countdown appear between waves.</p><button class="button launch" type="submit"><span>Launch mission</span><i aria-hidden="true">→</i></button>
-    </form>
-  </section>`,
-    "terminal-screen",
-  );
-  bindHome();
-  document
-    .querySelector<HTMLFormElement>("#mission-form")!
-    .addEventListener("submit", async (event) => {
-      event.preventDefault();
-      const data = new FormData(event.currentTarget as HTMLFormElement);
-      const generation = screenGeneration;
-      const button = document.querySelector<HTMLButtonElement>(
-        "#mission-form button[type=submit]",
-      )!;
-      if (button.disabled) return;
-      button.disabled = true;
-      document.querySelector("#offline-status")!.textContent =
-        "Preparing mission content…";
-      try {
-        await requireOfflinePack();
-        if (generation !== screenGeneration) return;
-        await perform(
-          () => session.start(profile.id, data.get("grade") as Grade),
-          renderCombat,
-        );
-      } catch (error) {
-        if (generation === screenGeneration)
-          document.querySelector("#offline-status")!.textContent =
-            error instanceof Error
-              ? error.message
-              : "Offline content is unavailable.";
-      } finally {
-        if (generation === screenGeneration) button.disabled = false;
-      }
+  profileLease.release();
+  activeProfileId = null;
+  const profile =
+    session.profiles.find((p) => p.id === campProfileId) ?? session.profiles[0];
+  campProfileId = profile?.id ?? null;
+  if (profile) campGrade = profile.grade;
+  app.innerHTML = `<section class="camp-screen" aria-label="Base camp">
+    <div id="camp-world" class="camp-world"></div>
+    <header class="camp-hud">
+      <button class="camp-edit-boundaries" id="edit-boundaries" aria-label="Edit map boundaries"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5 19 7 17 19 4 17Z" fill="none" stroke="currentColor" stroke-width="1.5"/><g fill="currentColor"><circle cx="5" cy="5" r="2"/><circle cx="19" cy="7" r="2"/><circle cx="17" cy="19" r="2"/><circle cx="4" cy="17" r="2"/></g></svg></button>
+    </header>
+    <p id="profile-status" class="sr-only" role="status"></p>
+    <div class="camp-joystick" id="camp-joystick" aria-label="Drag to move"><span id="camp-stick"></span></div>
+  </section>`;
+  const host = document.querySelector<HTMLElement>("#camp-world")!;
+  camp = new BaseCampController(host, () => {
+    void enterCampPortal();
+  });
+  document.querySelector("#edit-boundaries")!.addEventListener("click", () => {
+    camp?.setPaused(true);
+    const picker = document.createElement("dialog");
+    picker.className = "track-dialog";
+    picker.setAttribute("aria-labelledby", "boundary-map-title");
+    picker.innerHTML = `<h1 id="boundary-map-title">Edit map boundaries</h1><p>Choose a map to draw its walkable area and blocked scenery. Each map saves separately in this browser.</p><div class="track-actions"><button data-map="camp" class="button primary">Base camp</button><button data-map="arena" class="button primary">Battleground</button><button data-map="cancel" class="button secondary">Cancel</button></div>`;
+    document.body.append(picker);
+    picker.addEventListener("click", (event) => {
+      const choice = (event.target as HTMLElement).closest<HTMLButtonElement>(
+        "[data-map]",
+      )?.dataset.map;
+      if (choice) picker.close(choice);
     });
+    picker.addEventListener(
+      "close",
+      () => {
+        const choice = picker.returnValue;
+        picker.remove();
+        const finish = (saved: boolean) => {
+          if (saved) renderBaseCamp();
+          else {
+            camp?.setPaused(false);
+            host.querySelector("canvas")?.focus();
+          }
+        };
+        if (choice === "camp") openBoundaryEditor(finish);
+        else if (choice === "arena")
+          openBoundaryEditor(finish, {
+            ...arenaBoundaryOptions(),
+            saveLabel: "Save & return to camp",
+          });
+        else finish(false);
+      },
+      { once: true },
+    );
+    picker.showModal();
+  });
+  camp.bindJoystick(
+    document.querySelector("#camp-joystick")!,
+    document.querySelector("#camp-stick")!,
+  );
+  host.addEventListener("portal-proximity", (event) => {
+    const nearby = (event as CustomEvent<boolean>).detail;
+    if (nearby)
+      announce(
+        "Portal nearby. Press E or tap the portal icon to enter the arena.",
+      );
+  });
+  host
+    .querySelector<HTMLCanvasElement>("canvas")!
+    .focus({ preventScroll: true });
+}
+
+function enterCampPortal(): void {
+  if (openingProfile || saving || document.querySelector("#track-dialog"))
+    return;
+  camp?.setPaused(true);
+  const labels: Record<Grade, string> = {
+    K: "Count & compare",
+    "1": "Within 20",
+    "2": "Within 100",
+    "3": "Multiply & divide",
+    "4": "Fractions & products",
+    "5": "Decimals & fractions",
+  };
+  const dialog = document.createElement("dialog");
+  dialog.id = "track-dialog";
+  dialog.className = "track-dialog";
+  dialog.setAttribute("aria-labelledby", "track-title");
+  dialog.innerHTML = `<form id="portal-mission-form">
+    <p class="eyebrow warm">ARENA MISSION</p>
+    <h1 id="track-title">Choose your math track</h1>
+    <fieldset><legend>Grade level</legend><div class="portal-tracks">${GRADES.map((grade) => `<label class="portal-track"><input type="radio" name="grade" value="${grade}" ${grade === campGrade ? "checked" : ""} required><span><b>${grade === "K" ? "Kindergarten" : `Grade ${grade}`}</b><small>${labels[grade]}</small></span></label>`).join("")}</div></fieldset>
+    <div class="track-actions"><button type="button" id="cancel-track" class="button secondary">Back to camp</button><button type="submit" class="button primary">Start mission</button></div>
+  </form>`;
+  document.querySelector(".camp-screen")!.append(dialog);
+  let launching = false;
+  dialog.addEventListener("close", () => {
+    dialog.remove();
+    if (!launching) {
+      camp?.setPaused(false);
+      document
+        .querySelector<HTMLCanvasElement>(".camp-canvas")
+        ?.focus({ preventScroll: true });
+    }
+  });
+  dialog
+    .querySelector("#cancel-track")!
+    .addEventListener("click", () => dialog.close());
+  dialog.querySelector("form")!.addEventListener("submit", (event) => {
+    event.preventDefault();
+    if (launching) return;
+    const grade = new FormData(event.currentTarget as HTMLFormElement).get(
+      "grade",
+    ) as Grade;
+    if (!GRADES.includes(grade)) return;
+    campGrade = grade;
+    launching = true;
+    dialog.close();
+    void startCampMission();
+  });
+  decorateControls(dialog);
+  dialog.showModal();
+  dialog.querySelector<HTMLInputElement>("input:checked")!.focus();
+}
+
+async function startCampMission(): Promise<void> {
+  if (openingProfile || saving) return;
+  document.querySelector("#profile-status")!.textContent = "Preparing arena…";
+  if (!campProfileId) {
+    await perform(
+      () => session.createProfile("Cadet"),
+      (id) => {
+        campProfileId = id;
+        void openProfile(id);
+      },
+    );
+  } else await openProfile(campProfileId);
 }
 
 function resumeRun(): void {
@@ -404,6 +412,7 @@ function resumeRun(): void {
 
 function renderCombat(): void {
   cleanup();
+  document.querySelector("#battle-backdrop")?.remove();
   const profile = activeProfile();
   const run = activeRun();
   const activeNames = run.activeAmmoIds
@@ -413,12 +422,13 @@ function renderCombat(): void {
   app.innerHTML = `<div class="combat-screen ${profile.handedness === "right" ? "mirrored" : ""}" id="content">
     <div class="combat-hud top-left"><div class="portrait-mini"><span></span></div><div class="meter-stack"><div class="hud-label"><span>SUIT INTEGRITY</span><b id="hp-text">${Math.ceil(run.hp)} / ${run.maxHp}</b></div><div class="hp-track"><i id="hp-fill" style="width:${(run.hp / run.maxHp) * 100}%"></i></div><div class="ammo-readout">PULSE BLASTER · ${activeNames.join(" + ") || "STANDARD"}</div></div></div>
     <div class="wave-badge"><small>WAVE</small><b>${run.wave}<span>/ ${run.totalWaves}</span></b><em id="enemy-count">Incoming</em></div>
-    <div class="combat-hud top-right"><div><small>SALVAGE</small><b id="salvage-count">${run.salvage}</b></div><button id="pause-button" class="icon-button" aria-label="Pause game">Ⅱ</button></div>
+    <div class="combat-hud top-right"><div class="salvage-hud">${itemArt("salvage_bundle")}<small>SALVAGE</small><b id="salvage-count">${run.salvage}</b></div><div class="chest-hud"><span aria-hidden="true">${itemArt("supply_cache_closed")}</span><small>CHESTS</small><b id="chest-count">${run.combatSave?.version === 2 ? (run.combatSave.chestLoot?.length ?? 0) : 0}</b></div><button id="pause-button" class="icon-button" aria-label="Pause game">Ⅱ</button></div>
     <div id="combat-canvas" class="combat-canvas" aria-label="Combat arena"></div>
     <div class="touch-controls"><div id="joystick" class="joystick" aria-label="Movement control"><div id="stick-knob"></div></div>
-      <button id="medkit-button" class="medkit-button" aria-label="Use med-kit"><i aria-hidden="true">+</i><span>MED-GEL <b id="medkit-count">${run.medkits}</b></span></button></div>
+      <button id="medkit-button" class="medkit-button" aria-label="Use med-kit">${itemArt("med_kit")}<span>MED-GEL <b id="medkit-count">${run.medkits}</b></span></button></div>
     <div class="combat-tip">${matchMedia("(pointer: coarse)").matches ? "DRAG TO MOVE · TAP MED-GEL TO HEAL · FIRING IS AUTOMATIC" : "MOVE: WASD / ARROWS · MED-GEL: Q · FIRING IS AUTOMATIC"}</div>
   </div>`;
+  decorateControls();
   const host = document.querySelector<HTMLElement>("#combat-canvas")!;
   let checkpointTick =
     run.combatSave?.version === 2 ? (run.combatSave.simulationTick ?? 0) : 0;
@@ -463,12 +473,16 @@ function updateCombatHud(state: CombatSnapshot): void {
     fill.style.width = `${Math.max(0, (state.hp / state.maxHp) * 100)}%`;
   const salvage = document.querySelector<HTMLElement>("#salvage-count");
   if (salvage) salvage.textContent = String(state.salvage);
+  const chests = document.querySelector<HTMLElement>("#chest-count");
+  if (chests) chests.textContent = String(state.chestLoot?.length ?? 0);
   const medkits = document.querySelector<HTMLElement>("#medkit-count");
   if (medkits) medkits.textContent = String(state.medkits);
   const enemies = document.querySelector<HTMLElement>("#enemy-count");
   if (enemies)
     enemies.textContent = state.enemiesLeft
-      ? `${state.enemiesLeft} hostiles`
+      ? state.remainingMs === null
+        ? "Boss wave"
+        : `${Math.ceil(state.remainingMs / 1000)}s`
       : "Area clear";
 }
 
@@ -484,12 +498,6 @@ function checkpoint(): Checkpoint {
         ? document.querySelector<HTMLInputElement>("#correction-input")?.value
         : undefined,
   };
-}
-
-function saveCheckpoint(after: () => void): void {
-  const data = checkpoint();
-  const id = activeProfileId!;
-  void perform(() => session.checkpoint(id, data), after);
 }
 
 function saveBackgroundCheckpoint(): void {
@@ -599,13 +607,13 @@ function renderQuiz(message = ""): void {
   quizDraft = quiz.draft ?? "";
   app.innerHTML = shell(
     `<section class="quiz-layout" id="content">
-    <aside class="rarity-rail" aria-label="Reward power bands"><div class="rail-title">POWER LEVEL</div>${["purple", "blue", "green", "white"].map((q) => `<div class="rail-step ${q}" data-quality="${q}">${qualityPips(q as Quality)}<b>${QUALITY_LABEL[q as Quality]}</b><small>${q === "purple" ? "> 20s" : q === "blue" ? "> 10s" : q === "green" ? "> 0s" : "0s"}</small></div>`).join("")}</aside>
+    <aside class="rarity-rail" aria-label="Reward power bands"><div class="rail-title">POWER LEVEL</div>${["purple", "blue", "green", "white"].map((q) => `<div class="rail-step ${q}" data-quality="${q}">${qualityLevel(q as Quality)}<small>${q === "purple" ? "> 20s" : q === "blue" ? "> 10s" : q === "green" ? "> 0s" : "0s"}</small></div>`).join("")}</aside>
     <div class="quiz-main">
-      <div class="quiz-topline"><div><p class="eyebrow warm">REACTOR RECHARGE</p><h1>Question ${quiz.index + 1} <span>of 5</span></h1></div><div class="countdown" id="countdown" aria-label="Time remaining"><small>SHARED TIME</small><b>${formatTime(quiz.remainingMs)}</b></div></div>
-      <div class="mobile-tier-strip" id="mobile-tier">${qualityPips(timeQuality(quiz.remainingMs))}<b>${QUALITY_LABEL[timeQuality(quiz.remainingMs)]}</b><span>candidate</span></div>
+      <div class="quiz-topline"><div><p class="eyebrow warm">1 / 4 · QUIZ</p><h1>Question ${quiz.index + 1} <span>of 5</span></h1></div><div class="countdown" id="countdown" aria-label="Time remaining"><small>TIME LEFT</small><b>${formatTime(quiz.remainingMs)}</b></div></div>
+      <div class="mobile-tier-strip" id="mobile-tier">${qualityLevel(timeQuality(quiz.remainingMs))}</div>
       <div class="question-panel"><div class="question-copy"><p class="prompt">${escapeHtml(question.prompt)}</p>${questionVisuals(question)}
         ${usesFractionInput(question) ? fractionFields : '<label for="answer">Your answer</label>'}<output id="answer" class="answer-field" aria-live="polite" ${usesFractionInput(question) ? "hidden" : ""}>&nbsp;</output><p class="input-error" id="input-error">${escapeHtml(message)}</p>
-        <div class="quiz-tools"><span>Take your best shot.</span><button id="save-exit" class="text-button" type="button">Save & exit</button></div></div>
+        <div class="quiz-tools"><button id="qa-skip-quiz" class="text-button" type="button">QA · Skip quiz</button></div></div>
         <div class="keypad" aria-label="Number keypad">${[7, 8, 9, 4, 5, 6, 1, 2, 3].map((n) => `<button data-key="${n}" aria-label="${n}">${n}</button>`).join("")}
           <button data-key="." aria-label="Decimal point">.</button><button data-key="0" aria-label="0">0</button><button data-key="/" aria-label="Fraction bar">⁄</button>
           <button data-key="back" class="key-muted" aria-label="Backspace">⌫</button><button data-key="clear" class="key-muted">Clear</button><button data-key="check" class="key-check">Check</button>
@@ -673,7 +681,6 @@ function renderQuiz(message = ""): void {
     }
   };
   window.addEventListener("keydown", quizKeyHandler);
-  document.querySelector("#save-exit")!.addEventListener("click", saveAndExit);
   quizElapsedAtStart = quiz.elapsedMs;
   quizStartedAt = performance.now();
   timerId = window.setInterval(updateTimer, 50);
@@ -701,8 +708,7 @@ function updateTierRail(remaining = activeRun().quiz!.remainingMs): void {
       ),
     );
   const strip = document.querySelector<HTMLElement>("#mobile-tier");
-  if (strip)
-    strip.innerHTML = `${qualityPips(quality)}<b>${QUALITY_LABEL[quality]}</b><span>candidate</span>`;
+  if (strip) strip.innerHTML = `${qualityLevel(quality)}`;
 }
 
 function submitInitial(value: string, occurrenceId: string): void {
@@ -727,13 +733,26 @@ function renderReward(): void {
   const run = activeRun();
   const quiz = run.quiz!;
   const quality = quiz.rewardQuality!;
-  const wrong = quiz.attempts.filter((a) => !a.correct).length;
-  const candidate = timeQuality(quiz.remainingMs);
   app.innerHTML = shell(
-    `<section class="reward-screen" id="content">
-    <div class="reward-heading"><p class="eyebrow warm">FABRICATOR ONLINE</p><h1>Choose one upgrade</h1><p>${formatTime(quiz.remainingMs)} seconds remaining · Reward strengths are prototype tuning.</p><div class="outcome-row"><div><small>Time tier</small><b>${QUALITY_LABEL[candidate]}</b></div><span>− ${wrong} ${wrong === 1 ? "miss" : "misses"}</span><div class="quality-badge ${quality}">${qualityPips(quality)}<b>${QUALITY_LABEL[quality]}</b></div></div></div>
-    <div class="reward-grid">${quiz.rewardChoices!.map((module, i) => `<article class="reward-card ${quality}"><div class="card-index">0${i + 1}</div><div class="module-icon ${module.stat}" aria-hidden="true"><i></i></div><p class="eyebrow">${moduleStatus(module, run.modules)}</p><h2>${escapeHtml(module.name)}</h2><div class="card-quality">${QUALITY_LABEL[quality]} ${qualityPips(quality)}</div><p class="stat-gain">${statText(module)}</p><p>${moduleDescription(module.stat)}</p><p>${rewardPreview(module, run)}</p><button class="button primary" data-reward="${escapeHtml(module.id)}">Choose module</button></article>`).join("")}</div>
-    <button id="save-exit" class="text-button centered">Save & exit</button>
+    `<section class="reward-screen" id="content" aria-labelledby="reward-title">
+    <header class="reward-heading"><div><p class="flow-step">2 / 4</p><h1 id="reward-title">Select reward</h1></div><span>Wave ${run.wave}</span></header>
+    <div class="reward-selection">
+      ${rewardStats(run)}
+      <div class="reward-grid">${quiz
+        .rewardChoices!.map(
+          (module) =>
+            `<button type="button" class="reward-card level-card ${quality}" data-reward="${escapeHtml(module.id)}" aria-label="Choose ${escapeHtml(module.name)}: ${escapeHtml(statText(module))}, ${QUALITY_LABEL[quality]} rarity">${itemArt(moduleArtKey(module.name), "reward-art")}<strong>${escapeHtml(module.name)}</strong><span class="stat-gain">${statText(
+              module,
+            )
+              .split(" · ")
+              .map((stat) => `<span>${stat}</span>`)
+              .join(
+                "",
+              )}</span>${levelBadge(QUALITY_ORDER.indexOf(quality) + 1)}</button>`,
+        )
+        .join("")}</div>
+    </div>
+
   </section>`,
     "reward-shell",
   );
@@ -745,7 +764,6 @@ function renderReward(): void {
         chooseReward(button.dataset.reward!),
       ),
     );
-  document.querySelector("#save-exit")!.addEventListener("click", saveAndExit);
 }
 
 function chooseReward(id: string): void {
@@ -759,15 +777,15 @@ function renderCorrection(message = ""): void {
   const quiz = run.quiz!;
   const misses = quiz.attempts.filter((a) => !a.correct && !a.corrected);
   if (!misses.length) {
-    renderCache();
+    resumeRun();
     return;
   }
   const attempt = misses[0];
   app.innerHTML = shell(
-    `<section class="correction-screen" id="content"><div class="correction-copy"><p class="eyebrow warm">UNTIMED CORRECTION</p><h1>Let’s repair this one.</h1><p>Rewards are locked in. Work it through before the next wave.</p></div>
-    <div class="correction-card"><div><span class="correction-count">${quiz.attempts.filter((a) => !a.correct).length - misses.length + 1} / ${quiz.attempts.filter((a) => !a.correct).length}</span><p class="prompt">${escapeHtml(attempt.question.prompt)}</p>${questionVisuals(attempt.question)}<div class="hint-box"><b>Mission hint</b><p>${escapeHtml(attempt.question.hint)}</p></div><details><summary>Show worked explanation</summary><p>${escapeHtml(attempt.question.explanation)}</p></details></div>
+    `<section class="correction-screen" id="content"><div class="correction-copy"><p class="eyebrow warm">1 / 4 · QUIZ REVIEW</p><h1>Try this one again.</h1><p>Untimed · Your reward level is already set.</p></div>
+    <div class="correction-card"><div><span class="correction-count">${quiz.attempts.filter((a) => !a.correct).length - misses.length + 1} / ${quiz.attempts.filter((a) => !a.correct).length}</span><p class="prompt">${escapeHtml(attempt.question.prompt)}</p>${questionVisuals(attempt.question)}<div class="hint-box"><b>Hint</b><p>${escapeHtml(attempt.question.hint)}</p></div><details><summary>Show solution</summary><p>${escapeHtml(attempt.question.explanation)}</p></details></div>
       <div>${usesFractionInput(attempt.question) ? fractionFields : '<label for="correction-input">Correct answer</label>'}<input id="correction-input" ${usesFractionInput(attempt.question) ? "hidden" : ""} inputmode="none" autocomplete="off" value="${escapeHtml(quiz.correctionDraft ?? "")}"><div class="keypad correction-keypad" aria-label="Correction number keypad">${["7", "8", "9", "4", "5", "6", "1", "2", "3", ".", "0", "/", "back", "clear", "-"].map((key) => `<button type="button" data-correction-key="${key}" aria-label="${key === "/" ? "Fraction bar" : key === "back" ? "Backspace" : key === "-" ? "Minus" : key}">${key === "back" ? "⌫" : key === "clear" ? "Clear" : key}</button>`).join("")}</div><p class="input-error" id="correction-error">${escapeHtml(message)}</p><button id="correction-check" class="button primary">Check answer</button></div></div>
-    <button id="save-exit" class="text-button centered">Save & exit</button></section>`,
+    <button id="qa-skip-quiz" class="text-button centered">QA · Skip quiz</button></section>`,
     "correction-shell",
   );
   bindHome();
@@ -830,63 +848,74 @@ function renderCorrection(message = ""): void {
       if (!event.repeat) submit();
     }
   });
-  document.querySelector("#save-exit")!.addEventListener("click", saveAndExit);
 }
 
 function renderCache(): void {
+  renderShop();
+}
+
+function levelBadge(level: number, legendary = false): string {
+  return `<span class="sr-only" aria-label="${legendary ? "Legendary" : `Level ${level}`}">${legendary ? "★" : `Lv ${level}`}</span>`;
+}
+
+function manageLoot(run: RunState): string {
+  const loot = run.waveLoot ?? [];
+  if (!loot.length) return "";
+  return `<section class="loot-panel" aria-labelledby="loot-title"><div class="panel-heading"><h2 id="loot-title">Loot${loot.length ? ` · ${loot.length}` : ""}</h2>${loot.length > 1 ? '<div class="loot-bulk"><button class="button secondary" data-loot="all" data-disposition="accept">Accept all</button><button class="text-button" data-loot="all" data-disposition="sell">Sell all</button></div>' : ""}</div>
+  ${loot.length ? `<div class="loot-grid">${loot.map((item) => `<article class="loot-card level-card ${item.legendary ? "legendary" : qualityFromTier(item.tier)}">${levelBadge(item.tier, item.legendary)}${itemArt(ammoArtKey(item.type, item.legendary))}<h3>${escapeHtml(item.legendary ? "Omni Ammo" : item.type)}</h3><p>${item.legendary ? "All five ammo effects" : ammoEffect(item.type)}</p><small>Owned: ${run.ammo.filter((a) => a.type === item.type && a.tier === item.tier && !!a.legendary === !!item.legendary).length}</small><div class="loot-actions"><button class="button secondary" data-loot="${escapeHtml(item.id)}" data-disposition="accept">Accept</button><button class="text-button" data-loot="${escapeHtml(item.id)}" data-disposition="sell">Sell · ${ammoSellPrice(item)}</button></div></article>`).join("")}</div>` : ""}
+  </section>`;
+}
+
+function renderLoot(): void {
   cleanup();
   const run = activeRun();
-  if (run.cacheClaimed) {
+  if (!run.waveLoot?.length) {
     renderShop();
     return;
   }
-  if (!run.choiceCache) {
-    void perform(() => session.openCache(activeProfileId!), renderCache);
-    return;
-  }
-  const cache = run.choiceCache;
   app.innerHTML = shell(
-    `<section class="cache-screen" id="content"><div class="cache-heading"><p class="eyebrow warm">FREE SUPPLY DROP</p><h1>Choose one bundle</h1><p>Accept one upgrade or sell its complete bundle for salvage. All other choices close.</p></div>
-    <div class="cache-grid">${cache.options
-      .map((option) => {
-        const type = option.kind === "ammo" ? option.ammo[0].type : undefined;
-        const title =
-          type ?? (option.kind === "module" ? option.module.name : "Ammo");
-        return `<article class="cache-card"><div class="${type ? `ammo-icon ${ammoClass(type)}` : "module-icon armor"}"><i></i></div><h2>${escapeHtml(title)}</h2><p>${type ? ammoEffect(type) : "Take less damage when slimes reach you."}</p><div class="cache-tier">${type ? "Blue T3 ×2 · Ready to combine" : "Green module · +2 armor (up to cap)"}</div><button class="button secondary" data-cache-option="${escapeHtml(option.id)}" data-disposition="accept">Accept ${escapeHtml(title)}</button><button class="text-button" data-cache-option="${escapeHtml(option.id)}" data-disposition="sell">Sell bundle · ${option.sellPrice} salvage</button></article>`;
-      })
-      .join("")}</div>
-    <button id="save-exit" class="text-button centered">Save & exit</button></section>`,
-    "cache-shell",
+    `<section class="shop-screen manage-screen loot-screen" id="content" aria-labelledby="manage-title">
+    <header class="shop-top"><div><p class="flow-step">3 / 4</p><h1 id="manage-title">Loot drops</h1></div><div class="salvage-chip">${itemArt("salvage_bundle")}<b>${run.salvage}</b><span>salvage</span></div></header>
+    <div class="loot-content">${manageLoot(run)}</div>
+  </section>`,
+    "shop-shell",
   );
   bindHome();
-  document
-    .querySelectorAll<HTMLElement>("[data-cache-option]")
-    .forEach((button) =>
-      button.addEventListener("click", () => {
-        if (!paused)
-          void perform(
-            () =>
-              session.settleCache(
-                activeProfileId!,
-                cache.id,
-                button.dataset.cacheOption!,
-                button.dataset.disposition as "accept" | "sell",
-              ),
-            () => renderShop(),
-          );
-      }),
-    );
-  document.querySelector("#save-exit")!.addEventListener("click", saveAndExit);
+  document.querySelectorAll<HTMLElement>("[data-loot]").forEach((button) =>
+    button.addEventListener("click", () => {
+      if (!paused)
+        void perform(
+          () =>
+            session.settleWaveLoot(
+              activeProfileId!,
+              button.dataset.loot!,
+              button.dataset.disposition as "accept" | "sell",
+            ),
+          () => renderLoot(),
+        );
+    }),
+  );
 }
 
+let inventoryPage = 0;
 function renderShop(message = ""): void {
-  cleanup();
-  const run = activeRun();
-  if (run.forgeIngredientIds) {
-    forgeOmni();
+  if (activeRun().waveLoot?.length) {
+    renderLoot();
     return;
   }
-  if (!run.shop) {
+  const previousScroll = document.querySelector(".manage-grid")?.scrollTop ?? 0;
+  const focused = document.activeElement as HTMLElement | null;
+  const focusSelector = focused?.id
+    ? `#${CSS.escape(focused.id)}`
+    : ["data-buy", "data-ammo-id", "data-sell-ammo", "data-loot"]
+        .filter((attr) => focused?.hasAttribute(attr))
+        .map(
+          (attr) => `[${attr}="${CSS.escape(focused!.getAttribute(attr)!)}"]`,
+        )
+        .join("");
+  cleanup();
+  const run = activeRun();
+  if (!run.shop || run.phase === "cache") {
     void perform(
       () => session.openShop(activeProfileId!),
       () => renderShop(),
@@ -898,36 +927,55 @@ function renderShop(message = ""): void {
     .map((id) => run.ammo.find((ammo) => ammo.id === id))
     .filter((ammo): ammo is Ammo => Boolean(ammo));
   const mergePreview = previewMerges(run);
-  const merges = mergePreview.pairs
-    .map(([firstId, secondId], index) => {
-      const first = run.ammo.find((a) => a.id === firstId)!;
-      const equipped =
-        run.activeAmmoIds.includes(firstId) ||
-        run.activeAmmoIds.includes(secondId);
-      return `<li><label><input type="checkbox" data-merge-pair="${index}" checked> 2 × ${first.type} T${first.tier} → 1 × T${first.tier + 1}${equipped ? " · replaces equipped ingredient in its slot" : " · stays in reserve"}</label></li>`;
-    })
-    .join("");
   const purpleTypes = new Set(
     run.ammo
       .filter((ammo) => ammo.tier === 4 && !ammo.legendary)
       .map((ammo) => ammo.type),
   ).size;
   app.innerHTML = shell(
-    `<section class="shop-screen" id="content"><div class="shop-top"><div><p class="eyebrow warm">BETWEEN WAVES</p><h1>Gear up for wave ${run.wave + 1}</h1><p>Everything here is optional. Your current gear is ready to go.</p></div><div class="salvage-chip"><small>SALVAGE</small><b>${run.salvage}</b></div></div><p class="shop-message" role="status">${escapeHtml(message)}</p>
-    <section class="market-panel" aria-labelledby="shop-title"><div class="panel-heading"><div><p class="eyebrow">OUTPOST SHOP</p><h2 id="shop-title">Buy an upgrade</h2></div><span>Four choices</span></div>
-      <div class="shop-offers">${offers.map((offer, i) => (offer.purchased ? `<article class="shop-offer bought"><span>0${i + 1}</span><p>Purchased · slot empty</p></article>` : `<article class="shop-offer ${run.shopBought.includes(offer.id) ? "bought" : ""}"><span>0${i + 1}</span><div class="shop-offer-icon ${offer.kind}" aria-hidden="true"><i></i></div><h3>${escapeHtml(offer.title)}</h3>${offer.kind === "module" ? `<p>${QUALITY_LABEL[offer.module.quality]} ${qualityPips(offer.module.quality)} · ${moduleStatus(offer.module, run.modules)}</p>` : ""}<p>${offer.module ? statText(offer.module) : offer.detail}</p>${offer.module ? `<p>${rewardPreview(offer.module, run)}</p>` : ""}<button class="button secondary" data-buy="${escapeHtml(offer.id)}" ${offer.disabled || run.shopBought.includes(offer.id) ? "disabled" : ""}>${run.shopBought.includes(offer.id) ? "Bought" : `Buy · ${offer.price} salvage`}</button></article>`)).join("")}</div>
-      <button id="reroll-shop" class="button secondary">Reroll unpurchased · ${rerollPrice(run)} salvage</button><p>Buy all four for a free refill. Purchased slots stay empty until then.</p>
-    </section>
-    <section class="loadout"><details><summary>Marine stats</summary><p>${marineStats(run)}</p></details><div class="loadout-heading"><div><p class="eyebrow">YOUR EQUIPMENT</p><h2>Pulse Blaster</h2><p>Tap Equip on any ammo card. When your active slots are full, it replaces the rightmost ammo.</p></div>${purpleTypes > 0 || canForge(run) ? `<div class="omni-progress"><small>OMNI AMMO</small><b>${purpleTypes} / 5</b><button id="forge-button" class="button forge" >View forge recipe</button></div>` : ""}</div>
-      <div class="weapon-dock"><div class="blaster-card"><div class="blaster-icon" aria-hidden="true"><i></i></div><div><small>ONE WEAPON</small><b>Pulse Blaster</b></div></div><div class="loaded-ammo"><small>ACTIVE AMMO · ${activeAmmo.length}/${run.ammoCapacity}</small>${omniEquipped(run) ? `<p>Omni stabilizer: +${Math.round(omniRateBonus(run) * 100)}% firing rate. Extra normal ammo adds no power.</p>` : ""}<div>${activeAmmo.map((ammo) => `<span>${ammo.legendary ? "Omni" : ammo.type} T${ammo.tier}</span>`).join("") || "<em>No ammo equipped</em>"}${Array.from({ length: Math.max(0, run.ammoCapacity - activeAmmo.length) }, () => "<i>Empty</i>").join("")}</div></div></div>
-      <div class="reserve"><div class="panel-heading compact"><div><p class="eyebrow">AMMO LOCKER</p><h3>Owned ammo</h3></div><span>${run.ammo.length} cartridge${run.ammo.length === 1 ? "" : "s"}</span></div><div class="reserve-grid">${reserveStacks(run)}</div></div>
-      ${merges ? `<div class="merge-row"><div><p class="eyebrow">READY TO UPGRADE</p><span>Combine two matching cartridges into one stronger cartridge.</span></div><details><summary>Preview ${mergePreview.pairs.length} merge${mergePreview.pairs.length === 1 ? "" : "s"}</summary><ul>${merges}</ul><p>Only these pairs are combined. New results stay available for your next merge.</p><button id="confirm-merges" class="button secondary">Confirm merges</button></details></div>` : ""}
-    </section>
-    <div class="shop-actions"><button id="save-exit" class="text-button">Save & exit</button><div><small>No purchase required</small><button id="next-wave" class="button launch">Start wave ${run.wave + 1} <i aria-hidden="true">→</i></button></div></div>
-  </section>`,
+    `<section class="shop-screen manage-screen" id="content" aria-labelledby="manage-title">
+    <header class="shop-top"><div><p class="flow-step">4 / 4</p><h1 id="manage-title">Shop & inventory</h1></div><div class="salvage-chip">${itemArt("salvage_bundle")}<b>${run.salvage}</b><span>salvage</span></div></header>
+    <p class="shop-message" role="status">${escapeHtml(message)}</p>
+    <div class="manage-grid">${rewardStats(run)}<div class="manage-content">
+
+      <section class="market-panel" aria-labelledby="shop-title"><div class="panel-heading"><h2 id="shop-title">Shop</h2><button id="reroll-shop" class="button secondary" ${run.salvage < rerollPrice(run) ? "disabled" : ""}>Reroll · ${rerollPrice(run)}</button></div>
+      <div class="shop-offers">${offers.map((offer) => (offer.purchased ? `<article class="shop-offer bought"><span>Sold</span></article>` : `<article class="shop-offer level-card ${offer.kind === "module" ? offer.module.quality : qualityFromTier(offer.kind === "ammo" ? (offer.ammoTier ?? 1) : 1)}">${offer.kind === "module" ? levelBadge(QUALITY_ORDER.indexOf(offer.module.quality) + 1) : offer.kind === "ammo" ? levelBadge(offer.ammoTier ?? 1) : ""}${offerArt(offer)}<h3>${escapeHtml(offer.title)}</h3><p>${offer.kind === "module" ? statText(offer.module) : offer.kind === "ammo" ? ammoEffect(offer.ammoType) : offer.detail}</p><button class="button secondary" data-buy="${escapeHtml(offer.id)}" aria-label="Buy ${escapeHtml(offer.title)} for ${offer.price} salvage" ${offer.disabled || run.salvage < offer.price ? "disabled" : ""}>Buy · ${offer.price}</button></article>`)).join("")}</div>
+      </section>
+      <section class="loadout" aria-labelledby="inventory-title"><div class="panel-heading"><h2 id="inventory-title">Inventory</h2><span class="inventory-total">${run.ammo.length + run.medkits} items owned</span></div>
+        <p class="inventory-summary">${activeAmmo.length} / ${run.ammoCapacity} equipped · ${run.ammo.length} ammo · ${run.medkits} med-gel</p>
+        ${inventorySlots(run)}
+        <div class="inventory-tools">${mergePreview.pairs.length ? '<button id="merge-all" class="button secondary">Merge all</button>' : ""}${purpleTypes > 0 || canForge(run) ? `<button id="forge-button" class="button secondary">Forge · ${purpleTypes}/5</button>` : ""}${omniEquipped(run) ? `<small>Omni · +${Math.round(omniRateBonus(run) * 100)}% fire rate</small>` : ""}</div>
+      </section>
+    </div></div>
+    <footer class="shop-actions"><div>${run.waveLoot?.length ? "<small>Accept or sell your loot to continue</small>" : ""}<button id="next-wave" class="button launch" ${run.waveLoot?.length ? "disabled" : ""}>Start wave ${run.wave + 1} →</button></div></footer>
+    </section>`,
     "shop-shell",
   );
   bindHome();
+  document
+    .querySelector(".stats-toggle")
+    ?.addEventListener("click", (event) => {
+      const button = event.currentTarget as HTMLButtonElement;
+      const expanded = button.getAttribute("aria-expanded") !== "true";
+      button.setAttribute("aria-expanded", String(expanded));
+      button
+        .closest(".reward-stats")
+        ?.classList.toggle("stats-expanded", expanded);
+    });
+
+  document
+    .querySelectorAll<HTMLElement>("[data-inventory-page]")
+    .forEach((button) => {
+      button.addEventListener("click", () => {
+        inventoryPage += Number(button.dataset.inventoryPage);
+        renderShop();
+        document
+          .querySelector<HTMLElement>(
+            `[data-inventory-page="${button.dataset.inventoryPage}"]:not(:disabled)`,
+          )
+          ?.focus();
+      });
+    });
   document.querySelector("#reroll-shop")!.addEventListener("click", () => {
     void perform(
       () => session.reroll(activeProfileId!),
@@ -946,22 +994,28 @@ function renderShop(message = ""): void {
         toggleAmmo(button.dataset.ammoId!),
       ),
     );
-  document.querySelector("#confirm-merges")?.addEventListener("click", () => {
+  document.querySelector("#merge-all")?.addEventListener("click", () => {
     if (!paused)
       void perform(
-        () =>
-          session.mergePreview(activeProfileId!, {
-            ...mergePreview,
-            pairs: mergePreview.pairs.filter(
-              (_, index) =>
-                document.querySelector<HTMLInputElement>(
-                  `[data-merge-pair="${index}"]`,
-                )?.checked,
-            ),
-          }),
+        () => session.mergeAll(activeProfileId!),
         (message) => renderShop(message),
       );
   });
+  bindAmmoDragging(
+    document.querySelector<HTMLElement>(".inventory-six")!,
+    run.ammo,
+    (pair) => {
+      if (!paused)
+        void perform(
+          () =>
+            session.mergePreview(activeProfileId!, {
+              ...mergePreview,
+              pairs: [pair],
+            }),
+          (message) => renderShop(message),
+        );
+    },
+  );
   document.querySelectorAll<HTMLElement>("[data-sell-ammo]").forEach((button) =>
     button.addEventListener("click", () => {
       if (!paused)
@@ -972,11 +1026,20 @@ function renderShop(message = ""): void {
     }),
   );
   document.querySelector("#forge-button")?.addEventListener("click", forgeOmni);
-  document.querySelector("#save-exit")!.addEventListener("click", saveAndExit);
   document.querySelector("#next-wave")!.addEventListener("click", () => {
-    if (!paused)
-      perform(() => session.nextWave(activeProfileId!), renderCombat);
+    if (!paused) perform(() => session.nextWave(activeProfileId!), resumeRun);
   });
+  const grid = document.querySelector(".manage-grid");
+  if (grid) grid.scrollTop = previousScroll;
+  if (focusSelector) {
+    const target =
+      document.querySelector<HTMLElement>(focusSelector) ??
+      document.querySelector<HTMLElement>(
+        "[data-loot], [data-buy]:not(:disabled), #next-wave",
+      );
+    target?.focus({ preventScroll: true });
+  }
+  if (run.forgeIngredientIds) showForgeDialog(run);
 }
 
 function buyOffer(id: string): void {
@@ -995,91 +1058,88 @@ function toggleAmmo(id: string): void {
     );
 }
 
-function reserveStacks(run: RunState): string {
+function inventorySlots(run: RunState): string {
   const groups = new Map<string, Ammo[]>();
   for (const ammo of run.ammo) {
-    const key = `${ammo.type}:${ammo.tier}:${!!ammo.legendary}`;
+    const active = run.activeAmmoIds.includes(ammo.id);
+    const key = active
+      ? ammo.id
+      : `${ammo.type}:${ammo.tier}:${!!ammo.legendary}`;
     const group = groups.get(key) ?? [];
     group.push(ammo);
     groups.set(key, group);
   }
-  return [...groups.values()]
-    .map((group) => {
-      const active = group.find((a) => run.activeAmmoIds.includes(a.id));
-      const representative = active ?? group[0];
-      const sellable = group.find(
-        (a) => !a.legendary && !run.activeAmmoIds.includes(a.id),
-      );
-      return `<article>${ammoChip(representative, !!active)}<p>${group.length} owned${active ? " · 1 equipped" : " · reserve"}</p>${sellable ? `<button class="text-button" data-sell-ammo="${escapeHtml(sellable.id)}">Sell 1 unequipped · ${ammoSellPrice(sellable)} salvage</button>` : ""}</article>`;
-    })
-    .join("");
+  const stacks = [...groups.values()].sort(
+    (a, b) =>
+      Number(run.activeAmmoIds.includes(b[0].id)) -
+        Number(run.activeAmmoIds.includes(a[0].id)) ||
+      AMMO_TYPES.indexOf(a[0].type) - AMMO_TYPES.indexOf(b[0].type) ||
+      b[0].tier - a[0].tier,
+  );
+  const pages = Math.max(1, Math.ceil(stacks.length / 6));
+  inventoryPage = Math.min(inventoryPage, pages - 1);
+  const visible = stacks.slice(inventoryPage * 6, inventoryPage * 6 + 6);
+  const cards = Array.from({ length: 6 }, (_, index) => {
+    const group = visible[index];
+    if (!group) return '<div class="empty-slot"><span>Empty</span></div>';
+    const ammo = group[0];
+    const active = run.activeAmmoIds.includes(ammo.id);
+    return `<article class="inventory-stack"><div class="stack-count">${active ? "Equipped" : `×${group.length}`}</div>${ammoChip(ammo, active)}${!active && !ammo.legendary ? `<button class="text-button" data-sell-ammo="${escapeHtml(ammo.id)}" aria-label="Sell one ${escapeHtml(ammo.type)} level ${ammo.tier} for ${ammoSellPrice(ammo)} salvage">Sell · ${ammoSellPrice(ammo)}</button>` : ""}</article>`;
+  }).join("");
+  return `<div class="reserve-grid inventory-six">${cards}</div><div class="inventory-pager" ${pages === 1 ? "hidden" : ""}><button class="button secondary" data-inventory-page="-1" aria-label="Previous inventory page" ${inventoryPage === 0 ? "disabled" : ""}>←</button><span>${inventoryPage + 1} / ${pages}</span><button class="button secondary" data-inventory-page="1" aria-label="Next inventory page" ${inventoryPage === pages - 1 ? "disabled" : ""}>→</button></div>`;
 }
 
 function forgeOmni(): void {
-  if (paused) return;
-  cleanup();
-  const run = activeRun();
-  if (!run.forgeIngredientIds) {
+  if (!paused)
     void perform(
       () => session.selectForgeIngredients(activeProfileId!),
-      forgeOmni,
+      () => renderShop(),
     );
-    return;
-  }
+}
+
+function showForgeDialog(run: RunState): void {
   const preview = previewForge(run);
-  app.innerHTML = shell(
-    `<section class="shop-screen" id="content"><p class="eyebrow">LEGENDARY FORGE</p><h1>Legendary Omni Ammo</h1><p>Combine five purple cartridges into all five effects in one slot. Once per run.</p>
-    ${AMMO_TYPES.map((type) => {
+  const dialog = document.createElement("dialog");
+  dialog.className = "forge-dialog";
+  dialog.setAttribute("aria-labelledby", "forge-title");
+  dialog.innerHTML = `<h2 id="forge-title">Forge Omni Ammo</h2><p>One purple ammo of each type → all five effects in one slot.</p>${AMMO_TYPES.map(
+    (type) => {
       const copies = run.ammo.filter(
         (a) => !a.legendary && a.type === type && a.tier === 4,
       );
-      return `<label class="forge-ingredient">${type} · Purple ●●●● <select data-forge-type="${type}" ${copies.length ? "" : "disabled"}>${copies.length ? copies.map((a, index) => `<option value="${escapeHtml(a.id)}" ${preview.ingredientIds.includes(a.id) ? "selected" : ""}>Copy ${index + 1}${run.activeAmmoIds.includes(a.id) ? " · equipped" : " · reserve"}</option>`).join("") : '<option value="">Missing ingredient</option>'}</select></label>`;
-    }).join("")}
-    <p id="forge-loadout"></p><p>Omni stabilizer: +${Math.round(capacityRateBonus(run.ammoCapacity) * 100)}% firing rate while equipped. Normal ammo adds no extra effects alongside Omni.</p><p>Unconsumed cartridges stay owned, including any moved out of active slots.</p>
-    <button id="confirm-forge" class="button forge" ${canForge(run) ? "" : "disabled"}>${run.forgedOmni || run.ammo.some((a) => a.legendary) ? "Already forged this run" : "Forge selected cartridges"}</button><button id="back-shop" class="text-button">Back to shop</button><button id="save-exit" class="text-button">Save & exit</button></section>`,
-    "shop-shell",
-  );
-  const selected = () =>
-    Array.from(
-      document.querySelectorAll<HTMLSelectElement>("[data-forge-type]"),
-    ).map((select) => select.value);
-  const updatePreview = () => {
-    const retained = retainedForgeLoadout(run, selected());
-    document.querySelector("#forge-loadout")!.textContent =
-      `Resulting active slots, in priority order: Omni${retained
-        .map((id) => {
-          const ammo = run.ammo.find((a) => a.id === id)!;
-          return ` → ${ammo.type} T${ammo.tier} (redundant)`;
-        })
-        .join("")}.`;
-  };
-  document.querySelectorAll("[data-forge-type]").forEach((select) =>
-    select.addEventListener("change", () => {
-      const ids = selected().filter(Boolean);
-      if (!paused)
-        void perform(
-          () => session.selectForgeIngredients(activeProfileId!, ids),
-          forgeOmni,
-        );
-    }),
-  );
-  updatePreview();
-  document.querySelector("#confirm-forge")!.addEventListener("click", () => {
-    const choice = { ...preview, ingredientIds: selected() };
+      return `<label class="forge-ingredient">${itemArt(ammoArtKey(type))}${type}<select data-forge-type="${type}" ${copies.length ? "" : "disabled"}>${copies.length ? copies.map((a, index) => `<option value="${escapeHtml(a.id)}" ${preview.ingredientIds.includes(a.id) ? "selected" : ""}>Copy ${index + 1}${run.activeAmmoIds.includes(a.id) ? " · equipped" : ""}</option>`).join("") : '<option value="">Missing</option>'}</select></label>`;
+    },
+  ).join(
+    "",
+  )}<p>+${Math.round(capacityRateBonus(run.ammoCapacity) * 100)}% fire rate while equipped. Once per mission.</p><div class="loot-actions"><button id="confirm-forge" class="button primary" ${canForge(run) ? "" : "disabled"}>Forge</button><button id="close-forge" class="button secondary">Close</button></div>`;
+  app.append(dialog);
+  const close = () => {
     if (!paused)
       void perform(
-        () => session.forge(activeProfileId!, choice),
-        () => renderShop("Forge selection resolved."),
+        () => session.cancelForge(activeProfileId!),
+        () => {
+          dialog.close();
+          renderShop();
+          document.querySelector<HTMLButtonElement>("#forge-button")?.focus();
+        },
+      );
+  };
+  dialog.addEventListener("cancel", (event) => {
+    event.preventDefault();
+    close();
+  });
+  dialog.querySelector("#close-forge")!.addEventListener("click", close);
+  dialog.querySelector("#confirm-forge")!.addEventListener("click", () => {
+    const ingredientIds = Array.from(
+      dialog.querySelectorAll<HTMLSelectElement>("[data-forge-type]"),
+    ).map((select) => select.value);
+    if (!paused)
+      void perform(
+        () => session.forge(activeProfileId!, { ...preview, ingredientIds }),
+        () => renderShop("Omni forged."),
       );
   });
-  document.querySelector("#back-shop")!.addEventListener("click", () => {
-    void perform(
-      () => session.cancelForge(activeProfileId!),
-      () => renderShop(),
-    );
-  });
-  document.querySelector("#save-exit")!.addEventListener("click", saveAndExit);
-  bindHome();
+  dialog.showModal();
 }
 
 function endRun(victory: boolean, state?: CombatSnapshot): void {
@@ -1088,6 +1148,7 @@ function endRun(victory: boolean, state?: CombatSnapshot): void {
     (summary) => {
       if (!summary) return;
       cleanup();
+      document.querySelector("#battle-backdrop")?.remove();
       const profile = activeProfile();
       const run = summary;
       const missionHistory = profile.history.filter((entry) =>
@@ -1103,7 +1164,7 @@ function endRun(victory: boolean, state?: CombatSnapshot): void {
       app.innerHTML = shell(
         `<section class="summary-screen" id="content"><div class="summary-mark ${victory ? "victory" : "defeat"}"><i></i></div><p class="eyebrow warm">${victory ? "MISSION COMPLETE" : "SUIT OFFLINE"}</p><h1>${victory ? "Mars is secure." : "The slimes broke through."}</h1><p>${victory ? "The Overmind is down and the outpost reactor is stable." : "Your learning record is safe. Refit and launch again."}</p>
     <div class="summary-stats"><div><small>WAVES</small><b>${run.wave}</b></div><div><small>FIRST-TRY ACCURACY</small><b>${accuracy}%</b></div><div><small>MODULES</small><b>${run.modules.length}</b></div><div><small>SALVAGE</small><b>${run.salvage}</b></div></div>
-    <div class="summary-actions">${victory ? "" : `<button id="retry-mission" class="button primary">Retry mission</button>`}<button id="return-home" class="button ${victory ? "launch" : "secondary"}">Return to crew</button></div></section>`,
+    <div class="summary-actions">${victory ? "" : `<button id="retry-mission" class="button primary">Retry mission</button>`}<button id="return-home" class="button ${victory ? "launch" : "secondary"}">Return to base camp</button></div></section>`,
         "summary-shell",
       );
       bindHome();
@@ -1135,7 +1196,7 @@ function endRun(victory: boolean, state?: CombatSnapshot): void {
         });
       document
         .querySelector("#return-home")!
-        .addEventListener("click", renderProfiles);
+        .addEventListener("click", renderBaseCamp);
     },
   );
 }
@@ -1144,6 +1205,7 @@ function setBlocked(blocked: boolean): void {
   paused = blocked;
   session.setPaused(blocked);
   app.inert = blocked;
+  camp?.setPaused(blocked);
   if (blocked) {
     resetTouch?.();
     if (timerId !== null) window.clearInterval(timerId);
@@ -1187,6 +1249,7 @@ async function perform<T>(
       overlay.className = "pause-overlay";
       overlay.innerHTML = `<div class="pause-dialog" role="alertdialog" aria-modal="true"><h2>Progress could not be saved</h2><p>${escapeHtml(error instanceof Error ? error.message : "Storage is unavailable.")}</p><p>The change has not been applied. Retry saving before continuing.</p><button class="button primary" id="retry-save">Retry save</button><button class="text-button" id="export-safe">Export last saved progress</button><button class="button secondary" id="reload-saved">Reload saved profiles</button></div>`;
       document.body.append(overlay);
+      decorateControls(overlay);
       overlay
         .querySelector("#reload-saved")!
         .addEventListener("click", () => location.reload());
@@ -1244,26 +1307,12 @@ function showPause(title: string): void {
       setBlocked(true);
       quizElapsedAtStart = elapsed;
       const overlay = document.createElement("div");
-      overlay.className = "pause-overlay";
+      overlay.className = "pause-overlay mission-pause";
       overlay.id = "pause-overlay";
-      overlay.innerHTML = `<div class="pause-dialog" role="dialog" aria-modal="true" aria-labelledby="pause-title"><p class="eyebrow warm">MISSION HOLD</p><h2 id="pause-title">${escapeHtml(title)}</h2><p>Combat and question time are stopped.</p><button id="mirror-controls" class="button">Move with ${activeProfile().handedness === "left" ? "right" : "left"} thumb</button><button id="resume-button" class="button primary">Resume</button><button id="pause-exit" class="text-button">Save & exit</button></div>`;
+      overlay.innerHTML = `<div class="pause-dialog" role="dialog" aria-modal="true" aria-labelledby="pause-title"><h2 id="pause-title">Paused</h2>${title.includes("failed") ? `<p>${escapeHtml(title)}</p>` : ""}<button id="resume-button" class="button primary">Resume</button>${activeRun().phase === "combat" ? '<button id="edit-arena-bounds" class="button secondary">Edit arena bounds</button>' : ""}<button id="pause-exit" class="text-button">Exit mission</button><p class="pause-exit-note">Exiting loses this mission’s progress.</p></div>`;
       document.body.append(overlay);
+      decorateControls(overlay);
       overlay.querySelector<HTMLButtonElement>("#resume-button")!.focus();
-      overlay
-        .querySelector("#mirror-controls")!
-        .addEventListener("click", () => {
-          const next = activeProfile().handedness === "left" ? "right" : "left";
-          perform(
-            () => session.setHandedness(activeProfileId!, next),
-            () => {
-              document
-                .querySelector(".combat-screen")
-                ?.classList.toggle("mirrored", next === "right");
-              overlay.querySelector("#mirror-controls")!.textContent =
-                `Move with ${next === "left" ? "right" : "left"} thumb`;
-            },
-          );
-        });
       overlay.querySelector("#resume-button")!.addEventListener("click", () => {
         if (saving) return;
         overlay.remove();
@@ -1275,17 +1324,42 @@ function showPause(title: string): void {
           timerId = window.setInterval(updateTimer, 50);
         }
       });
+      overlay
+        .querySelector("#edit-arena-bounds")
+        ?.addEventListener("click", () => {
+          openBoundaryEditor((saved) => {
+            if (saved) {
+              overlay.remove();
+              setBlocked(false);
+              renderCombat();
+            } else
+              overlay
+                .querySelector<HTMLButtonElement>("#edit-arena-bounds")
+                ?.focus();
+          }, arenaBoundaryOptions());
+        });
       overlay.querySelector("#pause-exit")!.addEventListener("click", () => {
         if (saving) return;
-        overlay.remove();
-        renderProfiles();
+        exitMission();
       });
     },
   );
 }
 
-function saveAndExit(): void {
-  saveCheckpoint(renderProfiles);
+function exitMission(): void {
+  if (saving || !activeProfileId) return;
+  const id = activeProfileId;
+  void perform(
+    () => {
+      // Exiting is allowed from the pause menu as well as every active phase.
+      session.setPaused(false);
+      session.end(id, false);
+    },
+    () => {
+      document.querySelector("#pause-overlay")?.remove();
+      renderBaseCamp();
+    },
+  );
 }
 
 function downloadProfiles(text: string): void {
@@ -1312,84 +1386,37 @@ function statText(module: Module): string {
         healing: "healing",
         projectileSpeed: "projectile speed",
         pickupRadius: "pickup radius",
+        luck: "luck",
       }[m.stat];
       return `+${Number((m.value * (absolute ? 1 : 100)).toFixed(2))}${absolute ? "" : "%"} ${label}`;
     })
     .join(" · ");
 }
 
-function moduleStatus(module: Module, owned: Module[]): string {
-  if (owned.some((m) => m.name === module.name)) return "Add another";
-  const family = module.name.split(" ").at(-1);
-  return owned.some((m) => m.name.split(" ").at(-1) === family)
-    ? "New variant"
-    : "New module";
-}
-function marineStats(run: RunState): string {
-  return [
-    `${run.hp.toFixed(1)} / ${run.maxHp} integrity`,
-    ...(
-      [
-        "damage",
-        "attackSpeed",
-        "projectileSpeed",
-        "moveSpeed",
-        "pickupRadius",
-        "healing",
-        "armor",
-      ] as Module["stat"][]
-    ).map((stat) =>
-      statText({
-        id: "summary",
-        name: "",
-        quality: "white",
-        stat,
-        value: moduleTotal(run.modules, stat),
-      }),
-    ),
-  ].join(" · ");
-}
-
-function rewardPreview(module: Module, run: RunState): string {
-  return (
-    "After install: " +
-    modifiers(module)
-      .map((m) => {
-        const total = moduleTotal([...run.modules, module], m.stat);
-        if (m.stat === "maxHp")
-          return `${run.maxHp + total - moduleTotal(run.modules, "maxHp")} max integrity`;
-        return statText({
-          ...module,
-          stat: m.stat,
-          value: total,
-          additionalModifiers: [],
-        });
-      })
-      .join(" · ")
-  );
-}
-
-function moduleDescription(stat: Module["stat"]): string {
-  return {
-    damage: "Harder impacts on every shot.",
-    attackSpeed: "Faster automatic Pulse Blaster fire.",
-    maxHp: "More room for damage before suit failure.",
-    armor: "Reduce damage from contact and projectiles.",
-    moveSpeed: "Quicker dodges across the arena.",
-    healing: "Med-gel restores more integrity.",
-    projectileSpeed: "Shots reach slimes sooner.",
-    pickupRadius: "Collect salvage from farther away.",
-  }[stat];
+function rewardStats(run: RunState): string {
+  const stats: [Module["stat"], string][] = [
+    ["damage", "Damage"],
+    ["attackSpeed", "Attack speed"],
+    ["armor", "Armor"],
+    ["moveSpeed", "Move speed"],
+    ["projectileSpeed", "Projectile speed"],
+    ["pickupRadius", "Pickup radius"],
+    ["healing", "Healing"],
+    ["luck", "Luck"],
+  ];
+  return `<aside class="reward-stats" aria-labelledby="marine-stats-title"><div class="marine-avatar" role="img" aria-label="Marine"></div><h2 id="marine-stats-title">Marine stats</h2><button class="stats-toggle button secondary" aria-expanded="false" aria-controls="marine-stat-values">Marine stats</button><dl id="marine-stat-values"><div><dt>Integrity</dt><dd>${Number(run.hp.toFixed(1))} / ${run.maxHp}</dd></div>${stats
+    .map(([stat, label]) => {
+      const value = moduleTotal(run.modules, stat);
+      return `<div><dt>${label}</dt><dd>${stat === "armor" ? value : `+${Number((value * 100).toFixed(2))}%`}</dd></div>`;
+    })
+    .join("")}</dl></aside>`;
 }
 
 function ammoChip(ammo: Ammo, active: boolean): string {
   const quality = ammo.legendary ? "purple" : qualityFromTier(ammo.tier);
-  return `<button class="ammo-chip ${ammo.legendary ? "legendary" : `tier-${ammo.tier}`} ${active ? "active" : ""}" data-ammo-id="${escapeHtml(ammo.id)}"><span class="ammo-icon ${ammo.legendary ? "omni" : ammoClass(ammo.type)}"><i></i></span><span class="ammo-copy"><b>${ammo.legendary ? "Legendary Omni" : ammo.type}</b><small>${ammo.legendary ? "All five effects" : `${QUALITY_LABEL[quality]} · T${ammo.tier}`}</small></span><span class="ammo-action">${active ? "Unequip" : "Equip"}</span></button>`;
+  return `<button class="ammo-chip level-card ${ammo.legendary ? "legendary" : quality} ${active ? "active" : ""}" data-ammo-id="${escapeHtml(ammo.id)}" title="${escapeHtml(ammo.legendary ? "All five ammo effects" : ammoEffect(ammo.type))}" aria-label="${active ? "Unequip" : "Equip"} ${escapeHtml(ammo.type)}, level ${ammo.tier}" aria-pressed="${active}">${levelBadge(ammo.tier, ammo.legendary)}${itemArt(ammoArtKey(ammo.type, ammo.legendary))}<span class="ammo-copy"><b>${ammo.legendary ? "Omni" : ammo.type}</b></span><span class="ammo-effect">${ammo.legendary ? "All five ammo effects" : ammoEffect(ammo.type)}</span><span class="ammo-action">${active ? "Unequip" : "Equip"}</span></button>`;
 }
 
-function ammoClass(type: AmmoType): string {
-  return type.toLowerCase().replaceAll(" ", "-");
-}
 function ammoEffect(type: AmmoType): string {
   return (
     {
@@ -1413,19 +1440,6 @@ function hashSeed(value: string): number {
     2166136261,
   );
 }
-function gradeLabel(grade: Grade): string {
-  return (
-    {
-      K: "Count & compare",
-      1: "Within 20",
-      2: "Within 100",
-      3: "Multiply & divide",
-      4: "Fractions & products",
-      5: "Decimals & fractions",
-      6: "Ratios & equations",
-    } as Record<Grade, string>
-  )[grade];
-}
 function escapeHtml(value: string): string {
   return value.replace(
     /[&<>'"]/g,
@@ -1443,6 +1457,7 @@ document.addEventListener("visibilitychange", () => {
 window.addEventListener("keydown", (event) => {
   if (event.key !== "Escape" || !activeProfileId || !activeProfile().activeRun)
     return;
+  if (document.querySelector("dialog[open]")) return;
   event.preventDefault();
   showPause("Mission paused");
 });
@@ -1455,6 +1470,19 @@ window.addEventListener("orientationchange", () => {
 });
 
 async function boot(): Promise<void> {
+  app.innerHTML = `<section class="loading-screen" aria-label="Loading Math on Mars"><img class="splash-backdrop" src="${splashUrl}" alt="" aria-hidden="true"><img src="${splashUrl}" alt="Math on Mars"><div class="loading-progress"><p id="loading-status" role="status">Loading base camp…</p><progress id="camp-progress" max="1" value="0" aria-label="Loading base camp"></progress></div></section>`;
+  try {
+    await loadCampAssets((fraction) => {
+      const progress =
+        document.querySelector<HTMLProgressElement>("#camp-progress");
+      if (progress) progress.value = fraction;
+    });
+  } catch (error) {
+    document.querySelector(".loading-progress")!.innerHTML =
+      `<p role="alert">${escapeHtml(error instanceof Error ? error.message : "Camp could not load.")}</p><button id="retry-camp" class="button primary">Retry loading</button>`;
+    document.querySelector("#retry-camp")!.addEventListener("click", boot);
+    return;
+  }
   if (!import.meta.env.DEV)
     history.replaceState(null, "", releaseLocation(BUILD_VERSION));
   try {
@@ -1469,7 +1497,20 @@ async function boot(): Promise<void> {
         throw new Error("Use a durable command.");
       },
     });
-    renderProfiles();
+    // Opt-in development fixture; production always enters camp.
+    if (
+      import.meta.env.DEV &&
+      document.documentElement.dataset.previewRun === "true" &&
+      STORAGE_KEY.startsWith("math-on-mars-art-fixture-")
+    ) {
+      const profile = session.profiles[0];
+      if (profile?.activeRun && (await profileLease.acquire(profile.id))) {
+        activeProfileId = profile.id;
+        resumeRun();
+        return;
+      }
+    }
+    renderBaseCamp();
   } catch (error) {
     app.inert = false;
     app.innerHTML = `<section class="terminal"><h1>Saved progress needs attention</h1><p>${escapeHtml(error instanceof Error ? error.message : "Storage is unavailable.")}</p><p>Your stored data has not been overwritten.</p><button id="reload-save" class="button primary">Retry loading</button><button id="recover-save" class="button secondary">Restore last valid backup</button><button id="recover-history" class="button secondary">Recover valid history without unresumable missions</button><button id="export-raw" class="text-button">Export stored data</button><p id="recovery-error" role="alert"></p></section>`;
@@ -1483,7 +1524,7 @@ async function boot(): Promise<void> {
               throw new Error("Use a durable command.");
             },
           });
-          renderProfiles();
+          renderBaseCamp();
         } catch (failure) {
           document.querySelector("#recovery-error")!.textContent =
             String(failure);
@@ -1498,7 +1539,7 @@ async function boot(): Promise<void> {
               throw new Error("Use a durable command.");
             },
           });
-          renderProfiles();
+          renderBaseCamp();
         } catch (failure) {
           document.querySelector("#recovery-error")!.textContent =
             String(failure);

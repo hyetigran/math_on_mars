@@ -1,0 +1,356 @@
+/* A fixed game screen with separate activities and paged collections. */
+.app-shell.shop-shell:has(.shop-screen) {
+  height: 100dvh;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding-block: max(6px, env(safe-area-inset-top))
+    max(6px, env(safe-area-inset-bottom));
+}
+.shop-shell .topbar {
+  min-height: 44px;
+  flex: 0 0 44px;
+}
+.shop-shell .shop-screen {
+  width: min(1180px, 100%);
+  margin: 0 auto;
+  min-height: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.shop-shell [hidden] {
+  display: none !important;
+}
+.shop-shell .shop-top {
+  margin: 0;
+  align-items: center;
+}
+.shop-shell .shop-top h1 {
+  font-size: clamp(1.2rem, 3vw, 2rem);
+  margin: 0;
+}
+.shop-shell .shop-top p {
+  margin: 0;
+  font-size: 0.8rem;
+}
+.shop-shell .shop-top .eyebrow {
+  font-size: 0.75rem;
+}
+.shop-shell .salvage-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  min-width: 0;
+}
+.shop-shell .salvage-chip .item-art {
+  width: 28px;
+  height: 28px;
+}
+.shop-shell .salvage-chip b {
+  font-size: 1.2rem;
+}
+.shop-shell .shop-message {
+  min-height: 0;
+  margin: 0;
+  font-size: 0.8rem;
+}
+.shop-shell .shop-message:empty {
+  display: none;
+}
+.shop-view-body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+}
+.shop-view {
+  width: 100%;
+  min-width: 0;
+  margin: 0 !important;
+  padding: 12px !important;
+  align-self: stretch;
+  background: #182433;
+  border-radius: 8px;
+}
+.shop-view.market-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.shop-shell .panel-heading {
+  margin: 0 0 8px;
+}
+.shop-shell .panel-heading h2,
+.shop-shell .panel-heading h3 {
+  font-size: 1rem;
+}
+.shop-shell .panel-heading .eyebrow,
+.shop-shell .panel-heading > span {
+  display: none;
+}
+.shop-shell .shop-offers,
+.shop-shell .reserve-grid {
+  grid-template-columns: repeat(var(--shop-columns, 1), minmax(0, 1fr));
+  gap: 10px;
+}
+.shop-shell .shop-offers {
+  flex: 1;
+  min-height: 0;
+}
+.shop-shell .shop-offer {
+  min-height: 0;
+  padding: 10px;
+  gap: 4px;
+  justify-content: center;
+}
+.shop-shell .shop-offer > .item-art {
+  width: 56px;
+  height: 56px;
+}
+.shop-shell .shop-offer h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+.shop-shell .shop-offer p {
+  min-height: 0;
+  font-size: 0.75rem;
+}
+.shop-shell .button {
+  min-height: 40px;
+  padding: 8px 12px;
+  font-size: 0.75rem;
+}
+.shop-shell .market-panel > p {
+  margin: 0;
+  font-size: 0.75rem;
+}
+.shop-shell .reserve-grid > article > p {
+  margin: 6px 0;
+}
+.shop-shell .loadout-heading {
+  gap: 12px;
+}
+.shop-shell .loadout-heading .eyebrow {
+  display: none;
+}
+.shop-shell .weapon-dock {
+  margin-top: 12px;
+}
+.shop-shell .merge-row {
+  display: block;
+}
+.shop-shell .merge-row ul {
+  padding-inline-start: 20px;
+}
+.shop-shell .merge-row li {
+  padding-block: 8px;
+}
+.shop-shell .merge-row input {
+  width: 20px;
+  height: 20px;
+  vertical-align: middle;
+}
+.shop-shell .shop-view > summary,
+.shop-shell .merge-row summary {
+  pointer-events: none;
+  list-style: none;
+  font-weight: 700;
+}
+.shop-shell .shop-view > p {
+  line-height: 1.8;
+}
+.shop-pager {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  flex-shrink: 0;
+  font-size: 0.8rem;
+}
+.shop-shell .shop-actions {
+  flex-shrink: 0;
+  margin: 0;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+}
+.shop-shell .shop-actions > div {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.shop-shell .shop-actions .button {
+  width: auto;
+}
+@media (max-width: 550px) {
+  .shop-shell .topbar {
+    display: none;
+  }
+  .shop-shell .shop-top p:last-child {
+    display: none;
+  }
+  .shop-shell .shop-actions small {
+    display: none;
+  }
+  .shop-shell .salvage-chip small {
+    display: none;
+  }
+  .shop-shell .weapon-dock {
+    grid-template-columns: 1fr;
+  }
+  .shop-shell .loadout-heading {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .shop-shell .omni-progress {
+    min-width: 0;
+  }
+}
+@media (max-height: 600px) {
+  .shop-shell .topbar {
+    display: none;
+  }
+  .shop-shell .shop-top p {
+    display: none;
+  }
+  .shop-shell .shop-screen {
+    gap: 4px;
+  }
+  .shop-view {
+    padding: 8px !important;
+  }
+  .shop-shell .shop-offer {
+    display: grid;
+    grid-template-columns: 60px 1fr auto;
+    text-align: start;
+    gap: 4px 12px;
+  }
+  .shop-shell .shop-offer > .item-art {
+    grid-column: 1;
+    grid-row: 1 / span 5;
+  }
+  .shop-shell .shop-offer h3,
+  .shop-shell .shop-offer p {
+    grid-column: 2;
+  }
+  .shop-shell .shop-offer .button {
+    grid-column: 3;
+    grid-row: 1 / span 5;
+    margin: 0;
+  }
+  .shop-shell .shop-offer > span {
+    display: none;
+  }
+  .shop-shell .market-panel > .panel-heading {
+    display: none;
+  }
+  .shop-shell .market-panel > p {
+    display: none;
+  }
+  .shop-shell .weapon-dock {
+    margin-top: 4px;
+    padding: 4px;
+  }
+  .shop-shell .loadout-heading > div:first-child > p:last-child {
+    display: none;
+  }
+  .shop-shell .merge-row > div:first-child,
+  .shop-shell .merge-row > div > p {
+    display: none;
+  }
+  .shop-shell .merge-row ul {
+    margin-block: 4px;
+  }
+}
+@media (max-height: 600px) {
+  .shop-shell .weapon-dock {
+    grid-template-columns: 1fr;
+  }
+  .shop-shell .blaster-card {
+    display: none;
+  }
+  .shop-shell .loaded-ammo {
+    padding: 6px;
+    gap: 4px;
+  }
+  .shop-shell .loaded-ammo > div {
+    gap: 4px;
+  }
+  .shop-shell .loaded-ammo span {
+    padding: 4px;
+    font-size: 0.75rem;
+  }
+  .shop-shell .loaded-ammo .item-art {
+    width: 20px;
+    height: 20px;
+  }
+  .shop-shell .loaded-ammo > p {
+    margin: 0;
+    font-size: 0.75rem;
+  }
+  .shop-shell .omni-progress {
+    display: flex;
+    padding: 4px;
+    align-items: center;
+  }
+  .shop-shell .loadout-heading {
+    flex-direction: row;
+  }
+  .shop-shell .loadout-heading h2 {
+    font-size: 1rem;
+  }
+  .shop-shell .omni-progress small {
+    display: none;
+  }
+  .shop-shell .ammo-chip {
+    min-height: 64px;
+  }
+  .shop-shell .ammo-chip .item-art {
+    width: 40px;
+    height: 40px;
+  }
+  .shop-shell .reserve > .panel-heading {
+    margin-bottom: 4px;
+  }
+  .shop-shell .reserve-grid > article {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 4px 12px;
+  }
+  .shop-shell .reserve-grid > article > .ammo-chip {
+    grid-row: 1 / span 2;
+  }
+  .shop-shell .reserve-grid > article > p {
+    margin: 0;
+    font-size: 0.75rem;
+  }
+  .shop-shell .reserve-grid > article > .text-button {
+    padding: 6px;
+    font-size: 0.75rem;
+  }
+}
+@media (max-width: 420px) and (max-height: 600px) {
+  .shop-shell .shop-offer {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+  .shop-shell .shop-offer > .item-art {
+    display: none;
+  }
+  .shop-shell .shop-offer h3,
+  .shop-shell .shop-offer p,
+  .shop-shell .shop-offer .button {
+    grid-column: 1;
+    grid-row: auto;
+  }
+  .shop-shell .reserve-grid > article {
+    display: block;
+  }
+}
+
+.shop-shell .shop-view h3 {
+  margin-block: 0 8px;
+}

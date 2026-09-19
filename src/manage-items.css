@@ -1,0 +1,1155 @@
+/* Levels remain readable without color; borders carry the rarity at a glance. */
+.level-card {
+  --level: #b9c5d4;
+  position: relative;
+  border: 2px solid var(--level) !important;
+  border-image: none !important;
+  background: color-mix(in srgb, var(--level) 9%, #14202e) !important;
+  box-shadow:
+    inset 0 0 0 2px #101722,
+    0 0 12px color-mix(in srgb, var(--level) 18%, transparent) !important;
+  border-radius: 10px;
+}
+.level-card.green {
+  --level: #70e790;
+}
+.level-card.blue {
+  --level: #40bfff;
+}
+.level-card.purple {
+  --level: #c68aff;
+}
+.level-card.legendary {
+  --level: #ffd36b;
+}
+.level-card .level-badge,
+.level-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: auto;
+  padding: 3px 6px;
+  border: 1px solid var(--level, #afc8db);
+  border-radius: 5px;
+  color: var(--level, #e9f2fc);
+  background: #10202e;
+  font: 800 0.75rem/1.2 var(--font-display);
+  white-space: nowrap;
+}
+.level-card > .level-badge {
+  position: absolute;
+  inset: 7px 7px auto auto;
+  z-index: 1;
+}
+.reward-shell .level-card {
+  padding-top: 36px;
+}
+.flow-step {
+  margin: 0 0 4px;
+  color: #a5b8cf;
+  font: 700 0.75rem/1.2 var(--font-display);
+  letter-spacing: 0.12em;
+}
+.shop-shell:has(.manage-screen) {
+  padding: max(12px, env(safe-area-inset-top))
+    max(16px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom))
+    max(16px, env(safe-area-inset-left));
+}
+.battle-overlay .manage-screen {
+  width: min(1280px, 100%);
+  padding: 0;
+  gap: 12px;
+}
+.manage-screen .shop-top {
+  padding: 8px 14px;
+}
+.manage-screen .shop-top .flow-step {
+  display: block;
+}
+.manage-screen .salvage-chip .item-art {
+  position: static;
+  width: 28px;
+  height: 28px;
+}
+.manage-grid {
+  display: grid;
+  grid-template-columns: 180px minmax(0, 1fr);
+  gap: 20px;
+  min-height: 0;
+  overflow: auto;
+  flex: 1;
+  scrollbar-width: thin;
+  padding: 3px;
+}
+.manage-grid > .reward-stats {
+  position: sticky;
+  top: 0;
+  align-self: start;
+  padding: 16px 12px;
+  background: #121c2aed;
+}
+.manage-grid .reward-stats dl {
+  gap: 12px;
+  font-size: 0.75rem;
+}
+.manage-content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-width: 0;
+}
+.manage-screen .market-panel,
+.manage-screen .loadout,
+.manage-screen .loot-panel {
+  height: auto;
+  min-width: 0;
+  margin: 0;
+  padding: 12px;
+  border-radius: 12px;
+  background: #152130e8;
+  box-shadow: none;
+}
+.manage-screen .panel-heading {
+  margin: 0 0 10px;
+  align-items: center;
+  gap: 12px;
+}
+.manage-screen .panel-heading h2 {
+  margin: 0;
+  font-size: 1rem;
+}
+.manage-screen .panel-heading > span {
+  display: block;
+  font-size: 0.75rem;
+  color: #b7c8dd;
+}
+.manage-screen .shop-offers {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+.manage-screen .shop-offer {
+  display: flex;
+  flex-direction: column;
+  min-height: 192px;
+  padding: 28px 10px 10px;
+  gap: 8px;
+  text-align: center;
+  justify-content: start;
+}
+.manage-screen .shop-offer > .item-art {
+  width: 56px;
+  height: 56px;
+  margin: 0;
+}
+.manage-screen .shop-offer h3 {
+  margin: 0;
+  font-size: 0.85rem;
+}
+.manage-screen .shop-offer p {
+  min-height: 0;
+  margin: 0;
+  color: #d4e0ef;
+  font-size: 0.75rem;
+  line-height: 1.4;
+}
+.manage-screen .shop-offer .button {
+  margin-top: auto;
+}
+.manage-screen .shop-offer.bought {
+  justify-content: center;
+  border: 1px dashed #637084;
+  background: #14202e;
+}
+.manage-screen .shop-offer.bought > span {
+  position: static;
+  display: block;
+  color: #b7c8dd;
+}
+.manage-screen .button {
+  min-height: 40px;
+  font-size: 0.75rem;
+  padding: 7px 10px;
+}
+.manage-screen .text-button {
+  min-height: 36px;
+  font-size: 0.75rem;
+  margin: 0;
+  padding: 6px 8px;
+}
+.inventory-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+.manage-screen .reserve {
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+}
+.manage-screen .reserve-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  gap: 12px;
+}
+.manage-screen .inventory-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+.manage-screen .ammo-chip {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+  min-height: 124px;
+  padding: 26px 6px 6px;
+  text-align: center;
+}
+.manage-screen .ammo-chip.active {
+  outline: none;
+}
+.manage-screen .ammo-chip.active .ammo-action {
+  color: #fff;
+  background: #344757;
+  border: 1px solid #89a2bc;
+}
+.manage-screen .ammo-chip .item-art {
+  width: 42px;
+  height: 42px;
+  margin: 0;
+}
+.manage-screen .ammo-copy {
+  display: block;
+}
+.manage-screen .ammo-copy b {
+  font-size: 0.75rem;
+}
+.manage-screen .ammo-action {
+  display: block;
+  padding: 3px 8px;
+  margin-top: auto;
+  font-size: 0.75rem;
+  color: #d4e0ef;
+  border-radius: 5px;
+}
+.manage-screen .ammo-action .ui-glyph {
+  display: none;
+}
+.stack-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+.stack-actions small {
+  font-size: 0.75rem;
+  color: #bdcde0;
+}
+.module-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 12px;
+}
+.module-tile {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  gap: 6px;
+  padding: 26px 8px 8px;
+  min-width: 0;
+  text-align: center;
+}
+.module-tile .item-art {
+  width: 40px;
+  height: 40px;
+}
+.module-tile > span:not(.level-badge) {
+  font-size: 0.75rem;
+}
+.module-tile small {
+  font-size: 0.75rem;
+  color: #a9e0bd;
+}
+.empty-inventory {
+  margin: 14px 0;
+  color: #a8b9ce;
+  font-size: 0.8rem;
+}
+.inventory-tools {
+  display: flex;
+  align-items: start;
+  gap: 12px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+.manage-screen .merge-row {
+  display: block;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+}
+.manage-screen .merge-row summary {
+  pointer-events: auto;
+  list-style: revert;
+  padding: 10px;
+  cursor: var(--game-cursor-pointer, pointer);
+  border: 1px solid #7e95ad;
+  border-radius: 6px;
+  font-size: 0.75rem;
+}
+.manage-screen .merge-row ul {
+  margin: 8px 0;
+  font-size: 0.75rem;
+}
+.manage-screen .merge-row li {
+  padding-block: 6px;
+}
+.loot-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(135px, 1fr));
+  gap: 12px;
+}
+.bonus-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+.loot-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 26px 8px 8px;
+  text-align: center;
+}
+.loot-card .item-art {
+  width: 44px;
+  height: 44px;
+}
+.loot-card h3 {
+  margin: 0;
+  font-size: 0.8rem;
+}
+.loot-card p {
+  margin: 0;
+  font-size: 0.75rem;
+  color: #d4e0ef;
+}
+.loot-actions,
+.loot-bulk {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.loot-actions {
+  margin-top: auto;
+}
+.manage-screen .bonus-heading {
+  margin: 16px 0 10px;
+}
+.bonus-heading h3 {
+  margin: 0;
+  font-size: 0.85rem;
+}
+.manage-screen .shop-actions {
+  padding: 10px 14px;
+}
+.manage-screen .shop-actions > div {
+  gap: 12px;
+}
+.manage-screen .shop-actions small {
+  color: #c3d0e1;
+  font-size: 0.75rem;
+}
+.level-card:focus-visible,
+.manage-screen summary:focus-visible {
+  outline: 3px solid white;
+  outline-offset: 3px;
+}
+@media (min-width: 1150px) {
+  .bonus-grid {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+}
+@media (max-width: 900px) {
+  .manage-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .manage-grid > .reward-stats {
+    position: static;
+    padding: 10px;
+  }
+  .manage-grid .reward-stats h2 {
+    display: none;
+  }
+  .manage-grid .reward-stats dl {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 8px 16px;
+    font-size: 0.75rem;
+  }
+  .manage-content {
+    gap: 16px;
+  }
+}
+@media (max-width: 580px) {
+  .shop-shell:has(.manage-screen) {
+    padding-inline: 8px;
+  }
+  .manage-screen .shop-offers {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .inventory-columns {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  .manage-grid .reward-stats dl {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .bonus-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .manage-screen .shop-actions small {
+    display: none;
+  }
+  .manage-screen .shop-actions {
+    padding: 6px;
+  }
+  .manage-screen .shop-actions .button {
+    min-height: 44px;
+  }
+  .manage-screen .shop-top {
+    padding: 8px;
+  }
+  .manage-screen .shop-top h1 {
+    font-size: 1.25rem;
+  }
+  .manage-grid {
+    gap: 12px;
+  }
+  .manage-screen .shop-offer {
+    min-height: 182px;
+  }
+  .manage-screen .shop-offer > .item-art {
+    display: block;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .level-card {
+    transition: none !important;
+  }
+}
+@media (forced-colors: active) {
+  .level-card {
+    border-color: CanvasText !important;
+  }
+}
+.manage-screen .shop-offer > .level-badge {
+  display: inline-flex;
+  left: auto;
+  color: var(--level);
+}
+.manage-screen .reserve-grid > article {
+  display: flex;
+}
+.forge-dialog {
+  width: min(540px, calc(100vw - 32px));
+  max-height: calc(100dvh - 32px);
+  padding: 24px;
+  border: 2px solid #d6b06b;
+  border-radius: 12px;
+  color: #f3f5fc;
+  background: #182433;
+}
+.forge-dialog::backdrop {
+  background: #070e18a8;
+}
+.forge-dialog h2 {
+  font-size: 1.3rem;
+}
+.forge-dialog p {
+  color: #c1d1e6;
+  font-size: 0.8rem;
+}
+.forge-dialog .forge-ingredient {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-block: 8px;
+  padding: 8px;
+  font-size: 0.75rem;
+}
+.forge-dialog .forge-ingredient .item-art {
+  width: 32px;
+  height: 32px;
+}
+.forge-dialog select {
+  margin-inline-start: auto;
+  min-width: 0;
+}
+
+/* Keep the shop, equipped slots, reserve and passive upgrades distinct. */
+.manage-content {
+  display: grid;
+  grid-template-columns: minmax(250px, 0.8fr) minmax(360px, 1.4fr);
+  align-items: start;
+}
+.manage-screen .shop-offers {
+  grid-template-columns: 1fr;
+}
+.manage-screen .shop-offer {
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr);
+  min-height: 132px;
+  padding: 32px 12px 12px;
+  text-align: left;
+  align-items: start;
+}
+.manage-screen .shop-offer > .item-art {
+  grid-row: 1 / 4;
+  width: 48px;
+  height: 48px;
+}
+.manage-screen .shop-offer h3 {
+  font-size: 0.95rem;
+}
+.manage-screen .shop-offer p {
+  font-size: 0.8rem;
+}
+.manage-screen .shop-offer .button {
+  grid-column: 2;
+  justify-self: start;
+}
+.manage-screen .shop-offer.bought {
+  display: flex;
+  min-height: 132px;
+  align-items: center;
+}
+.manage-screen .loadout > section + section {
+  margin-top: 24px;
+}
+.manage-screen .loadout h3 {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 0 0 12px;
+  font-size: 0.9rem;
+}
+.manage-screen .loadout h3 > span {
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: #b8c9dc;
+}
+.manage-screen .panel-heading .inventory-total {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #fff;
+}
+.equipped-grid,
+.manage-screen .reserve-grid,
+.module-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+}
+.equipped-grid {
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+}
+.manage-screen .ammo-chip {
+  min-height: 174px;
+  padding: 32px 10px 10px;
+  gap: 8px;
+}
+.manage-screen .ammo-copy b {
+  font-size: 0.85rem;
+}
+.manage-screen .ammo-effect {
+  font-size: 0.75rem;
+  line-height: 1.4;
+  font-weight: 400;
+  color: #c7d5e6;
+}
+.manage-screen .ammo-action {
+  font-size: 0.75rem;
+  background: #263b4d;
+  border: 1px solid #607a94;
+}
+.manage-screen .ammo-chip.active {
+  box-shadow: inset 0 -4px #b4e7ff !important;
+}
+.stack-count {
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: #fff;
+  padding: 4px 0;
+}
+.manage-screen .inventory-stack {
+  gap: 6px;
+}
+.manage-screen .inventory-stack > .text-button {
+  border: 1px solid #5b7088;
+  border-radius: 6px;
+}
+.empty-slot {
+  min-height: 174px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  border: 1px dashed #62768d;
+  border-radius: 10px;
+  color: #a6bbd0;
+  font-size: 0.85rem;
+}
+.module-tile {
+  padding: 32px 12px 12px;
+}
+.module-tile b {
+  font-size: 0.85rem;
+}
+.module-tile small {
+  font-size: 0.75rem;
+  line-height: 1.5;
+}
+.loot-content {
+  overflow: auto;
+  flex: 1;
+  min-height: 0;
+  padding: 3px;
+}
+.loot-screen .loot-grid {
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+}
+.loot-screen .loot-card {
+  padding: 34px 16px 16px;
+  gap: 12px;
+}
+.loot-screen .loot-card .item-art {
+  width: 68px;
+  height: 68px;
+}
+.loot-screen .loot-card h3 {
+  font-size: 1rem;
+}
+.loot-screen .loot-card p,
+.loot-screen .loot-card small {
+  font-size: 0.8rem;
+}
+.loot-screen .bonus-grid {
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+.loot-complete {
+  padding: 64px 24px;
+  text-align: center;
+}
+@media (max-width: 1100px) {
+  .manage-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .manage-grid > .reward-stats {
+    position: static;
+  }
+  .manage-grid .reward-stats dl {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  .manage-grid .reward-stats h2 {
+    display: none;
+  }
+}
+@media (max-width: 720px) {
+  .manage-content {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .manage-screen .shop-offers {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .manage-screen .shop-offer {
+    display: flex;
+    text-align: center;
+    align-items: center;
+  }
+  .manage-screen .shop-offer .button {
+    margin-top: auto;
+  }
+  .manage-grid .reward-stats dl {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+.inventory-summary {
+  margin: 0 0 16px;
+  color: #bed0e4;
+  font-size: 0.8rem;
+}
+@media (min-width: 721px) {
+  .manage-screen .shop-offer {
+    min-height: 114px;
+    gap: 6px 10px;
+    padding-top: 26px;
+  }
+  .manage-screen .shop-offers {
+    gap: 8px;
+  }
+}
+.power-emblem {
+  display: block;
+  width: 72px;
+  height: 72px;
+  object-fit: contain;
+}
+.rail-step {
+  justify-items: center;
+  opacity: 0.65;
+}
+.rail-step.active {
+  opacity: 1;
+}
+.mobile-tier-strip .power-emblem {
+  width: 48px;
+  height: 48px;
+}
+.quiz-tools {
+  flex-wrap: wrap;
+  gap: 16px;
+}
+/* Loot is a centered decision panel; the shop leads into inventory below. */
+.loot-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: safe center;
+  align-items: center;
+}
+.loot-screen .loot-panel {
+  width: min(1080px, 100%);
+  box-sizing: border-box;
+}
+.manage-content {
+  display: flex;
+  flex-direction: column;
+}
+.manage-screen .market-panel,
+.manage-screen .loadout {
+  width: 100%;
+  box-sizing: border-box;
+}
+.manage-screen .shop-offers {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+.manage-screen .shop-offer {
+  display: flex;
+  align-items: center;
+  text-align: center;
+}
+@media (max-width: 720px) {
+  .manage-screen .shop-offers {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.manage-screen .shop-actions {
+  justify-content: flex-end;
+}
+
+/* Compact cards give their artwork priority over chrome. */
+.marine-avatar {
+  width: 96px;
+  height: 96px;
+  margin: 0 auto 12px;
+  border: 2px solid #7097b4;
+  border-radius: 50%;
+  background: #294158
+    url("./assets/characters/marine/armed/runtime/idle-s.webp") -48px -16px /
+    960px 1152px no-repeat;
+}
+.level-card.legendary {
+  --level: #c68aff;
+}
+.rarity-dot {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #b9c5d4;
+}
+.rarity-dot.green {
+  background: #70e790;
+}
+.rarity-dot.blue {
+  background: #40bfff;
+}
+.rarity-dot.purple {
+  background: #c68aff;
+}
+.reward-shell .level-card {
+  padding-top: 16px;
+}
+.manage-screen .shop-offer,
+.manage-screen .shop-offer.bought {
+  min-height: 0;
+  padding: 8px;
+  gap: 4px;
+}
+.manage-screen .shop-offer > .item-art {
+  width: 76px;
+  height: 76px;
+}
+.manage-screen .ammo-chip {
+  min-height: 0;
+  padding: 6px;
+  gap: 3px;
+}
+.manage-screen .ammo-chip .item-art {
+  width: 64px;
+  height: 64px;
+}
+.manage-screen .ammo-effect {
+  display: none;
+}
+.manage-screen .empty-slot {
+  min-height: 128px;
+}
+.manage-screen .shop-offers,
+.manage-screen .reserve-grid,
+.equipped-grid {
+  gap: 8px;
+}
+.manage-screen .loadout > section + section {
+  margin-top: 12px;
+}
+.manage-screen .loadout h3 {
+  margin-bottom: 6px;
+}
+.manage-screen .inventory-summary {
+  margin-bottom: 8px;
+}
+.manage-content {
+  gap: 12px;
+}
+.manage-screen .inventory-stack {
+  gap: 3px;
+}
+.manage-screen .stack-count {
+  font-size: 0.75rem;
+  padding: 0;
+}
+.loot-screen .loot-card {
+  padding: 12px;
+  gap: 8px;
+}
+.loot-screen .loot-card .item-art {
+  width: 88px;
+  height: 88px;
+}
+.portal-bubble {
+  font-family: var(--font-display);
+}
+
+.manage-screen .inventory-six {
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+}
+.inventory-pager {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 8px;
+  font-size: 0.75rem;
+}
+.manage-screen .inventory-tools {
+  margin-top: 8px;
+}
+.manage-screen .merge-row[open] {
+  position: fixed;
+  z-index: 20;
+  inset: 50% auto auto 50%;
+  transform: translate(-50%, -50%);
+  width: min(480px, calc(100vw - 32px));
+  max-height: 70dvh;
+  overflow: auto;
+  padding: 16px;
+  border: 1px solid #7e95ad;
+  border-radius: 12px;
+  background: #152130;
+  box-shadow: 0 0 0 100vmax #090f188c;
+}
+@media (min-width: 801px) {
+  .manage-grid {
+    grid-template-columns: 168px minmax(0, 1fr);
+    gap: 12px;
+  }
+  .manage-grid .reward-stats dl {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  .manage-grid .reward-stats h2 {
+    display: block;
+  }
+}
+@media (max-width: 800px) {
+  .manage-grid {
+    gap: 8px;
+  }
+  .manage-grid > .reward-stats {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px;
+  }
+  .manage-grid .marine-avatar {
+    width: 64px;
+    height: 64px;
+    flex: 0 0 64px;
+    margin: 0;
+    background-size: 640px 768px;
+    background-position: -32px -11px;
+  }
+  .manage-grid .reward-stats dl {
+    flex: 1;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 4px 8px;
+  }
+  .manage-grid .reward-stats dl > div {
+    display: block;
+  }
+  .manage-screen .inventory-six {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .manage-screen .shop-offers {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .manage-screen .shop-offer {
+    display: grid;
+    grid-template-columns: 64px minmax(0, 1fr);
+    text-align: left;
+    gap: 2px 4px;
+  }
+  .manage-screen .shop-offer > .item-art {
+    width: 64px;
+    height: 64px;
+    grid-row: 1 / 3;
+  }
+  .manage-screen .shop-offer p {
+    display: none;
+  }
+  .manage-screen .shop-offer .button {
+    grid-column: 2;
+    padding: 4px;
+    min-height: 32px;
+  }
+  .manage-screen .market-panel,
+  .manage-screen .loadout {
+    padding: 8px;
+  }
+  .manage-screen .panel-heading {
+    margin-bottom: 6px;
+  }
+  .manage-screen .ammo-chip .item-art {
+    width: 56px;
+    height: 56px;
+  }
+  .manage-screen .ammo-chip {
+    padding: 4px;
+  }
+  .manage-screen .ammo-action {
+    padding: 2px 6px;
+  }
+  .manage-screen .text-button {
+    min-height: 28px;
+    padding: 2px 6px;
+  }
+  .manage-screen .empty-slot {
+    min-height: 110px;
+  }
+  .manage-screen .inventory-six {
+    gap: 6px;
+  }
+  .manage-screen .inventory-summary {
+    margin-bottom: 6px;
+  }
+  .manage-content {
+    gap: 8px;
+  }
+  .manage-screen .stack-count {
+    line-height: 1.2;
+  }
+  .manage-screen .shop-top .flow-step {
+    display: none;
+  }
+  .manage-grid .reward-stats dt {
+    font-size: 10px;
+  }
+}
+/* Keep paging and inventory actions on one compact row. */
+.manage-screen .loadout {
+  display: flow-root;
+}
+.inventory-pager {
+  float: right;
+  margin-top: 8px;
+}
+.manage-screen .inventory-tools {
+  min-height: 40px;
+  align-items: center;
+}
+@media (min-width: 801px) {
+  .manage-screen .shop-offer {
+    display: grid;
+    grid-template-columns: 76px minmax(0, 1fr);
+    text-align: left;
+    gap: 4px 8px;
+  }
+  .manage-screen .shop-offer > .item-art {
+    grid-row: 1 / 4;
+  }
+  .manage-screen .shop-offer .button {
+    grid-column: 2;
+    width: 100%;
+  }
+  .manage-screen .shop-offer p {
+    line-height: 1.2;
+  }
+}
+@media (max-width: 800px) {
+  .manage-screen .shop-offers {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 4px;
+  }
+  .manage-screen .shop-offer {
+    display: flex;
+    padding: 4px;
+    text-align: center;
+  }
+  .manage-screen .shop-offer h3 {
+    font-size: 0.75rem;
+    line-height: 1.15;
+  }
+  .manage-screen .shop-offer .button {
+    width: 100%;
+  }
+  .manage-screen .shop-offer > .item-art {
+    width: 64px;
+    height: 64px;
+  }
+  .manage-screen .ammo-copy b {
+    font-size: 0.75rem;
+  }
+  .manage-screen .shop-actions {
+    justify-content: flex-end;
+  }
+  .manage-grid .reward-stats dt {
+    font-size: 0.75rem;
+  }
+  .manage-grid .reward-stats dl {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.stats-toggle {
+  display: none;
+}
+.manage-screen .panel-heading {
+  margin-bottom: 8px;
+}
+@media (max-width: 800px) {
+  .manage-grid > .reward-stats {
+    position: relative;
+    padding: 4px 8px;
+  }
+  .manage-grid .stats-toggle {
+    display: block;
+  }
+  .manage-grid .reward-stats dl {
+    display: none;
+  }
+  .manage-grid .reward-stats.stats-expanded dl {
+    display: grid;
+    position: absolute;
+    z-index: 10;
+    top: 100%;
+    inset-inline: 0;
+    padding: 16px;
+    background: #152130;
+    border: 1px solid #7097b4;
+    border-radius: 8px;
+    box-shadow: 0 12px 30px #0009;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .manage-screen .market-panel,
+  .manage-screen .loadout {
+    border: 1px solid #435064;
+    border-image: none;
+    padding: 6px;
+  }
+  .manage-screen .panel-heading .button {
+    min-height: 32px;
+    padding: 4px 8px;
+  }
+  .manage-screen .panel-heading {
+    margin-bottom: 4px;
+  }
+  .manage-screen .inventory-summary {
+    margin-bottom: 4px;
+  }
+  .manage-screen .shop-offer {
+    padding: 3px;
+  }
+  .manage-screen .shop-actions {
+    padding-block: 4px;
+  }
+  .manage-screen .shop-actions > div {
+    width: auto;
+  }
+}
+
+@media (max-width: 800px) {
+  .manage-screen .inventory-stack {
+    gap: 1px;
+  }
+  .manage-screen .inventory-six {
+    row-gap: 4px;
+  }
+  .manage-screen .inventory-tools,
+  .manage-screen .inventory-pager {
+    margin-top: 4px;
+  }
+}
+.manage-screen .ammo-chip {
+  touch-action: none;
+  user-select: none;
+  cursor: grab;
+}
+.manage-screen .ammo-chip.ammo-dragging {
+  opacity: 0.55;
+  cursor: grabbing;
+}
+.manage-screen .ammo-chip.merge-target {
+  outline: 2px dashed #fff;
+  outline-offset: 2px;
+}
+/* Action feedback shares the footer, so it never pushes inventory offscreen. */
+.manage-screen {
+  position: relative;
+}
+.battle-overlay .manage-screen .shop-message:not(:empty) {
+  position: absolute;
+  z-index: 2;
+  inset: auto 180px 12px 14px;
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  pointer-events: none;
+  font-size: 0.75rem;
+}
+@media (max-width: 800px) {
+  .battle-overlay .manage-screen .shop-message:not(:empty) {
+    inset-inline: 8px 150px;
+    bottom: 10px;
+  }
+}

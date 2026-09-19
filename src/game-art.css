@@ -1,0 +1,707 @@
+/* Compact UI layout with the approved, subtler v002 artwork. */
+:root {
+  --mom-cyan: #27dce8;
+}
+.item-art {
+  display: inline-block;
+  width: 72px;
+  height: 72px;
+  object-fit: contain;
+  vertical-align: middle;
+  flex: 0 0 auto;
+  pointer-events: none;
+}
+.reward-art {
+  display: block;
+  width: 88px;
+  height: 84px;
+  margin: 0 auto 1rem;
+}
+.cache-art {
+  display: block;
+  width: 96px;
+  height: 80px;
+  margin: 0 auto 1rem;
+}
+.ui-glyph {
+  display: inline-flex;
+  width: 1.2em;
+  height: 1.2em;
+  vertical-align: -0.2em;
+  flex-shrink: 0;
+  margin-right: 0.4em;
+}
+.ui-glyph svg {
+  width: 100%;
+  height: 100%;
+}
+.button.primary,
+.button.launch,
+.button.forge,
+.button.secondary {
+  border: 1px solid #3a4657;
+  border-radius: 10px;
+  padding: 0.5rem 0.8rem 0.7rem;
+  background: #1b2636;
+  color: #081936;
+  box-shadow: none;
+}
+.button:focus-visible,
+.keypad button:focus-visible,
+.ammo-chip:focus-visible {
+  outline: 3px solid #27dce8;
+  outline-offset: 3px;
+}
+.icon-button,
+.keypad button {
+  border: 1px solid #3a4657;
+  border-radius: 10px;
+  color: #fff4db;
+  background: #1b2636;
+  box-shadow: none;
+}
+.icon-button .ui-glyph {
+  margin: 0;
+}
+.keypad .key-check {
+  color: #081936;
+}
+.keypad .key-muted {
+  color: #fff4db;
+  background: #1b2636;
+}
+.question-panel,
+.correction-card,
+.track-dialog,
+.pause-dialog {
+  border: 1px solid #3a4657;
+  border-radius: 10px;
+  background: #1b2636;
+  color: #fff4db;
+  box-shadow: none;
+}
+.question-copy,
+.correction-card {
+  color: #fff4db;
+}
+.question-copy .text-button,
+.correction-card .text-button {
+  color: #d1dbe9;
+}
+.question-copy label,
+.correction-card label {
+  color: #fff4db;
+}
+.answer-field,
+#correction-input {
+  border: 1px solid #3a4657;
+  background: #1b2636;
+  border-radius: 10px;
+  color: #fff4db;
+  padding: 0.35rem 0.75rem;
+}
+.market-panel,
+.loadout,
+.hint-box {
+  border: 1px solid #3a4657;
+  background: #1b2636;
+  border-radius: 10px;
+  color: #fff4db;
+  box-shadow: none;
+}
+.reward-card,
+.cache-card {
+  border: 1px solid #3a4657;
+  background: #1b2636;
+  border-radius: 10px;
+  color: #fff4db;
+  box-shadow: none;
+  padding: 1rem;
+}
+.reward-card::before {
+  display: none;
+}
+.reward-card > p:not(.eyebrow):not(.stat-gain),
+.cache-card > p:not(.eyebrow),
+.shop-offer p {
+  color: #c5d2e6;
+}
+.card-index {
+  top: 0.5rem;
+  right: 0.5rem;
+  color: #c5d2e6;
+}
+.shop-offer {
+  background: #10213e;
+}
+.shop-offer > .item-art {
+  display: block;
+  margin: 0.5rem 0;
+  width: 88px;
+  height: 84px;
+}
+.salvage-chip {
+  position: relative;
+  padding-left: 64px;
+}
+.salvage-chip > .item-art {
+  position: absolute;
+  width: 48px;
+  height: 48px;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+.salvage-hud {
+  position: relative;
+  padding-left: 36px;
+}
+.salvage-hud > .item-art {
+  position: absolute;
+  width: 32px;
+  height: 32px;
+  left: 0;
+  top: 4px;
+}
+.ammo-slot,
+.loaded-ammo > div > span,
+.loaded-ammo > div > i {
+  border: 1px solid #3a4657;
+  background: #1b2636;
+  border-radius: 10px;
+}
+.ammo-slot {
+  width: 60px;
+  height: 60px;
+  padding: 3px;
+}
+.ammo-chip {
+  background: #10213e;
+}
+.ammo-chip.active {
+  outline: 2px solid #27dce8;
+  outline-offset: 2px;
+}
+.loaded-ammo > div > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  color: #fff4db;
+}
+.loaded-ammo .item-art {
+  width: 32px;
+  height: 32px;
+}
+.forge-ingredient .item-art {
+  width: 48px;
+  height: 48px;
+  margin-right: 0.6rem;
+}
+.forge-hero {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin: 1rem 0;
+}
+.forge-hero > .item-art {
+  width: 110px;
+  height: 110px;
+}
+.legendary-crest {
+  width: 64px;
+  height: 72px;
+  background: url("./assets/ui/runtime/ui_legendary_crest.webp") center /
+    contain no-repeat;
+}
+.hp-track {
+  height: 8px;
+  padding: 0;
+  background: #354253;
+  border: 0;
+  border-radius: 4px;
+  box-shadow: none;
+}
+.hp-track i {
+  height: 100%;
+  background: #72c9c6;
+  border-radius: inherit;
+}
+.joystick {
+  background: #172334b3;
+  border: 1px solid #a5b4c077;
+  box-shadow: none;
+}
+.joystick::before,
+.joystick::after {
+  display: none;
+}
+.joystick #stick-knob {
+  background: #d7e1e5;
+  border: 1px solid #62768b;
+  box-shadow: none;
+}
+.medkit-button {
+  border: 1px solid #3a4657;
+  background: #1b2636;
+  border-radius: 10px;
+  color: #fff4db;
+  gap: 0;
+}
+.medkit-button > .item-art {
+  width: 42px;
+  height: 36px;
+}
+.summary-mark {
+  width: 88px;
+  height: 80px;
+  border-radius: 10px;
+  background: transparent center / contain no-repeat;
+  box-shadow: none;
+}
+.summary-mark i {
+  display: none;
+}
+.summary-mark.victory {
+  background-image: url("./assets/ui/runtime/ui_victory_badge.webp");
+}
+.summary-mark.defeat {
+  background-image: url("./assets/ui/runtime/ui_defeat_badge.webp");
+}
+@media (max-width: 600px) {
+  .question-panel,
+  .correction-card,
+  .track-dialog,
+  .pause-dialog {
+    border-width: 1px;
+    padding: 0.7rem;
+  }
+  .reward-card,
+  .cache-card {
+    padding: 0.75rem;
+    border-width: 1px;
+  }
+  .market-panel,
+  .loadout {
+    border-width: 1px;
+    padding: 0.7rem;
+  }
+  .reward-art {
+    width: 96px;
+    height: 88px;
+  }
+  .cache-art {
+    width: 108px;
+    height: 88px;
+  }
+  .salvage-hud {
+    padding-left: 0;
+  }
+  .salvage-hud > .item-art {
+    display: none;
+  }
+  .forge-ingredient .item-art {
+    width: 32px;
+    height: 32px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mom-control {
+    transition: none;
+  }
+}
+.keypad button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+}
+.keypad button .ui-glyph {
+  margin: 0;
+}
+.quiz-tools,
+.question-copy .input-error {
+  color: #c5d2e6;
+}
+.supply-marker {
+  width: 42px;
+  height: 36px;
+  margin-right: 0.5rem;
+}
+@media (max-width: 600px) {
+  .combat-hud.top-left {
+    padding: 0.5rem;
+  }
+  .combat-hud .meter-stack {
+    width: 31vw;
+  }
+  .combat-hud .hud-label {
+    display: block;
+  }
+  .combat-hud .hud-label b {
+    display: block;
+    margin-top: 0.25rem;
+    white-space: nowrap;
+  }
+  .wave-badge {
+    left: 55%;
+  }
+  .touch-controls {
+    bottom: max(2.8rem, env(safe-area-inset-bottom));
+  }
+}
+
+.button {
+  background: #293648;
+  color: #eef1f4;
+  border: 1px solid #3a4657;
+  box-shadow: none;
+}
+
+/* One accent for actions; secondary controls and nested content stay neutral. */
+body {
+  background: #121923;
+}
+.button.primary,
+.button.launch,
+.button.forge,
+.keypad .key-check {
+  background: #ec9a58;
+  border-color: transparent;
+  color: #17202c;
+}
+.button.secondary {
+  background: #293648;
+  color: #eef1f4;
+}
+.button.primary,
+.button.launch,
+.button.forge,
+.button.secondary {
+  padding: 0.75rem 1rem;
+}
+.icon-button,
+.keypad button {
+  background: #293648;
+  color: #eef1f4;
+}
+.keypad .key-muted {
+  background: #222d3d;
+  color: #c3cdd9;
+}
+.question-panel,
+.correction-card,
+.track-dialog,
+.pause-dialog,
+.market-panel,
+.loadout,
+.reward-card,
+.cache-card {
+  background: #1b2636;
+  color: #eef1f4;
+}
+.question-panel,
+.correction-card {
+  padding: clamp(1rem, 3vw, 1.7rem);
+}
+.answer-field,
+#correction-input,
+.fraction-fields input {
+  background: #121c2a;
+  color: #eef1f4;
+  border: 1px solid #71859b;
+  border-radius: 8px;
+}
+.answer-field:focus-within,
+#correction-input:focus,
+.fraction-fields input:focus {
+  border-color: #9ed6d3;
+}
+.market-panel,
+.loadout {
+  padding: clamp(1rem, 3vw, 1.4rem);
+}
+.shop-offer,
+.hint-box,
+.summary-stats > div {
+  background: #222f41;
+  border: 0;
+  box-shadow: none;
+  border-radius: 8px;
+}
+.reward-card,
+.cache-card {
+  padding: 1.25rem;
+}
+.reward-card .stat-gain {
+  background: transparent;
+  padding-inline: 0;
+}
+.ammo-slot {
+  border: 0;
+  background: transparent;
+}
+.ammo-chip {
+  background: #222f41;
+  box-shadow: none;
+}
+.ammo-chip.active {
+  outline: 1px solid #9ed6d3;
+  outline-offset: 1px;
+}
+.loaded-ammo > div > span,
+.loaded-ammo > div > i {
+  border: 1px solid #3a4657;
+  background: #222f41;
+}
+.hint-box {
+  padding: 1rem;
+}
+.card-index,
+.shop-offer > span,
+.supply-marker,
+.legendary-crest {
+  display: none;
+}
+.combat-hud,
+.wave-badge,
+.salvage-chip,
+.countdown,
+.rarity-rail,
+.mobile-tier,
+.omni-progress,
+.loading-progress {
+  background: #1b2636;
+  box-shadow: none;
+  border: 0;
+  border-radius: 8px;
+}
+.medkit-button {
+  background: #1b2636e6;
+  border: 1px solid #62768b;
+}
+.eyebrow {
+  letter-spacing: 0.1em;
+}
+.button .ui-glyph,
+.text-button .ui-glyph,
+.ammo-action .ui-glyph,
+.stat-gain .ui-glyph {
+  display: none;
+}
+.keypad button[data-key="back"] .ui-glyph {
+  display: inline-flex;
+}
+.keypad button[data-key="check"] .ui-glyph {
+  display: none;
+}
+.mom-control:hover:not(:disabled) {
+  filter: brightness(1.06);
+}
+@media (max-width: 600px) {
+  .question-panel,
+  .correction-card,
+  .track-dialog,
+  .pause-dialog {
+    padding: 1rem;
+  }
+  .reward-art {
+    width: 80px;
+    height: 76px;
+  }
+  .cache-art {
+    width: 80px;
+    height: 68px;
+  }
+}
+
+.portal-track:has(input:checked) {
+  background: #293a49;
+  border-color: #9ed6d3;
+  box-shadow: none;
+}
+html body {
+  background: #121923;
+}
+@media (forced-colors: active) {
+  .button,
+  .icon-button,
+  .keypad button,
+  .question-panel,
+  .correction-card,
+  .track-dialog,
+  .pause-dialog,
+  .reward-card,
+  .cache-card,
+  .answer-field,
+  #correction-input,
+  .market-panel,
+  .loadout {
+    border: 2px solid ButtonText;
+    background: Canvas;
+    color: CanvasText;
+  }
+}
+
+/* Pause over the current zone instead of replacing it with an opaque screen. */
+.pause-overlay.mission-pause {
+  background: rgb(7 12 20 / 48%);
+  backdrop-filter: none;
+}
+.mission-pause .pause-dialog {
+  width: min(320px, 100%);
+  padding: 24px;
+  background: rgb(27 38 54 / 92%);
+  border: 1px solid #647489;
+  border-radius: 12px;
+  box-shadow: 0 16px 48px #0006;
+}
+.mission-pause .pause-dialog h2 {
+  margin: 0 0 16px;
+  font-size: 1.5rem;
+}
+.mission-pause .pause-dialog .pause-exit-note {
+  margin: 8px 0 0;
+  color: #c3cdd9;
+  font-size: 0.75rem;
+}
+.mission-pause .button,
+.mission-pause .text-button {
+  min-height: 44px;
+}
+/* Slice the approved frames so content and hit areas remain responsive. */
+@media (forced-colors: none) {
+  .question-panel,
+  .correction-card,
+  .track-dialog,
+  .pause-dialog,
+  .mission-pause .pause-dialog {
+    border: 12px solid transparent;
+    border-image: url("./assets/ui/runtime/ui_console_panel.webp") 90 fill /
+      12px;
+    background: transparent;
+  }
+  .market-panel,
+  .loadout,
+  .hint-box {
+    border: 8px solid transparent;
+    border-image: url("./assets/ui/runtime/ui_inset_panel.webp") 50 fill / 8px;
+    background: transparent;
+  }
+  .reward-card,
+  .cache-card,
+  .app-shell.reward-shell .reward-card {
+    border: 10px solid transparent;
+    border-image: url("./assets/ui/runtime/ui_reward_card.webp") 70 fill / 10px;
+    background: transparent;
+  }
+  .app-shell.reward-shell .reward-card {
+    outline: 1px solid var(--rarity);
+    outline-offset: -3px;
+  }
+  .button.primary,
+  .button.launch,
+  .button.forge,
+  .keypad .key-check {
+    border: 6px solid transparent;
+    border-image: url("./assets/ui/runtime/ui_button_primary.webp") 35 90 fill /
+      6px 16px;
+    background: transparent;
+    color: #17202c;
+  }
+  .button.secondary {
+    border: 6px solid transparent;
+    border-image: url("./assets/ui/runtime/ui_button_secondary.webp") 35 90
+      fill / 6px 16px;
+    background: transparent;
+    color: #17202c;
+  }
+  .icon-button,
+  .keypad button:not(.key-check),
+  .medkit-button {
+    border: 5px solid transparent;
+    border-image: url("./assets/ui/runtime/ui_button_icon.webp") 90 fill / 5px;
+    background: transparent;
+  }
+  .answer-field,
+  #correction-input,
+  .fraction-fields input {
+    border: 6px solid transparent;
+    border-image: url("./assets/ui/runtime/ui_answer_field.webp") 35 65 fill /
+      6px 12px;
+    background: transparent;
+  }
+  .ammo-slot,
+  .loaded-ammo > div > span,
+  .loaded-ammo > div > i {
+    border: 4px solid transparent;
+    border-image: url("./assets/ui/runtime/ui_item_slot.webp") 100 fill / 4px;
+    background: transparent;
+  }
+  .hp-track {
+    height: 16px;
+    border: 4px solid transparent;
+    border-image: url("./assets/ui/runtime/ui_hud_bar.webp") 30 60 fill / 4px
+      8px;
+    background: transparent;
+  }
+  .joystick {
+    border: 0;
+    background: url("./assets/ui/runtime/ui_joystick_base.webp") center /
+      contain no-repeat;
+  }
+  .joystick #stick-knob {
+    border: 0;
+    background: url("./assets/ui/runtime/ui_joystick_knob.webp") center /
+      contain no-repeat;
+  }
+  .legendary-crest {
+    display: block;
+  }
+}
+@media (forced-colors: active) {
+  .mission-pause .pause-dialog {
+    background: Canvas;
+    border-color: CanvasText;
+  }
+}
+
+/* Wave chest count shares the resource HUD with salvage. */
+.top-right > .chest-hud {
+  display: grid;
+  position: relative;
+  padding-inline-start: 36px;
+}
+.chest-hud > span {
+  position: absolute;
+  inset-inline-start: 0;
+  top: 4px;
+}
+.chest-hud .item-art {
+  width: 32px;
+  height: 32px;
+}
+#chest-count,
+#salvage-count {
+  font-variant-numeric: tabular-nums;
+}
+@media (max-width: 700px) {
+  .combat-hud.top-right {
+    top: max(80px, calc(env(safe-area-inset-top) + 72px));
+    gap: 12px;
+  }
+  .top-right > .salvage-hud,
+  .top-right > .chest-hud {
+    display: grid;
+    min-width: 46px;
+    padding-inline-start: 0;
+  }
+  .chest-hud > span,
+  .top-right > .salvage-hud > .item-art {
+    display: none;
+  }
+  .top-right > #pause-button {
+    position: absolute;
+    inset-inline-end: 0;
+    bottom: calc(100% + 12px);
+  }
+}

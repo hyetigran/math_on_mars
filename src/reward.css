@@ -1,0 +1,360 @@
+/* Keep the entire post-wave choice visible alongside the current build. */
+.app-shell.reward-shell {
+  display: flex;
+  flex-direction: column;
+  background: radial-gradient(ellipse at 65% 45%, #243044, #121923 75%);
+}
+.reward-shell .topbar {
+  min-height: 60px;
+}
+.reward-shell .build-tag {
+  display: none;
+}
+.reward-shell .reward-screen {
+  width: min(1180px, 100%);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: clamp(12px, 3vh, 28px);
+  margin: 0 auto;
+  padding: 12px 0;
+}
+.reward-shell .reward-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  text-align: left;
+}
+.reward-shell .reward-heading h1 {
+  margin: 0;
+  font-size: clamp(1.25rem, 3vw, 2rem);
+}
+.reward-heading > span {
+  color: #bdc8d6;
+  white-space: nowrap;
+  font-size: 0.875rem;
+}
+.reward-selection {
+  display: grid;
+  grid-template-columns: 210px minmax(0, 1fr);
+  align-items: stretch;
+  gap: 20px;
+}
+.reward-stats {
+  padding: 20px 16px;
+  border: 1px solid #435064;
+  border-radius: 10px;
+  background: #121c2a;
+}
+.reward-stats h2 {
+  margin: 0 0 20px;
+  font-size: 1rem;
+}
+.reward-stats dl {
+  display: grid;
+  gap: 14px;
+  margin: 0;
+  font-size: 0.8rem;
+}
+.reward-stats dl > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+.reward-stats dt {
+  color: #bdc8d6;
+}
+.reward-stats dd {
+  margin: 0;
+  color: #a9e0bd;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.reward-shell .reward-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+.reward-shell .reward-card {
+  --rarity: #e5e2da;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  padding: 24px 12px;
+  border: 2px solid var(--rarity);
+  border-radius: 10px;
+  background: #1b2636;
+  color: #eef1f4;
+  text-align: center;
+  cursor: var(--game-cursor-pointer, pointer);
+  transition:
+    background-color 150ms ease,
+    scale 150ms ease;
+}
+.reward-shell .reward-card.green {
+  --rarity: #83d69a;
+}
+.reward-shell .reward-card.blue {
+  --rarity: #7cbfff;
+}
+.reward-shell .reward-card.purple {
+  --rarity: #c7a2ff;
+}
+.reward-shell .reward-card:hover {
+  transform: none;
+  background: #29384d;
+}
+.reward-shell .reward-card:active {
+  scale: 0.96;
+}
+.reward-shell .reward-card:focus-visible {
+  outline: 3px solid #fff0a6;
+  outline-offset: 4px;
+}
+.reward-shell .reward-art {
+  width: clamp(72px, 10vw, 128px);
+  height: clamp(72px, 10vw, 128px);
+  margin: 0;
+}
+.reward-shell .stat-gain {
+  display: grid;
+  align-content: center;
+  gap: 8px;
+  min-height: 0;
+  padding: 0;
+  margin: 0;
+  font-size: clamp(0.8rem, 1.3vw, 1rem);
+  font-weight: 700;
+  line-height: 1.4;
+}
+.reward-shell .card-quality {
+  margin: 0;
+  color: var(--rarity);
+  justify-content: center;
+  flex-wrap: wrap;
+  line-height: 1.4;
+}
+.reward-shell #exit-mission {
+  margin: 0 auto;
+  min-height: 44px;
+}
+@media (max-width: 700px) {
+  .reward-selection {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+  .reward-stats {
+    padding: 12px;
+  }
+  .reward-stats h2 {
+    margin-bottom: 12px;
+    font-size: 0.875rem;
+  }
+  .reward-stats dl {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px 20px;
+    font-size: 0.75rem;
+  }
+  .reward-shell .reward-grid {
+    gap: 8px;
+  }
+  .reward-shell .reward-card {
+    padding: 18px 6px;
+    gap: 16px;
+  }
+  .reward-shell .reward-art {
+    width: 64px;
+    height: 64px;
+  }
+  .reward-shell .stat-gain {
+    font-size: 0.75rem;
+  }
+  .reward-shell .card-quality {
+    font-size: 0.75rem;
+    gap: 4px;
+  }
+}
+@media (max-height: 500px) and (min-width: 701px) {
+  .reward-shell .topbar {
+    min-height: 48px;
+  }
+  .reward-shell .reward-screen {
+    gap: 8px;
+    padding: 4px 0;
+  }
+  .reward-stats {
+    padding: 12px;
+  }
+  .reward-stats h2 {
+    margin-bottom: 10px;
+  }
+  .reward-stats dl {
+    gap: 7px;
+  }
+  .reward-shell .reward-card {
+    padding: 10px;
+    gap: 10px;
+  }
+  .reward-shell .reward-art {
+    width: 64px;
+    height: 64px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .reward-shell .reward-card {
+    transition: none;
+  }
+  .reward-shell .reward-card:active {
+    scale: 1;
+  }
+}
+@media (forced-colors: active) {
+  .reward-shell .reward-card {
+    border-color: ButtonText;
+  }
+}
+/* The whole card is the action; keep automatic button icons out of its content. */
+.reward-shell .reward-card > .ui-glyph {
+  display: none;
+}
+@media (max-width: 360px) {
+  .reward-shell .reward-screen {
+    gap: 8px;
+    padding: 8px 0;
+  }
+  .reward-shell .reward-grid {
+    grid-template-columns: 1fr;
+  }
+  .reward-shell .reward-card {
+    display: grid;
+    grid-template-columns: 40px minmax(0, 1fr) 48px;
+    gap: 8px;
+    padding: 8px;
+    text-align: left;
+  }
+  .reward-shell .reward-art {
+    width: 40px;
+    height: 40px;
+  }
+  .reward-shell .stat-gain {
+    gap: 2px;
+    font-size: 0.75rem;
+  }
+  .reward-shell .card-quality {
+    font-size: 0.75rem;
+  }
+  .reward-selection {
+    gap: 8px;
+  }
+  .reward-stats dl {
+    gap: 8px 12px;
+  }
+}
+
+/* Supply drops use the same compact selection surface, with a separate sell action. */
+.supply-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+.supply-option {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.supply-shell .reward-card {
+  flex: 1;
+  width: 100%;
+  gap: 8px;
+  padding: 12px 8px;
+}
+.supply-shell .reward-art {
+  width: 64px;
+  height: 64px;
+}
+.supply-shell .stat-gain {
+  font-size: 0.85rem;
+}
+.supply-shell .supply-sell {
+  min-height: 36px;
+  margin: 0;
+  padding: 6px;
+  font-size: 0.8rem;
+}
+@media (max-width: 700px) {
+  .supply-shell .reward-screen {
+    gap: 8px;
+    padding: 8px 0;
+  }
+  .supply-shell .reward-selection {
+    gap: 8px;
+  }
+  .supply-grid {
+    gap: 8px;
+  }
+  .supply-shell .reward-card {
+    display: flex;
+    gap: 6px;
+    padding: 8px 4px;
+    text-align: center;
+  }
+  .supply-shell .reward-art {
+    width: 40px;
+    height: 40px;
+  }
+  .supply-shell .stat-gain {
+    font-size: 0.75rem;
+    min-height: 2.8em;
+  }
+  .supply-shell .card-quality {
+    font-size: 0.75rem;
+  }
+  .supply-shell .reward-stats {
+    padding: 10px;
+  }
+  .supply-shell .reward-stats h2 {
+    margin-bottom: 8px;
+  }
+  .supply-shell .reward-stats dl {
+    gap: 6px 12px;
+  }
+}
+@media (max-height: 500px) and (min-width: 701px) {
+  .supply-grid {
+    gap: 6px 10px;
+  }
+  .supply-shell .reward-card {
+    display: grid;
+    grid-template-columns: 40px 1fr;
+    padding: 6px;
+    gap: 4px 8px;
+    text-align: left;
+  }
+  .supply-shell .reward-art {
+    grid-row: span 2;
+    width: 40px;
+    height: 40px;
+  }
+  .supply-shell .stat-gain {
+    font-size: 0.75rem;
+  }
+  .supply-shell .card-quality {
+    justify-content: start;
+  }
+}
+@media (max-width: 360px) {
+  .supply-shell .topbar {
+    min-height: 48px;
+  }
+  .supply-shell .reward-card {
+    padding-block: 6px;
+  }
+  .supply-shell .reward-art {
+    width: 32px;
+    height: 32px;
+  }
+}

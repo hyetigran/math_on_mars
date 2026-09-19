@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en" data-profile-storage-key="math-on-mars-old-build-review">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Fresh portal mission regression</title>
+    <style>
+      aside button {
+        color: white;
+        background: #27394e;
+        border: 1px solid #8595a6;
+        padding: 6px;
+        margin-bottom: 6px;
+      }
+      aside button:disabled {
+        opacity: 0.5;
+      }
+    </style>
+  </head>
+  <body>
+    <main id="app"></main>
+    <div id="announcer" class="sr-only" role="status" aria-live="polite"></div>
+    <aside
+      style="
+        position: fixed;
+        top: 90px;
+        left: 12px;
+        z-index: 1000;
+        max-width: 260px;
+        background: #17202ce8;
+        padding: 10px;
+        border-radius: 10px;
+      "
+    >
+      <button id="walk-route">Walk around heater to portal</button>
+      <button id="enter-key">Press E</button>
+      <output id="test-result" style="display: block; font-size: 12px"></output>
+    </aside>
+    <script type="module">
+      import { IndexedProfileRepository } from "../src/indexeddb.ts";
+      import { RunSession } from "../src/session.ts";
+      const repository = new IndexedProfileRepository(
+        indexedDB,
+        document.documentElement.dataset.profileStorageKey,
+        localStorage,
+      );
+      const saved = await repository.load();
+      if (!saved.some((profile) => profile.activeRun)) {
+        const fixture = new RunSession(saved, { commit: () => {} });
+        const id = fixture.createProfile("Previous build fixture");
+        fixture.start(id, "3");
+        const profiles = fixture.profiles;
+        profiles.find((profile) => profile.id === id).activeRun.releaseVersion =
+          "0000000000000001";
+        await repository.commit(profiles, `seed-old-build-${id}`);
+      }
+      repository.close();
+      await import("../src/main.ts");
+      const result = document.querySelector("#test-result");
+      const route = document.querySelector("#walk-route");
+      const key = (type, value) =>
+        window.dispatchEvent(
+          new KeyboardEvent(type, { key: value, bubbles: true }),
+        );
+      document.querySelector("#enter-key").onclick = () => {
+        key("keydown", "e");
+        key("keyup", "e");
+      };
+      route.onclick = async () => {
+        const canvas = document.querySelector(".camp-canvas");
+        if (!canvas) {
+          result.textContent = "Return to base camp before walking the route.";
+          return;
+        }
+        route.disabled = true;
+        canvas.focus();
+        // Real key handlers, movement clock, collision and proximity checks.
+        for (const [value, milliseconds] of [
+          ["w", 340],
+          ["d", 820],
+          ["w", 1200],
+          ["a", 840],
+          ["w", 370],
+        ]) {
+          key("keydown", value);
+          await new Promise((resolve) => setTimeout(resolve, milliseconds));
+          key("keyup", value);
+        }
+        const bubble = document.querySelector(".portal-bubble");
+        result.textContent =
+          bubble && !bubble.hidden
+            ? "PASS: walked to portal; interaction bubble visible."
+            : "FAIL: portal did not become reachable.";
+        route.disabled = false;
+        if (bubble && !bubble.hidden) {
+          key("keydown", "e");
+          key("keyup", "e");
+          await new Promise((resolve) => setTimeout(resolve, 500));
+          const form = document.querySelector("#portal-mission-form");
+          if (!form) {
+            result.textContent = "FAIL: portal skipped fresh mission setup.";
+            return;
+          }
+          form.requestSubmit();
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+          const check = new IndexedProfileRepository(
+            indexedDB,
+            document.documentElement.dataset.profileStorageKey,
+            localStorage,
+          );
+          const profiles = await check.load();
+          check.close();
+          const run = profiles.find((profile) => profile.activeRun)?.activeRun;
+          result.textContent =
+            document.querySelector(".combat-screen") &&
+            run?.wave === 1 &&
+            run.releaseVersion !== "0000000000000001"
+              ? "PASS: portal started a fresh wave-one mission with current content."
+              : "FAIL: portal did not create a fresh mission.";
+          document.querySelector("#pause-button")?.click();
+        }
+      };
+    </script>
+  </body>
+</html>

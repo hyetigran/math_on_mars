@@ -13,8 +13,7 @@ async function visit(path) {
     }
   }
 }
-for (const folder of ["src", "content", "public", "scripts"])
-  await visit(folder);
+for (const folder of ["src", "content", "scripts"]) await visit(folder);
 for (const file of [
   "index.html",
   "package.json",

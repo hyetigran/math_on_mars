@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en" data-preview-run="true">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Game art integration fixtures</title>
+  </head>
+  <body>
+    <main id="app">
+      <h1>Game art integration fixtures</h1>
+      <p>
+        Each scenario uses a separate test profile. These controls open the real
+        game screens.
+      </p>
+      <div id="scenarios"></div>
+    </main>
+    <div id="announcer" role="status" aria-live="polite"></div>
+    <script type="module">
+      import { RunSession } from "../src/session.ts";
+      import { ProfileRepository } from "../src/persistence.ts";
+      import { CombatSimulation } from "../src/combat-rules.ts";
+      import { AMMO_TYPES } from "../src/types.ts";
+      const scenarios = [
+        "shop",
+        "merge",
+        "quiz",
+        "reward",
+        "correction",
+        "combat",
+        "wave-clear",
+        "loot",
+      ];
+      for (const kind of scenarios) {
+        const button = document.createElement("button");
+        button.textContent = `Open ${kind}`;
+        document.querySelector("#scenarios").append(button);
+        button.onclick = async () => {
+          const key = `math-on-mars-art-fixture-${crypto.randomUUID()}`;
+          document.documentElement.dataset.profileStorageKey = key;
+          const store = new ProfileRepository(localStorage, key);
+          let session = new RunSession([], store);
+          const id = session.createProfile("Art review");
+          session.start(id, "4");
+          let profiles = session.profiles;
+          const run = profiles[0].activeRun;
+          run.salvage = 100;
+          run.ammoCapacity = 3;
+          run.ammo = AMMO_TYPES.flatMap((type) =>
+            [1, 2, 3, 4].map((tier) => ({
+              id: crypto.randomUUID(),
+              type,
+              tier,
+            })),
+          );
+          if (kind === "merge") {
+            run.ammo = [
+              "Frost",
+              "Frost",
+              "Fiery",
+              "Fiery",
+              "Piercing",
+              "Piercing",
+            ].map((type, i) => ({
+              id: `merge-${i}`,
+              type,
+              tier: Math.floor(i / 2) + 1,
+            }));
+          }
+          run.activeAmmoIds = run.ammo
+            .filter((a) => a.tier === 3)
+            .slice(0, 3)
+            .map((a) => a.id);
+          if (kind === "merge") run.activeAmmoIds = ["merge-0"];
+          session = new RunSession(profiles, store);
+          if (kind === "wave-clear") {
+            const simulation = new CombatSimulation({ ...run, seed: 1 });
+            simulation.state.spawned = simulation.state.spawnTotal;
+            simulation.state.chestLoot = [
+              { id: "drop-1-4", type: "Frost", tier: 2 },
+              { id: "drop-1-8", type: "Fiery", tier: 1 },
+            ];
+            run.combatSave = simulation.serialize();
+            session = new RunSession(profiles, store);
+            store.commit(session.profiles);
+          } else if (kind !== "combat") {
+            session.finishWave(id, { hp: 70, salvage: 100, medkits: 2 });
+            if (kind === "loot") {
+              const snapshot = session.profiles;
+              snapshot[0].activeRun.waveLoot = [
+                { id: "review-loot-1", type: "Frost", tier: 3 },
+                { id: "review-loot-2", type: "Fiery", tier: 2 },
+                { id: "review-loot-3", type: "Multi Shot", tier: 4 },
+              ];
+              session = new RunSession(snapshot, store);
+              store.commit(session.profiles);
+            }
+            if (kind !== "quiz") {
+              for (let i = 0; i < 5; i++) {
+                const q = session.profile(id).activeRun.quiz.questions[i];
+                session.submit(
+                  id,
+                  q.id,
+                  kind === "correction" && i === 0
+                    ? "999"
+                    : `${q.answer[0]}/${q.answer[1]}`,
+                  8000,
+                );
+              }
+              if (kind !== "reward") {
+                session.chooseReward(
+                  id,
+                  session.profile(id).activeRun.quiz.rewardChoices[0].id,
+                );
+                if (kind === "shop" || kind === "merge") {
+                  session.openShop(id);
+                }
+              }
+            }
+          } else store.commit(session.profiles);
+          await import("../src/main.ts");
+        };
+      }
+    </script>
+  </body>
+</html>

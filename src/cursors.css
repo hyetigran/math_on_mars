@@ -1,0 +1,25 @@
+/* Cyan edge cursors. Hotspots align clicks with the arrow tip / fingertip. */
+:root {
+  --game-cursor-arrow: url("./assets/ui/cursors/arrow.png") 5 0, default;
+  --game-cursor-pointer: url("./assets/ui/cursors/pointer.png") 12 0, pointer;
+  cursor: var(--game-cursor-arrow);
+}
+body {
+  cursor: var(--game-cursor-arrow);
+}
+a[href],
+button:enabled,
+summary,
+select:enabled,
+input[type="checkbox"]:enabled,
+input[type="radio"]:enabled,
+[role="button"]:not([aria-disabled="true"]) {
+  cursor: var(--game-cursor-pointer);
+}
+/* Keep useful native editing, dragging, resizing and unavailable cursors. */
+button:disabled,
+input:disabled,
+select:disabled,
+[aria-disabled="true"] {
+  cursor: not-allowed;
+}

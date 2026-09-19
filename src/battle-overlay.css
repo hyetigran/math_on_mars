@@ -1,0 +1,127 @@
+/* Keep the frozen arena clear behind menus, without advancing combat. */
+#battle-backdrop {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100dvh;
+  object-fit: cover;
+  pointer-events: none;
+}
+#app:has(.battle-overlay) {
+  position: relative;
+}
+.app-shell.battle-overlay {
+  background: #10172238;
+}
+.pause-overlay,
+.pause-overlay.mission-pause {
+  background: #090f188c;
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+}
+.battle-overlay .shop-screen {
+  width: min(1000px, 100%);
+  padding-block: clamp(8px, 3vh, 24px);
+}
+.battle-overlay .shop-view-body {
+  align-items: center;
+}
+.battle-overlay .shop-view {
+  align-self: center;
+  max-height: 100%;
+  background: #182433e8;
+}
+.battle-overlay .market-panel {
+  height: min(370px, 100%);
+}
+.battle-overlay .shop-top,
+.battle-overlay .shop-actions {
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: #182433e8;
+}
+.equipment-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+.battle-overlay .shop-message:not(:empty) {
+  background: #182433e8;
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+.battle-overlay .shop-pager {
+  background: #182433e8;
+  border-radius: 8px;
+}
+@media (max-height: 600px) {
+  .battle-overlay .shop-screen {
+    padding-block: 0;
+  }
+  .battle-overlay .shop-top,
+  .battle-overlay .shop-actions {
+    padding: 4px 8px;
+  }
+  .equipment-actions {
+    margin-bottom: 6px;
+  }
+  .shop-shell .merge-row > .equipment-actions {
+    display: flex;
+  }
+}
+@media (max-width: 550px) {
+  .battle-overlay .shop-actions > div {
+    gap: 6px;
+  }
+  .battle-overlay .shop-actions .button {
+    padding-inline: 8px;
+  }
+}
+.shop-shell .merge-row > .equipment-actions:first-child {
+  display: flex;
+}
+@media (max-height: 600px) {
+  .shop-shell .merge-row > div:nth-child(2) {
+    display: none;
+  }
+}
+.loot-shell {
+  display: grid;
+  place-items: center;
+}
+.wave-loot {
+  width: min(420px, 100%);
+  padding: 24px;
+  border-radius: 12px;
+  background: #182433ee;
+  text-align: center;
+}
+.chest-reveal-art {
+  display: block;
+  width: 128px;
+  height: 128px;
+  object-fit: contain;
+  margin: 16px auto;
+}
+.wave-loot h1 {
+  font-size: 1.75rem;
+}
+.wave-loot .text-button {
+  display: block;
+  margin: 8px auto 0;
+}
+@media (max-height: 500px) {
+  .wave-loot {
+    padding: 12px;
+  }
+  .chest-reveal-art {
+    width: 64px;
+    height: 64px;
+    margin: 8px auto;
+  }
+  .wave-loot p,
+  .wave-loot h1 {
+    margin-block: 6px;
+  }
+}

@@ -1,0 +1,154 @@
+/* latin-ext */
+@font-face {
+  font-family: "Atkinson Hyperlegible Next";
+  font-style: normal;
+  font-weight: 400 800;
+  font-display: swap;
+  src: url(./assets/fonts/atkinson-latin-ext.woff2) format("woff2");
+  unicode-range:
+    U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304,
+    U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB,
+    U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: "Atkinson Hyperlegible Next";
+  font-style: normal;
+  font-weight: 400 800;
+  font-display: swap;
+  src: url(./assets/fonts/atkinson-latin.woff2) format("woff2");
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC,
+    U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212,
+    U+2215, U+FEFF, U+FFFD;
+}
+/* latin-ext */
+@font-face {
+  font-family: "Oxanium";
+  font-style: normal;
+  font-weight: 400 800;
+  font-display: swap;
+  src: url(./assets/fonts/oxanium-latin-ext.woff2) format("woff2");
+  unicode-range:
+    U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304,
+    U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB,
+    U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: "Oxanium";
+  font-style: normal;
+  font-weight: 400 800;
+  font-display: swap;
+  src: url(./assets/fonts/oxanium-latin.woff2) format("woff2");
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC,
+    U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212,
+    U+2215, U+FEFF, U+FFFD;
+}
+
+:root {
+  --font-display: "Oxanium", "Atkinson Hyperlegible Next", sans-serif;
+  --font-body: "Atkinson Hyperlegible Next", system-ui, sans-serif;
+  --text-caption: 0.75rem;
+  --text-small: 0.875rem;
+  --text-body: 1rem;
+  --text-heading: clamp(1.5rem, 3vw, 2rem);
+  font-family: var(--font-body);
+  font-optical-sizing: auto;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+}
+h1,
+h2,
+h3,
+.button,
+.keypad button,
+.correction-keypad button,
+.countdown b,
+.wave-badge b,
+.salvage-chip b,
+.ammo-copy b,
+.reward-card > strong,
+.brand {
+  font-family: var(--font-display);
+}
+h1,
+h2,
+h3 {
+  line-height: 1.15;
+  text-wrap: balance;
+}
+p {
+  line-height: 1.5;
+  text-wrap: pretty;
+}
+button,
+input,
+select,
+.countdown,
+.wave-badge,
+.salvage-chip,
+.reward-stats,
+.hud-label,
+.stack-count,
+.inventory-total,
+.inventory-summary,
+.prompt,
+.stat-gain,
+.level-badge {
+  font-variant-numeric: tabular-nums;
+}
+.prompt,
+.answer-field,
+.fraction-input {
+  font-family: var(--font-body);
+}
+.manage-screen .shop-offer h3,
+.manage-screen .ammo-copy b {
+  font-size: var(--text-small);
+}
+.manage-screen .shop-offer p,
+.manage-screen .ammo-effect,
+.manage-screen .button,
+.manage-screen .text-button,
+.level-badge {
+  font-size: var(--text-caption);
+}
+.text-button {
+  text-underline-position: from-font;
+  text-decoration-thickness: from-font;
+}
+input,
+select,
+textarea {
+  font-size: max(1rem, 1em);
+}
+.camp-hud {
+  justify-content: flex-end;
+}
+.camp-edit-boundaries {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 8px;
+}
+.camp-edit-boundaries svg,
+.portal-bubble svg {
+  width: 26px;
+  height: 26px;
+}
+.portal-bubble {
+  display: grid;
+  place-items: center;
+}
+.portal-bubble[hidden] {
+  display: none;
+}
