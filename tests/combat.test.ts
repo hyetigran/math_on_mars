@@ -623,18 +623,22 @@ test("enemy projectiles are cleared on both wave victory and defeat", () => {
   }
 });
 
-test("Spitters and Chargers enter the documented standard and short waves", () => {
-  for (const totalWaves of [10, 6]) {
+test("each of the first four waves introduces one enemy type in every mission length", () => {
+  for (const totalWaves of [20, 10, 6]) {
     for (const wave of [1, 2, 3, 4, 5]) {
       const sim = new CombatSimulation({ ...options, wave, totalWaves });
       sim.state.shotCooldownMs = 1e6;
-      for (let spawn = 0; spawn < 3; spawn++) {
+      for (let spawn = 0; spawn < 4; spawn++) {
         sim.state.spawnCooldownMs = 0;
         sim.advance(STEP);
       }
       const kinds = new Set(sim.state.enemies.map((e) => e.kind));
-      assert.equal(kinds.has("spitter"), wave >= (totalWaves === 6 ? 2 : 3));
-      assert.equal(kinds.has("charger"), wave >= (totalWaves === 6 ? 3 : 5));
+      assert.deepEqual(
+        [...kinds].sort(),
+        ["drifter", "spitter", "charger", "splitter"]
+          .slice(0, Math.min(wave, 4))
+          .sort(),
+      );
     }
   }
 });

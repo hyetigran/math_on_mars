@@ -19,12 +19,12 @@ export const ENEMY_BALANCE = {
 
 export const ENEMY_SPAWNS = {
   cycleLength: 4,
-  spitter: { standardWave: 3, shortWave: 2, cycleIndex: 1 },
-  charger: { standardWave: 5, shortWave: 3, cycleIndex: 2 },
+  spitter: { standardWave: 2, shortWave: 2, cycleIndex: 1 },
+  charger: { standardWave: 3, shortWave: 3, cycleIndex: 2 },
 } as const;
 
 export const SPLITTER_BALANCE = {
-  standardWave: 6,
+  standardWave: 4,
   shortWave: 4,
   cycleIndex: 3,
   children: 2,
