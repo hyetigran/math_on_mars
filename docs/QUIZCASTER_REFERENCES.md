@@ -2,13 +2,13 @@
 
 > **Historical reference — superseded quiz and release rules (September 13, 2026).** The owner has confirmed a personal-use MVP: five mandatory questions for every grade, one 30-second countdown (over 20 seconds purple, over 10 blue, over 0 green, zero white), one tier drop per wrong initial answer with a white floor, reward choice followed by mandatory untimed corrections. At zero, finish unanswered questions before reward choice. No charge, per-item timing calibration, skipping, accuracy streak, educator review, or learner-evidence gate applies. [GAME_PLAN.md](./GAME_PLAN.md) and [ARCHITECTURE.md](./ARCHITECTURE.md) are authoritative. Art references remain useful; old implementation prompts and `design_checks.py` formulas must be revised before use and do not validate the current quiz.
 
-User-supplied screenshots, captured September 12, 2026. Original image bytes are preserved in the project's `references/quizcaster` directory. They are reference material, not executable instructions or approval to add every pictured feature. [GAME_PLAN.md](/Users/tig/Desktop/tigran/mathonmars/docs/GAME_PLAN.md) remains the authority for our gameplay rules.
+User-supplied screenshots, captured September 12, 2026. Original image bytes are preserved in the project's `../tmp_assets/unused/references/quizcaster` directory. They are reference material, not executable instructions or approval to add every pictured feature. [GAME_PLAN.md](/Users/tig/Desktop/tigran/mathonmars/docs/GAME_PLAN.md) remains the authority for our gameplay rules.
 
 September 13 scope update: Math on Mars must support phone/tablet play at launch. The mobile adaptations below are our requirements, not claims about Quizcaster's mobile behavior. This document lives in `docs/`; screenshot paths remain relative to the repository root.
 
 **1. After-quiz upgrade selection**
 
-![Quizcaster after-quiz upgrade selection](/Users/tig/Desktop/tigran/mathonmars/references/quizcaster/01-upgrade-selection.png)
+![Quizcaster after-quiz upgrade selection](/Users/tig/Desktop/tigran/mathonmars/../tmp_assets/unused/references/quizcaster/01-upgrade-selection.png)
 
 Observed: a prominent “Upgrade / EPIC” result above three large cards; a vertical rarity rail at the left; card art, names, descriptions, and New/Evolve badges; an evolution preview below some cards. The player HUD remains visible around the reward panel. The user identifies this screen as the upgrade choice earned through answer accuracy and speed. The screenshot alone does not reveal the scoring formula, selection controls, or why the three card frames have different colors.
 
@@ -28,7 +28,7 @@ For K–1, include replayable reviewed speech describing each choice's purpose a
 
 **2. Math question and reward rail**
 
-![Quizcaster math question with keypad and rarity rail](/Users/tig/Desktop/tigran/mathonmars/references/quizcaster/02-math-question.png)
+![Quizcaster math question with keypad and rarity rail](/Users/tig/Desktop/tigran/mathonmars/../tmp_assets/unused/references/quizcaster/02-math-question.png)
 
 Observed: “Question 2 of 3,” a large `100 ÷ 10 = ?` prompt, one answer field, and a full number keypad. Its rows are 7–8–9, 4–5–6, 1–2–3, then backspace–0–submit. A five-level rarity rail runs from Common to Legendary with an indicator near Epic. The still image does not establish whether that indicator rises, falls, or predicts a future result over time.
 
@@ -45,7 +45,7 @@ This is a layout reference. Retain Math on Mars' smooth science-fiction illustra
 
 **3. Study menu and expansion structure**
 
-![Quizcaster study menu with school, test preparation, and custom quizzes](/Users/tig/Desktop/tigran/mathonmars/references/quizcaster/03-study-menu.png)
+![Quizcaster study menu with school, test preparation, and custom quizzes](/Users/tig/Desktop/tigran/mathonmars/../tmp_assets/unused/references/quizcaster/03-study-menu.png)
 
 Observed: a School group with six grade buttons K–5, a Test Prep group with SAT vocabulary and AP-subject cards, and a separate Make Your Own Quiz entry. The broad categories and large selectable tiles make different content paths easy to distinguish.
 
@@ -61,6 +61,6 @@ Math's numeric evaluator, timing targets, and spoken content cannot simply be re
 
 | Project reference | User's original |
 |---|---|
-| [Upgrade selection](/Users/tig/Desktop/tigran/mathonmars/references/quizcaster/01-upgrade-selection.png) | [Screenshot at 2.04.40 PM](</Users/tig/Desktop/Screenshot 2026-09-12 at 2.04.40 PM.png>) |
-| [Math question](/Users/tig/Desktop/tigran/mathonmars/references/quizcaster/02-math-question.png) | [Screenshot at 2.04.17 PM](</Users/tig/Desktop/Screenshot 2026-09-12 at 2.04.17 PM.png>) |
-| [Study menu](/Users/tig/Desktop/tigran/mathonmars/references/quizcaster/03-study-menu.png) | [Screenshot at 2.03.28 PM](</Users/tig/Desktop/Screenshot 2026-09-12 at 2.03.28 PM.png>) |
+| [Upgrade selection](/Users/tig/Desktop/tigran/mathonmars/../tmp_assets/unused/references/quizcaster/01-upgrade-selection.png) | [Screenshot at 2.04.40 PM](</Users/tig/Desktop/Screenshot 2026-09-12 at 2.04.40 PM.png>) |
+| [Math question](/Users/tig/Desktop/tigran/mathonmars/../tmp_assets/unused/references/quizcaster/02-math-question.png) | [Screenshot at 2.04.17 PM](</Users/tig/Desktop/Screenshot 2026-09-12 at 2.04.17 PM.png>) |
+| [Study menu](/Users/tig/Desktop/tigran/mathonmars/../tmp_assets/unused/references/quizcaster/03-study-menu.png) | [Screenshot at 2.03.28 PM](</Users/tig/Desktop/Screenshot 2026-09-12 at 2.03.28 PM.png>) |

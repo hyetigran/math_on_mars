@@ -15,8 +15,8 @@ Observed September 13, 2026.
 - [GAME_PLAN.md](../GAME_PLAN.md): authoritative product rules.
 - [ARCHITECTURE.md](../ARCHITECTURE.md): proposed runtime, state, and persistence contracts.
 - [CONTEXT.md](../../CONTEXT.md): project vocabulary.
-- `references/backwoods/`: composition and combat readability.
-- `references/quizcaster/`: math and upgrade screen layouts.
+- `../tmp_assets/unused/references/backwoods/`: composition and combat readability.
+- `../tmp_assets/unused/references/quizcaster/`: math and upgrade screen layouts.
 - Goblin Gutter: rendering and gameplay reference described in the plan.
 - WizardGenie: intended development-time asset workflow. The project reference sheet is not yet created or approved.
 

@@ -1,0 +1,1063 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Headless 3D model preview</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        overflow: hidden;
+        background: transparent;
+      }
+      canvas {
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "../../node_modules/three/build/three.module.js",
+          "three/addons/": "../../node_modules/three/examples/jsm/"
+        }
+      }
+    </script>
+    <script type="module">
+      import * as THREE from "three";
+      import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+
+      function flatMaterial(source) {
+        if (!source) return new THREE.MeshBasicMaterial({ color: 0xffffff });
+        if (source.map) source.map.colorSpace = THREE.SRGBColorSpace;
+        return new THREE.MeshBasicMaterial({
+          color: source.color ?? 0xffffff,
+          map: source.map ?? null,
+          opacity: source.opacity ?? 1,
+          side: THREE.DoubleSide,
+          transparent: (source.opacity ?? 1) < 1,
+        });
+      }
+
+      function studioMaterial(source) {
+        if (!source)
+          return new THREE.MeshStandardMaterial({
+            color: 0xffffff,
+            roughness: 0.72,
+            metalness: 0,
+          });
+        if (source.isMeshBasicMaterial) {
+          if (source.map) source.map.colorSpace = THREE.SRGBColorSpace;
+          return new THREE.MeshStandardMaterial({
+            color: source.color,
+            map: source.map ?? null,
+            roughness: 0.68,
+            metalness: 0,
+            opacity: source.opacity ?? 1,
+            transparent: (source.opacity ?? 1) < 1,
+            side: THREE.DoubleSide,
+          });
+        }
+        const material = source.clone();
+        if (material.map) material.map.colorSpace = THREE.SRGBColorSpace;
+        if ("emissiveIntensity" in material) material.emissiveIntensity = 0.08;
+        if ("roughness" in material)
+          material.roughness = Math.max(material.roughness ?? 0.72, 0.58);
+        if ("metalness" in material) material.metalness = 0;
+        material.side = THREE.DoubleSide;
+        material.needsUpdate = true;
+        return material;
+      }
+
+      function addStudioLighting(scene) {
+        scene.add(new THREE.HemisphereLight(0xeaf6ff, 0x18233a, 1.65));
+        const key = new THREE.DirectionalLight(0xfff5e8, 2.4);
+        key.position.set(-3.5, 5.5, 5);
+        scene.add(key);
+        const fill = new THREE.DirectionalLight(0x9edcff, 1.15);
+        fill.position.set(4, 2.5, 3);
+        scene.add(fill);
+        const rim = new THREE.DirectionalLight(0xffffff, 1.35);
+        rim.position.set(0, 4, -5);
+        scene.add(rim);
+      }
+
+      window.inspectModel = async function inspectModel({ modelUrl }) {
+        const gltf = await new GLTFLoader().loadAsync(modelUrl);
+        const model = gltf.scene;
+        model.updateMatrixWorld(true);
+        const bounds = new THREE.Box3().setFromObject(model);
+        const position = new THREE.Vector3();
+        const nodes = [];
+        model.traverse((object) => {
+          if (
+            !object.isBone &&
+            !object.isMesh &&
+            !/hand|arm|shoulder|spine|hip/i.test(object.name)
+          )
+            return;
+          object.getWorldPosition(position);
+          nodes.push({
+            name: object.name,
+            type: object.type,
+            parent: object.parent?.name ?? null,
+            position: object.position.toArray(),
+            quaternion: object.quaternion.toArray(),
+            worldPosition: position.toArray(),
+            skeletonBones: object.isSkinnedMesh
+              ? object.skeleton.bones.map((bone) => bone.name)
+              : undefined,
+          });
+        });
+        return {
+          animations: gltf.animations.map(({ name, duration }) => ({
+            name,
+            duration,
+          })),
+          bounds: {
+            min: bounds.min.toArray(),
+            max: bounds.max.toArray(),
+          },
+          nodes,
+        };
+      };
+
+      window.renderStaticModelViews = async function renderStaticModelViews({
+        modelUrl,
+        yawDegrees,
+        width = 512,
+        height = 512,
+      }) {
+        const renderer = new THREE.WebGLRenderer({
+          alpha: true,
+          antialias: true,
+          preserveDrawingBuffer: true,
+        });
+        renderer.setPixelRatio(1);
+        renderer.setSize(width, height, false);
+        renderer.setClearColor(0x000000, 0);
+        renderer.outputColorSpace = THREE.SRGBColorSpace;
+        renderer.toneMapping = THREE.NoToneMapping;
+        document.body.append(renderer.domElement);
+
+        const scene = new THREE.Scene();
+        const gltf = await new GLTFLoader().loadAsync(modelUrl);
+        const model = gltf.scene;
+        model.traverse((object) => {
+          if (!object.isMesh) return;
+          object.material = Array.isArray(object.material)
+            ? object.material.map(flatMaterial)
+            : flatMaterial(object.material);
+        });
+        scene.add(model);
+        model.rotation.y = THREE.MathUtils.degToRad(yawDegrees);
+        model.updateMatrixWorld(true);
+
+        const bounds = new THREE.Box3().setFromObject(model);
+        const center = bounds.getCenter(new THREE.Vector3());
+        const size = bounds.getSize(new THREE.Vector3());
+        model.position.sub(center);
+        model.updateMatrixWorld(true);
+
+        const aspect = width / height;
+        const halfHeight = Math.max(
+          size.y * 0.62,
+          (size.x / aspect) * 0.62,
+          0.2,
+        );
+        const camera = new THREE.OrthographicCamera(
+          -halfHeight * aspect,
+          halfHeight * aspect,
+          halfHeight,
+          -halfHeight,
+          0.01,
+          100,
+        );
+        const distance = Math.max(size.x, size.y, size.z, 1) * 4;
+        camera.position.set(0, distance * 0.32, distance);
+        camera.lookAt(0, 0, 0);
+        camera.updateProjectionMatrix();
+
+        await renderer.compileAsync(scene, camera);
+        renderer.render(scene, camera);
+        const image = renderer.domElement.toDataURL("image/png");
+        renderer.dispose();
+        renderer.forceContextLoss();
+        renderer.domElement.remove();
+        return {
+          image,
+          dimensions: { x: size.x, y: size.y, z: size.z },
+          meshCount: [...scene.children].length,
+        };
+      };
+
+      function aimBoneAt(bone, child, target) {
+        bone.updateWorldMatrix(true, true);
+        const start = bone.getWorldPosition(new THREE.Vector3());
+        const end = child.getWorldPosition(new THREE.Vector3());
+        const currentDirection = end.sub(start).normalize();
+        const targetDirection = target.clone().sub(start).normalize();
+        const delta = new THREE.Quaternion().setFromUnitVectors(
+          currentDirection,
+          targetDirection,
+        );
+        const world = bone.getWorldQuaternion(new THREE.Quaternion());
+        const parentWorld = bone.parent.getWorldQuaternion(
+          new THREE.Quaternion(),
+        );
+        bone.quaternion.copy(
+          parentWorld.invert().multiply(delta.multiply(world)),
+        );
+        bone.updateWorldMatrix(true, true);
+      }
+
+      function solveArm(character, side, target, poleDirection) {
+        const upper = character.getObjectByName(`${side}Arm`);
+        const lower = character.getObjectByName(`${side}ForeArm`);
+        const hand = character.getObjectByName(`${side}Hand`);
+        character.updateMatrixWorld(true);
+        const shoulder = upper.getWorldPosition(new THREE.Vector3());
+        const elbow = lower.getWorldPosition(new THREE.Vector3());
+        const wrist = hand.getWorldPosition(new THREE.Vector3());
+        const upperLength = shoulder.distanceTo(elbow);
+        const lowerLength = elbow.distanceTo(wrist);
+        const towardTarget = target.clone().sub(shoulder);
+        const distance = Math.min(
+          towardTarget.length(),
+          upperLength + lowerLength - 0.001,
+        );
+        const direction = towardTarget.normalize();
+        const along =
+          (distance * distance +
+            upperLength * upperLength -
+            lowerLength * lowerLength) /
+          (2 * distance);
+        const height = Math.sqrt(
+          Math.max(0, upperLength * upperLength - along * along),
+        );
+        const pole = poleDirection
+          .clone()
+          .sub(direction.clone().multiplyScalar(poleDirection.dot(direction)))
+          .normalize();
+        const elbowTarget = shoulder
+          .clone()
+          .add(direction.clone().multiplyScalar(along))
+          .add(pole.multiplyScalar(height));
+        aimBoneAt(upper, lower, elbowTarget);
+        character.updateMatrixWorld(true);
+        aimBoneAt(lower, hand, target);
+        character.updateMatrixWorld(true);
+        return {
+          shoulder: shoulder.toArray(),
+          elbow: lower.getWorldPosition(new THREE.Vector3()).toArray(),
+          hand: hand.getWorldPosition(new THREE.Vector3()).toArray(),
+          target: target.toArray(),
+        };
+      }
+
+      function setWorldQuaternion(object, worldQuaternion) {
+        const parentWorld = object.parent.getWorldQuaternion(
+          new THREE.Quaternion(),
+        );
+        object.quaternion.copy(
+          parentWorld.invert().multiply(worldQuaternion.clone()),
+        );
+        object.updateWorldMatrix(true, true);
+      }
+
+      function solveLeg(character, side, target) {
+        const upper = character.getObjectByName(`${side}UpLeg`);
+        const lower = character.getObjectByName(`${side}Leg`);
+        const foot = character.getObjectByName(`${side}Foot`);
+        const footWorldQuaternion = foot.getWorldQuaternion(
+          new THREE.Quaternion(),
+        );
+
+        character.updateMatrixWorld(true);
+        const hip = upper.getWorldPosition(new THREE.Vector3());
+        const knee = lower.getWorldPosition(new THREE.Vector3());
+        const ankle = foot.getWorldPosition(new THREE.Vector3());
+        const upperLength = hip.distanceTo(knee);
+        const lowerLength = knee.distanceTo(ankle);
+        const towardTarget = target.clone().sub(hip);
+        const distance = Math.min(
+          towardTarget.length(),
+          upperLength + lowerLength - 0.001,
+        );
+        const direction = towardTarget.normalize();
+        const along =
+          (distance * distance +
+            upperLength * upperLength -
+            lowerLength * lowerLength) /
+          (2 * distance);
+        const height = Math.sqrt(
+          Math.max(0, upperLength * upperLength - along * along),
+        );
+        const kneePole = new THREE.Vector3(0, 0, 1)
+          .sub(direction.clone().multiplyScalar(direction.z))
+          .normalize();
+        const kneeTarget = hip
+          .clone()
+          .add(direction.clone().multiplyScalar(along))
+          .add(kneePole.multiplyScalar(height));
+
+        aimBoneAt(upper, lower, kneeTarget);
+        character.updateMatrixWorld(true);
+        aimBoneAt(lower, foot, target);
+        character.updateMatrixWorld(true);
+        setWorldQuaternion(foot, footWorldQuaternion);
+        character.updateMatrixWorld(true);
+
+        return {
+          hip: hip.toArray(),
+          knee: lower.getWorldPosition(new THREE.Vector3()).toArray(),
+          foot: foot.getWorldPosition(new THREE.Vector3()).toArray(),
+          target: target.toArray(),
+        };
+      }
+
+      async function buildArmedCharacter(characterUrl, weaponUrl) {
+        const [characterGltf, weaponGltf] = await Promise.all([
+          new GLTFLoader().loadAsync(characterUrl),
+          new GLTFLoader().loadAsync(weaponUrl),
+        ]);
+        const character = characterGltf.scene;
+        const weapon = weaponGltf.scene;
+        character.name = "MarineArmed";
+        weapon.name = "TwinRailBlaster";
+        character.updateMatrixWorld(true);
+
+        // Active hip-fire stance: lower the hips into a mild crouch, stagger
+        // the left foot forward, and keep the support hand beneath the barrel.
+        const hips = character.getObjectByName("Hips");
+        hips.position.y -= 3.5;
+        character.updateMatrixWorld(true);
+        const leftLeg = solveLeg(
+          character,
+          "Left",
+          new THREE.Vector3(0.18, 0.118, 0.15),
+        );
+        const rightLeg = solveLeg(
+          character,
+          "Right",
+          new THREE.Vector3(-0.18, 0.116, -0.1),
+        );
+
+        const rightTarget = new THREE.Vector3(-0.05, 0.63, 0.07);
+        const leftTarget = new THREE.Vector3(0.04, 0.69, 0.22);
+        const rightArm = solveArm(
+          character,
+          "Right",
+          rightTarget,
+          new THREE.Vector3(-1, -0.5, -0.1),
+        );
+        const leftArm = solveArm(
+          character,
+          "Left",
+          leftTarget,
+          new THREE.Vector3(1, -0.5, -0.1),
+        );
+
+        const weaponScale = 0.7;
+        const gripPoint = new THREE.Vector3(-0.38, 0.14, 0);
+        const weaponRotation = new THREE.Quaternion().setFromEuler(
+          new THREE.Euler(0, THREE.MathUtils.degToRad(-65), 0),
+        );
+        const gripOffset = gripPoint
+          .clone()
+          .multiplyScalar(weaponScale)
+          .applyQuaternion(weaponRotation);
+        weapon.scale.setScalar(weaponScale);
+        weapon.quaternion.copy(weaponRotation);
+        weapon.position.copy(rightTarget).sub(gripOffset);
+        character.add(weapon);
+        character.updateMatrixWorld(true);
+        character.getObjectByName("RightHand").attach(weapon);
+
+        const muzzle = new THREE.Object3D();
+        muzzle.name = "MuzzleMarker";
+        muzzle.position.set(0.568, 0.455, 0);
+        muzzle.rotation.y = Math.PI / 2;
+        weapon.add(muzzle);
+        character.updateMatrixWorld(true);
+
+        return {
+          character,
+          pose: {
+            sourceCharacter: characterUrl,
+            sourceWeapon: weaponUrl,
+            firingHandBone: "RightHand",
+            supportingHandBone: "LeftHand",
+            muzzleMarker: "MuzzleMarker",
+            weaponScale,
+            weaponLocalPosition: weapon.position.toArray(),
+            weaponLocalQuaternion: weapon.quaternion.toArray(),
+            rightArm,
+            leftArm,
+            leftLeg,
+            rightLeg,
+          },
+        };
+      }
+
+      function createPistol(name) {
+        const pistol = new THREE.Group();
+        pistol.name = name;
+        const colors = {
+          ivory: 0xf2f0e9,
+          navy: 0x082b61,
+          orange: 0xff6d0a,
+          cyan: 0x11c8ef,
+        };
+        const addBox = (partName, size, position, color, rotationX = 0) => {
+          const mesh = new THREE.Mesh(
+            new THREE.BoxGeometry(size.x, size.y, size.z),
+            new THREE.MeshBasicMaterial({ color }),
+          );
+          mesh.name = `${name}_${partName}`;
+          mesh.position.copy(position);
+          mesh.rotation.x = rotationX;
+          pistol.add(mesh);
+          return mesh;
+        };
+
+        addBox(
+          "Body",
+          new THREE.Vector3(0.14, 0.13, 0.3),
+          new THREE.Vector3(0, 0.09, 0.1),
+          colors.ivory,
+        );
+        addBox(
+          "BarrelInset",
+          new THREE.Vector3(0.09, 0.06, 0.25),
+          new THREE.Vector3(0, 0.105, 0.125),
+          colors.navy,
+        );
+        addBox(
+          "TopAccent",
+          new THREE.Vector3(0.09, 0.035, 0.18),
+          new THREE.Vector3(0, 0.172, 0.06),
+          colors.orange,
+        );
+        addBox(
+          "MuzzleFrame",
+          new THREE.Vector3(0.145, 0.135, 0.045),
+          new THREE.Vector3(0, 0.09, 0.272),
+          colors.ivory,
+        );
+        addBox(
+          "Muzzle",
+          new THREE.Vector3(0.085, 0.065, 0.008),
+          new THREE.Vector3(0, 0.09, 0.297),
+          colors.cyan,
+        );
+        addBox(
+          "Grip",
+          new THREE.Vector3(0.105, 0.23, 0.1),
+          new THREE.Vector3(0, -0.075, -0.015),
+          colors.navy,
+          -0.18,
+        );
+        addBox(
+          "GripCap",
+          new THREE.Vector3(0.12, 0.055, 0.115),
+          new THREE.Vector3(0, -0.19, -0.035),
+          colors.ivory,
+          -0.18,
+        );
+        pistol.userData.gripPoint = [0, -0.075, -0.015];
+        return pistol;
+      }
+
+      function attachPistolAtPalm(character, handBoneName, pistol) {
+        const handBounds = skinnedBoneBounds(character, handBoneName);
+        const palmCenter = new THREE.Vector3().fromArray(handBounds.center);
+        const gripPoint = new THREE.Vector3().fromArray(
+          pistol.userData.gripPoint,
+        );
+        pistol.position.copy(palmCenter).sub(gripPoint);
+        character.add(pistol);
+        character.updateMatrixWorld(true);
+        character.getObjectByName(handBoneName).attach(pistol);
+        character.updateMatrixWorld(true);
+        return {
+          handBoneName,
+          palmCenter: palmCenter.toArray(),
+          gripPoint: gripPoint.toArray(),
+          pistolLocalPosition: pistol.position.toArray(),
+        };
+      }
+
+      async function buildDualPistolCharacter(characterUrl) {
+        const characterGltf = await new GLTFLoader().loadAsync(characterUrl);
+        const character = characterGltf.scene;
+        character.name = "MarineDualPistols";
+        character.updateMatrixWorld(true);
+
+        const hips = character.getObjectByName("Hips");
+        hips.position.y -= 3.5;
+        character.updateMatrixWorld(true);
+        const leftLeg = solveLeg(
+          character,
+          "Left",
+          new THREE.Vector3(0.18, 0.118, 0.15),
+        );
+        const rightLeg = solveLeg(
+          character,
+          "Right",
+          new THREE.Vector3(-0.18, 0.116, -0.1),
+        );
+
+        const rightTarget = new THREE.Vector3(-0.2, 0.8, 0.35);
+        const leftTarget = new THREE.Vector3(0.2, 0.8, 0.35);
+        const rightArm = solveArm(
+          character,
+          "Right",
+          rightTarget,
+          new THREE.Vector3(-1, -0.2, 0.1),
+        );
+        const leftArm = solveArm(
+          character,
+          "Left",
+          leftTarget,
+          new THREE.Vector3(1, -0.2, 0.1),
+        );
+
+        const rightPistol = createPistol("RightPistol");
+        const leftPistol = createPistol("LeftPistol");
+        const rightGrip = attachPistolAtPalm(
+          character,
+          "RightHand",
+          rightPistol,
+        );
+        const leftGrip = attachPistolAtPalm(character, "LeftHand", leftPistol);
+
+        const addMuzzleMarker = (pistol, name) => {
+          const muzzle = new THREE.Object3D();
+          muzzle.name = name;
+          muzzle.position.set(0, 0.09, 0.3);
+          pistol.add(muzzle);
+        };
+        addMuzzleMarker(rightPistol, "RightMuzzleMarker");
+        addMuzzleMarker(leftPistol, "LeftMuzzleMarker");
+        character.updateMatrixWorld(true);
+
+        return {
+          character,
+          pose: {
+            sourceCharacter: characterUrl,
+            loadout: "dual-pistols-prototype",
+            firingHandBones: ["RightHand", "LeftHand"],
+            muzzleMarkers: ["RightMuzzleMarker", "LeftMuzzleMarker"],
+            rightArm,
+            leftArm,
+            rightGrip,
+            leftGrip,
+            leftLeg,
+            rightLeg,
+          },
+        };
+      }
+
+      function skinnedBoneBounds(character, boneName, minimumWeight = 0.45) {
+        const bounds = new THREE.Box3();
+        let vertexCount = 0;
+        character.updateMatrixWorld(true);
+        character.traverse((object) => {
+          if (!object.isSkinnedMesh) return;
+          const boneIndex = object.skeleton.bones.findIndex(
+            (bone) => bone.name === boneName,
+          );
+          if (boneIndex < 0) return;
+          const positions = object.geometry.attributes.position;
+          const skinIndices = object.geometry.attributes.skinIndex;
+          const skinWeights = object.geometry.attributes.skinWeight;
+          const vertex = new THREE.Vector3();
+          for (let index = 0; index < positions.count; index += 1) {
+            let influence = 0;
+            for (let slot = 0; slot < 4; slot += 1) {
+              if (skinIndices.getComponent(index, slot) === boneIndex)
+                influence += skinWeights.getComponent(index, slot);
+            }
+            if (influence < minimumWeight) continue;
+            vertex.fromBufferAttribute(positions, index);
+            object.applyBoneTransform(index, vertex);
+            object.localToWorld(vertex);
+            bounds.expandByPoint(vertex);
+            vertexCount += 1;
+          }
+        });
+        return {
+          boneName,
+          vertexCount,
+          min: bounds.min.toArray(),
+          max: bounds.max.toArray(),
+          center: bounds.getCenter(new THREE.Vector3()).toArray(),
+          size: bounds.getSize(new THREE.Vector3()).toArray(),
+          wrist: character
+            .getObjectByName(boneName)
+            .getWorldPosition(new THREE.Vector3())
+            .toArray(),
+        };
+      }
+
+      window.inspectDualPistolGrip = async function inspectDualPistolGrip({
+        characterUrl,
+      }) {
+        const { character, pose } =
+          await buildDualPistolCharacter(characterUrl);
+        return {
+          pose,
+          right: skinnedBoneBounds(character, "RightHand"),
+          left: skinnedBoneBounds(character, "LeftHand"),
+        };
+      };
+
+      window.renderArmedCharacterViews =
+        async function renderArmedCharacterViews({
+          characterUrl,
+          weaponUrl,
+          yawDegrees,
+          width = 512,
+          height = 512,
+        }) {
+          const renderer = new THREE.WebGLRenderer({
+            alpha: true,
+            antialias: true,
+            premultipliedAlpha: true,
+            preserveDrawingBuffer: true,
+          });
+          renderer.setPixelRatio(1);
+          renderer.setSize(width, height, false);
+          renderer.setClearColor(0x000000, 0);
+          renderer.outputColorSpace = THREE.SRGBColorSpace;
+          renderer.toneMapping = THREE.NoToneMapping;
+          document.body.append(renderer.domElement);
+
+          const scene = new THREE.Scene();
+          const { character, pose } = await buildArmedCharacter(
+            characterUrl,
+            weaponUrl,
+          );
+          character.traverse((object) => {
+            if (!object.isMesh) return;
+            object.material = Array.isArray(object.material)
+              ? object.material.map(flatMaterial)
+              : flatMaterial(object.material);
+          });
+          scene.add(character);
+
+          const camera = new THREE.OrthographicCamera(
+            -1.12,
+            1.12,
+            1.12,
+            -1.12,
+            0.1,
+            30,
+          );
+          camera.position.set(0, 4.8, 7);
+          camera.lookAt(0, 0.82, 0);
+          camera.updateProjectionMatrix();
+          camera.updateMatrixWorld(true);
+          await renderer.compileAsync(scene, camera);
+          const images = [];
+          let dimensions;
+          for (const yaw of yawDegrees) {
+            character.rotation.y = THREE.MathUtils.degToRad(yaw);
+            character.updateMatrixWorld(true);
+            renderer.render(scene, camera);
+            images.push(renderer.domElement.toDataURL("image/png"));
+            dimensions ??= new THREE.Box3()
+              .setFromObject(character)
+              .getSize(new THREE.Vector3())
+              .toArray();
+          }
+          renderer.dispose();
+          renderer.forceContextLoss();
+          renderer.domElement.remove();
+          return { images, dimensions, pose };
+        };
+
+      window.renderDualPistolCharacterViews =
+        async function renderDualPistolCharacterViews({
+          characterUrl,
+          yawDegrees,
+          width = 512,
+          height = 512,
+        }) {
+          const renderer = new THREE.WebGLRenderer({
+            alpha: true,
+            antialias: true,
+            premultipliedAlpha: true,
+            preserveDrawingBuffer: true,
+          });
+          renderer.setPixelRatio(1);
+          renderer.setSize(width, height, false);
+          renderer.setClearColor(0x000000, 0);
+          renderer.outputColorSpace = THREE.SRGBColorSpace;
+          renderer.toneMapping = THREE.NoToneMapping;
+          document.body.append(renderer.domElement);
+
+          const scene = new THREE.Scene();
+          const { character, pose } =
+            await buildDualPistolCharacter(characterUrl);
+          const gripDiagnostics = {
+            right: skinnedBoneBounds(character, "RightHand"),
+            left: skinnedBoneBounds(character, "LeftHand"),
+          };
+          character.traverse((object) => {
+            if (!object.isMesh) return;
+            object.material = Array.isArray(object.material)
+              ? object.material.map(flatMaterial)
+              : flatMaterial(object.material);
+          });
+          scene.add(character);
+
+          const camera = new THREE.OrthographicCamera(
+            -1.12,
+            1.12,
+            1.12,
+            -1.12,
+            0.1,
+            30,
+          );
+          camera.position.set(0, 4.8, 7);
+          camera.lookAt(0, 0.82, 0);
+          camera.updateProjectionMatrix();
+          camera.updateMatrixWorld(true);
+          await renderer.compileAsync(scene, camera);
+          const images = [];
+          let dimensions;
+          for (const yaw of yawDegrees) {
+            character.rotation.y = THREE.MathUtils.degToRad(yaw);
+            character.updateMatrixWorld(true);
+            renderer.render(scene, camera);
+            images.push(renderer.domElement.toDataURL("image/png"));
+            dimensions ??= new THREE.Box3()
+              .setFromObject(character)
+              .getSize(new THREE.Vector3())
+              .toArray();
+          }
+          renderer.dispose();
+          renderer.forceContextLoss();
+          renderer.domElement.remove();
+          return {
+            images,
+            dimensions,
+            pose,
+            gripDiagnostics,
+          };
+        };
+
+      window.bakeDualPistolAnimation = async function bakeDualPistolAnimation({
+        modelUrl,
+        motion,
+        yawDegrees,
+        fps = 15,
+        width = 512,
+        height = 512,
+      }) {
+        const renderer = new THREE.WebGLRenderer({
+          alpha: true,
+          antialias: true,
+          premultipliedAlpha: true,
+          preserveDrawingBuffer: true,
+        });
+        renderer.setPixelRatio(1);
+        renderer.setSize(width, height, false);
+        renderer.setClearColor(0x000000, 0);
+        renderer.outputColorSpace = THREE.SRGBColorSpace;
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        renderer.toneMappingExposure = 1.05;
+        document.body.append(renderer.domElement);
+
+        const scene = new THREE.Scene();
+        addStudioLighting(scene);
+        const gltf = await new GLTFLoader().loadAsync(modelUrl);
+        const character = gltf.scene;
+        character.name = "MarineDualPistolsAnimated";
+        character.traverse((object) => {
+          if (!object.isMesh) return;
+          object.material = Array.isArray(object.material)
+            ? object.material.map(studioMaterial)
+            : studioMaterial(object.material);
+        });
+        scene.add(character);
+
+        const camera = new THREE.OrthographicCamera(
+          -1.12,
+          1.12,
+          1.12,
+          -1.12,
+          0.1,
+          30,
+        );
+        camera.position.set(0, 4.8, 7);
+        camera.lookAt(0, 0.82, 0);
+        camera.updateProjectionMatrix();
+        camera.updateMatrixWorld(true);
+
+        const animatedBoneNames = [
+          "Hips",
+          "Spine02",
+          "Spine01",
+          "Spine",
+          "LeftUpLeg",
+          "LeftLeg",
+          "LeftFoot",
+          "RightUpLeg",
+          "RightLeg",
+          "RightFoot",
+          "LeftShoulder",
+          "LeftArm",
+          "LeftForeArm",
+          "LeftHand",
+          "RightShoulder",
+          "RightArm",
+          "RightForeArm",
+          "RightHand",
+        ];
+        const bindPose = new Map(
+          animatedBoneNames.map((name) => {
+            const bone = character.getObjectByName(name);
+            return [
+              name,
+              {
+                position: bone.position.clone(),
+                quaternion: bone.quaternion.clone(),
+                scale: bone.scale.clone(),
+              },
+            ];
+          }),
+        );
+        const restoreBindPose = () => {
+          for (const [name, transform] of bindPose) {
+            const bone = character.getObjectByName(name);
+            bone.position.copy(transform.position);
+            bone.quaternion.copy(transform.quaternion);
+            bone.scale.copy(transform.scale);
+          }
+          character.updateMatrixWorld(true);
+        };
+
+        let mixer;
+        let clip;
+        const isRunAttack = motion === "run-attack";
+        const isRun = motion === "run" || isRunAttack;
+        if (isRun) {
+          clip = gltf.animations[0];
+          if (!clip || clip.duration <= 0)
+            throw new Error("The run GLB has no timed animation clip.");
+          mixer = new THREE.AnimationMixer(character);
+          const action = mixer.clipAction(clip);
+          action.setLoop(THREE.LoopRepeat, Infinity);
+          action.play();
+        }
+        const isAttack = motion === "attack";
+        const hasAttack = isAttack || isRunAttack;
+        const duration = motion === "idle" ? 2 : isAttack ? 0.6 : clip.duration;
+        const endpointExcluded = !isAttack;
+        const frameCount = Math.max(
+          2,
+          Math.round(duration * fps) + (endpointExcluded ? 0 : 1),
+        );
+        const fireFrame = hasAttack ? 1 : undefined;
+        const previewFrame = hasAttack ? 2 : 0;
+        const rightTarget = new THREE.Vector3(-0.2, 0.8, 0.35);
+        const leftTarget = new THREE.Vector3(0.2, 0.8, 0.35);
+        let referenceTorsoCenter;
+
+        const smoothstep = (value) => {
+          const clamped = THREE.MathUtils.clamp(value, 0, 1);
+          return clamped * clamped * (3 - 2 * clamped);
+        };
+        const attackRecoilAt = (time) => {
+          if (!hasAttack) return 0;
+          const progress = time / duration;
+          if (progress < 0.18) return smoothstep(progress / 0.18);
+          if (progress < 0.72) return 1 - smoothstep((progress - 0.18) / 0.54);
+          return 0;
+        };
+
+        const torsoCenter = () => {
+          const leftShoulder = character
+            .getObjectByName("LeftShoulder")
+            .getWorldPosition(new THREE.Vector3());
+          const rightShoulder = character
+            .getObjectByName("RightShoulder")
+            .getWorldPosition(new THREE.Vector3());
+          return leftShoulder.add(rightShoulder).multiplyScalar(0.5);
+        };
+
+        const poseFrame = (time) => {
+          character.rotation.y = 0;
+          const attackRecoil = attackRecoilAt(time);
+          if (!isRun) {
+            restoreBindPose();
+            const phase = (time / duration) * Math.PI * 2;
+            const hips = character.getObjectByName("Hips");
+            const spine = character.getObjectByName("Spine");
+            hips.position.y -=
+              3.5 - (motion === "idle" ? Math.sin(phase) * 0.55 : 0);
+            if (motion === "idle") {
+              spine.quaternion.multiply(
+                new THREE.Quaternion().setFromEuler(
+                  new THREE.Euler(
+                    Math.sin(phase) * 0.012,
+                    0,
+                    Math.sin(phase * 0.5) * 0.008,
+                  ),
+                ),
+              );
+            } else {
+              spine.quaternion.multiply(
+                new THREE.Quaternion().setFromEuler(
+                  new THREE.Euler(-attackRecoil * 0.035, 0, 0),
+                ),
+              );
+            }
+            character.updateMatrixWorld(true);
+            solveLeg(character, "Left", new THREE.Vector3(0.18, 0.118, 0.15));
+            solveLeg(character, "Right", new THREE.Vector3(-0.18, 0.116, -0.1));
+          } else {
+            mixer.setTime(time);
+            character.updateMatrixWorld(true);
+            if (isRunAttack) {
+              const spine = character.getObjectByName("Spine");
+              spine.quaternion.multiply(
+                new THREE.Quaternion().setFromEuler(
+                  new THREE.Euler(-attackRecoil * 0.028, 0, 0),
+                ),
+              );
+              character.updateMatrixWorld(true);
+            }
+          }
+
+          const phase = (time / duration) * Math.PI * 2;
+          const currentTorsoCenter = torsoCenter();
+          referenceTorsoCenter ??= currentTorsoCenter.clone();
+          const torsoDelta = currentTorsoCenter
+            .clone()
+            .sub(referenceTorsoCenter);
+          const sharedMotion = new THREE.Vector3(
+            torsoDelta.x * 0.65,
+            torsoDelta.y * 0.9,
+            torsoDelta.z * 0.75,
+          );
+          if (isRun) {
+            sharedMotion.x += Math.sin(phase) * 0.008;
+            sharedMotion.y += Math.sin(phase * 2) * 0.006;
+            sharedMotion.z += Math.cos(phase * 2) * 0.008;
+            if (isRunAttack) {
+              sharedMotion.y += attackRecoil * 0.02;
+              sharedMotion.z -= attackRecoil * 0.06;
+            }
+          } else if (motion === "idle") {
+            sharedMotion.y += Math.sin(phase) * 0.006;
+          } else {
+            sharedMotion.y += attackRecoil * 0.025;
+            sharedMotion.z -= attackRecoil * 0.075;
+          }
+          solveArm(
+            character,
+            "Right",
+            rightTarget.clone().add(sharedMotion),
+            new THREE.Vector3(-1, -0.2, 0.1),
+          );
+          solveArm(
+            character,
+            "Left",
+            leftTarget.clone().add(sharedMotion),
+            new THREE.Vector3(1, -0.2, 0.1),
+          );
+          character.updateMatrixWorld(true);
+          return new THREE.Quaternion().setFromEuler(
+            new THREE.Euler(
+              motion === "run"
+                ? Math.sin(phase * 2) * 0.035
+                : isRunAttack
+                  ? Math.sin(phase * 2) * 0.035 - attackRecoil * 0.1
+                  : isAttack
+                    ? -attackRecoil * 0.1
+                    : Math.sin(phase) * 0.008,
+              isRun ? Math.sin(phase) * 0.018 : 0,
+              isRun ? Math.sin(phase) * 0.012 : 0,
+            ),
+          );
+        };
+
+        poseFrame(0);
+        const rightPistol = createPistol("RightPistol");
+        const leftPistol = createPistol("LeftPistol");
+        attachPistolAtPalm(character, "RightHand", rightPistol);
+        attachPistolAtPalm(character, "LeftHand", leftPistol);
+        const rightMuzzle = new THREE.Object3D();
+        const leftMuzzle = new THREE.Object3D();
+        rightMuzzle.position.set(0, 0.09, 0.3);
+        leftMuzzle.position.set(0, 0.09, 0.3);
+        rightPistol.add(rightMuzzle);
+        leftPistol.add(leftMuzzle);
+
+        await renderer.compileAsync(scene, camera);
+        const groundPivot = new THREE.Vector3(0, 0, 0).project(camera);
+        const pivot = {
+          x: (groundPivot.x * 0.5 + 0.5) * width,
+          y: (-groundPivot.y * 0.5 + 0.5) * height,
+        };
+        const frames = [];
+        const muzzlePivots = [];
+        const projectMarker = (marker) => {
+          const point = marker
+            .getWorldPosition(new THREE.Vector3())
+            .project(camera);
+          return {
+            x: Number((point.x * 0.5 + 0.5).toFixed(6)),
+            y: Number((-point.y * 0.5 + 0.5).toFixed(6)),
+          };
+        };
+        for (let index = 0; index < frameCount; index += 1) {
+          const time =
+            (index / (endpointExcluded ? frameCount : frameCount - 1)) *
+            duration;
+          const pistolMotion = poseFrame(time);
+          setWorldQuaternion(rightPistol, pistolMotion);
+          setWorldQuaternion(leftPistol, pistolMotion);
+          character.rotation.y = THREE.MathUtils.degToRad(yawDegrees);
+          character.updateMatrixWorld(true);
+          renderer.render(scene, camera);
+          frames.push(renderer.domElement.toDataURL("image/png"));
+          muzzlePivots.push({
+            right: projectMarker(rightMuzzle),
+            left: projectMarker(leftMuzzle),
+          });
+        }
+
+        mixer?.stopAllAction();
+        renderer.dispose();
+        renderer.forceContextLoss();
+        renderer.domElement.remove();
+        return {
+          frames,
+          duration,
+          frameCount,
+          fps,
+          pivot,
+          endpointExcluded,
+          fireFrame,
+          previewFrame,
+          muzzlePivots,
+          clipName:
+            motion === "idle"
+              ? "procedural-combat-idle"
+              : isAttack
+                ? "procedural-dual-pistol-attack"
+                : isRunAttack
+                  ? `${clip.name}+procedural-dual-pistol-recoil`
+                  : clip.name,
+          motion,
+        };
+      };
+    </script>
+  </body>
+</html>

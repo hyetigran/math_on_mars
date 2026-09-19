@@ -1,0 +1,113 @@
+{
+  "assets": [
+    {
+      "id": "ammo_electric_chain",
+      "path": "items/ammo/ammo_electric_chain.png",
+      "approvedSource": "../tmp_assets/06_items/ammo/ammo_electric_chain_v002.png",
+      "status": "approved final"
+    },
+    {
+      "id": "ammo_fiery",
+      "path": "items/ammo/ammo_fiery.png",
+      "approvedSource": "../tmp_assets/06_items/ammo/ammo_fiery_v002.png",
+      "status": "approved final"
+    },
+    {
+      "id": "ammo_frost",
+      "path": "items/ammo/ammo_frost.png",
+      "approvedSource": "../tmp_assets/06_items/ammo/ammo_frost_v002.png",
+      "status": "approved final"
+    },
+    {
+      "id": "ammo_legendary_omni",
+      "path": "items/ammo/ammo_legendary_omni.png",
+      "approvedSource": "../tmp_assets/06_items/ammo/ammo_legendary_omni_v002.png",
+      "status": "approved final"
+    },
+    {
+      "id": "ammo_multi_shot",
+      "path": "items/ammo/ammo_multi_shot.png",
+      "approvedSource": "../tmp_assets/06_items/ammo/ammo_multi_shot_v002.png",
+      "status": "approved final"
+    },
+    {
+      "id": "ammo_piercing",
+      "path": "items/ammo/ammo_piercing.png",
+      "approvedSource": "../tmp_assets/06_items/ammo/ammo_piercing_v002.png",
+      "status": "approved final"
+    },
+    {
+      "id": "trinket_ammo_expander",
+      "path": "items/trinkets/trinket_ammo_expander.png",
+      "approvedSource": "../tmp_assets/06_items/trinkets/trinket_ammo_expander_v001.png",
+      "status": "approved final"
+    },
+    {
+      "id": "trinket_med_service_module",
+      "path": "items/trinkets/trinket_med_service_module.png",
+      "approvedSource": "../tmp_assets/06_items/trinkets/trinket_med_service_module_v001.png",
+      "status": "approved final"
+    },
+    {
+      "id": "trinket_overclock_chip",
+      "path": "items/trinkets/trinket_overclock_chip.png",
+      "approvedSource": "../tmp_assets/06_items/trinkets/trinket_overclock_chip_v001.png",
+      "status": "approved final"
+    },
+    {
+      "id": "trinket_salvage_module",
+      "path": "items/trinkets/trinket_salvage_module.png",
+      "approvedSource": "../tmp_assets/06_items/trinkets/trinket_salvage_module_v001.png",
+      "status": "approved final"
+    },
+    {
+      "id": "trinket_shield_capacitor",
+      "path": "items/trinkets/trinket_shield_capacitor.png",
+      "approvedSource": "../tmp_assets/06_items/trinkets/trinket_shield_capacitor_v001.png",
+      "status": "approved final"
+    },
+    {
+      "id": "trinket_targeting_module",
+      "path": "items/trinkets/trinket_targeting_module.png",
+      "approvedSource": "../tmp_assets/06_items/trinkets/trinket_targeting_module_v001.png",
+      "status": "approved final"
+    },
+    {
+      "id": "trinket_thruster_coupler",
+      "path": "items/trinkets/trinket_thruster_coupler.png",
+      "approvedSource": "../tmp_assets/06_items/trinkets/trinket_thruster_coupler_v001.png",
+      "status": "approved final"
+    },
+    {
+      "id": "med_gel",
+      "path": "items/healing_loot/med_gel.png",
+      "approvedSource": "../tmp_assets/06_items/healing_loot/med_gel_v001.png",
+      "status": "approved final"
+    },
+    {
+      "id": "med_kit",
+      "path": "items/healing_loot/med_kit.png",
+      "approvedSource": "../tmp_assets/06_items/healing_loot/med_kit_v001.png",
+      "status": "approved final"
+    },
+    {
+      "id": "salvage_bundle",
+      "path": "items/healing_loot/salvage_bundle.png",
+      "approvedSource": "../tmp_assets/06_items/salvage_variants/salvage_hex_nut_v001.png",
+      "status": "approved final",
+      "design": "Hex nut \u2014 selected September 18, 2026"
+    },
+    {
+      "id": "supply_cache_closed",
+      "path": "items/healing_loot/supply_cache_closed.png",
+      "approvedSource": "../tmp_assets/06_items/healing_loot/supply_cache_closed_v001.png",
+      "status": "approved final"
+    },
+    {
+      "id": "supply_cache_open",
+      "path": "items/healing_loot/supply_cache_open.png",
+      "approvedSource": "../tmp_assets/06_items/healing_loot/supply_cache_open_v001.png",
+      "status": "approved final"
+    }
+  ]
+}

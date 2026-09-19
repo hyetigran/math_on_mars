@@ -1,0 +1,34 @@
+{
+  "name": "idle-ne",
+  "direction": "ne",
+  "motion": "idle",
+  "image": "idle-ne.png",
+  "frameWidth": 512,
+  "frameHeight": 512,
+  "columns": 5,
+  "rows": 6,
+  "frameCount": 30,
+  "fps": 15,
+  "durationSeconds": 2,
+  "loop": true,
+  "endpointExcluded": true,
+  "pivot": {
+    "x": 512,
+    "y": 837.8674544094877
+  },
+  "sourceModel": "../../../../../../../../mathonmars/src/assets/characters/marine/source/rigged/character-rigged-1789585407607.glb",
+  "sourceClip": "procedural-combat-idle",
+  "loadout": "dual-pistols-prototype",
+  "camera": {
+    "projection": "orthographic",
+    "elevationDegrees": 30,
+    "characterYawDegrees": 135
+  },
+  "loopQa": {
+    "seamDelta": 0.002952,
+    "medianStepDelta": 0.00228,
+    "seamToMedianRatio": 1.295,
+    "passThreshold": 1.75,
+    "pass": true
+  }
+}

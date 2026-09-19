@@ -1,0 +1,86 @@
+/* Optional companion styles: live states, rarity cues and gauges. */
+.mom-ui {
+  --mom-navy: #081936;
+  --mom-ivory: #fff4db;
+  --mom-cyan: #27dce8;
+  --mom-orange: #ff871b;
+  color: var(--mom-ivory);
+}
+.mom-rarity {
+  --rarity: #fff4db;
+  border: 3px solid var(--rarity);
+}
+.mom-rarity[data-rarity="green"] {
+  --rarity: #72d591;
+}
+.mom-rarity[data-rarity="blue"] {
+  --rarity: #79b9ff;
+}
+.mom-rarity[data-rarity="purple"] {
+  --rarity: #cb9cff;
+}
+.mom-rarity[data-rarity="legendary"] {
+  --rarity: #ffcf54;
+}
+.mom-pips {
+  display: inline-flex;
+  gap: 4px;
+}
+.mom-pip {
+  width: 7px;
+  height: 7px;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+}
+.mom-pip[data-filled="true"] {
+  background: currentColor;
+}
+.mom-control {
+  min-height: 48px;
+  min-width: 48px;
+  cursor: var(--game-cursor-pointer, pointer);
+}
+.mom-control:hover:not(:disabled) {
+  filter: brightness(1.08);
+}
+.mom-control:focus-visible {
+  outline: 3px solid var(--mom-cyan);
+  outline-offset: 4px;
+}
+.mom-control:active:not(:disabled) {
+  transform: translateY(2px);
+}
+.mom-control:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.mom-slot {
+  position: relative;
+  border-radius: 12px;
+}
+.mom-slot[aria-pressed="true"] {
+  outline: 3px solid var(--mom-cyan);
+  outline-offset: 3px;
+}
+.mom-slot[data-unavailable="true"] {
+  opacity: 0.45;
+}
+.mom-gauge {
+  height: 12px;
+  background: var(--mom-navy);
+  border: 2px solid var(--mom-ivory);
+  border-radius: 20px;
+  overflow: hidden;
+}
+.mom-gauge-fill {
+  height: 100%;
+  width: var(--value, 0%);
+  background: var(--mom-cyan);
+}
+.mom-progress,
+.mom-forge-slots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}

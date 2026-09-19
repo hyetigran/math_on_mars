@@ -1,0 +1,42 @@
+{
+  "name": "walk-se",
+  "direction": "se",
+  "image": "walk-se.png",
+  "frameWidth": 512,
+  "frameHeight": 512,
+  "columns": 5,
+  "rows": 4,
+  "frameCount": 16,
+  "fps": 15,
+  "durationSeconds": 1.0666667222976685,
+  "loop": true,
+  "endpointExcluded": true,
+  "pivot": {
+    "x": 256,
+    "y": 418.93,
+    "normalizedX": 0.5,
+    "normalizedY": 0.81823,
+    "meaning": "fixed world origin at ground level"
+  },
+  "sourceModel": "../../source/animations/walking.glb",
+  "sourceClip": "Armature|walking_man|baselayer",
+  "poseCorrections": {
+    "armStabilization": 0.8,
+    "neutralPose": "model bind pose",
+    "armOffsets": {},
+    "staticPose": false,
+    "proceduralMotion": null
+  },
+  "camera": {
+    "projection": "orthographic",
+    "elevationDegrees": 30,
+    "characterYawDegrees": 45,
+    "facingConvention": "Yaw 45 renders southeast for marine-v005"
+  },
+  "loopQa": {
+    "seamDelta": 0.032167,
+    "medianStepDelta": 0.022712,
+    "seamToMedianRatio": 1.416,
+    "pass": true
+  }
+}

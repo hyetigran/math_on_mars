@@ -1,0 +1,333 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Offline marine sprite baker</title>
+    <script>
+      // This file is a headless-only rendering surface. If WizardGenie opens it
+      // interactively, return to the game instead of presenting a transparent page.
+      if ("__wgEditorCam" in window) {
+        location.replace(new URL("../../", document.baseURI));
+      }
+    </script>
+    <style>
+      html,
+      body {
+        margin: 0;
+        overflow: hidden;
+        background: transparent;
+      }
+
+      canvas {
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "../../node_modules/three/build/three.module.js",
+          "three/addons/": "../../node_modules/three/examples/jsm/"
+        }
+      }
+    </script>
+    <script type="module">
+      import * as THREE from "three";
+      import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+
+      function flatMaterial(source) {
+        if (!source) return new THREE.MeshBasicMaterial({ color: 0xffffff });
+        if (source.map) source.map.colorSpace = THREE.SRGBColorSpace;
+        return new THREE.MeshBasicMaterial({
+          color: source.color ?? 0xffffff,
+          map: source.map ?? null,
+          opacity: source.opacity ?? 1,
+          side: THREE.DoubleSide,
+          transparent: (source.opacity ?? 1) < 1,
+        });
+      }
+
+      window.bakeSpriteFrames = async function bakeSpriteFrames(options) {
+        const {
+          modelUrl,
+          fps,
+          width,
+          height,
+          yawDegrees,
+          armStabilization = 0,
+          armOffsets = {},
+          staticPose = false,
+          proceduralMotion,
+          durationSeconds = 0.8,
+        } = options;
+        const renderer = new THREE.WebGLRenderer({
+          alpha: true,
+          antialias: true,
+          premultipliedAlpha: true,
+          preserveDrawingBuffer: true,
+        });
+        renderer.setPixelRatio(1);
+        renderer.setSize(width, height, false);
+        renderer.setClearColor(0x000000, 0);
+        renderer.outputColorSpace = THREE.SRGBColorSpace;
+        renderer.toneMapping = THREE.NoToneMapping;
+        document.body.append(renderer.domElement);
+
+        const scene = new THREE.Scene();
+        const defaultCameraExtent = 1.12;
+        const cameraExtent = proceduralMotion ? 1.25 : defaultCameraExtent;
+        const cameraVerticalOffset = proceduralMotion ? 0.15 : 0;
+        const camera = new THREE.OrthographicCamera(
+          -cameraExtent,
+          cameraExtent,
+          cameraExtent,
+          -cameraExtent,
+          0.1,
+          30,
+        );
+        camera.position.set(0, 4.8 + cameraVerticalOffset, 7);
+        camera.lookAt(0, 0.82 + cameraVerticalOffset, 0);
+        camera.updateProjectionMatrix();
+        camera.updateMatrixWorld(true);
+
+        const gltf = await new GLTFLoader().loadAsync(modelUrl);
+        const character = gltf.scene;
+        character.rotation.y = THREE.MathUtils.degToRad(yawDegrees);
+        character.traverse((object) => {
+          if (!object.isMesh) return;
+          object.castShadow = false;
+          object.receiveShadow = false;
+          if (Array.isArray(object.material))
+            object.material = object.material.map(flatMaterial);
+          else object.material = flatMaterial(object.material);
+        });
+        scene.add(character);
+
+        const clip = gltf.animations[0];
+        if (
+          !staticPose &&
+          (!proceduralMotion || proceduralMotion === "runningJump") &&
+          (!clip || clip.duration <= 0)
+        )
+          throw new Error("The GLB has no timed animation clip.");
+        const duration = proceduralMotion ? durationSeconds : clip?.duration;
+        const frameCount = staticPose
+          ? 1
+          : proceduralMotion
+            ? Math.max(3, Math.round(duration * fps) + 1)
+            : Math.max(2, Math.round(duration * fps));
+        const armBones = [
+          "LeftShoulder",
+          "LeftArm",
+          "LeftForeArm",
+          "LeftHand",
+          "RightShoulder",
+          "RightArm",
+          "RightForeArm",
+          "RightHand",
+        ]
+          .map((name) => character.getObjectByName(name))
+          .filter(Boolean);
+        const bindArms = new Map(
+          armBones.map((bone) => [bone.name, bone.quaternion.clone()]),
+        );
+        const jumpBoneNames = [
+          "Spine",
+          "Spine01",
+          "LeftArm",
+          "LeftForeArm",
+          "RightArm",
+          "RightForeArm",
+          "LeftUpLeg",
+          "RightUpLeg",
+          "LeftLeg",
+          "RightLeg",
+        ];
+        const jumpBones = new Map(
+          jumpBoneNames
+            .map((name) => [name, character.getObjectByName(name)])
+            .filter(([, bone]) => bone),
+        );
+        const bindJumpBones = new Map(
+          [...jumpBones].map(([name, bone]) => [name, bone.quaternion.clone()]),
+        );
+        const bindPosition = character.position.clone();
+        const bindScale = character.scale.clone();
+        const offsetBone = (name, x = 0, y = 0, z = 0) => {
+          const bone = jumpBones.get(name);
+          const bind = bindJumpBones.get(name);
+          if (!bone || !bind) return;
+          bone.quaternion
+            .copy(bind)
+            .multiply(
+              new THREE.Quaternion().setFromEuler(
+                new THREE.Euler(
+                  THREE.MathUtils.degToRad(x),
+                  THREE.MathUtils.degToRad(y),
+                  THREE.MathUtils.degToRad(z),
+                  "XYZ",
+                ),
+              ),
+            );
+        };
+        const addBoneOffset = (name, x = 0, y = 0, z = 0) => {
+          const bone = jumpBones.get(name);
+          if (!bone) return;
+          bone.quaternion.multiply(
+            new THREE.Quaternion().setFromEuler(
+              new THREE.Euler(
+                THREE.MathUtils.degToRad(x),
+                THREE.MathUtils.degToRad(y),
+                THREE.MathUtils.degToRad(z),
+                "XYZ",
+              ),
+            ),
+          );
+        };
+        let mixer;
+        if (
+          !staticPose &&
+          (!proceduralMotion || proceduralMotion === "runningJump")
+        ) {
+          mixer = new THREE.AnimationMixer(character);
+          const action = mixer.clipAction(clip);
+          action.setLoop(THREE.LoopRepeat, Infinity);
+          action.play();
+        }
+
+        await renderer.compileAsync(scene, camera);
+        const groundPivot = new THREE.Vector3(0, 0, 0).project(camera);
+        const pivot = {
+          x: (groundPivot.x * 0.5 + 0.5) * width,
+          y: (-groundPivot.y * 0.5 + 0.5) * height,
+        };
+        const frames = [];
+        for (let index = 0; index < frameCount; index += 1) {
+          if (mixer) {
+            const progress = proceduralMotion
+              ? index / (frameCount - 1)
+              : index / frameCount;
+            const sampledDuration =
+              proceduralMotion === "runningJump" ? clip.duration : duration;
+            mixer.setTime(progress * sampledDuration);
+          }
+          for (const bone of armBones) {
+            const bind = bindArms.get(bone.name);
+            if (bind) bone.quaternion.slerp(bind, armStabilization);
+            const offset = armOffsets[bone.name];
+            if (offset) {
+              bone.quaternion.multiply(
+                new THREE.Quaternion().setFromEuler(
+                  new THREE.Euler(
+                    THREE.MathUtils.degToRad(offset.x ?? 0),
+                    THREE.MathUtils.degToRad(offset.y ?? 0),
+                    THREE.MathUtils.degToRad(offset.z ?? 0),
+                    "XYZ",
+                  ),
+                ),
+              );
+            }
+          }
+          if (proceduralMotion === "jump") {
+            const progress = index / (frameCount - 1);
+            const crouchIn =
+              progress < 0.18 ? Math.sin((progress / 0.18) * (Math.PI / 2)) : 0;
+            const landing =
+              progress > 0.78
+                ? Math.sin(((progress - 0.78) / 0.22) * Math.PI)
+                : 0;
+            const airborne =
+              progress >= 0.14 && progress <= 0.82
+                ? Math.sin(((progress - 0.14) / 0.68) * Math.PI)
+                : 0;
+            const compression = Math.max(crouchIn, landing * 0.82);
+            const lift = Math.max(0, airborne) * 0.42;
+
+            character.position.copy(bindPosition);
+            character.position.y += lift - compression * 0.075;
+            character.scale.set(
+              bindScale.x * (1 + compression * 0.035),
+              bindScale.y * (1 - compression * 0.055),
+              bindScale.z * (1 + compression * 0.035),
+            );
+
+            const tuck = compression * 16 + airborne * 7;
+            offsetBone("Spine", -compression * 5);
+            offsetBone("Spine01", airborne * 3);
+            offsetBone("LeftUpLeg", tuck);
+            offsetBone("RightUpLeg", tuck);
+            offsetBone("LeftLeg", -tuck * 1.45);
+            offsetBone("RightLeg", -tuck * 1.45);
+            offsetBone("LeftArm", -airborne * 5, 0, -airborne * 7);
+            offsetBone("RightArm", -airborne * 5, 0, airborne * 7);
+          }
+          if (proceduralMotion === "runningJump") {
+            const progress = index / (frameCount - 1);
+            const crouchIn =
+              progress < 0.13 ? Math.sin((progress / 0.13) * (Math.PI / 2)) : 0;
+            const landing =
+              progress > 0.84
+                ? Math.sin(((progress - 0.84) / 0.16) * Math.PI)
+                : 0;
+            const airborne =
+              progress >= 0.1 && progress <= 0.88
+                ? Math.sin(((progress - 0.1) / 0.78) * Math.PI)
+                : 0;
+            const compression = Math.max(crouchIn, landing * 0.78);
+            const lift = Math.max(0, airborne) * 0.43;
+
+            character.position.copy(bindPosition);
+            character.position.y += lift - compression * 0.065;
+            character.scale.set(
+              bindScale.x * (1 + compression * 0.025),
+              bindScale.y * (1 - compression * 0.045),
+              bindScale.z * (1 + compression * 0.025),
+            );
+
+            // Retain the authored moving gait while giving the airborne pose a
+            // readable running-leap silhouette instead of the planted jump's
+            // symmetrical leg tuck.
+            const scissor = Math.sin(progress * Math.PI * 2);
+            addBoneOffset("Spine", -compression * 4 - airborne * 3);
+            addBoneOffset("Spine01", airborne * 2);
+            addBoneOffset("LeftUpLeg", airborne * (9 + scissor * 7));
+            addBoneOffset("RightUpLeg", airborne * (9 - scissor * 7));
+            addBoneOffset("LeftLeg", -airborne * (13 + scissor * 5));
+            addBoneOffset("RightLeg", -airborne * (13 - scissor * 5));
+            addBoneOffset("LeftArm", -airborne * 13, 0, -airborne * 8);
+            addBoneOffset("RightArm", -airborne * 13, 0, airborne * 8);
+            addBoneOffset("LeftForeArm", -airborne * 18);
+            addBoneOffset("RightForeArm", -airborne * 18);
+          }
+          character.updateMatrixWorld(true);
+          scene.updateMatrixWorld(true);
+          renderer.render(scene, camera);
+          frames.push(renderer.domElement.toDataURL("image/png"));
+        }
+
+        mixer?.stopAllAction();
+        renderer.dispose();
+        renderer.forceContextLoss();
+        renderer.domElement.remove();
+        return {
+          clipName: staticPose
+            ? "model-bind-pose"
+            : proceduralMotion || clip.name,
+          duration: staticPose ? 0 : duration,
+          displayScale: cameraExtent / defaultCameraExtent,
+          frameCount,
+          frames,
+          pivot,
+          poseCorrections: {
+            armStabilization,
+            neutralPose: "model bind pose",
+            armOffsets,
+            staticPose,
+            proceduralMotion: proceduralMotion ?? null,
+          },
+        };
+      };
+    </script>
+  </body>
+</html>

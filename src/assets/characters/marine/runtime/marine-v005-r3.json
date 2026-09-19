@@ -1,0 +1,1522 @@
+[
+  {
+    "direction": "n",
+    "image": "walk-v005-r3-n.webp",
+    "idleImage": "idle-v005-r3-n.webp",
+    "jumpImage": "jump-v005-r3-n.webp",
+    "runningJumpImage": "run-jump-v005-r3-n.webp",
+    "source": "src/assets/characters/marine/sprites/n/walk-n.png",
+    "idleSource": "src/assets/characters/marine/sprites/n/idle-n.png",
+    "jumpSource": "src/assets/characters/marine/sprites/n/jump-n.png",
+    "runningJumpSource": "src/assets/characters/marine/sprites/n/run_jump-n.png",
+    "frameWidth": 192,
+    "frameHeight": 192,
+    "columns": 5,
+    "frameCount": 16,
+    "stride": 176,
+    "framePivots": [
+      {
+        "x": 0.5,
+        "y": 0.81823
+      },
+      {
+        "x": 0.5,
+        "y": 0.81823
+      },
+      {
+        "x": 0.5,
+        "y": 0.81823
+      },
+      {
+        "x": 0.5,
+        "y": 0.81823
+      },
+      {
+        "x": 0.5,
+        "y": 0.81823
+      },
+      {
+        "x": 0.5,
+        "y": 0.81823
+      },
+      {
+        "x": 0.5,
+        "y": 0.81823
+      },
+      {
+        "x": 0.5,
+        "y": 0.81823
+      },
+      {
+        "x": 0.5,
+        "y": 0.81823
+      },
+      {
+        "x": 0.5,
+        "y": 0.81823
+      },
+      {
+        "x": 0.5,
+        "y": 0.81823
+      },
+      {
+        "x": 0.5,
+        "y": 0.81823
+      },
+      {
+        "x": 0.5,
+        "y": 0.81823
+      },
+      {
+        "x": 0.5,
+        "y": 0.81823
+      },
+      {
+        "x": 0.5,
+        "y": 0.81823
+      },
+      {
+        "x": 0.5,
+        "y": 0.81823
+      }
+    ],
+    "idlePivot": {
+      "x": 0.5,
+      "y": 0.81823
+    },
+    "jumpColumns": 5,
+    "jumpFrameCount": 10,
+    "jumpFps": 15,
+    "jumpDisplayScale": 1.116071,
+    "jumpPivots": [
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      }
+    ],
+    "runningJumpColumns": 5,
+    "runningJumpFrameCount": 13,
+    "runningJumpFps": 15,
+    "runningJumpDisplayScale": 1.116071,
+    "runningJumpPivots": [
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      }
+    ]
+  },
+  {
+    "direction": "ne",
+    "image": "walk-v005-r3-ne.webp",
+    "idleImage": "idle-v005-r3-ne.webp",
+    "jumpImage": "jump-v005-r3-ne.webp",
+    "runningJumpImage": "run-jump-v005-r3-ne.webp",
+    "source": "src/assets/characters/marine/sprites/ne/walk-ne.png",
+    "idleSource": "src/assets/characters/marine/sprites/ne/idle-ne.png",
+    "jumpSource": "src/assets/characters/marine/sprites/ne/jump-ne.png",
+    "runningJumpSource": "src/assets/characters/marine/sprites/ne/run_jump-ne.png",
+    "frameWidth": 192,
+    "frameHeight": 192,
+    "columns": 5,
+    "frameCount": 16,
+    "stride": 176,
+    "framePivots": [
+      {
+        "x": 0.5,
+        "y": 0.81823
+      },
+      {
+        "x": 0.5,
+        "y": 0.81823
+      },
+      {
+        "x": 0.5,
+        "y": 0.81823
+      },
+      {
+        "x": 0.5,
+        "y": 0.81823
+      },
+      {
+        "x": 0.5,
+        "y": 0.81823
+      },
+      {
+        "x": 0.5,
+        "y": 0.81823
+      },
+      {
+        "x": 0.5,
+        "y": 0.81823
+      },
+      {
+        "x": 0.5,
+        "y": 0.81823
+      },
+      {
+        "x": 0.5,
+        "y": 0.81823
+      },
+      {
+        "x": 0.5,
+        "y": 0.81823
+      },
+      {
+        "x": 0.5,
+        "y": 0.81823
+      },
+      {
+        "x": 0.5,
+        "y": 0.81823
+      },
+      {
+        "x": 0.5,
+        "y": 0.81823
+      },
+      {
+        "x": 0.5,
+        "y": 0.81823
+      },
+      {
+        "x": 0.5,
+        "y": 0.81823
+      },
+      {
+        "x": 0.5,
+        "y": 0.81823
+      }
+    ],
+    "idlePivot": {
+      "x": 0.5,
+      "y": 0.81823
+    },
+    "jumpColumns": 5,
+    "jumpFrameCount": 10,
+    "jumpFps": 15,
+    "jumpDisplayScale": 1.116071,
+    "jumpPivots": [
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      }
+    ],
+    "runningJumpColumns": 5,
+    "runningJumpFrameCount": 13,
+    "runningJumpFps": 15,
+    "runningJumpDisplayScale": 1.116071,
+    "runningJumpPivots": [
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      }
+    ]
+  },
+  {
+    "direction": "e",
+    "image": "walk-v005-r3-e.webp",
+    "idleImage": "idle-v005-r3-e.webp",
+    "jumpImage": "jump-v005-r3-e.webp",
+    "runningJumpImage": "run-jump-v005-r3-e.webp",
+    "source": "src/assets/characters/marine/sprites/e/walk-e.png",
+    "idleSource": "src/assets/characters/marine/sprites/e/idle-e.png",
+    "jumpSource": "src/assets/characters/marine/sprites/e/jump-e.png",
+    "runningJumpSource": "src/assets/characters/marine/sprites/e/run_jump-e.png",
+    "frameWidth": 192,
+    "frameHeight": 192,
+    "columns": 5,
+    "frameCount": 16,
+    "stride": 176,
+    "framePivots": [
+      {
+        "x": 0.5,
+        "y": 0.81823
+      },
+      {
+        "x": 0.5,
+        "y": 0.81823
+      },
+      {
+        "x": 0.5,
+        "y": 0.81823
+      },
+      {
+        "x": 0.5,
+        "y": 0.81823
+      },
+      {
+        "x": 0.5,
+        "y": 0.81823
+      },
+      {
+        "x": 0.5,
+        "y": 0.81823
+      },
+      {
+        "x": 0.5,
+        "y": 0.81823
+      },
+      {
+        "x": 0.5,
+        "y": 0.81823
+      },
+      {
+        "x": 0.5,
+        "y": 0.81823
+      },
+      {
+        "x": 0.5,
+        "y": 0.81823
+      },
+      {
+        "x": 0.5,
+        "y": 0.81823
+      },
+      {
+        "x": 0.5,
+        "y": 0.81823
+      },
+      {
+        "x": 0.5,
+        "y": 0.81823
+      },
+      {
+        "x": 0.5,
+        "y": 0.81823
+      },
+      {
+        "x": 0.5,
+        "y": 0.81823
+      },
+      {
+        "x": 0.5,
+        "y": 0.81823
+      }
+    ],
+    "idlePivot": {
+      "x": 0.5,
+      "y": 0.81823
+    },
+    "jumpColumns": 5,
+    "jumpFrameCount": 10,
+    "jumpFps": 15,
+    "jumpDisplayScale": 1.116071,
+    "jumpPivots": [
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      }
+    ],
+    "runningJumpColumns": 5,
+    "runningJumpFrameCount": 13,
+    "runningJumpFps": 15,
+    "runningJumpDisplayScale": 1.116071,
+    "runningJumpPivots": [
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      }
+    ]
+  },
+  {
+    "direction": "se",
+    "image": "walk-v005-r3-se.webp",
+    "idleImage": "idle-v005-r3-se.webp",
+    "jumpImage": "jump-v005-r3-se.webp",
+    "runningJumpImage": "run-jump-v005-r3-se.webp",
+    "source": "src/assets/characters/marine/sprites/se/walk-se.png",
+    "idleSource": "src/assets/characters/marine/sprites/se/idle-se.png",
+    "jumpSource": "src/assets/characters/marine/sprites/se/jump-se.png",
+    "runningJumpSource": "src/assets/characters/marine/sprites/se/run_jump-se.png",
+    "frameWidth": 192,
+    "frameHeight": 192,
+    "columns": 5,
+    "frameCount": 16,
+    "stride": 176,
+    "framePivots": [
+      {
+        "x": 0.5,
+        "y": 0.81823
+      },
+      {
+        "x": 0.5,
+        "y": 0.81823
+      },
+      {
+        "x": 0.5,
+        "y": 0.81823
+      },
+      {
+        "x": 0.5,
+        "y": 0.81823
+      },
+      {
+        "x": 0.5,
+        "y": 0.81823
+      },
+      {
+        "x": 0.5,
+        "y": 0.81823
+      },
+      {
+        "x": 0.5,
+        "y": 0.81823
+      },
+      {
+        "x": 0.5,
+        "y": 0.81823
+      },
+      {
+        "x": 0.5,
+        "y": 0.81823
+      },
+      {
+        "x": 0.5,
+        "y": 0.81823
+      },
+      {
+        "x": 0.5,
+        "y": 0.81823
+      },
+      {
+        "x": 0.5,
+        "y": 0.81823
+      },
+      {
+        "x": 0.5,
+        "y": 0.81823
+      },
+      {
+        "x": 0.5,
+        "y": 0.81823
+      },
+      {
+        "x": 0.5,
+        "y": 0.81823
+      },
+      {
+        "x": 0.5,
+        "y": 0.81823
+      }
+    ],
+    "idlePivot": {
+      "x": 0.5,
+      "y": 0.81823
+    },
+    "jumpColumns": 5,
+    "jumpFrameCount": 10,
+    "jumpFps": 15,
+    "jumpDisplayScale": 1.116071,
+    "jumpPivots": [
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      }
+    ],
+    "runningJumpColumns": 5,
+    "runningJumpFrameCount": 13,
+    "runningJumpFps": 15,
+    "runningJumpDisplayScale": 1.116071,
+    "runningJumpPivots": [
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      }
+    ]
+  },
+  {
+    "direction": "s",
+    "image": "walk-v005-r3-s.webp",
+    "idleImage": "idle-v005-r3-s.webp",
+    "jumpImage": "jump-v005-r3-s.webp",
+    "runningJumpImage": "run-jump-v005-r3-s.webp",
+    "source": "src/assets/characters/marine/sprites/s/walk-s.png",
+    "idleSource": "src/assets/characters/marine/sprites/s/idle-s.png",
+    "jumpSource": "src/assets/characters/marine/sprites/s/jump-s.png",
+    "runningJumpSource": "src/assets/characters/marine/sprites/s/run_jump-s.png",
+    "frameWidth": 192,
+    "frameHeight": 192,
+    "columns": 5,
+    "frameCount": 16,
+    "stride": 176,
+    "framePivots": [
+      {
+        "x": 0.5,
+        "y": 0.81823
+      },
+      {
+        "x": 0.5,
+        "y": 0.81823
+      },
+      {
+        "x": 0.5,
+        "y": 0.81823
+      },
+      {
+        "x": 0.5,
+        "y": 0.81823
+      },
+      {
+        "x": 0.5,
+        "y": 0.81823
+      },
+      {
+        "x": 0.5,
+        "y": 0.81823
+      },
+      {
+        "x": 0.5,
+        "y": 0.81823
+      },
+      {
+        "x": 0.5,
+        "y": 0.81823
+      },
+      {
+        "x": 0.5,
+        "y": 0.81823
+      },
+      {
+        "x": 0.5,
+        "y": 0.81823
+      },
+      {
+        "x": 0.5,
+        "y": 0.81823
+      },
+      {
+        "x": 0.5,
+        "y": 0.81823
+      },
+      {
+        "x": 0.5,
+        "y": 0.81823
+      },
+      {
+        "x": 0.5,
+        "y": 0.81823
+      },
+      {
+        "x": 0.5,
+        "y": 0.81823
+      },
+      {
+        "x": 0.5,
+        "y": 0.81823
+      }
+    ],
+    "idlePivot": {
+      "x": 0.5,
+      "y": 0.81823
+    },
+    "jumpColumns": 5,
+    "jumpFrameCount": 10,
+    "jumpFps": 15,
+    "jumpDisplayScale": 1.116071,
+    "jumpPivots": [
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      }
+    ],
+    "runningJumpColumns": 5,
+    "runningJumpFrameCount": 13,
+    "runningJumpFps": 15,
+    "runningJumpDisplayScale": 1.116071,
+    "runningJumpPivots": [
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      }
+    ]
+  },
+  {
+    "direction": "sw",
+    "image": "walk-v005-r3-sw.webp",
+    "idleImage": "idle-v005-r3-sw.webp",
+    "jumpImage": "jump-v005-r3-sw.webp",
+    "runningJumpImage": "run-jump-v005-r3-sw.webp",
+    "source": "src/assets/characters/marine/sprites/sw/walk-sw.png",
+    "idleSource": "src/assets/characters/marine/sprites/sw/idle-sw.png",
+    "jumpSource": "src/assets/characters/marine/sprites/sw/jump-sw.png",
+    "runningJumpSource": "src/assets/characters/marine/sprites/sw/run_jump-sw.png",
+    "frameWidth": 192,
+    "frameHeight": 192,
+    "columns": 5,
+    "frameCount": 16,
+    "stride": 176,
+    "framePivots": [
+      {
+        "x": 0.5,
+        "y": 0.81823
+      },
+      {
+        "x": 0.5,
+        "y": 0.81823
+      },
+      {
+        "x": 0.5,
+        "y": 0.81823
+      },
+      {
+        "x": 0.5,
+        "y": 0.81823
+      },
+      {
+        "x": 0.5,
+        "y": 0.81823
+      },
+      {
+        "x": 0.5,
+        "y": 0.81823
+      },
+      {
+        "x": 0.5,
+        "y": 0.81823
+      },
+      {
+        "x": 0.5,
+        "y": 0.81823
+      },
+      {
+        "x": 0.5,
+        "y": 0.81823
+      },
+      {
+        "x": 0.5,
+        "y": 0.81823
+      },
+      {
+        "x": 0.5,
+        "y": 0.81823
+      },
+      {
+        "x": 0.5,
+        "y": 0.81823
+      },
+      {
+        "x": 0.5,
+        "y": 0.81823
+      },
+      {
+        "x": 0.5,
+        "y": 0.81823
+      },
+      {
+        "x": 0.5,
+        "y": 0.81823
+      },
+      {
+        "x": 0.5,
+        "y": 0.81823
+      }
+    ],
+    "idlePivot": {
+      "x": 0.5,
+      "y": 0.81823
+    },
+    "jumpColumns": 5,
+    "jumpFrameCount": 10,
+    "jumpFps": 15,
+    "jumpDisplayScale": 1.116071,
+    "jumpPivots": [
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      }
+    ],
+    "runningJumpColumns": 5,
+    "runningJumpFrameCount": 13,
+    "runningJumpFps": 15,
+    "runningJumpDisplayScale": 1.116071,
+    "runningJumpPivots": [
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      }
+    ]
+  },
+  {
+    "direction": "w",
+    "image": "walk-v005-r3-w.webp",
+    "idleImage": "idle-v005-r3-w.webp",
+    "jumpImage": "jump-v005-r3-w.webp",
+    "runningJumpImage": "run-jump-v005-r3-w.webp",
+    "source": "src/assets/characters/marine/sprites/w/walk-w.png",
+    "idleSource": "src/assets/characters/marine/sprites/w/idle-w.png",
+    "jumpSource": "src/assets/characters/marine/sprites/w/jump-w.png",
+    "runningJumpSource": "src/assets/characters/marine/sprites/w/run_jump-w.png",
+    "frameWidth": 192,
+    "frameHeight": 192,
+    "columns": 5,
+    "frameCount": 16,
+    "stride": 176,
+    "framePivots": [
+      {
+        "x": 0.5,
+        "y": 0.81823
+      },
+      {
+        "x": 0.5,
+        "y": 0.81823
+      },
+      {
+        "x": 0.5,
+        "y": 0.81823
+      },
+      {
+        "x": 0.5,
+        "y": 0.81823
+      },
+      {
+        "x": 0.5,
+        "y": 0.81823
+      },
+      {
+        "x": 0.5,
+        "y": 0.81823
+      },
+      {
+        "x": 0.5,
+        "y": 0.81823
+      },
+      {
+        "x": 0.5,
+        "y": 0.81823
+      },
+      {
+        "x": 0.5,
+        "y": 0.81823
+      },
+      {
+        "x": 0.5,
+        "y": 0.81823
+      },
+      {
+        "x": 0.5,
+        "y": 0.81823
+      },
+      {
+        "x": 0.5,
+        "y": 0.81823
+      },
+      {
+        "x": 0.5,
+        "y": 0.81823
+      },
+      {
+        "x": 0.5,
+        "y": 0.81823
+      },
+      {
+        "x": 0.5,
+        "y": 0.81823
+      },
+      {
+        "x": 0.5,
+        "y": 0.81823
+      }
+    ],
+    "idlePivot": {
+      "x": 0.5,
+      "y": 0.81823
+    },
+    "jumpColumns": 5,
+    "jumpFrameCount": 10,
+    "jumpFps": 15,
+    "jumpDisplayScale": 1.116071,
+    "jumpPivots": [
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      }
+    ],
+    "runningJumpColumns": 5,
+    "runningJumpFrameCount": 13,
+    "runningJumpFps": 15,
+    "runningJumpDisplayScale": 1.116071,
+    "runningJumpPivots": [
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      }
+    ]
+  },
+  {
+    "direction": "nw",
+    "image": "walk-v005-r3-nw.webp",
+    "idleImage": "idle-v005-r3-nw.webp",
+    "jumpImage": "jump-v005-r3-nw.webp",
+    "runningJumpImage": "run-jump-v005-r3-nw.webp",
+    "source": "src/assets/characters/marine/sprites/nw/walk-nw.png",
+    "idleSource": "src/assets/characters/marine/sprites/nw/idle-nw.png",
+    "jumpSource": "src/assets/characters/marine/sprites/nw/jump-nw.png",
+    "runningJumpSource": "src/assets/characters/marine/sprites/nw/run_jump-nw.png",
+    "frameWidth": 192,
+    "frameHeight": 192,
+    "columns": 5,
+    "frameCount": 16,
+    "stride": 176,
+    "framePivots": [
+      {
+        "x": 0.5,
+        "y": 0.81823
+      },
+      {
+        "x": 0.5,
+        "y": 0.81823
+      },
+      {
+        "x": 0.5,
+        "y": 0.81823
+      },
+      {
+        "x": 0.5,
+        "y": 0.81823
+      },
+      {
+        "x": 0.5,
+        "y": 0.81823
+      },
+      {
+        "x": 0.5,
+        "y": 0.81823
+      },
+      {
+        "x": 0.5,
+        "y": 0.81823
+      },
+      {
+        "x": 0.5,
+        "y": 0.81823
+      },
+      {
+        "x": 0.5,
+        "y": 0.81823
+      },
+      {
+        "x": 0.5,
+        "y": 0.81823
+      },
+      {
+        "x": 0.5,
+        "y": 0.81823
+      },
+      {
+        "x": 0.5,
+        "y": 0.81823
+      },
+      {
+        "x": 0.5,
+        "y": 0.81823
+      },
+      {
+        "x": 0.5,
+        "y": 0.81823
+      },
+      {
+        "x": 0.5,
+        "y": 0.81823
+      },
+      {
+        "x": 0.5,
+        "y": 0.81823
+      }
+    ],
+    "idlePivot": {
+      "x": 0.5,
+      "y": 0.81823
+    },
+    "jumpColumns": 5,
+    "jumpFrameCount": 10,
+    "jumpFps": 15,
+    "jumpDisplayScale": 1.116071,
+    "jumpPivots": [
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      }
+    ],
+    "runningJumpColumns": 5,
+    "runningJumpFrameCount": 13,
+    "runningJumpFps": 15,
+    "runningJumpDisplayScale": 1.116071,
+    "runningJumpPivots": [
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      },
+      {
+        "x": 0.5,
+        "y": 0.837293
+      }
+    ]
+  }
+]

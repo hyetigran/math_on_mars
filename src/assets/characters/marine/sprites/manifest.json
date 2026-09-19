@@ -1,0 +1,610 @@
+{
+  "schemaVersion": 1,
+  "character": "marine-v005",
+  "projection": "orthographic",
+  "cameraElevationDegrees": 30,
+  "directions": [
+    {
+      "slug": "n",
+      "label": "north",
+      "yawDegrees": 180
+    },
+    {
+      "slug": "ne",
+      "label": "northeast",
+      "yawDegrees": 135
+    },
+    {
+      "slug": "e",
+      "label": "east",
+      "yawDegrees": 90
+    },
+    {
+      "slug": "se",
+      "label": "southeast",
+      "yawDegrees": 45
+    },
+    {
+      "slug": "s",
+      "label": "south",
+      "yawDegrees": 360
+    },
+    {
+      "slug": "sw",
+      "label": "southwest",
+      "yawDegrees": 315
+    },
+    {
+      "slug": "w",
+      "label": "west",
+      "yawDegrees": 270
+    },
+    {
+      "slug": "nw",
+      "label": "northwest",
+      "yawDegrees": 225
+    }
+  ],
+  "animations": [
+    {
+      "state": "idle",
+      "direction": "n",
+      "image": "n/idle-n.png",
+      "metadata": "n/idle-n.json",
+      "frameWidth": 512,
+      "frameHeight": 512,
+      "frameCount": 1,
+      "fps": 15,
+      "pivot": {
+        "x": 256,
+        "y": 418.93,
+        "normalizedX": 0.5,
+        "normalizedY": 0.81823,
+        "meaning": "fixed world origin at ground level"
+      }
+    },
+    {
+      "state": "jump",
+      "direction": "n",
+      "image": "n/jump-n.png",
+      "metadata": "n/jump-n.json",
+      "frameWidth": 512,
+      "frameHeight": 512,
+      "frameCount": 10,
+      "fps": 15,
+      "displayScale": 1.116071,
+      "pivot": {
+        "x": 256,
+        "y": 428.69,
+        "normalizedX": 0.5,
+        "normalizedY": 0.837293,
+        "meaning": "fixed world origin at ground level"
+      }
+    },
+    {
+      "state": "run_jump",
+      "direction": "n",
+      "image": "n/run_jump-n.png",
+      "metadata": "n/run_jump-n.json",
+      "frameWidth": 512,
+      "frameHeight": 512,
+      "frameCount": 13,
+      "fps": 15,
+      "displayScale": 1.116071,
+      "pivot": {
+        "x": 256,
+        "y": 428.69,
+        "normalizedX": 0.5,
+        "normalizedY": 0.837293,
+        "meaning": "fixed world origin at ground level"
+      }
+    },
+    {
+      "state": "walk",
+      "direction": "n",
+      "image": "n/walk-n.png",
+      "metadata": "n/walk-n.json",
+      "frameWidth": 512,
+      "frameHeight": 512,
+      "frameCount": 16,
+      "fps": 15,
+      "pivot": {
+        "x": 256,
+        "y": 418.93,
+        "normalizedX": 0.5,
+        "normalizedY": 0.81823,
+        "meaning": "fixed world origin at ground level"
+      }
+    },
+    {
+      "state": "idle",
+      "direction": "ne",
+      "image": "ne/idle-ne.png",
+      "metadata": "ne/idle-ne.json",
+      "frameWidth": 512,
+      "frameHeight": 512,
+      "frameCount": 1,
+      "fps": 15,
+      "pivot": {
+        "x": 256,
+        "y": 418.93,
+        "normalizedX": 0.5,
+        "normalizedY": 0.81823,
+        "meaning": "fixed world origin at ground level"
+      }
+    },
+    {
+      "state": "jump",
+      "direction": "ne",
+      "image": "ne/jump-ne.png",
+      "metadata": "ne/jump-ne.json",
+      "frameWidth": 512,
+      "frameHeight": 512,
+      "frameCount": 10,
+      "fps": 15,
+      "displayScale": 1.116071,
+      "pivot": {
+        "x": 256,
+        "y": 428.69,
+        "normalizedX": 0.5,
+        "normalizedY": 0.837293,
+        "meaning": "fixed world origin at ground level"
+      }
+    },
+    {
+      "state": "run_jump",
+      "direction": "ne",
+      "image": "ne/run_jump-ne.png",
+      "metadata": "ne/run_jump-ne.json",
+      "frameWidth": 512,
+      "frameHeight": 512,
+      "frameCount": 13,
+      "fps": 15,
+      "displayScale": 1.116071,
+      "pivot": {
+        "x": 256,
+        "y": 428.69,
+        "normalizedX": 0.5,
+        "normalizedY": 0.837293,
+        "meaning": "fixed world origin at ground level"
+      }
+    },
+    {
+      "state": "walk",
+      "direction": "ne",
+      "image": "ne/walk-ne.png",
+      "metadata": "ne/walk-ne.json",
+      "frameWidth": 512,
+      "frameHeight": 512,
+      "frameCount": 16,
+      "fps": 15,
+      "pivot": {
+        "x": 256,
+        "y": 418.93,
+        "normalizedX": 0.5,
+        "normalizedY": 0.81823,
+        "meaning": "fixed world origin at ground level"
+      }
+    },
+    {
+      "state": "idle",
+      "direction": "e",
+      "image": "e/idle-e.png",
+      "metadata": "e/idle-e.json",
+      "frameWidth": 512,
+      "frameHeight": 512,
+      "frameCount": 1,
+      "fps": 15,
+      "pivot": {
+        "x": 256,
+        "y": 418.93,
+        "normalizedX": 0.5,
+        "normalizedY": 0.81823,
+        "meaning": "fixed world origin at ground level"
+      }
+    },
+    {
+      "state": "jump",
+      "direction": "e",
+      "image": "e/jump-e.png",
+      "metadata": "e/jump-e.json",
+      "frameWidth": 512,
+      "frameHeight": 512,
+      "frameCount": 10,
+      "fps": 15,
+      "displayScale": 1.116071,
+      "pivot": {
+        "x": 256,
+        "y": 428.69,
+        "normalizedX": 0.5,
+        "normalizedY": 0.837293,
+        "meaning": "fixed world origin at ground level"
+      }
+    },
+    {
+      "state": "run_jump",
+      "direction": "e",
+      "image": "e/run_jump-e.png",
+      "metadata": "e/run_jump-e.json",
+      "frameWidth": 512,
+      "frameHeight": 512,
+      "frameCount": 13,
+      "fps": 15,
+      "displayScale": 1.116071,
+      "pivot": {
+        "x": 256,
+        "y": 428.69,
+        "normalizedX": 0.5,
+        "normalizedY": 0.837293,
+        "meaning": "fixed world origin at ground level"
+      }
+    },
+    {
+      "state": "walk",
+      "direction": "e",
+      "image": "e/walk-e.png",
+      "metadata": "e/walk-e.json",
+      "frameWidth": 512,
+      "frameHeight": 512,
+      "frameCount": 16,
+      "fps": 15,
+      "pivot": {
+        "x": 256,
+        "y": 418.93,
+        "normalizedX": 0.5,
+        "normalizedY": 0.81823,
+        "meaning": "fixed world origin at ground level"
+      }
+    },
+    {
+      "state": "idle",
+      "direction": "se",
+      "image": "se/idle-se.png",
+      "metadata": "se/idle-se.json",
+      "frameWidth": 512,
+      "frameHeight": 512,
+      "frameCount": 1,
+      "fps": 15,
+      "pivot": {
+        "x": 256,
+        "y": 418.93,
+        "normalizedX": 0.5,
+        "normalizedY": 0.81823,
+        "meaning": "fixed world origin at ground level"
+      }
+    },
+    {
+      "state": "jump",
+      "direction": "se",
+      "image": "se/jump-se.png",
+      "metadata": "se/jump-se.json",
+      "frameWidth": 512,
+      "frameHeight": 512,
+      "frameCount": 10,
+      "fps": 15,
+      "displayScale": 1.116071,
+      "pivot": {
+        "x": 256,
+        "y": 428.69,
+        "normalizedX": 0.5,
+        "normalizedY": 0.837293,
+        "meaning": "fixed world origin at ground level"
+      }
+    },
+    {
+      "state": "run_jump",
+      "direction": "se",
+      "image": "se/run_jump-se.png",
+      "metadata": "se/run_jump-se.json",
+      "frameWidth": 512,
+      "frameHeight": 512,
+      "frameCount": 13,
+      "fps": 15,
+      "displayScale": 1.116071,
+      "pivot": {
+        "x": 256,
+        "y": 428.69,
+        "normalizedX": 0.5,
+        "normalizedY": 0.837293,
+        "meaning": "fixed world origin at ground level"
+      }
+    },
+    {
+      "state": "walk",
+      "direction": "se",
+      "image": "se/walk-se.png",
+      "metadata": "se/walk-se.json",
+      "frameWidth": 512,
+      "frameHeight": 512,
+      "frameCount": 16,
+      "fps": 15,
+      "pivot": {
+        "x": 256,
+        "y": 418.93,
+        "normalizedX": 0.5,
+        "normalizedY": 0.81823,
+        "meaning": "fixed world origin at ground level"
+      }
+    },
+    {
+      "state": "idle",
+      "direction": "s",
+      "image": "s/idle-s.png",
+      "metadata": "s/idle-s.json",
+      "frameWidth": 512,
+      "frameHeight": 512,
+      "frameCount": 1,
+      "fps": 15,
+      "pivot": {
+        "x": 256,
+        "y": 418.93,
+        "normalizedX": 0.5,
+        "normalizedY": 0.81823,
+        "meaning": "fixed world origin at ground level"
+      }
+    },
+    {
+      "state": "jump",
+      "direction": "s",
+      "image": "s/jump-s.png",
+      "metadata": "s/jump-s.json",
+      "frameWidth": 512,
+      "frameHeight": 512,
+      "frameCount": 10,
+      "fps": 15,
+      "displayScale": 1.116071,
+      "pivot": {
+        "x": 256,
+        "y": 428.69,
+        "normalizedX": 0.5,
+        "normalizedY": 0.837293,
+        "meaning": "fixed world origin at ground level"
+      }
+    },
+    {
+      "state": "run_jump",
+      "direction": "s",
+      "image": "s/run_jump-s.png",
+      "metadata": "s/run_jump-s.json",
+      "frameWidth": 512,
+      "frameHeight": 512,
+      "frameCount": 13,
+      "fps": 15,
+      "displayScale": 1.116071,
+      "pivot": {
+        "x": 256,
+        "y": 428.69,
+        "normalizedX": 0.5,
+        "normalizedY": 0.837293,
+        "meaning": "fixed world origin at ground level"
+      }
+    },
+    {
+      "state": "walk",
+      "direction": "s",
+      "image": "s/walk-s.png",
+      "metadata": "s/walk-s.json",
+      "frameWidth": 512,
+      "frameHeight": 512,
+      "frameCount": 16,
+      "fps": 15,
+      "pivot": {
+        "x": 256,
+        "y": 418.93,
+        "normalizedX": 0.5,
+        "normalizedY": 0.81823,
+        "meaning": "fixed world origin at ground level"
+      }
+    },
+    {
+      "state": "idle",
+      "direction": "sw",
+      "image": "sw/idle-sw.png",
+      "metadata": "sw/idle-sw.json",
+      "frameWidth": 512,
+      "frameHeight": 512,
+      "frameCount": 1,
+      "fps": 15,
+      "pivot": {
+        "x": 256,
+        "y": 418.93,
+        "normalizedX": 0.5,
+        "normalizedY": 0.81823,
+        "meaning": "fixed world origin at ground level"
+      }
+    },
+    {
+      "state": "jump",
+      "direction": "sw",
+      "image": "sw/jump-sw.png",
+      "metadata": "sw/jump-sw.json",
+      "frameWidth": 512,
+      "frameHeight": 512,
+      "frameCount": 10,
+      "fps": 15,
+      "displayScale": 1.116071,
+      "pivot": {
+        "x": 256,
+        "y": 428.69,
+        "normalizedX": 0.5,
+        "normalizedY": 0.837293,
+        "meaning": "fixed world origin at ground level"
+      }
+    },
+    {
+      "state": "run_jump",
+      "direction": "sw",
+      "image": "sw/run_jump-sw.png",
+      "metadata": "sw/run_jump-sw.json",
+      "frameWidth": 512,
+      "frameHeight": 512,
+      "frameCount": 13,
+      "fps": 15,
+      "displayScale": 1.116071,
+      "pivot": {
+        "x": 256,
+        "y": 428.69,
+        "normalizedX": 0.5,
+        "normalizedY": 0.837293,
+        "meaning": "fixed world origin at ground level"
+      }
+    },
+    {
+      "state": "walk",
+      "direction": "sw",
+      "image": "sw/walk-sw.png",
+      "metadata": "sw/walk-sw.json",
+      "frameWidth": 512,
+      "frameHeight": 512,
+      "frameCount": 16,
+      "fps": 15,
+      "pivot": {
+        "x": 256,
+        "y": 418.93,
+        "normalizedX": 0.5,
+        "normalizedY": 0.81823,
+        "meaning": "fixed world origin at ground level"
+      }
+    },
+    {
+      "state": "idle",
+      "direction": "w",
+      "image": "w/idle-w.png",
+      "metadata": "w/idle-w.json",
+      "frameWidth": 512,
+      "frameHeight": 512,
+      "frameCount": 1,
+      "fps": 15,
+      "pivot": {
+        "x": 256,
+        "y": 418.93,
+        "normalizedX": 0.5,
+        "normalizedY": 0.81823,
+        "meaning": "fixed world origin at ground level"
+      }
+    },
+    {
+      "state": "jump",
+      "direction": "w",
+      "image": "w/jump-w.png",
+      "metadata": "w/jump-w.json",
+      "frameWidth": 512,
+      "frameHeight": 512,
+      "frameCount": 10,
+      "fps": 15,
+      "displayScale": 1.116071,
+      "pivot": {
+        "x": 256,
+        "y": 428.69,
+        "normalizedX": 0.5,
+        "normalizedY": 0.837293,
+        "meaning": "fixed world origin at ground level"
+      }
+    },
+    {
+      "state": "run_jump",
+      "direction": "w",
+      "image": "w/run_jump-w.png",
+      "metadata": "w/run_jump-w.json",
+      "frameWidth": 512,
+      "frameHeight": 512,
+      "frameCount": 13,
+      "fps": 15,
+      "displayScale": 1.116071,
+      "pivot": {
+        "x": 256,
+        "y": 428.69,
+        "normalizedX": 0.5,
+        "normalizedY": 0.837293,
+        "meaning": "fixed world origin at ground level"
+      }
+    },
+    {
+      "state": "walk",
+      "direction": "w",
+      "image": "w/walk-w.png",
+      "metadata": "w/walk-w.json",
+      "frameWidth": 512,
+      "frameHeight": 512,
+      "frameCount": 16,
+      "fps": 15,
+      "pivot": {
+        "x": 256,
+        "y": 418.93,
+        "normalizedX": 0.5,
+        "normalizedY": 0.81823,
+        "meaning": "fixed world origin at ground level"
+      }
+    },
+    {
+      "state": "idle",
+      "direction": "nw",
+      "image": "nw/idle-nw.png",
+      "metadata": "nw/idle-nw.json",
+      "frameWidth": 512,
+      "frameHeight": 512,
+      "frameCount": 1,
+      "fps": 15,
+      "pivot": {
+        "x": 256,
+        "y": 418.93,
+        "normalizedX": 0.5,
+        "normalizedY": 0.81823,
+        "meaning": "fixed world origin at ground level"
+      }
+    },
+    {
+      "state": "jump",
+      "direction": "nw",
+      "image": "nw/jump-nw.png",
+      "metadata": "nw/jump-nw.json",
+      "frameWidth": 512,
+      "frameHeight": 512,
+      "frameCount": 10,
+      "fps": 15,
+      "displayScale": 1.116071,
+      "pivot": {
+        "x": 256,
+        "y": 428.69,
+        "normalizedX": 0.5,
+        "normalizedY": 0.837293,
+        "meaning": "fixed world origin at ground level"
+      }
+    },
+    {
+      "state": "run_jump",
+      "direction": "nw",
+      "image": "nw/run_jump-nw.png",
+      "metadata": "nw/run_jump-nw.json",
+      "frameWidth": 512,
+      "frameHeight": 512,
+      "frameCount": 13,
+      "fps": 15,
+      "displayScale": 1.116071,
+      "pivot": {
+        "x": 256,
+        "y": 428.69,
+        "normalizedX": 0.5,
+        "normalizedY": 0.837293,
+        "meaning": "fixed world origin at ground level"
+      }
+    },
+    {
+      "state": "walk",
+      "direction": "nw",
+      "image": "nw/walk-nw.png",
+      "metadata": "nw/walk-nw.json",
+      "frameWidth": 512,
+      "frameHeight": 512,
+      "frameCount": 16,
+      "fps": 15,
+      "pivot": {
+        "x": 256,
+        "y": 418.93,
+        "normalizedX": 0.5,
+        "normalizedY": 0.81823,
+        "meaning": "fixed world origin at ground level"
+      }
+    }
+  ]
+}

@@ -7,6 +7,8 @@
     "dev": "vite",
     "build": "node scripts/build-version.mjs && tsc && vite build && node scripts/build-offline.mjs",
     "preview": "vite preview",
+    "sprites:bake:marine": "node scripts/sprite-baker/bake-marine.mjs",
+    "sprites:bake:marine:v005": "node scripts/sprite-baker/bake-marine.mjs --character marine-v005",
     "test": "node scripts/test.mjs",
     "format": "prettier --write src tests scripts content \"*.{html,json,ts,yaml}\"",
     "format:check": "prettier --check src tests scripts content \"*.{html,json,ts,yaml}\""
@@ -15,8 +17,12 @@
     "phaser": "4.2.1"
   },
   "devDependencies": {
+    "@types/three": "^0.185.4",
     "fake-indexeddb": "6.2.5",
     "prettier": "3.9.6",
+    "puppeteer-core": "^25.10.0",
+    "sharp": "^0.35.4",
+    "three": "^0.186.0",
     "typescript": "^5.9.2",
     "vite": "^7.1.5"
   },

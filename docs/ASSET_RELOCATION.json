@@ -1,0 +1,2833 @@
+{
+  "archive": "../tmp_assets",
+  "files": [
+    {
+      "from": "tmp_assets/02_screens/splash/splash.png",
+      "to": "src/assets/screens/splash/masters/splash.png",
+      "bytes": 8473445,
+      "sha256": "5ab2e85fc3139af0f86bc8d1fd6d81dbbfbcd8289e6026b2402326f5fb53444c",
+      "relocatedSha256": "5ab2e85fc3139af0f86bc8d1fd6d81dbbfbcd8289e6026b2402326f5fb53444c"
+    },
+    {
+      "from": "tmp_assets/04_weapons/pulse_blaster/pulse_blaster_rail_v002.json",
+      "to": "src/assets/weapons/pulse_blaster/masters/pulse_blaster_rail_v002.json",
+      "bytes": 2208,
+      "sha256": "e86d60a159ae16ef5932f17e8f4fede27440494acf045b2ec35729facada4b9e",
+      "relocatedSha256": "3c887a607e741bef76594b981c4ad90a5311dfcd6737a23d08945ded5dcd524b"
+    },
+    {
+      "from": "tmp_assets/04_weapons/pulse_blaster/pulse_blaster_rail_v002_source.png",
+      "to": "src/assets/weapons/pulse_blaster/masters/pulse_blaster_rail_v002_source.png",
+      "bytes": 1139898,
+      "sha256": "51b7b0050a87d05ad42edec0f8d1e7cfef066035f7b83e311d28bbedfd676dbc",
+      "relocatedSha256": "51b7b0050a87d05ad42edec0f8d1e7cfef066035f7b83e311d28bbedfd676dbc"
+    },
+    {
+      "from": "tmp_assets/03_characters/enemies/charger/charger_horn_v001.json",
+      "to": "src/assets/characters/enemies/charger/charger_horn_v001.json",
+      "bytes": 2008,
+      "sha256": "f1f1d62f360f0216d4be7007601715170e235f67c0c5bd0dbf52328b6f2c7bb2",
+      "relocatedSha256": "604186656d1227fe2f91f977a6e385305f033c7658d5dfad4bfe5058684b1558"
+    },
+    {
+      "from": "tmp_assets/03_characters/enemies/charger/charger_horn_v001_source.png",
+      "to": "src/assets/characters/enemies/charger/charger_horn_v001_source.png",
+      "bytes": 1059238,
+      "sha256": "1be6a0cfff19e1f702b8adb0dc2b95ba0901c053b2673f74b36081a184565ab5",
+      "relocatedSha256": "1be6a0cfff19e1f702b8adb0dc2b95ba0901c053b2673f74b36081a184565ab5"
+    },
+    {
+      "from": "tmp_assets/03_characters/enemies/drifter/drifter_droplet_v003_flat.json",
+      "to": "src/assets/characters/enemies/drifter/drifter_droplet_v003_flat.json",
+      "bytes": 1806,
+      "sha256": "a525704031a0cd5243c3814828dba507e431253abfa6ff806649273a8021d1f1",
+      "relocatedSha256": "d39ccdc2a3460933ce9ff73fbae71c5ea2bec57717e6427f6be770e1492d3042"
+    },
+    {
+      "from": "tmp_assets/03_characters/enemies/drifter/drifter_droplet_v003_flat_source.png",
+      "to": "src/assets/characters/enemies/drifter/drifter_droplet_v003_flat_source.png",
+      "bytes": 981178,
+      "sha256": "fd0c571786333bd61d1dd21919ff727f2b80afa5d290263e5ddd11a04cfc5af0",
+      "relocatedSha256": "fd0c571786333bd61d1dd21919ff727f2b80afa5d290263e5ddd11a04cfc5af0"
+    },
+    {
+      "from": "tmp_assets/03_characters/enemies/overmind/overmind_mantle_v007_muscular.json",
+      "to": "src/assets/characters/enemies/overmind/overmind_mantle_v007_muscular.json",
+      "bytes": 1681,
+      "sha256": "429928f4cb2e510aef68b2ad778d2cff34c80d22c7d98665a7cb02113db94c7d",
+      "relocatedSha256": "d740282b8a388b5abc374ee2d14a69e9c5ac741431d841a5aee4650bb4007646"
+    },
+    {
+      "from": "tmp_assets/03_characters/enemies/overmind/overmind_mantle_v007_muscular_source.png",
+      "to": "src/assets/characters/enemies/overmind/overmind_mantle_v007_muscular_source.png",
+      "bytes": 860853,
+      "sha256": "4c34b1db0d021b0275f6aa0056bea58c0c4c7cf4cf1b63fa17ab31ac7df2144f",
+      "relocatedSha256": "4c34b1db0d021b0275f6aa0056bea58c0c4c7cf4cf1b63fa17ab31ac7df2144f"
+    },
+    {
+      "from": "tmp_assets/03_characters/enemies/spitter/spitter_siphon_v003_upright.json",
+      "to": "src/assets/characters/enemies/spitter/spitter_siphon_v003_upright.json",
+      "bytes": 1639,
+      "sha256": "be567282826625983143a33af6e16d3cb88f63210d6d3078cc28ef617f381cd6",
+      "relocatedSha256": "5a44a6d517be117cd265efa3670271f93aed554f3ce66a25bf77de01cc814477"
+    },
+    {
+      "from": "tmp_assets/03_characters/enemies/spitter/spitter_siphon_v003_upright_source.png",
+      "to": "src/assets/characters/enemies/spitter/spitter_siphon_v003_upright_source.png",
+      "bytes": 979555,
+      "sha256": "1b5904cafbb04b5d4fd8f339fc7378522aacd42416173a202f3c2b02f64b99dd",
+      "relocatedSha256": "1b5904cafbb04b5d4fd8f339fc7378522aacd42416173a202f3c2b02f64b99dd"
+    },
+    {
+      "from": "tmp_assets/03_characters/enemies/splitter/summoner_nursery_v001.json",
+      "to": "src/assets/characters/enemies/splitter/summoner_nursery_v001.json",
+      "bytes": 1770,
+      "sha256": "c5349e14471a58f12818d5e2a8e8b6f6c5337862393ddedee6ce3c1d5b6b5a0b",
+      "relocatedSha256": "57b792488244799d0abc6cec75a147f40efeb6d4b9dde86706e331268c7fed73"
+    },
+    {
+      "from": "tmp_assets/03_characters/enemies/splitter/summoner_nursery_v001_source.png",
+      "to": "src/assets/characters/enemies/splitter/summoner_nursery_v001_source.png",
+      "bytes": 1056292,
+      "sha256": "cab375020bc99f5db46405ae08795288b18a38495d5c545cde68f264b863c1fb",
+      "relocatedSha256": "cab375020bc99f5db46405ae08795288b18a38495d5c545cde68f264b863c1fb"
+    },
+    {
+      "from": "tmp_assets/05_environment/terrain/mars_arena_v005_light_center_source.png",
+      "to": "src/assets/environment/arena/masters/mars_arena_v005_light_center_source.png",
+      "bytes": 11440135,
+      "sha256": "df9a344f4f32a69bcb03850ebd80204730d3eab0b6f14f9cbcef78a9f37e90cb",
+      "relocatedSha256": "df9a344f4f32a69bcb03850ebd80204730d3eab0b6f14f9cbcef78a9f37e90cb"
+    },
+    {
+      "from": "tmp_assets/01_brand/typography/math_on_mars_mission_v001_source.png",
+      "to": "src/assets/brand/math_on_mars_mission_v001_source.png",
+      "bytes": 1318163,
+      "sha256": "6e92f17e00065caa8f56bfafeb758866021c4ed455ac037befefc7c33671b2bf",
+      "relocatedSha256": "6e92f17e00065caa8f56bfafeb758866021c4ed455ac037befefc7c33671b2bf"
+    },
+    {
+      "from": "tmp_assets/01_brand/typography/math_on_mars_mission_v001.json",
+      "to": "src/assets/brand/math_on_mars_mission_v001.json",
+      "bytes": 1245,
+      "sha256": "dce0712201625e2023745ba5d73a9686e397cb830f388ed36b3183777798693a",
+      "relocatedSha256": "dce0712201625e2023745ba5d73a9686e397cb830f388ed36b3183777798693a"
+    },
+    {
+      "from": "references/mathonmars/candidates/base-camp-v3-expanded.png",
+      "to": "src/assets/environment/camp/masters/base-camp-v3-expanded.png",
+      "bytes": 14138779,
+      "sha256": "e29456dc2fabb7edc67b02ddb3abc4c47d0aa24388e00ce45d1dffd2a77b47a8",
+      "relocatedSha256": "e29456dc2fabb7edc67b02ddb3abc4c47d0aa24388e00ce45d1dffd2a77b47a8"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-v005/rigged/character-rigged-1789585407607.glb",
+      "to": "src/assets/characters/marine/source/rigged/character-rigged-1789585407607.glb",
+      "bytes": 24249976,
+      "sha256": "89f52885b34ba4fad6568e5df425888d59d88501f1ddd28d1d95b75ef28f970b",
+      "relocatedSha256": "89f52885b34ba4fad6568e5df425888d59d88501f1ddd28d1d95b75ef28f970b"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-v005/animations/walking.glb",
+      "to": "src/assets/characters/marine/source/animations/walking.glb",
+      "bytes": 24262760,
+      "sha256": "731d58cb66d46e694cf7c62a846e13238fbeb2cea0dccb0e65f5ce8209956d67",
+      "relocatedSha256": "731d58cb66d46e694cf7c62a846e13238fbeb2cea0dccb0e65f5ce8209956d67"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-v005/sprites/e/idle-e.json",
+      "to": "src/assets/characters/marine/sprites/e/idle-e.json",
+      "bytes": 920,
+      "sha256": "f508ac92aeb6eecbea2cb0e6cb60673434a31d14ce4b3de04af709197561add1",
+      "relocatedSha256": "e7160f33148add0083c76ac19944645db3fd6d769cb2b35e12633d04ee5bb859"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-v005/sprites/e/idle-e.png",
+      "to": "src/assets/characters/marine/sprites/e/idle-e.png",
+      "bytes": 38724,
+      "sha256": "28de7256d5b1cc05424ff3aeff313903a035c0328214f95e82ec06cc97514c94",
+      "relocatedSha256": "28de7256d5b1cc05424ff3aeff313903a035c0328214f95e82ec06cc97514c94"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-v005/sprites/e/walk-e.json",
+      "to": "src/assets/characters/marine/sprites/e/walk-e.json",
+      "bytes": 952,
+      "sha256": "cd77f84b81c1a299faee5fad09dc40f6ed89428b1cc95585de5fa42d3119f87b",
+      "relocatedSha256": "86d5255a42f1a293e58622389a539465fb06ed03944ad310f08d66a0fce316bc"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-v005/sprites/e/walk-e.png",
+      "to": "src/assets/characters/marine/sprites/e/walk-e.png",
+      "bytes": 656029,
+      "sha256": "b5d16502bd10536c015c129f5c0c31e1a775ee1e047b4066649f718de17d1341",
+      "relocatedSha256": "b5d16502bd10536c015c129f5c0c31e1a775ee1e047b4066649f718de17d1341"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-v005/sprites/manifest.json",
+      "to": "src/assets/characters/marine/sprites/manifest.json",
+      "bytes": 10399,
+      "sha256": "629d4482ae9b4fd8f6c2131035fe2ce1c476c5160cd47c87a87e4f03863b050b",
+      "relocatedSha256": "1cf6da903e43cb662483e64a6fa1d3957e7231248cec58223d86291dc0f4975f"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-v005/sprites/n/idle-n.json",
+      "to": "src/assets/characters/marine/sprites/n/idle-n.json",
+      "bytes": 923,
+      "sha256": "923eec183023dcfc8081eb3401d84a4ccb94dba6a036650c115dc628145b5047",
+      "relocatedSha256": "77ebcf37d6cb8b1ece38cd6c4f4892ae18fc6489db3440a8d2784196cb11728b"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-v005/sprites/n/idle-n.png",
+      "to": "src/assets/characters/marine/sprites/n/idle-n.png",
+      "bytes": 51267,
+      "sha256": "6afa2a522d02079dd5104c1ba0d0d922295f6ef9d76c6afbe31ff1dd7994d6c4",
+      "relocatedSha256": "6afa2a522d02079dd5104c1ba0d0d922295f6ef9d76c6afbe31ff1dd7994d6c4"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-v005/sprites/n/walk-n.json",
+      "to": "src/assets/characters/marine/sprites/n/walk-n.json",
+      "bytes": 956,
+      "sha256": "68ebb3adc187e4736adb794188b27ab126bfcd9c17f75f58ed8e9b989c4f9e13",
+      "relocatedSha256": "115f0aa524a0fd7db4b24de821ab4bf2ff53e9ade8a37b1ffdf1efa02827ac3d"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-v005/sprites/n/walk-n.png",
+      "to": "src/assets/characters/marine/sprites/n/walk-n.png",
+      "bytes": 791945,
+      "sha256": "5e3b0b5c4e64710afce8146b67307de80301886da5c8753a0d9f7f0d9771596b",
+      "relocatedSha256": "5e3b0b5c4e64710afce8146b67307de80301886da5c8753a0d9f7f0d9771596b"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-v005/sprites/ne/idle-ne.json",
+      "to": "src/assets/characters/marine/sprites/ne/idle-ne.json",
+      "bytes": 930,
+      "sha256": "c70d7e462845d92fa11b049d41eb50e36dddf9636d297ffd36b72084d17c5f72",
+      "relocatedSha256": "7df78b84e6f20b5cbf01d02fb34a73268a33492e56a0a04530706715ba695cb6"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-v005/sprites/ne/idle-ne.png",
+      "to": "src/assets/characters/marine/sprites/ne/idle-ne.png",
+      "bytes": 49413,
+      "sha256": "5c3dfeec17cb005f87dda829aad77adb2ed9b9736733ef29f7a75850dbdeea40",
+      "relocatedSha256": "5c3dfeec17cb005f87dda829aad77adb2ed9b9736733ef29f7a75850dbdeea40"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-v005/sprites/ne/walk-ne.json",
+      "to": "src/assets/characters/marine/sprites/ne/walk-ne.json",
+      "bytes": 963,
+      "sha256": "3e4f574cccf03f836da1990b1d61c2be55d8bfa5e70c5bdc703b74bd97449ea3",
+      "relocatedSha256": "db0e207a4174e6cf951f831e77753bfe45dd3b2d37fd171f1d5a41b50e6f330d"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-v005/sprites/ne/walk-ne.png",
+      "to": "src/assets/characters/marine/sprites/ne/walk-ne.png",
+      "bytes": 717707,
+      "sha256": "5fe5fe5b4fdccad5a485198027cca015dfb804d826c36c653002faf343086908",
+      "relocatedSha256": "5fe5fe5b4fdccad5a485198027cca015dfb804d826c36c653002faf343086908"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-v005/sprites/nw/idle-nw.json",
+      "to": "src/assets/characters/marine/sprites/nw/idle-nw.json",
+      "bytes": 930,
+      "sha256": "09f097dc5562252da01851d44dd8165b63b52a699e38143a1a0119222e31b338",
+      "relocatedSha256": "ed74e8f088a773662d9aedeb1460aa1d2117a233e544036d8afa9c95ce3ab4f6"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-v005/sprites/nw/idle-nw.png",
+      "to": "src/assets/characters/marine/sprites/nw/idle-nw.png",
+      "bytes": 48707,
+      "sha256": "46e4a5a3527f0324081d8143505acff7c2bdb0eaf7f06e3a44aca3f9c51071bd",
+      "relocatedSha256": "46e4a5a3527f0324081d8143505acff7c2bdb0eaf7f06e3a44aca3f9c51071bd"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-v005/sprites/nw/walk-nw.json",
+      "to": "src/assets/characters/marine/sprites/nw/walk-nw.json",
+      "bytes": 963,
+      "sha256": "4d7dca46926d20ba17517226a389616bca8d0c42ae3109abc488c86a2889b91c",
+      "relocatedSha256": "9cc51d38c16e8299ac7969c12537cc23ef2a403c346ea9c0fc56c92922a53403"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-v005/sprites/nw/walk-nw.png",
+      "to": "src/assets/characters/marine/sprites/nw/walk-nw.png",
+      "bytes": 735956,
+      "sha256": "96cedc92bb0454a5cd574ff04c46f306237445a5069f353056f4d5c0558b6e70",
+      "relocatedSha256": "96cedc92bb0454a5cd574ff04c46f306237445a5069f353056f4d5c0558b6e70"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-v005/sprites/s/idle-s.json",
+      "to": "src/assets/characters/marine/sprites/s/idle-s.json",
+      "bytes": 923,
+      "sha256": "e3e6f2c84a54cf89b526d7099d1bc4f9fbc1781daccf9caa35b1a690db6ff1ab",
+      "relocatedSha256": "1e08833b21bea5c1317d0d81f97c994bfe02198c32f0277fd547c51e8192b720"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-v005/sprites/s/idle-s.png",
+      "to": "src/assets/characters/marine/sprites/s/idle-s.png",
+      "bytes": 55310,
+      "sha256": "e4946ae1d8aa07f04ff66ca7228082f2c6e421c92f0572a9d4bfea0c55746614",
+      "relocatedSha256": "e4946ae1d8aa07f04ff66ca7228082f2c6e421c92f0572a9d4bfea0c55746614"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-v005/sprites/s/walk-s.json",
+      "to": "src/assets/characters/marine/sprites/s/walk-s.json",
+      "bytes": 956,
+      "sha256": "df1d21beea86f3ab28337a110e803d7260d0536555b1a45e703d9ce18f054ca5",
+      "relocatedSha256": "d064f3cbef1db8cb7fbbae90c0b8555277950bd41a2454457cd8d47f2189224f"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-v005/sprites/s/walk-s.png",
+      "to": "src/assets/characters/marine/sprites/s/walk-s.png",
+      "bytes": 844631,
+      "sha256": "cf34ad78124e40fbb1cca89f3d6577c656837c22a30c20c2660b8dbb4d5b0fc0",
+      "relocatedSha256": "cf34ad78124e40fbb1cca89f3d6577c656837c22a30c20c2660b8dbb4d5b0fc0"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-v005/sprites/se/idle-se.json",
+      "to": "src/assets/characters/marine/sprites/se/idle-se.json",
+      "bytes": 928,
+      "sha256": "3d7129d2d1271ff4116c2dfb8e22cf0129c95b2956d4e7d29d9fc12a9837e4d5",
+      "relocatedSha256": "fd6b91edffbcddafdb66765c0616d58de8cb4dbed1cfafbc520730acce7fb004"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-v005/sprites/se/idle-se.png",
+      "to": "src/assets/characters/marine/sprites/se/idle-se.png",
+      "bytes": 51728,
+      "sha256": "358bc6ffee68b53b5ab3be0c0de3f1cdc155395b11079fe3ce219f0e17ce9e92",
+      "relocatedSha256": "358bc6ffee68b53b5ab3be0c0de3f1cdc155395b11079fe3ce219f0e17ce9e92"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-v005/sprites/se/walk-se.json",
+      "to": "src/assets/characters/marine/sprites/se/walk-se.json",
+      "bytes": 961,
+      "sha256": "fbcca5255e39aee2d2071f7772846f166feb605aa42ee22f624a58c44fe2fa80",
+      "relocatedSha256": "5f9bf99f5ada020ab76100e053e8201538f3335eeb932026044524352d074315"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-v005/sprites/se/walk-se.png",
+      "to": "src/assets/characters/marine/sprites/se/walk-se.png",
+      "bytes": 763089,
+      "sha256": "de4a18f202e91ff37a79de07b8a25ef3c37aa498e757ed82fcd5014d7ace44e5",
+      "relocatedSha256": "de4a18f202e91ff37a79de07b8a25ef3c37aa498e757ed82fcd5014d7ace44e5"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-v005/sprites/sw/idle-sw.json",
+      "to": "src/assets/characters/marine/sprites/sw/idle-sw.json",
+      "bytes": 930,
+      "sha256": "6f891e6757baf4f7bbe755e032b23a7b2375b40f650b53593b27d15209aeb036",
+      "relocatedSha256": "a96fc02943c7e22e952c6ae8358a3897c1b587c9bbcacf01cb532f541fc868c9"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-v005/sprites/sw/idle-sw.png",
+      "to": "src/assets/characters/marine/sprites/sw/idle-sw.png",
+      "bytes": 50989,
+      "sha256": "c57c56159880d13fb9afabd896ac380369e7873ce9ef06d945812b9cd6836625",
+      "relocatedSha256": "c57c56159880d13fb9afabd896ac380369e7873ce9ef06d945812b9cd6836625"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-v005/sprites/sw/walk-sw.json",
+      "to": "src/assets/characters/marine/sprites/sw/walk-sw.json",
+      "bytes": 963,
+      "sha256": "b45cdc04aaa5863784a19df4f514bb90595d7d0cf2d74e6029e358a6d7300744",
+      "relocatedSha256": "df08edda5282bdb6d81b176cea5dad2f689a44eb8d4a8708a0ec1efef9899615"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-v005/sprites/sw/walk-sw.png",
+      "to": "src/assets/characters/marine/sprites/sw/walk-sw.png",
+      "bytes": 712982,
+      "sha256": "abd1cb243b482e3d576d3f2f42407f2c2fb492bd7427de387934c33d3caff9c4",
+      "relocatedSha256": "abd1cb243b482e3d576d3f2f42407f2c2fb492bd7427de387934c33d3caff9c4"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-v005/sprites/w/idle-w.json",
+      "to": "src/assets/characters/marine/sprites/w/idle-w.json",
+      "bytes": 922,
+      "sha256": "bb8a70343746f47057b1ee4f0a9dee455d97099ac0f54cd3bd931b2c261c478e",
+      "relocatedSha256": "3c48ecb411361f02cc1f19ccaa2c1d04448cd72f39d234bc7562a3fbd5a05e82"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-v005/sprites/w/idle-w.png",
+      "to": "src/assets/characters/marine/sprites/w/idle-w.png",
+      "bytes": 37582,
+      "sha256": "7726e4b80196dda5ed184451b81f447b0a7016259b646a83b2e7b07176953bca",
+      "relocatedSha256": "7726e4b80196dda5ed184451b81f447b0a7016259b646a83b2e7b07176953bca"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-v005/sprites/w/walk-w.json",
+      "to": "src/assets/characters/marine/sprites/w/walk-w.json",
+      "bytes": 955,
+      "sha256": "af23d0fa16471d7bd92808b1ad86b0bdbad5b0a156f29db6ea69bcae073133de",
+      "relocatedSha256": "8061cf7d5a604c60b8b0d4827758a1338e743da2aec22c9a96573263646baf80"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-v005/sprites/w/walk-w.png",
+      "to": "src/assets/characters/marine/sprites/w/walk-w.png",
+      "bytes": 646343,
+      "sha256": "a5a1d6930307066757cf9945198aac1a6f70f586417003e7f80038de27a2931f",
+      "relocatedSha256": "a5a1d6930307066757cf9945198aac1a6f70f586417003e7f80038de27a2931f"
+    },
+    {
+      "from": "public/game/camp/base-camp-v3.webp",
+      "to": "src/assets/environment/camp/runtime/base-camp-v3.webp",
+      "bytes": 1312292,
+      "sha256": "991f2e96d1d9dfee98fa67278219d29a8c18eb473bd10ed6ca850ec9e27b863f",
+      "relocatedSha256": "991f2e96d1d9dfee98fa67278219d29a8c18eb473bd10ed6ca850ec9e27b863f"
+    },
+    {
+      "from": "public/game/camp/idle-v005-r2-e.webp",
+      "to": "src/assets/characters/marine/runtime/idle-v005-r2-e.webp",
+      "bytes": 9180,
+      "sha256": "5305bd21e2a3bf6127579433c033556165c8c483cc14450aa2a773968f261299",
+      "relocatedSha256": "5305bd21e2a3bf6127579433c033556165c8c483cc14450aa2a773968f261299"
+    },
+    {
+      "from": "public/game/camp/idle-v005-r2-n.webp",
+      "to": "src/assets/characters/marine/runtime/idle-v005-r2-n.webp",
+      "bytes": 12588,
+      "sha256": "c705af9a86c58e32281eba9b54877315642a2147f731893697a3580cd15a6fc7",
+      "relocatedSha256": "c705af9a86c58e32281eba9b54877315642a2147f731893697a3580cd15a6fc7"
+    },
+    {
+      "from": "public/game/camp/idle-v005-r2-ne.webp",
+      "to": "src/assets/characters/marine/runtime/idle-v005-r2-ne.webp",
+      "bytes": 11250,
+      "sha256": "d4f70e0f10447a42d277ef83331b59b24d6fbba43c9143be7526a4394fe391b9",
+      "relocatedSha256": "d4f70e0f10447a42d277ef83331b59b24d6fbba43c9143be7526a4394fe391b9"
+    },
+    {
+      "from": "public/game/camp/idle-v005-r2-nw.webp",
+      "to": "src/assets/characters/marine/runtime/idle-v005-r2-nw.webp",
+      "bytes": 11302,
+      "sha256": "517f550b8f739559a250168cc6407e0bdf126942ac2dcadb66629a775a0a0fe2",
+      "relocatedSha256": "517f550b8f739559a250168cc6407e0bdf126942ac2dcadb66629a775a0a0fe2"
+    },
+    {
+      "from": "public/game/camp/idle-v005-r2-s.webp",
+      "to": "src/assets/characters/marine/runtime/idle-v005-r2-s.webp",
+      "bytes": 13964,
+      "sha256": "bccdac9bf91bad0960715db579f9293dcc775a44cb77549209707c072a84d3bc",
+      "relocatedSha256": "bccdac9bf91bad0960715db579f9293dcc775a44cb77549209707c072a84d3bc"
+    },
+    {
+      "from": "public/game/camp/idle-v005-r2-se.webp",
+      "to": "src/assets/characters/marine/runtime/idle-v005-r2-se.webp",
+      "bytes": 12358,
+      "sha256": "52f9886ec14b5d25f4299fb81e3886ae76166423b8777c5b0df106c53ebd87b8",
+      "relocatedSha256": "52f9886ec14b5d25f4299fb81e3886ae76166423b8777c5b0df106c53ebd87b8"
+    },
+    {
+      "from": "public/game/camp/idle-v005-r2-sw.webp",
+      "to": "src/assets/characters/marine/runtime/idle-v005-r2-sw.webp",
+      "bytes": 12308,
+      "sha256": "85f3150917b844b38d67a9a539ace60df30b16b8db5c262600ff1513a40f4d7c",
+      "relocatedSha256": "85f3150917b844b38d67a9a539ace60df30b16b8db5c262600ff1513a40f4d7c"
+    },
+    {
+      "from": "public/game/camp/idle-v005-r2-w.webp",
+      "to": "src/assets/characters/marine/runtime/idle-v005-r2-w.webp",
+      "bytes": 9084,
+      "sha256": "3a5882a4ef20f984601b15fab03bc8bfb707ae53fdef671cb436507da80367b8",
+      "relocatedSha256": "3a5882a4ef20f984601b15fab03bc8bfb707ae53fdef671cb436507da80367b8"
+    },
+    {
+      "from": "public/game/camp/marine-v005-r2.json",
+      "to": "src/assets/characters/marine/runtime/marine-v005-r2.json",
+      "bytes": 10751,
+      "sha256": "5fe0b8de3ae6538720f364f296ac9801b8eab57f56ea9b10180aa8f126320cab",
+      "relocatedSha256": "cf4a55c450dc7a5b4979d32ffe569ac384529e571093774b9542fb459481473f"
+    },
+    {
+      "from": "public/game/camp/splash.webp",
+      "to": "src/assets/screens/splash/runtime/splash.webp",
+      "bytes": 365714,
+      "sha256": "7482f6655aa8433a9ac6aa4b4f88030acc7b5010ea00010317c4001be774fceb",
+      "relocatedSha256": "7482f6655aa8433a9ac6aa4b4f88030acc7b5010ea00010317c4001be774fceb"
+    },
+    {
+      "from": "public/game/camp/walk-v005-r2-e.webp",
+      "to": "src/assets/characters/marine/runtime/walk-v005-r2-e.webp",
+      "bytes": 160558,
+      "sha256": "70004952ac6fd4e8091268b9bd35089fd7cbc215b57872b8c87848f1132c6cfd",
+      "relocatedSha256": "70004952ac6fd4e8091268b9bd35089fd7cbc215b57872b8c87848f1132c6cfd"
+    },
+    {
+      "from": "public/game/camp/walk-v005-r2-n.webp",
+      "to": "src/assets/characters/marine/runtime/walk-v005-r2-n.webp",
+      "bytes": 181208,
+      "sha256": "18f329de8a24e1c8e19c63237eda153bfb6ac08ccd1f5397d8c561f4c69d1b8a",
+      "relocatedSha256": "18f329de8a24e1c8e19c63237eda153bfb6ac08ccd1f5397d8c561f4c69d1b8a"
+    },
+    {
+      "from": "public/game/camp/walk-v005-r2-ne.webp",
+      "to": "src/assets/characters/marine/runtime/walk-v005-r2-ne.webp",
+      "bytes": 157430,
+      "sha256": "90be7a7c14c643423218b3077645a75f8baac8591168030344e964bfc641393a",
+      "relocatedSha256": "90be7a7c14c643423218b3077645a75f8baac8591168030344e964bfc641393a"
+    },
+    {
+      "from": "public/game/camp/walk-v005-r2-nw.webp",
+      "to": "src/assets/characters/marine/runtime/walk-v005-r2-nw.webp",
+      "bytes": 164158,
+      "sha256": "fbe482105e2f838e96bec28e45c31210d9192c6b443d96708247fcb640d99740",
+      "relocatedSha256": "fbe482105e2f838e96bec28e45c31210d9192c6b443d96708247fcb640d99740"
+    },
+    {
+      "from": "public/game/camp/walk-v005-r2-s.webp",
+      "to": "src/assets/characters/marine/runtime/walk-v005-r2-s.webp",
+      "bytes": 228510,
+      "sha256": "8f9afc15e42859e3ddbf52018e2e7ceba9f45761b422232872480d511ef39a9e",
+      "relocatedSha256": "8f9afc15e42859e3ddbf52018e2e7ceba9f45761b422232872480d511ef39a9e"
+    },
+    {
+      "from": "public/game/camp/walk-v005-r2-se.webp",
+      "to": "src/assets/characters/marine/runtime/walk-v005-r2-se.webp",
+      "bytes": 194908,
+      "sha256": "2199e410d68f82005f9ec893e1c554aa307a42aa2883719a1b60fbb5e4fba3d3",
+      "relocatedSha256": "2199e410d68f82005f9ec893e1c554aa307a42aa2883719a1b60fbb5e4fba3d3"
+    },
+    {
+      "from": "public/game/camp/walk-v005-r2-sw.webp",
+      "to": "src/assets/characters/marine/runtime/walk-v005-r2-sw.webp",
+      "bytes": 185392,
+      "sha256": "e649dcc29bd2d74757e5537ebfe96a96167b659887d8f445ddf846ebd672aa2c",
+      "relocatedSha256": "e649dcc29bd2d74757e5537ebfe96a96167b659887d8f445ddf846ebd672aa2c"
+    },
+    {
+      "from": "public/game/camp/walk-v005-r2-w.webp",
+      "to": "src/assets/characters/marine/runtime/walk-v005-r2-w.webp",
+      "bytes": 162938,
+      "sha256": "adb0157b86aed4160b728972d209ae92af94d364258e6220835279181fb71817",
+      "relocatedSha256": "adb0157b86aed4160b728972d209ae92af94d364258e6220835279181fb71817"
+    },
+    {
+      "from": "src/assets/runtime/ammo_electric_chain.webp",
+      "to": "src/assets/items/ammo/runtime/ammo_electric_chain.webp",
+      "bytes": 13244,
+      "sha256": "89767a01bae2fa8724d6fe327f53eda5cccc3fcffda9333d62bb3b704cff5412",
+      "relocatedSha256": "89767a01bae2fa8724d6fe327f53eda5cccc3fcffda9333d62bb3b704cff5412"
+    },
+    {
+      "from": "src/assets/runtime/ammo_fiery.webp",
+      "to": "src/assets/items/ammo/runtime/ammo_fiery.webp",
+      "bytes": 13492,
+      "sha256": "1b7048765b089f47cf689c373c4d3925dd0758f800bb33524bc3ee2dea7d12aa",
+      "relocatedSha256": "1b7048765b089f47cf689c373c4d3925dd0758f800bb33524bc3ee2dea7d12aa"
+    },
+    {
+      "from": "src/assets/runtime/ammo_frost.webp",
+      "to": "src/assets/items/ammo/runtime/ammo_frost.webp",
+      "bytes": 13890,
+      "sha256": "9c4b6e69e9a62699f466eb4547b2cee4ca9b34fa9ff5cd3ccafb15328b07e08b",
+      "relocatedSha256": "9c4b6e69e9a62699f466eb4547b2cee4ca9b34fa9ff5cd3ccafb15328b07e08b"
+    },
+    {
+      "from": "src/assets/runtime/ammo_legendary_omni.webp",
+      "to": "src/assets/items/ammo/runtime/ammo_legendary_omni.webp",
+      "bytes": 21942,
+      "sha256": "89ccc2eb765bc829c26392923fcc76cdbeaaa2301aa26086a2e54f48183a7d49",
+      "relocatedSha256": "89ccc2eb765bc829c26392923fcc76cdbeaaa2301aa26086a2e54f48183a7d49"
+    },
+    {
+      "from": "src/assets/runtime/ammo_multi_shot.webp",
+      "to": "src/assets/items/ammo/runtime/ammo_multi_shot.webp",
+      "bytes": 19130,
+      "sha256": "2a7b865e14d62f8b1ded6d49fa9ed971797081665265b7a55203ceeec5c08195",
+      "relocatedSha256": "2a7b865e14d62f8b1ded6d49fa9ed971797081665265b7a55203ceeec5c08195"
+    },
+    {
+      "from": "src/assets/runtime/ammo_piercing.webp",
+      "to": "src/assets/items/ammo/runtime/ammo_piercing.webp",
+      "bytes": 10476,
+      "sha256": "4eef4be82c5c3404197bbf486a62fefd53a2fc286fe0675abafb690fed599cde",
+      "relocatedSha256": "4eef4be82c5c3404197bbf486a62fefd53a2fc286fe0675abafb690fed599cde"
+    },
+    {
+      "from": "src/assets/runtime/trinket_ammo_expander.webp",
+      "to": "src/assets/items/trinkets/runtime/trinket_ammo_expander.webp",
+      "bytes": 20212,
+      "sha256": "e8b968f53c62cb321191d67c8b134a5053185829d0d4b64632f37791e96b1824",
+      "relocatedSha256": "e8b968f53c62cb321191d67c8b134a5053185829d0d4b64632f37791e96b1824"
+    },
+    {
+      "from": "src/assets/runtime/trinket_med_service_module.webp",
+      "to": "src/assets/items/trinkets/runtime/trinket_med_service_module.webp",
+      "bytes": 16822,
+      "sha256": "d6cb42a600aaaaca790581459e274a80e8c45a1227b25ef7e1c89af557e2c22b",
+      "relocatedSha256": "d6cb42a600aaaaca790581459e274a80e8c45a1227b25ef7e1c89af557e2c22b"
+    },
+    {
+      "from": "src/assets/runtime/trinket_overclock_chip.webp",
+      "to": "src/assets/items/trinkets/runtime/trinket_overclock_chip.webp",
+      "bytes": 16730,
+      "sha256": "fb181f66346e9b4b0774c85506d812197b6e06b2fe246ea543a480b665d07628",
+      "relocatedSha256": "fb181f66346e9b4b0774c85506d812197b6e06b2fe246ea543a480b665d07628"
+    },
+    {
+      "from": "src/assets/runtime/trinket_salvage_module.webp",
+      "to": "src/assets/items/trinkets/runtime/trinket_salvage_module.webp",
+      "bytes": 15234,
+      "sha256": "5b2e4b4b97fbd746cf8ec17fdfefd66053e6adfebd0e4c34b204541cd206192c",
+      "relocatedSha256": "5b2e4b4b97fbd746cf8ec17fdfefd66053e6adfebd0e4c34b204541cd206192c"
+    },
+    {
+      "from": "src/assets/runtime/trinket_shield_capacitor.webp",
+      "to": "src/assets/items/trinkets/runtime/trinket_shield_capacitor.webp",
+      "bytes": 14684,
+      "sha256": "d576e94c5fbd4fcbfcb04a70fa5239b407407acc01736436e5ef9c215ad67886",
+      "relocatedSha256": "d576e94c5fbd4fcbfcb04a70fa5239b407407acc01736436e5ef9c215ad67886"
+    },
+    {
+      "from": "src/assets/runtime/trinket_targeting_module.webp",
+      "to": "src/assets/items/trinkets/runtime/trinket_targeting_module.webp",
+      "bytes": 21218,
+      "sha256": "341ecbb8ddc827e6cdfcacddc0f6dd26aef987efcd99e7751e19a82b727e907a",
+      "relocatedSha256": "341ecbb8ddc827e6cdfcacddc0f6dd26aef987efcd99e7751e19a82b727e907a"
+    },
+    {
+      "from": "src/assets/runtime/trinket_thruster_coupler.webp",
+      "to": "src/assets/items/trinkets/runtime/trinket_thruster_coupler.webp",
+      "bytes": 17028,
+      "sha256": "d0263610e53954f5a9a2defc3f7475b108ebe3da81b5a37006183fdd61f0a965",
+      "relocatedSha256": "d0263610e53954f5a9a2defc3f7475b108ebe3da81b5a37006183fdd61f0a965"
+    },
+    {
+      "from": "src/assets/runtime/med_gel.webp",
+      "to": "src/assets/items/healing_loot/runtime/med_gel.webp",
+      "bytes": 16690,
+      "sha256": "bb3afbe5626c4d24b77a2cf6f3c6174b2bf67a27f78dd06736ee4b403fd6dd7a",
+      "relocatedSha256": "bb3afbe5626c4d24b77a2cf6f3c6174b2bf67a27f78dd06736ee4b403fd6dd7a"
+    },
+    {
+      "from": "src/assets/runtime/med_kit.webp",
+      "to": "src/assets/items/healing_loot/runtime/med_kit.webp",
+      "bytes": 14524,
+      "sha256": "3c61327d05a47d8d23202655096f7f1d56538acac4a6397e66ead83a7e0ca7f9",
+      "relocatedSha256": "3c61327d05a47d8d23202655096f7f1d56538acac4a6397e66ead83a7e0ca7f9"
+    },
+    {
+      "from": "src/assets/runtime/salvage_bundle.webp",
+      "to": "src/assets/items/healing_loot/runtime/salvage_bundle.webp",
+      "bytes": 19026,
+      "sha256": "2b639ce8cb864f1f7c34e5fda4c5222170da8a6d0d52ee0682d32f7098017bd9",
+      "relocatedSha256": "2b639ce8cb864f1f7c34e5fda4c5222170da8a6d0d52ee0682d32f7098017bd9"
+    },
+    {
+      "from": "src/assets/runtime/supply_cache_closed.webp",
+      "to": "src/assets/items/healing_loot/runtime/supply_cache_closed.webp",
+      "bytes": 14648,
+      "sha256": "599e1273de75e622d34bee0c675766e538f44ea444be0995ff3bada4a78e24b9",
+      "relocatedSha256": "599e1273de75e622d34bee0c675766e538f44ea444be0995ff3bada4a78e24b9"
+    },
+    {
+      "from": "src/assets/runtime/supply_cache_open.webp",
+      "to": "src/assets/items/healing_loot/runtime/supply_cache_open.webp",
+      "bytes": 18884,
+      "sha256": "18e6e246591beda49d7325d557bffeec7ba7f8ef5955f8aaaf125309950e0b78",
+      "relocatedSha256": "18e6e246591beda49d7325d557bffeec7ba7f8ef5955f8aaaf125309950e0b78"
+    },
+    {
+      "from": "src/assets/runtime/ui_answer_field.webp",
+      "to": "src/assets/ui/runtime/ui_answer_field.webp",
+      "bytes": 17980,
+      "sha256": "309c7dea754cbbcd9584bf2c017a16dae7089f4f35da73d74623785e48bdea2d",
+      "relocatedSha256": "309c7dea754cbbcd9584bf2c017a16dae7089f4f35da73d74623785e48bdea2d"
+    },
+    {
+      "from": "src/assets/runtime/ui_button_icon.webp",
+      "to": "src/assets/ui/runtime/ui_button_icon.webp",
+      "bytes": 29002,
+      "sha256": "7fdb32a44ebbf83859d47bec450bce9774b936d91ca77a9174341de68e314347",
+      "relocatedSha256": "7fdb32a44ebbf83859d47bec450bce9774b936d91ca77a9174341de68e314347"
+    },
+    {
+      "from": "src/assets/runtime/ui_button_primary.webp",
+      "to": "src/assets/ui/runtime/ui_button_primary.webp",
+      "bytes": 14560,
+      "sha256": "d04635440828d4a01ea9593780bb0019af0d1fff2851def738fff2c340378eef",
+      "relocatedSha256": "d04635440828d4a01ea9593780bb0019af0d1fff2851def738fff2c340378eef"
+    },
+    {
+      "from": "src/assets/runtime/ui_button_secondary.webp",
+      "to": "src/assets/ui/runtime/ui_button_secondary.webp",
+      "bytes": 12178,
+      "sha256": "190352e9f9bb48b00c6daf7c9e0a8c1a003ecd82096139fc69bf7dd7a7d04870",
+      "relocatedSha256": "190352e9f9bb48b00c6daf7c9e0a8c1a003ecd82096139fc69bf7dd7a7d04870"
+    },
+    {
+      "from": "src/assets/runtime/ui_console_panel.webp",
+      "to": "src/assets/ui/runtime/ui_console_panel.webp",
+      "bytes": 24258,
+      "sha256": "1770cf7e44d2c799285ed633e55188d9c7cfcc227373f40871c2c31d05fead04",
+      "relocatedSha256": "1770cf7e44d2c799285ed633e55188d9c7cfcc227373f40871c2c31d05fead04"
+    },
+    {
+      "from": "src/assets/runtime/ui_defeat_badge.webp",
+      "to": "src/assets/ui/runtime/ui_defeat_badge.webp",
+      "bytes": 55046,
+      "sha256": "18df8d2db9283e102dc625e17ab78da12921132b5070abcc1f1f3fc4e87362ba",
+      "relocatedSha256": "18df8d2db9283e102dc625e17ab78da12921132b5070abcc1f1f3fc4e87362ba"
+    },
+    {
+      "from": "src/assets/runtime/ui_hud_bar.webp",
+      "to": "src/assets/ui/runtime/ui_hud_bar.webp",
+      "bytes": 13618,
+      "sha256": "86ce740b9ecc4e0a2b6a7d525cad9464b94cdaee1488635d96bb4ec5a250c06a",
+      "relocatedSha256": "86ce740b9ecc4e0a2b6a7d525cad9464b94cdaee1488635d96bb4ec5a250c06a"
+    },
+    {
+      "from": "src/assets/runtime/ui_inset_panel.webp",
+      "to": "src/assets/ui/runtime/ui_inset_panel.webp",
+      "bytes": 14354,
+      "sha256": "be6acb41cbb0ce536accba6839ed35dcc5e2e3c35f0876758b1c3ce90fbc184c",
+      "relocatedSha256": "be6acb41cbb0ce536accba6839ed35dcc5e2e3c35f0876758b1c3ce90fbc184c"
+    },
+    {
+      "from": "src/assets/runtime/ui_item_slot.webp",
+      "to": "src/assets/ui/runtime/ui_item_slot.webp",
+      "bytes": 26560,
+      "sha256": "1908e8a4158650237bc415aa3922f29054678ad588d6eb62288dbcf097589f71",
+      "relocatedSha256": "1908e8a4158650237bc415aa3922f29054678ad588d6eb62288dbcf097589f71"
+    },
+    {
+      "from": "src/assets/runtime/ui_joystick_base.webp",
+      "to": "src/assets/ui/runtime/ui_joystick_base.webp",
+      "bytes": 52434,
+      "sha256": "0eaf49a96eb4abc8da40678fc5c457095c33c8cd892a953cd1807e3155959d2b",
+      "relocatedSha256": "0eaf49a96eb4abc8da40678fc5c457095c33c8cd892a953cd1807e3155959d2b"
+    },
+    {
+      "from": "src/assets/runtime/ui_joystick_knob.webp",
+      "to": "src/assets/ui/runtime/ui_joystick_knob.webp",
+      "bytes": 46540,
+      "sha256": "3c00106fa6c4579615ed4e44791cd50205336a454c87fe75949cc1f6728e7614",
+      "relocatedSha256": "3c00106fa6c4579615ed4e44791cd50205336a454c87fe75949cc1f6728e7614"
+    },
+    {
+      "from": "src/assets/runtime/ui_legendary_crest.webp",
+      "to": "src/assets/ui/runtime/ui_legendary_crest.webp",
+      "bytes": 47404,
+      "sha256": "e6e8b35fa89af1cea81e602f2b84985c6630bcc582f2f3277ac7d26031a72433",
+      "relocatedSha256": "e6e8b35fa89af1cea81e602f2b84985c6630bcc582f2f3277ac7d26031a72433"
+    },
+    {
+      "from": "src/assets/runtime/ui_reward_card.webp",
+      "to": "src/assets/ui/runtime/ui_reward_card.webp",
+      "bytes": 31298,
+      "sha256": "3f46ca677a9079bf9fa2aef9dd4b69f4e28a38bf2f1415442c674c8a6484fdaa",
+      "relocatedSha256": "3f46ca677a9079bf9fa2aef9dd4b69f4e28a38bf2f1415442c674c8a6484fdaa"
+    },
+    {
+      "from": "src/assets/runtime/ui_victory_badge.webp",
+      "to": "src/assets/ui/runtime/ui_victory_badge.webp",
+      "bytes": 52308,
+      "sha256": "617d07588289dd516e24466ef7947a6dbf04e9da8f1bddbc47951a63d42d07b4",
+      "relocatedSha256": "617d07588289dd516e24466ef7947a6dbf04e9da8f1bddbc47951a63d42d07b4"
+    },
+    {
+      "from": "src/assets/runtime/manifest.json",
+      "to": "src/assets/runtime-manifest.json",
+      "bytes": 9465,
+      "sha256": "3780cdb57199339a6ca34de5b1f18163a8e34b7fbcc511308db6dd2efb040c3d",
+      "relocatedSha256": "bdcb8501aba3f0ddb6d2bf9d5d03c59415dfa0347145eed6e555e721fe3249c5"
+    },
+    {
+      "from": "assets/.DS_Store",
+      "to": "../tmp_assets/unused/assets/.DS_Store",
+      "bytes": 6148,
+      "sha256": "2de80bdd5340b87dc855304e03b5ab94446458d027b003222c30ec917d8f183a",
+      "relocatedSha256": "2de80bdd5340b87dc855304e03b5ab94446458d027b003222c30ec917d8f183a"
+    },
+    {
+      "from": "assets/sorceress/.DS_Store",
+      "to": "../tmp_assets/unused/assets/sorceress/.DS_Store",
+      "bytes": 6148,
+      "sha256": "f5a340b449a91c6df4e349d1c11f29fe9c4ccf5969558e1836ba99fddec106be",
+      "relocatedSha256": "f5a340b449a91c6df4e349d1c11f29fe9c4ccf5969558e1836ba99fddec106be"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-armed-v001/attachment.json",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-armed-v001/attachment.json",
+      "bytes": 2789,
+      "sha256": "004fb66554595bf11aaedfa60d5d86da99531a1736ae2b88070ca4f7c311c6f9",
+      "relocatedSha256": "004fb66554595bf11aaedfa60d5d86da99531a1736ae2b88070ca4f7c311c6f9"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-armed-v001/blaster/hunyuan3d-3-1-1789623986641.glb",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-armed-v001/blaster/hunyuan3d-3-1-1789623986641.glb",
+      "bytes": 81433600,
+      "sha256": "d0b8bc475daa20bce55e90f428a19fcdce2647d533d883f3d40f4f9b275de432",
+      "relocatedSha256": "d0b8bc475daa20bce55e90f428a19fcdce2647d533d883f3d40f4f9b275de432"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-armed-v001/previews/armed-turntable.png",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-armed-v001/previews/armed-turntable.png",
+      "bytes": 1554142,
+      "sha256": "839774cf67100f7e8d25df3b55e689eb9f40da377f6de91360c51b266250c25f",
+      "relocatedSha256": "839774cf67100f7e8d25df3b55e689eb9f40da377f6de91360c51b266250c25f"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-armed-v001/previews/armed-vs-camp.png",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-armed-v001/previews/armed-vs-camp.png",
+      "bytes": 611574,
+      "sha256": "b649403e8e07636c690a7d5d673255420eaf002d87fd2d60b1723f7b30a51516",
+      "relocatedSha256": "b649403e8e07636c690a7d5d673255420eaf002d87fd2d60b1723f7b30a51516"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-armed-v001/previews/blaster-turntable.png",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-armed-v001/previews/blaster-turntable.png",
+      "bytes": 951577,
+      "sha256": "6fe4ce4412355e6aca5af105ada9d2208c32c5f58ba43a42bdafeb933039e18e",
+      "relocatedSha256": "6fe4ce4412355e6aca5af105ada9d2208c32c5f58ba43a42bdafeb933039e18e"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-armed-v001/references/gpt-image-2-1789623701485.png",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-armed-v001/references/gpt-image-2-1789623701485.png",
+      "bytes": 877264,
+      "sha256": "5fefa9e445e121f624a9e55714d6636f6af012dac97155496b25d0ea8024f57c",
+      "relocatedSha256": "5fefa9e445e121f624a9e55714d6636f6af012dac97155496b25d0ea8024f57c"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-dual-pistols-v001/attachment.json",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-dual-pistols-v001/attachment.json",
+      "bytes": 4409,
+      "sha256": "0f66bb8036e1a27f6d879648994a67c5c6c8eefe83c93eef334825f38ffc723a",
+      "relocatedSha256": "0f66bb8036e1a27f6d879648994a67c5c6c8eefe83c93eef334825f38ffc723a"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-dual-pistols-v001/previews/dual-pistols-attack-se-lossless.png",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-dual-pistols-v001/previews/dual-pistols-attack-se-lossless.png",
+      "bytes": 306654,
+      "sha256": "5f360793a691c07d21e85e02c60b467080dfb08ba25697518e57505bc75de530",
+      "relocatedSha256": "5f360793a691c07d21e85e02c60b467080dfb08ba25697518e57505bc75de530"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-dual-pistols-v001/previews/dual-pistols-attack-se.mp4",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-dual-pistols-v001/previews/dual-pistols-attack-se.mp4",
+      "bytes": 66147,
+      "sha256": "3f24b0bfafeb435df133690e2588f726bcce0b6afefe3ea3c1d4e590b42b1ad5",
+      "relocatedSha256": "3f24b0bfafeb435df133690e2588f726bcce0b6afefe3ea3c1d4e590b42b1ad5"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-dual-pistols-v001/previews/dual-pistols-idle-se-lossless.png",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-dual-pistols-v001/previews/dual-pistols-idle-se-lossless.png",
+      "bytes": 302849,
+      "sha256": "354bf808e2508c15a896fe7074ed24c3829195177fe4aafdc512d7d652177c3a",
+      "relocatedSha256": "354bf808e2508c15a896fe7074ed24c3829195177fe4aafdc512d7d652177c3a"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-dual-pistols-v001/previews/dual-pistols-idle-se.mp4",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-dual-pistols-v001/previews/dual-pistols-idle-se.mp4",
+      "bytes": 131594,
+      "sha256": "1372d255dd2993fffec3ddaa7cbc35faca11655130b43730576a3b3d1bd6d6cd",
+      "relocatedSha256": "1372d255dd2993fffec3ddaa7cbc35faca11655130b43730576a3b3d1bd6d6cd"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-dual-pistols-v001/previews/dual-pistols-run-attack-se-lossless.png",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-dual-pistols-v001/previews/dual-pistols-run-attack-se-lossless.png",
+      "bytes": 284469,
+      "sha256": "3a5bb24ef7ce3fa25ca3467904371d9933f685cab9cc13366f90b196f5334205",
+      "relocatedSha256": "3a5bb24ef7ce3fa25ca3467904371d9933f685cab9cc13366f90b196f5334205"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-dual-pistols-v001/previews/dual-pistols-run-attack-se.mp4",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-dual-pistols-v001/previews/dual-pistols-run-attack-se.mp4",
+      "bytes": 132030,
+      "sha256": "352bceabe6a304cc7079724681f72e140eba517e4bdfaf67da70f9f1cf6a1420",
+      "relocatedSha256": "352bceabe6a304cc7079724681f72e140eba517e4bdfaf67da70f9f1cf6a1420"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-dual-pistols-v001/previews/dual-pistols-run-se-lossless.png",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-dual-pistols-v001/previews/dual-pistols-run-se-lossless.png",
+      "bytes": 257169,
+      "sha256": "548d5b8962179b999ed2ab2f8d2500558f23211bfb520a006f232e69f7417c44",
+      "relocatedSha256": "548d5b8962179b999ed2ab2f8d2500558f23211bfb520a006f232e69f7417c44"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-dual-pistols-v001/previews/dual-pistols-run-se.mp4",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-dual-pistols-v001/previews/dual-pistols-run-se.mp4",
+      "bytes": 128501,
+      "sha256": "b555d3a07900f97460695ff6f652446cc1f2a1a5c2ed1ee968aabde41fe250db",
+      "relocatedSha256": "b555d3a07900f97460695ff6f652446cc1f2a1a5c2ed1ee968aabde41fe250db"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-dual-pistols-v001/previews/dual-pistols-turntable.png",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-dual-pistols-v001/previews/dual-pistols-turntable.png",
+      "bytes": 1204664,
+      "sha256": "cc6470856c500db5ecacc0242e864520f0e2d16e93d082856fa5e0c1982f1edf",
+      "relocatedSha256": "cc6470856c500db5ecacc0242e864520f0e2d16e93d082856fa5e0c1982f1edf"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-dual-pistols-v001/previews/dual-pistols-vs-camp.png",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-dual-pistols-v001/previews/dual-pistols-vs-camp.png",
+      "bytes": 530367,
+      "sha256": "dbda8ca5b9eceef7953dccd1631a55b69e8489233774203b0d5c666a00d3efe6",
+      "relocatedSha256": "dbda8ca5b9eceef7953dccd1631a55b69e8489233774203b0d5c666a00d3efe6"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-dual-pistols-v001/sprites/e/attack-e.json",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-dual-pistols-v001/sprites/e/attack-e.json",
+      "bytes": 2364,
+      "sha256": "6de6e9367143c56b20dcc3c2e22ab8dc8cb6dc046eb279ed52ba47316eb0b537",
+      "relocatedSha256": "1e46c8f3be344fd189f0ccd769ed857aec165ca35dfa90a3ccffc74865e1ba76"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-dual-pistols-v001/sprites/e/attack-e.png",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-dual-pistols-v001/sprites/e/attack-e.png",
+      "bytes": 564421,
+      "sha256": "0a650ee68cd6ff66511650ac463af107d82318165f444a3b11247fd346497bfd",
+      "relocatedSha256": "0a650ee68cd6ff66511650ac463af107d82318165f444a3b11247fd346497bfd"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-dual-pistols-v001/sprites/e/idle-e.json",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-dual-pistols-v001/sprites/e/idle-e.json",
+      "bytes": 750,
+      "sha256": "427e80863f635e8c17fec725a4fc473abfa343d1ca72b3f928e3b1c6ef846faf",
+      "relocatedSha256": "72ffa81bc447bfc32904494a9d471b816b56b91a31eb08941efc86ebd3cbd658"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-dual-pistols-v001/sprites/e/idle-e.png",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-dual-pistols-v001/sprites/e/idle-e.png",
+      "bytes": 2195321,
+      "sha256": "e5270922b7af07a8c4803aee5db5bf6d68c823c8f59ed72f8d425d03980a9333",
+      "relocatedSha256": "e5270922b7af07a8c4803aee5db5bf6d68c823c8f59ed72f8d425d03980a9333"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-dual-pistols-v001/sprites/e/run-attack-e.json",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-dual-pistols-v001/sprites/e/run-attack-e.json",
+      "bytes": 2396,
+      "sha256": "b400779bcd6dbc68e2c94211d6810c92961bc45ccd67e3ce948af84e6d4749b1",
+      "relocatedSha256": "b400779bcd6dbc68e2c94211d6810c92961bc45ccd67e3ce948af84e6d4749b1"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-dual-pistols-v001/sprites/e/run-attack-e.png",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-dual-pistols-v001/sprites/e/run-attack-e.png",
+      "bytes": 896809,
+      "sha256": "1623355ee375f92dc1ebb4b5b10dd04e66be268830e33d19b70ecfc30b4b4cf9",
+      "relocatedSha256": "1623355ee375f92dc1ebb4b5b10dd04e66be268830e33d19b70ecfc30b4b4cf9"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-dual-pistols-v001/sprites/e/run-e.json",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-dual-pistols-v001/sprites/e/run-e.json",
+      "bytes": 748,
+      "sha256": "1525127963ab4c2ca9cd189938b3a669ad97e599dc060f50c869c15336cb14a3",
+      "relocatedSha256": "1525127963ab4c2ca9cd189938b3a669ad97e599dc060f50c869c15336cb14a3"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-dual-pistols-v001/sprites/e/run-e.png",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-dual-pistols-v001/sprites/e/run-e.png",
+      "bytes": 907733,
+      "sha256": "82cd858a33dd892d7494a80243782e931e838398f58db0211e5d5712f374377c",
+      "relocatedSha256": "82cd858a33dd892d7494a80243782e931e838398f58db0211e5d5712f374377c"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-dual-pistols-v001/sprites/manifest.json",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-dual-pistols-v001/sprites/manifest.json",
+      "bytes": 5558,
+      "sha256": "aedfe5bfb46b36728196ef230aa23fbd570072be933e51a9127c614897a379b5",
+      "relocatedSha256": "aedfe5bfb46b36728196ef230aa23fbd570072be933e51a9127c614897a379b5"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-dual-pistols-v001/sprites/n/attack-n.json",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-dual-pistols-v001/sprites/n/attack-n.json",
+      "bytes": 2366,
+      "sha256": "dfb04f8bcb518bb20a2a966b993fff04450eb9a2670699f85015fbb566ca494b",
+      "relocatedSha256": "b4ff62c1216a270a65b07549b98cd623738190168a7f00a04b96f533e54323a2"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-dual-pistols-v001/sprites/n/attack-n.png",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-dual-pistols-v001/sprites/n/attack-n.png",
+      "bytes": 510379,
+      "sha256": "e77d5ec8f2bf857e998aaf6561690c10d58569fce5bb0c7b083cc5e79d6c71a1",
+      "relocatedSha256": "e77d5ec8f2bf857e998aaf6561690c10d58569fce5bb0c7b083cc5e79d6c71a1"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-dual-pistols-v001/sprites/n/idle-n.json",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-dual-pistols-v001/sprites/n/idle-n.json",
+      "bytes": 750,
+      "sha256": "98fc3b209b756d264020a984f488c734f868f1ab18d80f9e0ef73d431e964855",
+      "relocatedSha256": "9d47c6b780ee2a91b48a21a356fa33a027942da18479c23a73ca173bf928a228"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-dual-pistols-v001/sprites/n/idle-n.png",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-dual-pistols-v001/sprites/n/idle-n.png",
+      "bytes": 2172794,
+      "sha256": "bc78b16a16144f19e2883be7237dcd4f160c5180d8a35b3349f1cd9046c977d5",
+      "relocatedSha256": "bc78b16a16144f19e2883be7237dcd4f160c5180d8a35b3349f1cd9046c977d5"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-dual-pistols-v001/sprites/n/run-attack-n.json",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-dual-pistols-v001/sprites/n/run-attack-n.json",
+      "bytes": 2390,
+      "sha256": "3aa18dde4ac40900a84ad4cb89b1cd5f383556119829b3909fe537e439224f95",
+      "relocatedSha256": "3aa18dde4ac40900a84ad4cb89b1cd5f383556119829b3909fe537e439224f95"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-dual-pistols-v001/sprites/n/run-attack-n.png",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-dual-pistols-v001/sprites/n/run-attack-n.png",
+      "bytes": 883918,
+      "sha256": "24088367e6454d49a7edb02e3ab8780caae5d4d9535c5ef54be1030ed2b73b06",
+      "relocatedSha256": "24088367e6454d49a7edb02e3ab8780caae5d4d9535c5ef54be1030ed2b73b06"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-dual-pistols-v001/sprites/n/run-n.json",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-dual-pistols-v001/sprites/n/run-n.json",
+      "bytes": 749,
+      "sha256": "15cc4371d57b7d6edd483c9e6c62338855958fdb4ca6e1cfcfb6953805238e2a",
+      "relocatedSha256": "15cc4371d57b7d6edd483c9e6c62338855958fdb4ca6e1cfcfb6953805238e2a"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-dual-pistols-v001/sprites/n/run-n.png",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-dual-pistols-v001/sprites/n/run-n.png",
+      "bytes": 883270,
+      "sha256": "e4d8ff1dfe3ff22046ade990bacc754ee46507ae9820310f9f56264267f588c7",
+      "relocatedSha256": "e4d8ff1dfe3ff22046ade990bacc754ee46507ae9820310f9f56264267f588c7"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-dual-pistols-v001/sprites/ne/attack-ne.json",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-dual-pistols-v001/sprites/ne/attack-ne.json",
+      "bytes": 2367,
+      "sha256": "bc8b4d7e5b48b96a5bbbeb7f532723dbb4a34f5ec2117ba5e5dcb47c96ef3bf0",
+      "relocatedSha256": "321bb9624fadaab6781abf0c7f7a47a40288429c8e02f73a29af9d43e124d479"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-dual-pistols-v001/sprites/ne/attack-ne.png",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-dual-pistols-v001/sprites/ne/attack-ne.png",
+      "bytes": 519123,
+      "sha256": "fe0b56dec7cf2535b78a4900309012a3950b01f5447b78d1d587e43cf5ed4c43",
+      "relocatedSha256": "fe0b56dec7cf2535b78a4900309012a3950b01f5447b78d1d587e43cf5ed4c43"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-dual-pistols-v001/sprites/ne/idle-ne.json",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-dual-pistols-v001/sprites/ne/idle-ne.json",
+      "bytes": 753,
+      "sha256": "c45c43c8e1b53c87b50cf7937280db78fdd6e619a5849a8800cdb65f75d03b6f",
+      "relocatedSha256": "a34a28c6a500dc8ee921eb14f412f9314ecf7fe2b0e2b3bea578fda86c5891d1"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-dual-pistols-v001/sprites/ne/idle-ne.png",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-dual-pistols-v001/sprites/ne/idle-ne.png",
+      "bytes": 2096538,
+      "sha256": "de5541004e3d13de75201dca3cc491e435f48ddc264a0b8d8c480dadd63d7a84",
+      "relocatedSha256": "de5541004e3d13de75201dca3cc491e435f48ddc264a0b8d8c480dadd63d7a84"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-dual-pistols-v001/sprites/ne/run-attack-ne.json",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-dual-pistols-v001/sprites/ne/run-attack-ne.json",
+      "bytes": 2395,
+      "sha256": "da6350d607e1316c2098bf5e2016274fae330b2bf0054c318646ff4264fd572d",
+      "relocatedSha256": "da6350d607e1316c2098bf5e2016274fae330b2bf0054c318646ff4264fd572d"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-dual-pistols-v001/sprites/ne/run-attack-ne.png",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-dual-pistols-v001/sprites/ne/run-attack-ne.png",
+      "bytes": 868553,
+      "sha256": "72e08315d30a4fcce9ab574e080e364efb64bd0120f7e17f492a302b0317d21d",
+      "relocatedSha256": "72e08315d30a4fcce9ab574e080e364efb64bd0120f7e17f492a302b0317d21d"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-dual-pistols-v001/sprites/ne/run-ne.json",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-dual-pistols-v001/sprites/ne/run-ne.json",
+      "bytes": 752,
+      "sha256": "d2203ac4fa79c1d07ba0e8fc8c85e1f5796e6fddf64f774fe47eca711092287e",
+      "relocatedSha256": "d2203ac4fa79c1d07ba0e8fc8c85e1f5796e6fddf64f774fe47eca711092287e"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-dual-pistols-v001/sprites/ne/run-ne.png",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-dual-pistols-v001/sprites/ne/run-ne.png",
+      "bytes": 875034,
+      "sha256": "842ec570f9682f6209e23eea1bf83217ba49ee7a431643b5fc9364eefe51cde7",
+      "relocatedSha256": "842ec570f9682f6209e23eea1bf83217ba49ee7a431643b5fc9364eefe51cde7"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-dual-pistols-v001/sprites/nw/attack-nw.json",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-dual-pistols-v001/sprites/nw/attack-nw.json",
+      "bytes": 2369,
+      "sha256": "96328168ed435f8c79c20b6d253bffc81a643aeaca7e916225f344f28cf8ac52",
+      "relocatedSha256": "89dfb0edb19f82a6de4ff651d858de6625e50f95139b07f2f43d0f712bd41514"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-dual-pistols-v001/sprites/nw/attack-nw.png",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-dual-pistols-v001/sprites/nw/attack-nw.png",
+      "bytes": 563802,
+      "sha256": "b8c50badeb1f182e8cae9d1cb6e26308de44cf75c19c022854c9eacc6a4935e5",
+      "relocatedSha256": "b8c50badeb1f182e8cae9d1cb6e26308de44cf75c19c022854c9eacc6a4935e5"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-dual-pistols-v001/sprites/nw/idle-nw.json",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-dual-pistols-v001/sprites/nw/idle-nw.json",
+      "bytes": 752,
+      "sha256": "5461ddb133e3a7fac23f5a842285be77da8d32b75724fdf6dadb8d9f022c6512",
+      "relocatedSha256": "62642a52ba86845b12a68fae558daca9fd8c9591f52b5d130817d27fe16a3e68"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-dual-pistols-v001/sprites/nw/idle-nw.png",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-dual-pistols-v001/sprites/nw/idle-nw.png",
+      "bytes": 2351538,
+      "sha256": "6df5da1cfdd824d2950b6399502fa3a361f586f3e9721bd18183cd89fdcd0210",
+      "relocatedSha256": "6df5da1cfdd824d2950b6399502fa3a361f586f3e9721bd18183cd89fdcd0210"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-dual-pistols-v001/sprites/nw/run-attack-nw.json",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-dual-pistols-v001/sprites/nw/run-attack-nw.json",
+      "bytes": 2402,
+      "sha256": "40250fabaa28ec65ac0e31730934aa4edd4700130ef4ad5fd3b4be0230cd704d",
+      "relocatedSha256": "40250fabaa28ec65ac0e31730934aa4edd4700130ef4ad5fd3b4be0230cd704d"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-dual-pistols-v001/sprites/nw/run-attack-nw.png",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-dual-pistols-v001/sprites/nw/run-attack-nw.png",
+      "bytes": 872745,
+      "sha256": "4d7c529f2fbd0c905e0d81a14a0c6bdacd7e4c6e5f5af3311929c257249911b6",
+      "relocatedSha256": "4d7c529f2fbd0c905e0d81a14a0c6bdacd7e4c6e5f5af3311929c257249911b6"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-dual-pistols-v001/sprites/nw/run-nw.json",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-dual-pistols-v001/sprites/nw/run-nw.json",
+      "bytes": 752,
+      "sha256": "1a95e5d558667953cc234482c0b5e306e904e22a399d8894a29214618d9e3125",
+      "relocatedSha256": "1a95e5d558667953cc234482c0b5e306e904e22a399d8894a29214618d9e3125"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-dual-pistols-v001/sprites/nw/run-nw.png",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-dual-pistols-v001/sprites/nw/run-nw.png",
+      "bytes": 875094,
+      "sha256": "0885b571ac7798e98620b7d83c3e13ad4cd91ac32178a0562b77853573394f1e",
+      "relocatedSha256": "0885b571ac7798e98620b7d83c3e13ad4cd91ac32178a0562b77853573394f1e"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-dual-pistols-v001/sprites/s/attack-s.json",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-dual-pistols-v001/sprites/s/attack-s.json",
+      "bytes": 2366,
+      "sha256": "3f5d2e55e4f8bdc0c4a38748157bb57a2d95a2c9bfb5da9ea8c1bccb04357e09",
+      "relocatedSha256": "b628d1b15b37582d26398a445f9a9d62d8df3803d15accd05d18132f5487c129"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-dual-pistols-v001/sprites/s/attack-s.png",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-dual-pistols-v001/sprites/s/attack-s.png",
+      "bytes": 584516,
+      "sha256": "266471287ac545cc3437e059f348206cab561cc155d430e834ecf6512067c43b",
+      "relocatedSha256": "266471287ac545cc3437e059f348206cab561cc155d430e834ecf6512067c43b"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-dual-pistols-v001/sprites/s/idle-s.json",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-dual-pistols-v001/sprites/s/idle-s.json",
+      "bytes": 746,
+      "sha256": "18a5852794785a34e7d9b19fb5be36bb7b2d314f137db936a35b73b0f2036a21",
+      "relocatedSha256": "deb61ba50a535598c77eb2a596a2d53fdc45e7ee0296ce3583a784b1b3068af4"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-dual-pistols-v001/sprites/s/idle-s.png",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-dual-pistols-v001/sprites/s/idle-s.png",
+      "bytes": 2224368,
+      "sha256": "95437bba394a4be02796af377a14d8e053385b0a72221cad4d97607cfb595dbf",
+      "relocatedSha256": "95437bba394a4be02796af377a14d8e053385b0a72221cad4d97607cfb595dbf"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-dual-pistols-v001/sprites/s/run-attack-s.json",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-dual-pistols-v001/sprites/s/run-attack-s.json",
+      "bytes": 2391,
+      "sha256": "3fdae250312b757091fa74bb8ba04374d2b4630fb645db61affbf534b4afc57f",
+      "relocatedSha256": "3fdae250312b757091fa74bb8ba04374d2b4630fb645db61affbf534b4afc57f"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-dual-pistols-v001/sprites/s/run-attack-s.png",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-dual-pistols-v001/sprites/s/run-attack-s.png",
+      "bytes": 923924,
+      "sha256": "80f91d837853a603e1ea13a5f33d858b3e712fb5116529a11f15c0f5390fa114",
+      "relocatedSha256": "80f91d837853a603e1ea13a5f33d858b3e712fb5116529a11f15c0f5390fa114"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-dual-pistols-v001/sprites/s/run-s.json",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-dual-pistols-v001/sprites/s/run-s.json",
+      "bytes": 747,
+      "sha256": "e4fec82d3af48d461f417565400ccb56684a87306b66d9a371684528f6196ca1",
+      "relocatedSha256": "e4fec82d3af48d461f417565400ccb56684a87306b66d9a371684528f6196ca1"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-dual-pistols-v001/sprites/s/run-s.png",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-dual-pistols-v001/sprites/s/run-s.png",
+      "bytes": 920210,
+      "sha256": "cdcba8a70c63bf89a97e7f1871eaf3014cf5eaf910b9c9da622e86a5aa505ff9",
+      "relocatedSha256": "cdcba8a70c63bf89a97e7f1871eaf3014cf5eaf910b9c9da622e86a5aa505ff9"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-dual-pistols-v001/sprites/se/attack-se.json",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-dual-pistols-v001/sprites/se/attack-se.json",
+      "bytes": 2368,
+      "sha256": "7e8d21f4159a46e29e2dba22d3d0e6f09c42bae0d44df8b8974702859bb081db",
+      "relocatedSha256": "3051a98cf5a9d84b255b9f4643fd608d297a5252e0f2ca53859aab33e2f16f47"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-dual-pistols-v001/sprites/se/attack-se.png",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-dual-pistols-v001/sprites/se/attack-se.png",
+      "bytes": 601745,
+      "sha256": "07bbc16fd27214b70fdce4812293ae3784233faa19f013e78337dca863428f3c",
+      "relocatedSha256": "07bbc16fd27214b70fdce4812293ae3784233faa19f013e78337dca863428f3c"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-dual-pistols-v001/sprites/se/idle-se.json",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-dual-pistols-v001/sprites/se/idle-se.json",
+      "bytes": 753,
+      "sha256": "9c2c04270a64bfb2cfe8779858212f2f56a9cf911a1dcfc64e964d65ffcd6ff0",
+      "relocatedSha256": "13713929905607d50faf2e677e025e56a389343dc9acf9bbd06eec8148cc955b"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-dual-pistols-v001/sprites/se/idle-se.png",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-dual-pistols-v001/sprites/se/idle-se.png",
+      "bytes": 2269152,
+      "sha256": "5e33ea00ca1eae8a0526084084a1fbc4e33f786c552a346637b4bce20df25067",
+      "relocatedSha256": "5e33ea00ca1eae8a0526084084a1fbc4e33f786c552a346637b4bce20df25067"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-dual-pistols-v001/sprites/se/run-attack-se.json",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-dual-pistols-v001/sprites/se/run-attack-se.json",
+      "bytes": 2398,
+      "sha256": "20b2e039c82451dcb847c87e129ee012c57ead3c00520ac673c0920827cdcc9f",
+      "relocatedSha256": "20b2e039c82451dcb847c87e129ee012c57ead3c00520ac673c0920827cdcc9f"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-dual-pistols-v001/sprites/se/run-attack-se.png",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-dual-pistols-v001/sprites/se/run-attack-se.png",
+      "bytes": 883421,
+      "sha256": "a4211b06d730d42917f587f5c10f7c0bf93e57befd6572b6f9a1ba4940739c86",
+      "relocatedSha256": "a4211b06d730d42917f587f5c10f7c0bf93e57befd6572b6f9a1ba4940739c86"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-dual-pistols-v001/sprites/se/run-se.json",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-dual-pistols-v001/sprites/se/run-se.json",
+      "bytes": 751,
+      "sha256": "8adbafd558b7e0c549fc377b803bb9859354d54a6670fed344f8dfa6ca1cf2a8",
+      "relocatedSha256": "8adbafd558b7e0c549fc377b803bb9859354d54a6670fed344f8dfa6ca1cf2a8"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-dual-pistols-v001/sprites/se/run-se.png",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-dual-pistols-v001/sprites/se/run-se.png",
+      "bytes": 886239,
+      "sha256": "79b03bc4327b53a665bda9e54d02019bc9f65b37c9057968989094a62bd51740",
+      "relocatedSha256": "79b03bc4327b53a665bda9e54d02019bc9f65b37c9057968989094a62bd51740"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-dual-pistols-v001/sprites/sw/attack-sw.json",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-dual-pistols-v001/sprites/sw/attack-sw.json",
+      "bytes": 2367,
+      "sha256": "6c4fc0d519385d54f6a09f6e3b70cbb0e4c2ab7b61c3230c1b8f4f1d88dd33b6",
+      "relocatedSha256": "015f511ddcd3f0983d4d83184c11266e678e9c734f93f6fcbbb84b05942d9a4d"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-dual-pistols-v001/sprites/sw/attack-sw.png",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-dual-pistols-v001/sprites/sw/attack-sw.png",
+      "bytes": 572956,
+      "sha256": "2de583cc2341ade9d04ea1bc27e9fef3c2e69a5da1f3a7bee1ef9924abc33117",
+      "relocatedSha256": "2de583cc2341ade9d04ea1bc27e9fef3c2e69a5da1f3a7bee1ef9924abc33117"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-dual-pistols-v001/sprites/sw/idle-sw.json",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-dual-pistols-v001/sprites/sw/idle-sw.json",
+      "bytes": 753,
+      "sha256": "b9947395057f345c0a451fd6a8bb80368bbef66b8ba5906c61c5345970f3b491",
+      "relocatedSha256": "0bccf92274a3b2868f3e5ecdd6a743de9011bc08c913448715b52634a7f339cf"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-dual-pistols-v001/sprites/sw/idle-sw.png",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-dual-pistols-v001/sprites/sw/idle-sw.png",
+      "bytes": 2079363,
+      "sha256": "6ec2c5c73efc9b72d8003c356a0f2465b92c9da853d22193ba166ace08821e0c",
+      "relocatedSha256": "6ec2c5c73efc9b72d8003c356a0f2465b92c9da853d22193ba166ace08821e0c"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-dual-pistols-v001/sprites/sw/run-attack-sw.json",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-dual-pistols-v001/sprites/sw/run-attack-sw.json",
+      "bytes": 2393,
+      "sha256": "7b98c8cab11c335f46ebd5e14fc96146aaf29858dc2f7b2dc5ca35c2e51e9b1f",
+      "relocatedSha256": "7b98c8cab11c335f46ebd5e14fc96146aaf29858dc2f7b2dc5ca35c2e51e9b1f"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-dual-pistols-v001/sprites/sw/run-attack-sw.png",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-dual-pistols-v001/sprites/sw/run-attack-sw.png",
+      "bytes": 861749,
+      "sha256": "8c4fd57abd4ab3a210a6c1726a06c4374e6c38541b8bd3bcdc45f93665b36299",
+      "relocatedSha256": "8c4fd57abd4ab3a210a6c1726a06c4374e6c38541b8bd3bcdc45f93665b36299"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-dual-pistols-v001/sprites/sw/run-sw.json",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-dual-pistols-v001/sprites/sw/run-sw.json",
+      "bytes": 752,
+      "sha256": "f9242ccbc938c23e8e29b8854c5ca42b66fa4d1d0e998e3b31d077c10dcda18a",
+      "relocatedSha256": "f9242ccbc938c23e8e29b8854c5ca42b66fa4d1d0e998e3b31d077c10dcda18a"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-dual-pistols-v001/sprites/sw/run-sw.png",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-dual-pistols-v001/sprites/sw/run-sw.png",
+      "bytes": 868300,
+      "sha256": "f4f8092b11677898dd36674f649cce0a2b70753dfc23c29d12c53d9fbd28b34f",
+      "relocatedSha256": "f4f8092b11677898dd36674f649cce0a2b70753dfc23c29d12c53d9fbd28b34f"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-dual-pistols-v001/sprites/w/attack-w.json",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-dual-pistols-v001/sprites/w/attack-w.json",
+      "bytes": 2368,
+      "sha256": "185bd3c93b3ccaf822b244389a181fbbea9055d5ae3fb0b6446f7489178e1d6d",
+      "relocatedSha256": "9b79abd9bdcddd0a367d3565bdbd08b59c37c85c28679d686e59a0ce74333661"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-dual-pistols-v001/sprites/w/attack-w.png",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-dual-pistols-v001/sprites/w/attack-w.png",
+      "bytes": 571798,
+      "sha256": "03bb39141409b684cbcb42ea1a62ab683375f11cca3c42bfb0f3207b782dbb9b",
+      "relocatedSha256": "03bb39141409b684cbcb42ea1a62ab683375f11cca3c42bfb0f3207b782dbb9b"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-dual-pistols-v001/sprites/w/idle-w.json",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-dual-pistols-v001/sprites/w/idle-w.json",
+      "bytes": 751,
+      "sha256": "1057b81656d0d9ed9d9700577a09b7e5c75a3099fe97449852774a70f8de484b",
+      "relocatedSha256": "3fc6852d525b9bdb8fc5025cf54687c14f9ec2eb4fb7a2ff7ca18ef2b138ee24"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-dual-pistols-v001/sprites/w/idle-w.png",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-dual-pistols-v001/sprites/w/idle-w.png",
+      "bytes": 2247899,
+      "sha256": "c2aacc3efd62ccb4833502c78b4c880378298551079b7521682ffde7feef9a5e",
+      "relocatedSha256": "c2aacc3efd62ccb4833502c78b4c880378298551079b7521682ffde7feef9a5e"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-dual-pistols-v001/sprites/w/run-attack-w.json",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-dual-pistols-v001/sprites/w/run-attack-w.json",
+      "bytes": 2393,
+      "sha256": "7d2a4f4a4bd69ea7cef150f03496fd6b92719f59c9e9970d9c9d1413dcddbdc5",
+      "relocatedSha256": "7d2a4f4a4bd69ea7cef150f03496fd6b92719f59c9e9970d9c9d1413dcddbdc5"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-dual-pistols-v001/sprites/w/run-attack-w.png",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-dual-pistols-v001/sprites/w/run-attack-w.png",
+      "bytes": 894660,
+      "sha256": "840b2bb5edf2ee8ee7174a56aee6f498bacc7567d67457b49b8d52026a11af9d",
+      "relocatedSha256": "840b2bb5edf2ee8ee7174a56aee6f498bacc7567d67457b49b8d52026a11af9d"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-dual-pistols-v001/sprites/w/run-w.json",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-dual-pistols-v001/sprites/w/run-w.json",
+      "bytes": 748,
+      "sha256": "7879024532b1f7922e043607ffbd80431c212f9ea9e76352adf0bab9559f3336",
+      "relocatedSha256": "7879024532b1f7922e043607ffbd80431c212f9ea9e76352adf0bab9559f3336"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-dual-pistols-v001/sprites/w/run-w.png",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-dual-pistols-v001/sprites/w/run-w.png",
+      "bytes": 902944,
+      "sha256": "510dab435df52213e0250d746e25a7254fd9a25308f0dfa174ad22a1f306e4a2",
+      "relocatedSha256": "510dab435df52213e0250d746e25a7254fd9a25308f0dfa174ad22a1f306e4a2"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-twin-rail/marine-unarmed-a-pose.png",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-twin-rail/marine-unarmed-a-pose.png",
+      "bytes": 1187633,
+      "sha256": "5b161770b196d6d25f107819d758d03cae84ce0ca0ea30e3b340328be9417e76",
+      "relocatedSha256": "5b161770b196d6d25f107819d758d03cae84ce0ca0ea30e3b340328be9417e76"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-v004/animations/marine-v004-run-textured.glb",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-v004/animations/marine-v004-run-textured.glb",
+      "bytes": 2675436,
+      "sha256": "db3d363168dd9f31b5eb331c9805e77c3201d7bf31eb09fd0928e558ff057e6e",
+      "relocatedSha256": "db3d363168dd9f31b5eb331c9805e77c3201d7bf31eb09fd0928e558ff057e6e"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-v004/animations/marine-v004-walk-textured.glb",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-v004/animations/marine-v004-walk-textured.glb",
+      "bytes": 2680040,
+      "sha256": "cae67742088edd58e61f523ee4f08f32889fe6ce252f9f6905e98be9d16bd13f",
+      "relocatedSha256": "cae67742088edd58e61f523ee4f08f32889fe6ce252f9f6905e98be9d16bd13f"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-v004/animations/running-armature.glb",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-v004/animations/running-armature.glb",
+      "bytes": 60940,
+      "sha256": "b227dbe30343cdb33eb454d4db89be7d2c044cec3ef8ef95215f7b6eaea0e66c",
+      "relocatedSha256": "b227dbe30343cdb33eb454d4db89be7d2c044cec3ef8ef95215f7b6eaea0e66c"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-v004/animations/running.glb",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-v004/animations/running.glb",
+      "bytes": 1745368,
+      "sha256": "45dc86ecef1fb1f94e357084c03231e1f27b2a6a754c897069f40d677ebd327a",
+      "relocatedSha256": "45dc86ecef1fb1f94e357084c03231e1f27b2a6a754c897069f40d677ebd327a"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-v004/animations/walking-armature.glb",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-v004/animations/walking-armature.glb",
+      "bytes": 65544,
+      "sha256": "8fbdaa6aba5bc29b0eb91079da8c5533c6187d3f07f6cb1ff67ba9d5d039cb55",
+      "relocatedSha256": "8fbdaa6aba5bc29b0eb91079da8c5533c6187d3f07f6cb1ff67ba9d5d039cb55"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-v004/animations/walking.glb",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-v004/animations/walking.glb",
+      "bytes": 1749972,
+      "sha256": "d47ea5e60877e87f072e8931333d6efca5c280484bba7a5ed0ee03b9d4bf4e8e",
+      "relocatedSha256": "d47ea5e60877e87f072e8931333d6efca5c280484bba7a5ed0ee03b9d4bf4e8e"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-v004/gpt-image-2-1789571708209.png",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-v004/gpt-image-2-1789571708209.png",
+      "bytes": 1112557,
+      "sha256": "54eef68d2592acfaa3fb7e4cf5627d4c597cfaa6b7c8b338c6803b426f0c2817",
+      "relocatedSha256": "54eef68d2592acfaa3fb7e4cf5627d4c597cfaa6b7c8b338c6803b426f0c2817"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-v004/marine-v004-a-pose.png",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-v004/marine-v004-a-pose.png",
+      "bytes": 1156222,
+      "sha256": "00715293c8251f04bf38898806ce3f963031248c9607a94bbce905b1945ee155",
+      "relocatedSha256": "00715293c8251f04bf38898806ce3f963031248c9607a94bbce905b1945ee155"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-v004/model/hunyuan3d-3-1-1789572215046.glb",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-v004/model/hunyuan3d-3-1-1789572215046.glb",
+      "bytes": 75831480,
+      "sha256": "468baeded73115db2bacfe699d5d68e1d8ba288c0e3b3fd7829cf18394738cb8",
+      "relocatedSha256": "468baeded73115db2bacfe699d5d68e1d8ba288c0e3b3fd7829cf18394738cb8"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-v004/model/marine-v004-rig-input-baked-y-up.glb",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-v004/model/marine-v004-rig-input-baked-y-up.glb",
+      "bytes": 39486068,
+      "sha256": "b9953ae29c1b88b309ac7588e479ca81425c4e686fbf65772dbab59053190ccf",
+      "relocatedSha256": "b9953ae29c1b88b309ac7588e479ca81425c4e686fbf65772dbab59053190ccf"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-v004/model/marine-v004-rig-input-geometry-only.glb",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-v004/model/marine-v004-rig-input-geometry-only.glb",
+      "bytes": 8037712,
+      "sha256": "117ff2313caa3e57587b70a699a932fb4ecd5c03bfed93c71912995cd0fb9468",
+      "relocatedSha256": "117ff2313caa3e57587b70a699a932fb4ecd5c03bfed93c71912995cd0fb9468"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-v004/model/marine-v004-rig-input-light.glb",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-v004/model/marine-v004-rig-input-light.glb",
+      "bytes": 8967716,
+      "sha256": "667842ad0cf0a95f37bea0893d982ac6a9fc929e946001f1061cd900a14da710",
+      "relocatedSha256": "667842ad0cf0a95f37bea0893d982ac6a9fc929e946001f1061cd900a14da710"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-v004/model/marine-v004-rig-input-pose-estimator.glb",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-v004/model/marine-v004-rig-input-pose-estimator.glb",
+      "bytes": 1154636,
+      "sha256": "234da65a223e3a745e660fb6d86be584592eeaa7f29470611239dbf02dfe0d69",
+      "relocatedSha256": "234da65a223e3a745e660fb6d86be584592eeaa7f29470611239dbf02dfe0d69"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-v004/model/marine-v004-rig-input-y-up.glb",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-v004/model/marine-v004-rig-input-y-up.glb",
+      "bytes": 39486124,
+      "sha256": "8e9cce3e433cfce733ec5e179896b4c123033e14bd015046eb03b63d83f4417a",
+      "relocatedSha256": "8e9cce3e433cfce733ec5e179896b4c123033e14bd015046eb03b63d83f4417a"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-v004/model/marine-v004-rig-input.glb",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-v004/model/marine-v004-rig-input.glb",
+      "bytes": 39486124,
+      "sha256": "8e9cce3e433cfce733ec5e179896b4c123033e14bd015046eb03b63d83f4417a",
+      "relocatedSha256": "8e9cce3e433cfce733ec5e179896b4c123033e14bd015046eb03b63d83f4417a"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-v004/rigged/character-rigged-1789574320539.glb",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-v004/rigged/character-rigged-1789574320539.glb",
+      "bytes": 1737204,
+      "sha256": "d94e09b247f93a74d36c207d07590573b1a109c1392b31035e679b55bd044b08",
+      "relocatedSha256": "d94e09b247f93a74d36c207d07590573b1a109c1392b31035e679b55bd044b08"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-v004/rigged/marine-v004-rigged-textured.glb",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-v004/rigged/marine-v004-rigged-textured.glb",
+      "bytes": 2667272,
+      "sha256": "7fe5ac256ce79076eeccb0eebd82a1e93f9eefef7798392978ff4bc2c3220a4d",
+      "relocatedSha256": "7fe5ac256ce79076eeccb0eebd82a1e93f9eefef7798392978ff4bc2c3220a4d"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-v004/sprites/e/run-e.json",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-v004/sprites/e/run-e.json",
+      "bytes": 852,
+      "sha256": "2d6ff3a28d78292b1cee917a17b5b33b9861690ec39c2b4f988e70c6183ab398",
+      "relocatedSha256": "2d6ff3a28d78292b1cee917a17b5b33b9861690ec39c2b4f988e70c6183ab398"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-v004/sprites/e/run-e.png",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-v004/sprites/e/run-e.png",
+      "bytes": 793095,
+      "sha256": "789d3eb483a9fb3d9df667c3cd9e292adc9108591794a888f26b49b43cc32b52",
+      "relocatedSha256": "789d3eb483a9fb3d9df667c3cd9e292adc9108591794a888f26b49b43cc32b52"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-v004/sprites/e/walk-e.json",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-v004/sprites/e/walk-e.json",
+      "bytes": 858,
+      "sha256": "97a0f4701be2075abaa6d30ccbd0aecb52024df08064196094a00e416c376b61",
+      "relocatedSha256": "97a0f4701be2075abaa6d30ccbd0aecb52024df08064196094a00e416c376b61"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-v004/sprites/e/walk-e.png",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-v004/sprites/e/walk-e.png",
+      "bytes": 1176005,
+      "sha256": "3aca907fd14f77aa5431c52e5ee5ff179c6a712e60f7b9aaf8ebf483819c5fb3",
+      "relocatedSha256": "3aca907fd14f77aa5431c52e5ee5ff179c6a712e60f7b9aaf8ebf483819c5fb3"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-v004/sprites/manifest.json",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-v004/sprites/manifest.json",
+      "bytes": 7202,
+      "sha256": "7defabd9d231baca7bc67281299a1e858861fb533eda8f8c39a4a2ee403404b9",
+      "relocatedSha256": "7defabd9d231baca7bc67281299a1e858861fb533eda8f8c39a4a2ee403404b9"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-v004/sprites/n/run-n.json",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-v004/sprites/n/run-n.json",
+      "bytes": 849,
+      "sha256": "f93e09dc352075b5ff7eef5afb1d10ca37bcb2c73954910bdbf82c479e546387",
+      "relocatedSha256": "f93e09dc352075b5ff7eef5afb1d10ca37bcb2c73954910bdbf82c479e546387"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-v004/sprites/n/run-n.png",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-v004/sprites/n/run-n.png",
+      "bytes": 531370,
+      "sha256": "16a7b62b9e0a797dfb45eb4e4414dd344b61c74d49734aeb1b78f714df85c30e",
+      "relocatedSha256": "16a7b62b9e0a797dfb45eb4e4414dd344b61c74d49734aeb1b78f714df85c30e"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-v004/sprites/n/walk-n.json",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-v004/sprites/n/walk-n.json",
+      "bytes": 856,
+      "sha256": "298dbb2951a8118f8db8d5d0306b879103ebe4514ad28325ff646ce2ffca4167",
+      "relocatedSha256": "298dbb2951a8118f8db8d5d0306b879103ebe4514ad28325ff646ce2ffca4167"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-v004/sprites/n/walk-n.png",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-v004/sprites/n/walk-n.png",
+      "bytes": 985985,
+      "sha256": "3508f498faf74af4c697567da30b075e6b082579bb260e9a23e45f86a9b68d72",
+      "relocatedSha256": "3508f498faf74af4c697567da30b075e6b082579bb260e9a23e45f86a9b68d72"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-v004/sprites/ne/run-ne.json",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-v004/sprites/ne/run-ne.json",
+      "bytes": 860,
+      "sha256": "20953fec9f044dae26f5d647964f20dbac6df41b718cc97d898fd958ee2059ba",
+      "relocatedSha256": "20953fec9f044dae26f5d647964f20dbac6df41b718cc97d898fd958ee2059ba"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-v004/sprites/ne/run-ne.png",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-v004/sprites/ne/run-ne.png",
+      "bytes": 672851,
+      "sha256": "e119f62508f8e09ad3080b2e1c37f75d91523e4680f4495b7d83332123e8187c",
+      "relocatedSha256": "e119f62508f8e09ad3080b2e1c37f75d91523e4680f4495b7d83332123e8187c"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-v004/sprites/ne/walk-ne.json",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-v004/sprites/ne/walk-ne.json",
+      "bytes": 867,
+      "sha256": "d598565160a5ac031bde68ae48a83239e830bc2cf1f048951c4f35749046a6c3",
+      "relocatedSha256": "d598565160a5ac031bde68ae48a83239e830bc2cf1f048951c4f35749046a6c3"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-v004/sprites/ne/walk-ne.png",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-v004/sprites/ne/walk-ne.png",
+      "bytes": 1096909,
+      "sha256": "2fbb33c2f72359895a135916e816955036d6314c90af16348cb713900e0ab62b",
+      "relocatedSha256": "2fbb33c2f72359895a135916e816955036d6314c90af16348cb713900e0ab62b"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-v004/sprites/nw/run-nw.json",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-v004/sprites/nw/run-nw.json",
+      "bytes": 856,
+      "sha256": "df99c0a5fa14146946744b39dcaddd8bf67fae6cf011cc0565d29ce551fe7272",
+      "relocatedSha256": "df99c0a5fa14146946744b39dcaddd8bf67fae6cf011cc0565d29ce551fe7272"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-v004/sprites/nw/run-nw.png",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-v004/sprites/nw/run-nw.png",
+      "bytes": 661524,
+      "sha256": "f12a92d5197f8cab231538a3787a7b089dc0021b4bfc48473cbfa41062f4f29e",
+      "relocatedSha256": "f12a92d5197f8cab231538a3787a7b089dc0021b4bfc48473cbfa41062f4f29e"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-v004/sprites/nw/walk-nw.json",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-v004/sprites/nw/walk-nw.json",
+      "bytes": 864,
+      "sha256": "503a8b04318bab3789667bc302d7d191868905bfd0f24d08f917019827d65779",
+      "relocatedSha256": "503a8b04318bab3789667bc302d7d191868905bfd0f24d08f917019827d65779"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-v004/sprites/nw/walk-nw.png",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-v004/sprites/nw/walk-nw.png",
+      "bytes": 1087531,
+      "sha256": "2497be3f721b66a388338d23e3f9cd22dcb0e275b6ccea2ad34f55bc96d498c4",
+      "relocatedSha256": "2497be3f721b66a388338d23e3f9cd22dcb0e275b6ccea2ad34f55bc96d498c4"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-v004/sprites/s/run-s.json",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-v004/sprites/s/run-s.json",
+      "bytes": 853,
+      "sha256": "3c51a9d4df457c4c10338ddde84c0bf28455d8bcbc217007bc7b10ffa14b4b21",
+      "relocatedSha256": "3c51a9d4df457c4c10338ddde84c0bf28455d8bcbc217007bc7b10ffa14b4b21"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-v004/sprites/s/run-s.png",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-v004/sprites/s/run-s.png",
+      "bytes": 729338,
+      "sha256": "7fffd0d52434684b51231141e48073fa5a28259dca4d221c2e44becfd0508463",
+      "relocatedSha256": "7fffd0d52434684b51231141e48073fa5a28259dca4d221c2e44becfd0508463"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-v004/sprites/s/walk-s.json",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-v004/sprites/s/walk-s.json",
+      "bytes": 859,
+      "sha256": "c3e1c9ac4822681060a9dadaa8a6fae0c817819a7883600fd6ee108bd1be350d",
+      "relocatedSha256": "c3e1c9ac4822681060a9dadaa8a6fae0c817819a7883600fd6ee108bd1be350d"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-v004/sprites/s/walk-s.png",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-v004/sprites/s/walk-s.png",
+      "bytes": 1152918,
+      "sha256": "a7291892be27216e2c96dc31bee4d8fc21045449de4c9d553f05572df3cf1106",
+      "relocatedSha256": "a7291892be27216e2c96dc31bee4d8fc21045449de4c9d553f05572df3cf1106"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-v004/sprites/se/run-se.json",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-v004/sprites/se/run-se.json",
+      "bytes": 862,
+      "sha256": "0ca14e4f997dbbcbdb695cc0915af595a9e79898e71c7f7624ffaae86cc7336e",
+      "relocatedSha256": "0ca14e4f997dbbcbdb695cc0915af595a9e79898e71c7f7624ffaae86cc7336e"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-v004/sprites/se/run-se.png",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-v004/sprites/se/run-se.png",
+      "bytes": 772347,
+      "sha256": "58461f7514ba2f56d898c30798627e3cabc6d907b7c557ff1a1b7c01a89d311f",
+      "relocatedSha256": "58461f7514ba2f56d898c30798627e3cabc6d907b7c557ff1a1b7c01a89d311f"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-v004/sprites/se/walk-se.json",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-v004/sprites/se/walk-se.json",
+      "bytes": 869,
+      "sha256": "b50fa8247cf9d51ec97dd984eb0bcf5a72d6ea59a060616cad96c6370b1d8576",
+      "relocatedSha256": "b50fa8247cf9d51ec97dd984eb0bcf5a72d6ea59a060616cad96c6370b1d8576"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-v004/sprites/se/walk-se.png",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-v004/sprites/se/walk-se.png",
+      "bytes": 1178558,
+      "sha256": "b5b7fe3032d852b1762ef27347bb13a4b131ef30d2d7f3c5d61d9ada280f6b14",
+      "relocatedSha256": "b5b7fe3032d852b1762ef27347bb13a4b131ef30d2d7f3c5d61d9ada280f6b14"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-v004/sprites/sw/run-sw.json",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-v004/sprites/sw/run-sw.json",
+      "bytes": 859,
+      "sha256": "0393dba1460630d59284048a6b6d104b4e9515165216546a49a1fb8b1ecb81a0",
+      "relocatedSha256": "0393dba1460630d59284048a6b6d104b4e9515165216546a49a1fb8b1ecb81a0"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-v004/sprites/sw/run-sw.png",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-v004/sprites/sw/run-sw.png",
+      "bytes": 787590,
+      "sha256": "9f487f514ecfc35761a3d81055b4982fec7b89de6dfc4d8617121eb5b7046c71",
+      "relocatedSha256": "9f487f514ecfc35761a3d81055b4982fec7b89de6dfc4d8617121eb5b7046c71"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-v004/sprites/sw/walk-sw.json",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-v004/sprites/sw/walk-sw.json",
+      "bytes": 867,
+      "sha256": "c2904ee1487df1209403225a9694d8960bf9605f8bf8f94c29f11dcd180ba60f",
+      "relocatedSha256": "c2904ee1487df1209403225a9694d8960bf9605f8bf8f94c29f11dcd180ba60f"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-v004/sprites/sw/walk-sw.png",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-v004/sprites/sw/walk-sw.png",
+      "bytes": 1192712,
+      "sha256": "79b29aa431e98057d22616cd4526f07e13bb4d470f23312a79f8b49c2ff92a6f",
+      "relocatedSha256": "79b29aa431e98057d22616cd4526f07e13bb4d470f23312a79f8b49c2ff92a6f"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-v004/sprites/w/run-w.json",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-v004/sprites/w/run-w.json",
+      "bytes": 849,
+      "sha256": "2f9a851bdb28fd3531f56e4298da3e5be8a7e4bedfbfc89200295457b1936f67",
+      "relocatedSha256": "2f9a851bdb28fd3531f56e4298da3e5be8a7e4bedfbfc89200295457b1936f67"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-v004/sprites/w/run-w.png",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-v004/sprites/w/run-w.png",
+      "bytes": 797477,
+      "sha256": "c127b353558b150797ad6c75047777843628d57cbea03e894491022488bd25cf",
+      "relocatedSha256": "c127b353558b150797ad6c75047777843628d57cbea03e894491022488bd25cf"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-v004/sprites/w/walk-w.json",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-v004/sprites/w/walk-w.json",
+      "bytes": 855,
+      "sha256": "36d1744df30a55a3e91be184e0c15f2265723e11ce7c056f4758b1a3deb9a590",
+      "relocatedSha256": "36d1744df30a55a3e91be184e0c15f2265723e11ce7c056f4758b1a3deb9a590"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-v004/sprites/w/walk-w.png",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-v004/sprites/w/walk-w.png",
+      "bytes": 1174641,
+      "sha256": "20002c27b2a9dc7afb7de8c85e2d6b9e9e432c51bc70acb13a325415aef3ea24",
+      "relocatedSha256": "20002c27b2a9dc7afb7de8c85e2d6b9e9e432c51bc70acb13a325415aef3ea24"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-v005/animations/running-armature.glb",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-v005/animations/running-armature.glb",
+      "bytes": 60776,
+      "sha256": "e95fbf8ffdab58613dd4c3dd8de78cc6592f58c30ac89e8830eb5f060851a01b",
+      "relocatedSha256": "e95fbf8ffdab58613dd4c3dd8de78cc6592f58c30ac89e8830eb5f060851a01b"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-v005/animations/running.glb",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-v005/animations/running.glb",
+      "bytes": 24258144,
+      "sha256": "943d52054b96e02d242b051ebba6c0da62d212bd6a4c71775df6c33e9e041ce4",
+      "relocatedSha256": "943d52054b96e02d242b051ebba6c0da62d212bd6a4c71775df6c33e9e041ce4"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-v005/animations/walking-armature.glb",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-v005/animations/walking-armature.glb",
+      "bytes": 65392,
+      "sha256": "b642d5294bb77219301fd21bc9251a113520a6f5be984b4fcb1b013803b0e039",
+      "relocatedSha256": "b642d5294bb77219301fd21bc9251a113520a6f5be984b4fcb1b013803b0e039"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-v005/source/marine-meshy.glb",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-v005/source/marine-meshy.glb",
+      "bytes": 18000580,
+      "sha256": "7d6a18804ccb91357fb4478d25a064095d6c06f6f890fba9e59c5915c26b759e",
+      "relocatedSha256": "7d6a18804ccb91357fb4478d25a064095d6c06f6f890fba9e59c5915c26b759e"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-v005/sprites/e/run-e.json",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-v005/sprites/e/run-e.json",
+      "bytes": 945,
+      "sha256": "f58d6cb418d575c1a2b76b7293eaf0be1b1208b0f0e39985dafe2eb2ddf0d3ca",
+      "relocatedSha256": "f58d6cb418d575c1a2b76b7293eaf0be1b1208b0f0e39985dafe2eb2ddf0d3ca"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-v005/sprites/e/run-e.png",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-v005/sprites/e/run-e.png",
+      "bytes": 438162,
+      "sha256": "f127a9218d9fdfe7e002605488e1b6d2a03c17594da3d985b11e7b0d34aa4a0e",
+      "relocatedSha256": "f127a9218d9fdfe7e002605488e1b6d2a03c17594da3d985b11e7b0d34aa4a0e"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-v005/sprites/n/run-n.json",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-v005/sprites/n/run-n.json",
+      "bytes": 948,
+      "sha256": "5a10fcbe4eacc47ad65f85f04681df14c94fa4c700297366479a41573b6d8afd",
+      "relocatedSha256": "5a10fcbe4eacc47ad65f85f04681df14c94fa4c700297366479a41573b6d8afd"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-v005/sprites/n/run-n.png",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-v005/sprites/n/run-n.png",
+      "bytes": 418447,
+      "sha256": "efaea6dddc79aaa1a7b9bfc7fd8c55f168efa3277f9ac4591d47d3e8b1f16d5a",
+      "relocatedSha256": "efaea6dddc79aaa1a7b9bfc7fd8c55f168efa3277f9ac4591d47d3e8b1f16d5a"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-v005/sprites/ne/run-ne.json",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-v005/sprites/ne/run-ne.json",
+      "bytes": 955,
+      "sha256": "471d25463e60faf4be4991500d615ce447fc79e7c159663e9ca4cf54891877f0",
+      "relocatedSha256": "471d25463e60faf4be4991500d615ce447fc79e7c159663e9ca4cf54891877f0"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-v005/sprites/ne/run-ne.png",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-v005/sprites/ne/run-ne.png",
+      "bytes": 416722,
+      "sha256": "04bb005565d2c2d392f9cb50b751c89607d0ba47c3acc1df1beb62ba49471f05",
+      "relocatedSha256": "04bb005565d2c2d392f9cb50b751c89607d0ba47c3acc1df1beb62ba49471f05"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-v005/sprites/nw/run-nw.json",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-v005/sprites/nw/run-nw.json",
+      "bytes": 954,
+      "sha256": "6be0b45a5b7f6c21d3140d6a8679faed41e6f5f106d5cb48a4df03413684f475",
+      "relocatedSha256": "6be0b45a5b7f6c21d3140d6a8679faed41e6f5f106d5cb48a4df03413684f475"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-v005/sprites/nw/run-nw.png",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-v005/sprites/nw/run-nw.png",
+      "bytes": 408980,
+      "sha256": "61b06e044090c153ce9e98ee0de8ebb4371f8bef947fec49eb236e92e24bccef",
+      "relocatedSha256": "61b06e044090c153ce9e98ee0de8ebb4371f8bef947fec49eb236e92e24bccef"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-v005/sprites/s/run-s.json",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-v005/sprites/s/run-s.json",
+      "bytes": 948,
+      "sha256": "4198dde469af8ffd19d5511ed0a475b92d09e48428767b74296db58af9f96d52",
+      "relocatedSha256": "4198dde469af8ffd19d5511ed0a475b92d09e48428767b74296db58af9f96d52"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-v005/sprites/s/run-s.png",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-v005/sprites/s/run-s.png",
+      "bytes": 437453,
+      "sha256": "d2c875da60200dce61b023334fb3931e83e67f2981fb598add6963419c17dcb0",
+      "relocatedSha256": "d2c875da60200dce61b023334fb3931e83e67f2981fb598add6963419c17dcb0"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-v005/sprites/se/run-se.json",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-v005/sprites/se/run-se.json",
+      "bytes": 953,
+      "sha256": "e6a10b8bdd7a7194c0cb1dbd986b806c99e8d058ac482acdcefd628d8daa9464",
+      "relocatedSha256": "e6a10b8bdd7a7194c0cb1dbd986b806c99e8d058ac482acdcefd628d8daa9464"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-v005/sprites/se/run-se.png",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-v005/sprites/se/run-se.png",
+      "bytes": 422177,
+      "sha256": "19fde1217c8c7bfec09d722e9a1f1c5675bd619f6043daaa45c07fece4e894d3",
+      "relocatedSha256": "19fde1217c8c7bfec09d722e9a1f1c5675bd619f6043daaa45c07fece4e894d3"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-v005/sprites/sw/run-sw.json",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-v005/sprites/sw/run-sw.json",
+      "bytes": 955,
+      "sha256": "1e2cbed5e2ea3682bdc6bc7967e6a4fc6a38620b1e99e8f042c296f6f9df3743",
+      "relocatedSha256": "1e2cbed5e2ea3682bdc6bc7967e6a4fc6a38620b1e99e8f042c296f6f9df3743"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-v005/sprites/sw/run-sw.png",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-v005/sprites/sw/run-sw.png",
+      "bytes": 419170,
+      "sha256": "f0085c4f7319a7e6c0b5f6027fbcf370391fc325fd67e86eee6d8c7478fb460f",
+      "relocatedSha256": "f0085c4f7319a7e6c0b5f6027fbcf370391fc325fd67e86eee6d8c7478fb460f"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-v005/sprites/w/run-w.json",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-v005/sprites/w/run-w.json",
+      "bytes": 947,
+      "sha256": "d99858c78b121a5cd43e56c1e754868be8da40d6cde1bd1db2b3c0dfd2b6e449",
+      "relocatedSha256": "d99858c78b121a5cd43e56c1e754868be8da40d6cde1bd1db2b3c0dfd2b6e449"
+    },
+    {
+      "from": "assets/sorceress/3d/marine-v005/sprites/w/run-w.png",
+      "to": "../tmp_assets/unused/assets/sorceress/3d/marine-v005/sprites/w/run-w.png",
+      "bytes": 424909,
+      "sha256": "a5cfb6b4eb2f71861b7a7d6c1fe36a824957ed8813b7c8a6c7cc12adb2d2025d",
+      "relocatedSha256": "a5cfb6b4eb2f71861b7a7d6c1fe36a824957ed8813b7c8a6c7cc12adb2d2025d"
+    },
+    {
+      "from": "assets/sorceress/autosprite/.DS_Store",
+      "to": "../tmp_assets/unused/assets/sorceress/autosprite/.DS_Store",
+      "bytes": 6148,
+      "sha256": "392d45c5215e14dcb006fda148c0d7a2409d828a48ab4c0501720ca375af100e",
+      "relocatedSha256": "392d45c5215e14dcb006fda148c0d7a2409d828a48ab4c0501720ca375af100e"
+    },
+    {
+      "from": "assets/sorceress/autosprite/directional/.DS_Store",
+      "to": "../tmp_assets/unused/assets/sorceress/autosprite/directional/.DS_Store",
+      "bytes": 6148,
+      "sha256": "34a983113889672e39e8ace2948a429ff906a4fe4ad0e4440fc2bf7a883a3006",
+      "relocatedSha256": "34a983113889672e39e8ace2948a429ff906a4fe4ad0e4440fc2bf7a883a3006"
+    },
+    {
+      "from": "assets/sorceress/autosprite/directional/e/keyed-keyed-1789504710823.png",
+      "to": "../tmp_assets/unused/assets/sorceress/autosprite/directional/e/keyed-keyed-1789504710823.png",
+      "bytes": 11147083,
+      "sha256": "b7dcb9cc706e6482d16db56db41b4f802cd358ed3a8d622bbd2e7ff25d85e048",
+      "relocatedSha256": "b7dcb9cc706e6482d16db56db41b4f802cd358ed3a8d622bbd2e7ff25d85e048"
+    },
+    {
+      "from": "assets/sorceress/autosprite/directional/e/walk-e-1789504354511.mp4",
+      "to": "../tmp_assets/unused/assets/sorceress/autosprite/directional/e/walk-e-1789504354511.mp4",
+      "bytes": 2329586,
+      "sha256": "74cd6f4c4c3483889eaadd456719663d1dcadf640788a7c1e47ca02e1bff8c26",
+      "relocatedSha256": "74cd6f4c4c3483889eaadd456719663d1dcadf640788a7c1e47ca02e1bff8c26"
+    },
+    {
+      "from": "assets/sorceress/autosprite/directional/e/walk-e-loop.json",
+      "to": "../tmp_assets/unused/assets/sorceress/autosprite/directional/e/walk-e-loop.json",
+      "bytes": 367,
+      "sha256": "81e086266cc0c4e84ae67c064e0092300e3c036f14c90253ad3238052af6f338",
+      "relocatedSha256": "81e086266cc0c4e84ae67c064e0092300e3c036f14c90253ad3238052af6f338"
+    },
+    {
+      "from": "assets/sorceress/autosprite/directional/e/walk-e-loop.png",
+      "to": "../tmp_assets/unused/assets/sorceress/autosprite/directional/e/walk-e-loop.png",
+      "bytes": 2743124,
+      "sha256": "ce0ac398d5bda7794aa3343c631616ff9e96262c615e27ff923552c188481a8e",
+      "relocatedSha256": "ce0ac398d5bda7794aa3343c631616ff9e96262c615e27ff923552c188481a8e"
+    },
+    {
+      "from": "assets/sorceress/autosprite/directional/gpt-image-2-1789500417964.png",
+      "to": "../tmp_assets/unused/assets/sorceress/autosprite/directional/gpt-image-2-1789500417964.png",
+      "bytes": 1141788,
+      "sha256": "8cd1b924949e770d9ba741fd5b8c57b34262b90cd41028a3fa5d607b59ba427a",
+      "relocatedSha256": "8cd1b924949e770d9ba741fd5b8c57b34262b90cd41028a3fa5d607b59ba427a"
+    },
+    {
+      "from": "assets/sorceress/autosprite/directional/gpt-image-2-1789500636634.png",
+      "to": "../tmp_assets/unused/assets/sorceress/autosprite/directional/gpt-image-2-1789500636634.png",
+      "bytes": 1166375,
+      "sha256": "c618a06e2f16f4d226ac08618bf933e60f3777b5222e69ca8c11869884bdd92b",
+      "relocatedSha256": "c618a06e2f16f4d226ac08618bf933e60f3777b5222e69ca8c11869884bdd92b"
+    },
+    {
+      "from": "assets/sorceress/autosprite/directional/gpt-image-2-1789500750837.png",
+      "to": "../tmp_assets/unused/assets/sorceress/autosprite/directional/gpt-image-2-1789500750837.png",
+      "bytes": 1120625,
+      "sha256": "9a62cd0fb15a80bfa0f56f4e5cef1c231a125bb51edffc20f1e603fa130bd75c",
+      "relocatedSha256": "9a62cd0fb15a80bfa0f56f4e5cef1c231a125bb51edffc20f1e603fa130bd75c"
+    },
+    {
+      "from": "assets/sorceress/autosprite/directional/gpt-image-2-1789500893173.png",
+      "to": "../tmp_assets/unused/assets/sorceress/autosprite/directional/gpt-image-2-1789500893173.png",
+      "bytes": 1120000,
+      "sha256": "2235098a4a6f547bd19acb9938f0d34b663e9c7c679e24c93f705a9b425c6b6b",
+      "relocatedSha256": "2235098a4a6f547bd19acb9938f0d34b663e9c7c679e24c93f705a9b425c6b6b"
+    },
+    {
+      "from": "assets/sorceress/autosprite/directional/n/keyed-keyed-1789501373234.png",
+      "to": "../tmp_assets/unused/assets/sorceress/autosprite/directional/n/keyed-keyed-1789501373234.png",
+      "bytes": 10445114,
+      "sha256": "60e7aa9d1a9a34eadbb4911c03f1e26ae7e33f4d6c1de189bddd3ae070e26892",
+      "relocatedSha256": "60e7aa9d1a9a34eadbb4911c03f1e26ae7e33f4d6c1de189bddd3ae070e26892"
+    },
+    {
+      "from": "assets/sorceress/autosprite/directional/n/walk-n-1789501006028.mp4",
+      "to": "../tmp_assets/unused/assets/sorceress/autosprite/directional/n/walk-n-1789501006028.mp4",
+      "bytes": 2154522,
+      "sha256": "269589f39794beec32c908c73898bbb96f366433150757807273c509baa30551",
+      "relocatedSha256": "269589f39794beec32c908c73898bbb96f366433150757807273c509baa30551"
+    },
+    {
+      "from": "assets/sorceress/autosprite/directional/n/walk-n-loop.json",
+      "to": "../tmp_assets/unused/assets/sorceress/autosprite/directional/n/walk-n-loop.json",
+      "bytes": 367,
+      "sha256": "2501d8345f059db522205b99a533ba724b0ff3d4fbcdfc22ccf094dfb8039353",
+      "relocatedSha256": "2501d8345f059db522205b99a533ba724b0ff3d4fbcdfc22ccf094dfb8039353"
+    },
+    {
+      "from": "assets/sorceress/autosprite/directional/n/walk-n-loop.png",
+      "to": "../tmp_assets/unused/assets/sorceress/autosprite/directional/n/walk-n-loop.png",
+      "bytes": 3185558,
+      "sha256": "910ac2ff1ecca3cbcf5d6b9d7b41e47bedb06436b6e25a2ac67c1517fcefc563",
+      "relocatedSha256": "910ac2ff1ecca3cbcf5d6b9d7b41e47bedb06436b6e25a2ac67c1517fcefc563"
+    },
+    {
+      "from": "assets/sorceress/autosprite/directional/ne/keyed-keyed-1789502356461.png",
+      "to": "../tmp_assets/unused/assets/sorceress/autosprite/directional/ne/keyed-keyed-1789502356461.png",
+      "bytes": 11010349,
+      "sha256": "5f5dd034c94c5498949af875810334960baa596e1164161b22a6f423eb5f99a8",
+      "relocatedSha256": "5f5dd034c94c5498949af875810334960baa596e1164161b22a6f423eb5f99a8"
+    },
+    {
+      "from": "assets/sorceress/autosprite/directional/ne/walk-ne-1789501971810.mp4",
+      "to": "../tmp_assets/unused/assets/sorceress/autosprite/directional/ne/walk-ne-1789501971810.mp4",
+      "bytes": 2379371,
+      "sha256": "3cb225e206759f4d672b152055a81d3d0a6937450653882a77db6c480adcaf93",
+      "relocatedSha256": "3cb225e206759f4d672b152055a81d3d0a6937450653882a77db6c480adcaf93"
+    },
+    {
+      "from": "assets/sorceress/autosprite/directional/ne/walk-ne-loop.json",
+      "to": "../tmp_assets/unused/assets/sorceress/autosprite/directional/ne/walk-ne-loop.json",
+      "bytes": 370,
+      "sha256": "e9b890393694caa8952ebc5370fa0bad0cff74b5a53a932b2d06b58375e16727",
+      "relocatedSha256": "e9b890393694caa8952ebc5370fa0bad0cff74b5a53a932b2d06b58375e16727"
+    },
+    {
+      "from": "assets/sorceress/autosprite/directional/ne/walk-ne-loop.png",
+      "to": "../tmp_assets/unused/assets/sorceress/autosprite/directional/ne/walk-ne-loop.png",
+      "bytes": 1791153,
+      "sha256": "9d13c9ac0af18bb890b5b460dc2d7f8b092be11a9c9c4a2d4999fbca8f4a7975",
+      "relocatedSha256": "9d13c9ac0af18bb890b5b460dc2d7f8b092be11a9c9c4a2d4999fbca8f4a7975"
+    },
+    {
+      "from": "assets/sorceress/autosprite/directional/nw/walk-nw-loop.json",
+      "to": "../tmp_assets/unused/assets/sorceress/autosprite/directional/nw/walk-nw-loop.json",
+      "bytes": 246,
+      "sha256": "5891aa273347972a9526c5c36b08272b6eac3733eea52f811b6774c76918e2f4",
+      "relocatedSha256": "5891aa273347972a9526c5c36b08272b6eac3733eea52f811b6774c76918e2f4"
+    },
+    {
+      "from": "assets/sorceress/autosprite/directional/nw/walk-nw-loop.png",
+      "to": "../tmp_assets/unused/assets/sorceress/autosprite/directional/nw/walk-nw-loop.png",
+      "bytes": 1788847,
+      "sha256": "aaca699d48c8ae9f5c409fb300e97339f91ea048f422a5f2b252ac4689c1822b",
+      "relocatedSha256": "aaca699d48c8ae9f5c409fb300e97339f91ea048f422a5f2b252ac4689c1822b"
+    },
+    {
+      "from": "assets/sorceress/autosprite/directional/s/keyed-keyed-1789501831072.png",
+      "to": "../tmp_assets/unused/assets/sorceress/autosprite/directional/s/keyed-keyed-1789501831072.png",
+      "bytes": 11848314,
+      "sha256": "ce9776920b3741912d138d29fe4774028075f5bad703a619558d6492bed5fda0",
+      "relocatedSha256": "ce9776920b3741912d138d29fe4774028075f5bad703a619558d6492bed5fda0"
+    },
+    {
+      "from": "assets/sorceress/autosprite/directional/s/walk-s-1789501533874.mp4",
+      "to": "../tmp_assets/unused/assets/sorceress/autosprite/directional/s/walk-s-1789501533874.mp4",
+      "bytes": 2379503,
+      "sha256": "a1d1fd86db8bd6249dabdd5c8a3abe44170a3cfc58a8b8457ad1395c05dad46e",
+      "relocatedSha256": "a1d1fd86db8bd6249dabdd5c8a3abe44170a3cfc58a8b8457ad1395c05dad46e"
+    },
+    {
+      "from": "assets/sorceress/autosprite/directional/s/walk-s-loop.json",
+      "to": "../tmp_assets/unused/assets/sorceress/autosprite/directional/s/walk-s-loop.json",
+      "bytes": 367,
+      "sha256": "991aad1c910af8d2defb4ba9f51e5724155cf296ca4d55abd0c00b754c51390a",
+      "relocatedSha256": "991aad1c910af8d2defb4ba9f51e5724155cf296ca4d55abd0c00b754c51390a"
+    },
+    {
+      "from": "assets/sorceress/autosprite/directional/s/walk-s-loop.png",
+      "to": "../tmp_assets/unused/assets/sorceress/autosprite/directional/s/walk-s-loop.png",
+      "bytes": 3802438,
+      "sha256": "5ffa9423e561fa31681ffbb8c7aa3910d0580b0d1a6967f25d9172b9e890f739",
+      "relocatedSha256": "5ffa9423e561fa31681ffbb8c7aa3910d0580b0d1a6967f25d9172b9e890f739"
+    },
+    {
+      "from": "assets/sorceress/autosprite/directional/se/walk-se-loop.json",
+      "to": "../tmp_assets/unused/assets/sorceress/autosprite/directional/se/walk-se-loop.json",
+      "bytes": 379,
+      "sha256": "2fea7955a25945f16c3223c1b16232273299acab43dac4f46f1b612cb2087af8",
+      "relocatedSha256": "2fea7955a25945f16c3223c1b16232273299acab43dac4f46f1b612cb2087af8"
+    },
+    {
+      "from": "assets/sorceress/autosprite/directional/se/walk-se-loop.png",
+      "to": "../tmp_assets/unused/assets/sorceress/autosprite/directional/se/walk-se-loop.png",
+      "bytes": 2385513,
+      "sha256": "343912f87dea6833348fe40030f4622044b50163c065e20c72735b53e2938ce8",
+      "relocatedSha256": "343912f87dea6833348fe40030f4622044b50163c065e20c72735b53e2938ce8"
+    },
+    {
+      "from": "assets/sorceress/autosprite/directional/sw/walk-sw-loop.json",
+      "to": "../tmp_assets/unused/assets/sorceress/autosprite/directional/sw/walk-sw-loop.json",
+      "bytes": 246,
+      "sha256": "5c76face0ac4fd8961f4bfad3f8e7fc22ee4db4cea63af243f05ac24298ed82e",
+      "relocatedSha256": "5c76face0ac4fd8961f4bfad3f8e7fc22ee4db4cea63af243f05ac24298ed82e"
+    },
+    {
+      "from": "assets/sorceress/autosprite/directional/sw/walk-sw-loop.png",
+      "to": "../tmp_assets/unused/assets/sorceress/autosprite/directional/sw/walk-sw-loop.png",
+      "bytes": 2394358,
+      "sha256": "a74118f0feb36ab7c5e5f441ff79f1e1d5cd908d4d061404af72530432f91ea2",
+      "relocatedSha256": "a74118f0feb36ab7c5e5f441ff79f1e1d5cd908d4d061404af72530432f91ea2"
+    },
+    {
+      "from": "assets/sorceress/autosprite/directional/w/walk-w-loop.json",
+      "to": "../tmp_assets/unused/assets/sorceress/autosprite/directional/w/walk-w-loop.json",
+      "bytes": 241,
+      "sha256": "b839f56835f3df1b1cdfde8bce38f20481bf1238b9d054305d6841c76669a9c2",
+      "relocatedSha256": "b839f56835f3df1b1cdfde8bce38f20481bf1238b9d054305d6841c76669a9c2"
+    },
+    {
+      "from": "assets/sorceress/autosprite/directional/w/walk-w-loop.png",
+      "to": "../tmp_assets/unused/assets/sorceress/autosprite/directional/w/walk-w-loop.png",
+      "bytes": 2749467,
+      "sha256": "879268f994e5e745c99e25527fffc857aebb5635a7cf5e476a78a2fb2e0dc94a",
+      "relocatedSha256": "879268f994e5e745c99e25527fffc857aebb5635a7cf5e476a78a2fb2e0dc94a"
+    },
+    {
+      "from": "assets/sorceress/autosprite/directional/walk-directions.json",
+      "to": "../tmp_assets/unused/assets/sorceress/autosprite/directional/walk-directions.json",
+      "bytes": 880,
+      "sha256": "90f9b1d33ccd68cf06cb773b6d9a23a6396390ab176050aaa23e9a8f308137d2",
+      "relocatedSha256": "90f9b1d33ccd68cf06cb773b6d9a23a6396390ab176050aaa23e9a8f308137d2"
+    },
+    {
+      "from": "assets/sorceress/autosprite/idle-unarmed-1789488470174.mp4",
+      "to": "../tmp_assets/unused/assets/sorceress/autosprite/idle-unarmed-1789488470174.mp4",
+      "bytes": 1724355,
+      "sha256": "f8fd1a68f0d4556f291fda617f353373ae7673cb8817f4dc9f71f8d85934b71b",
+      "relocatedSha256": "f8fd1a68f0d4556f291fda617f353373ae7673cb8817f4dc9f71f8d85934b71b"
+    },
+    {
+      "from": "assets/sorceress/autosprite/keyed-keyed-1789488901723.png",
+      "to": "../tmp_assets/unused/assets/sorceress/autosprite/keyed-keyed-1789488901723.png",
+      "bytes": 12115102,
+      "sha256": "871101a3dccfb17d401619680a57b9ec2f6716c50f138a3bddd59db243b27781",
+      "relocatedSha256": "871101a3dccfb17d401619680a57b9ec2f6716c50f138a3bddd59db243b27781"
+    },
+    {
+      "from": "assets/sorceress/autosprite/keyed-keyed-1789489931039.png",
+      "to": "../tmp_assets/unused/assets/sorceress/autosprite/keyed-keyed-1789489931039.png",
+      "bytes": 12353602,
+      "sha256": "58b57b8fe3477607ae9220df192dd162bed1214d2c991b386cdf5b0fdeec04fd",
+      "relocatedSha256": "58b57b8fe3477607ae9220df192dd162bed1214d2c991b386cdf5b0fdeec04fd"
+    },
+    {
+      "from": "assets/sorceress/autosprite/marine-twin-rail/.DS_Store",
+      "to": "../tmp_assets/unused/assets/sorceress/autosprite/marine-twin-rail/.DS_Store",
+      "bytes": 6148,
+      "sha256": "50de8b7d72ba795bf3d3785a6e7f1026f847d89495146a92b07694f60527e94f",
+      "relocatedSha256": "50de8b7d72ba795bf3d3785a6e7f1026f847d89495146a92b07694f60527e94f"
+    },
+    {
+      "from": "assets/sorceress/autosprite/marine-twin-rail/directional/gpt-image-2-1789526952392.png",
+      "to": "../tmp_assets/unused/assets/sorceress/autosprite/marine-twin-rail/directional/gpt-image-2-1789526952392.png",
+      "bytes": 517962,
+      "sha256": "815b71e0b0368401558ab180d17d90fc08929c6c706b7cb1e509e82e72dfce24",
+      "relocatedSha256": "815b71e0b0368401558ab180d17d90fc08929c6c706b7cb1e509e82e72dfce24"
+    },
+    {
+      "from": "assets/sorceress/autosprite/marine-twin-rail/directional/gpt-image-2-1789527147105.png",
+      "to": "../tmp_assets/unused/assets/sorceress/autosprite/marine-twin-rail/directional/gpt-image-2-1789527147105.png",
+      "bytes": 3011579,
+      "sha256": "9065c8adf10d3686ca22bf7c3eed2233e5eeb6425444ff57ff1eb75479431ed0",
+      "relocatedSha256": "9065c8adf10d3686ca22bf7c3eed2233e5eeb6425444ff57ff1eb75479431ed0"
+    },
+    {
+      "from": "assets/sorceress/autosprite/marine-twin-rail/directional/gpt-image-2-1789527272465.png",
+      "to": "../tmp_assets/unused/assets/sorceress/autosprite/marine-twin-rail/directional/gpt-image-2-1789527272465.png",
+      "bytes": 1153455,
+      "sha256": "e1a7704e2194b4f6f9d3702767ee65e9a4468c581155899142a7f7cdca182123",
+      "relocatedSha256": "e1a7704e2194b4f6f9d3702767ee65e9a4468c581155899142a7f7cdca182123"
+    },
+    {
+      "from": "assets/sorceress/autosprite/marine-twin-rail/directional/gpt-image-2-1789527484045.png",
+      "to": "../tmp_assets/unused/assets/sorceress/autosprite/marine-twin-rail/directional/gpt-image-2-1789527484045.png",
+      "bytes": 585397,
+      "sha256": "5a1cd93875cb02f3d13bbba418ec620cf2fd4c7f09acbccb947d4f7840222550",
+      "relocatedSha256": "5a1cd93875cb02f3d13bbba418ec620cf2fd4c7f09acbccb947d4f7840222550"
+    },
+    {
+      "from": "assets/sorceress/autosprite/marine-twin-rail/directional/gpt-image-2-1789527641999.png",
+      "to": "../tmp_assets/unused/assets/sorceress/autosprite/marine-twin-rail/directional/gpt-image-2-1789527641999.png",
+      "bytes": 548377,
+      "sha256": "353f4031a43f7483fc8e60aadbd7444a88212aa4d75d151b2b3855ef2de81136",
+      "relocatedSha256": "353f4031a43f7483fc8e60aadbd7444a88212aa4d75d151b2b3855ef2de81136"
+    },
+    {
+      "from": "assets/sorceress/autosprite/marine-twin-rail/directional/keyed-keyed-1789528065917.png",
+      "to": "../tmp_assets/unused/assets/sorceress/autosprite/marine-twin-rail/directional/keyed-keyed-1789528065917.png",
+      "bytes": 6508222,
+      "sha256": "bd0d0df670c3e739281e29c502f3d045c5b5a9556227c567809a9734318c55a7",
+      "relocatedSha256": "bd0d0df670c3e739281e29c502f3d045c5b5a9556227c567809a9734318c55a7"
+    },
+    {
+      "from": "assets/sorceress/autosprite/marine-twin-rail/directional/keyed-keyed-1789528067310.png",
+      "to": "../tmp_assets/unused/assets/sorceress/autosprite/marine-twin-rail/directional/keyed-keyed-1789528067310.png",
+      "bytes": 21464733,
+      "sha256": "1fd0db7272b4c7b3772a7403e57a18de4e094b1061c3d1af06cae2d48acf202e",
+      "relocatedSha256": "1fd0db7272b4c7b3772a7403e57a18de4e094b1061c3d1af06cae2d48acf202e"
+    },
+    {
+      "from": "assets/sorceress/autosprite/marine-twin-rail/directional/keyed-keyed-1789528069359.png",
+      "to": "../tmp_assets/unused/assets/sorceress/autosprite/marine-twin-rail/directional/keyed-keyed-1789528069359.png",
+      "bytes": 21117349,
+      "sha256": "d2bf1424af2eac860cc4ac77491beaa414d6adad8b89e169018af9ee3b8cb0f1",
+      "relocatedSha256": "d2bf1424af2eac860cc4ac77491beaa414d6adad8b89e169018af9ee3b8cb0f1"
+    },
+    {
+      "from": "assets/sorceress/autosprite/marine-twin-rail/directional/remediation/gpt-image-2-1789532406693.png",
+      "to": "../tmp_assets/unused/assets/sorceress/autosprite/marine-twin-rail/directional/remediation/gpt-image-2-1789532406693.png",
+      "bytes": 504148,
+      "sha256": "c3e27893ed276b6aed6015e2f97d79f7ca6e4f5e0d7977cf87dbb2f6bf60c69c",
+      "relocatedSha256": "c3e27893ed276b6aed6015e2f97d79f7ca6e4f5e0d7977cf87dbb2f6bf60c69c"
+    },
+    {
+      "from": "assets/sorceress/autosprite/marine-twin-rail/directional/remediation/gpt-image-2-1789532408492.png",
+      "to": "../tmp_assets/unused/assets/sorceress/autosprite/marine-twin-rail/directional/remediation/gpt-image-2-1789532408492.png",
+      "bytes": 651446,
+      "sha256": "bd246878ac75d924144ed4c94c85dcb97a7e4121d1390c89342218d1b22ba787",
+      "relocatedSha256": "bd246878ac75d924144ed4c94c85dcb97a7e4121d1390c89342218d1b22ba787"
+    },
+    {
+      "from": "assets/sorceress/autosprite/marine-twin-rail/directional/remediation/gpt-image-2-1789532650268.png",
+      "to": "../tmp_assets/unused/assets/sorceress/autosprite/marine-twin-rail/directional/remediation/gpt-image-2-1789532650268.png",
+      "bytes": 1241545,
+      "sha256": "03af016c6f1d4b7a4c34a93e967135507fdd8531fb907d4248c4fa0fea817f86",
+      "relocatedSha256": "03af016c6f1d4b7a4c34a93e967135507fdd8531fb907d4248c4fa0fea817f86"
+    },
+    {
+      "from": "assets/sorceress/autosprite/marine-twin-rail/directional/remediation/gpt-image-2-1789532862792.png",
+      "to": "../tmp_assets/unused/assets/sorceress/autosprite/marine-twin-rail/directional/remediation/gpt-image-2-1789532862792.png",
+      "bytes": 1208723,
+      "sha256": "49fa0ea91c61cad303a84799b6459583ec91624ac33e2f49990fad76fa0e3ecd",
+      "relocatedSha256": "49fa0ea91c61cad303a84799b6459583ec91624ac33e2f49990fad76fa0e3ecd"
+    },
+    {
+      "from": "assets/sorceress/autosprite/marine-twin-rail/directional/remediation/run-n-v2-1789532866519.mp4",
+      "to": "../tmp_assets/unused/assets/sorceress/autosprite/marine-twin-rail/directional/remediation/run-n-v2-1789532866519.mp4",
+      "bytes": 2292900,
+      "sha256": "4d3af1d3d29518b987502ff0f21b77d1a760bdcaaade08e396a73ffcc76740ad",
+      "relocatedSha256": "4d3af1d3d29518b987502ff0f21b77d1a760bdcaaade08e396a73ffcc76740ad"
+    },
+    {
+      "from": "assets/sorceress/autosprite/marine-twin-rail/directional/run-e-1789527851121.mp4",
+      "to": "../tmp_assets/unused/assets/sorceress/autosprite/marine-twin-rail/directional/run-e-1789527851121.mp4",
+      "bytes": 1527796,
+      "sha256": "e261a6dc890c428d9f53f19d803d5999625c46159ec26a3c084b39ea0245586a",
+      "relocatedSha256": "e261a6dc890c428d9f53f19d803d5999625c46159ec26a3c084b39ea0245586a"
+    },
+    {
+      "from": "assets/sorceress/autosprite/marine-twin-rail/directional/run-n-1789527844387.mp4",
+      "to": "../tmp_assets/unused/assets/sorceress/autosprite/marine-twin-rail/directional/run-n-1789527844387.mp4",
+      "bytes": 1802731,
+      "sha256": "bd7aa7ad1a0d495f1ac97a37b158e155391122b86d83e1673ffb3258deacb96e",
+      "relocatedSha256": "bd7aa7ad1a0d495f1ac97a37b158e155391122b86d83e1673ffb3258deacb96e"
+    },
+    {
+      "from": "assets/sorceress/autosprite/marine-twin-rail/directional/run-ne-1789527849025.mp4",
+      "to": "../tmp_assets/unused/assets/sorceress/autosprite/marine-twin-rail/directional/run-ne-1789527849025.mp4",
+      "bytes": 1676450,
+      "sha256": "9fc17c8e64271bac95aa37e73c3f209515131ca670c5d51284015f7e0210f915",
+      "relocatedSha256": "9fc17c8e64271bac95aa37e73c3f209515131ca670c5d51284015f7e0210f915"
+    },
+    {
+      "from": "assets/sorceress/autosprite/marine-twin-rail/directional/run-s-1789527847602.mp4",
+      "to": "../tmp_assets/unused/assets/sorceress/autosprite/marine-twin-rail/directional/run-s-1789527847602.mp4",
+      "bytes": 1409049,
+      "sha256": "83f17676a981468afb9f902cd53a7cdba61b42279c82597f50000b9ab8fec94d",
+      "relocatedSha256": "83f17676a981468afb9f902cd53a7cdba61b42279c82597f50000b9ab8fec94d"
+    },
+    {
+      "from": "assets/sorceress/autosprite/marine-twin-rail/directional/s/run-s-loop.json",
+      "to": "../tmp_assets/unused/assets/sorceress/autosprite/marine-twin-rail/directional/s/run-s-loop.json",
+      "bytes": 382,
+      "sha256": "89bca06abbae951f87afe810f47d48602cfb37676cf6034372679bcb99628f90",
+      "relocatedSha256": "89bca06abbae951f87afe810f47d48602cfb37676cf6034372679bcb99628f90"
+    },
+    {
+      "from": "assets/sorceress/autosprite/marine-twin-rail/directional/s/run-s-loop.png",
+      "to": "../tmp_assets/unused/assets/sorceress/autosprite/marine-twin-rail/directional/s/run-s-loop.png",
+      "bytes": 4910325,
+      "sha256": "26a0d79b9e167433417dff08332f5e1ba3768ef126f178b48beb0c586306bb45",
+      "relocatedSha256": "26a0d79b9e167433417dff08332f5e1ba3768ef126f178b48beb0c586306bb45"
+    },
+    {
+      "from": "assets/sorceress/autosprite/marine-twin-rail/keyed-keyed-1789508916875.png",
+      "to": "../tmp_assets/unused/assets/sorceress/autosprite/marine-twin-rail/keyed-keyed-1789508916875.png",
+      "bytes": 8492530,
+      "sha256": "b5b65ba4ddb36dab6f6576873455a15bf2dd84e9bf9fc36ad20b4e7852c9e007",
+      "relocatedSha256": "b5b65ba4ddb36dab6f6576873455a15bf2dd84e9bf9fc36ad20b4e7852c9e007"
+    },
+    {
+      "from": "assets/sorceress/autosprite/marine-twin-rail/run-twin-rail-1789508708054.mp4",
+      "to": "../tmp_assets/unused/assets/sorceress/autosprite/marine-twin-rail/run-twin-rail-1789508708054.mp4",
+      "bytes": 1792078,
+      "sha256": "ed7dd0f5fe5e6d9d5adc087cdc7ae2a0ccbd11f4c2e43d552a92796e11bf64a5",
+      "relocatedSha256": "ed7dd0f5fe5e6d9d5adc087cdc7ae2a0ccbd11f4c2e43d552a92796e11bf64a5"
+    },
+    {
+      "from": "assets/sorceress/autosprite/marine-twin-rail/run-twin-rail-loop.json",
+      "to": "../tmp_assets/unused/assets/sorceress/autosprite/marine-twin-rail/run-twin-rail-loop.json",
+      "bytes": 443,
+      "sha256": "6f3843875117788c86fee63fb895adb8cbfb36c8da16885b2cb399d9931271f2",
+      "relocatedSha256": "6f3843875117788c86fee63fb895adb8cbfb36c8da16885b2cb399d9931271f2"
+    },
+    {
+      "from": "assets/sorceress/autosprite/marine-twin-rail/run-twin-rail-loop.png",
+      "to": "../tmp_assets/unused/assets/sorceress/autosprite/marine-twin-rail/run-twin-rail-loop.png",
+      "bytes": 6129044,
+      "sha256": "1831cb8af9198513eac485ebcd7f984f338731c3fbdbd08bfeb3bf2eae294d1c",
+      "relocatedSha256": "1831cb8af9198513eac485ebcd7f984f338731c3fbdbd08bfeb3bf2eae294d1c"
+    },
+    {
+      "from": "assets/sorceress/autosprite/walk-unarmed-1789489544094.mp4",
+      "to": "../tmp_assets/unused/assets/sorceress/autosprite/walk-unarmed-1789489544094.mp4",
+      "bytes": 2411389,
+      "sha256": "1982a0e239156503e966e265986b045c7cf8cbb3ad576a2b67f40ff8bff89303",
+      "relocatedSha256": "1982a0e239156503e966e265986b045c7cf8cbb3ad576a2b67f40ff8bff89303"
+    },
+    {
+      "from": "assets/sorceress/autosprite/walk-unarmed-loop.json",
+      "to": "../tmp_assets/unused/assets/sorceress/autosprite/walk-unarmed-loop.json",
+      "bytes": 359,
+      "sha256": "4fde4136d27caad9d23c5ec81cc7b3b3a6a3c811273ba0d9aa228d28eab64198",
+      "relocatedSha256": "4fde4136d27caad9d23c5ec81cc7b3b3a6a3c811273ba0d9aa228d28eab64198"
+    },
+    {
+      "from": "assets/sorceress/autosprite/walk-unarmed-loop.png",
+      "to": "../tmp_assets/unused/assets/sorceress/autosprite/walk-unarmed-loop.png",
+      "bytes": 2385513,
+      "sha256": "343912f87dea6833348fe40030f4622044b50163c065e20c72735b53e2938ce8",
+      "relocatedSha256": "343912f87dea6833348fe40030f4622044b50163c065e20c72735b53e2938ce8"
+    },
+    {
+      "from": "references/.DS_Store",
+      "to": "../tmp_assets/unused/references/.DS_Store",
+      "bytes": 6148,
+      "sha256": "111fefdcbbe743c97641d45bb88610fb0b22ffd93d7f74b1621e7dc96014d391",
+      "relocatedSha256": "111fefdcbbe743c97641d45bb88610fb0b22ffd93d7f74b1621e7dc96014d391"
+    },
+    {
+      "from": "references/backwoods/base_camp_1.png",
+      "to": "../tmp_assets/unused/references/backwoods/base_camp_1.png",
+      "bytes": 872453,
+      "sha256": "c12dd3f5c1d0b57f0f4d02e053c59898df2eca8bc633b70933e5b182bc99058c",
+      "relocatedSha256": "c12dd3f5c1d0b57f0f4d02e053c59898df2eca8bc633b70933e5b182bc99058c"
+    },
+    {
+      "from": "references/backwoods/base_camp_2.png",
+      "to": "../tmp_assets/unused/references/backwoods/base_camp_2.png",
+      "bytes": 338708,
+      "sha256": "47b3bc12848277a84c2a22e231715d13a8404d88a94e6aedbefc021b22a28497",
+      "relocatedSha256": "47b3bc12848277a84c2a22e231715d13a8404d88a94e6aedbefc021b22a28497"
+    },
+    {
+      "from": "references/backwoods/gameplay_1.png",
+      "to": "../tmp_assets/unused/references/backwoods/gameplay_1.png",
+      "bytes": 126754,
+      "sha256": "6e5ad83d1d966d552eac73f1058c2c4a07e5cb7d294339cbc11f41898de853c7",
+      "relocatedSha256": "6e5ad83d1d966d552eac73f1058c2c4a07e5cb7d294339cbc11f41898de853c7"
+    },
+    {
+      "from": "references/backwoods/gameplay_2.png",
+      "to": "../tmp_assets/unused/references/backwoods/gameplay_2.png",
+      "bytes": 119722,
+      "sha256": "8e6f9ee48f2ad2882c03919b47cdc91c2e9f57c3d8159eefca1a7c0cc2ef45ac",
+      "relocatedSha256": "8e6f9ee48f2ad2882c03919b47cdc91c2e9f57c3d8159eefca1a7c0cc2ef45ac"
+    },
+    {
+      "from": "references/backwoods/level_selection.png",
+      "to": "../tmp_assets/unused/references/backwoods/level_selection.png",
+      "bytes": 141548,
+      "sha256": "c49965a6ec9715c2ef53b5bab12c75c827d799b60d575a752878a029ebcecf82",
+      "relocatedSha256": "c49965a6ec9715c2ef53b5bab12c75c827d799b60d575a752878a029ebcecf82"
+    },
+    {
+      "from": "references/backwoods/level_selection_locked.png",
+      "to": "../tmp_assets/unused/references/backwoods/level_selection_locked.png",
+      "bytes": 315950,
+      "sha256": "31e5f21c74602ac62333753906431e8e8acc9944e418a2b5eee8491847d07fbe",
+      "relocatedSha256": "31e5f21c74602ac62333753906431e8e8acc9944e418a2b5eee8491847d07fbe"
+    },
+    {
+      "from": "references/backwoods/post_wave_shop_1.png",
+      "to": "../tmp_assets/unused/references/backwoods/post_wave_shop_1.png",
+      "bytes": 47118,
+      "sha256": "66c5cff7e6a3d6eaf24a4b223f2654bc57746077d7d34a9cfdd8fad3834a0ac6",
+      "relocatedSha256": "66c5cff7e6a3d6eaf24a4b223f2654bc57746077d7d34a9cfdd8fad3834a0ac6"
+    },
+    {
+      "from": "references/backwoods/post_wave_shop_2.png",
+      "to": "../tmp_assets/unused/references/backwoods/post_wave_shop_2.png",
+      "bytes": 116261,
+      "sha256": "88988b3736d700d72d9f73883336e6ab21e44fb83e54b7cd215244eb04473d8b",
+      "relocatedSha256": "88988b3736d700d72d9f73883336e6ab21e44fb83e54b7cd215244eb04473d8b"
+    },
+    {
+      "from": "references/backwoods/splash_screen.jpg",
+      "to": "../tmp_assets/unused/references/backwoods/splash_screen.jpg",
+      "bytes": 108228,
+      "sha256": "f850316a9471a3ac12bf5610dcd897d1b04c61acea2a8afe0cf5e44dc2718de3",
+      "relocatedSha256": "f850316a9471a3ac12bf5610dcd897d1b04c61acea2a8afe0cf5e44dc2718de3"
+    },
+    {
+      "from": "references/mathonmars/.DS_Store",
+      "to": "../tmp_assets/unused/references/mathonmars/.DS_Store",
+      "bytes": 6148,
+      "sha256": "d4d8c15c65cd37e541f883a439393705e53937c6c53433bdb60bdaa4ebc6f237",
+      "relocatedSha256": "d4d8c15c65cd37e541f883a439393705e53937c6c53433bdb60bdaa4ebc6f237"
+    },
+    {
+      "from": "references/mathonmars/candidates/base-camp-v1.md",
+      "to": "../tmp_assets/unused/references/mathonmars/candidates/base-camp-v1.md",
+      "bytes": 2680,
+      "sha256": "c3bd743dde70a2c0d05060b72c8d3037a72172223f8e0ee5989d5b536c47dc3c",
+      "relocatedSha256": "c3bd743dde70a2c0d05060b72c8d3037a72172223f8e0ee5989d5b536c47dc3c"
+    },
+    {
+      "from": "references/mathonmars/candidates/base-camp-v1.png",
+      "to": "../tmp_assets/unused/references/mathonmars/candidates/base-camp-v1.png",
+      "bytes": 2722347,
+      "sha256": "1f7a01cad7b80aac8eb508b5e07e574e0f0687f21b6d6365a1ac8e1add48c03d",
+      "relocatedSha256": "1f7a01cad7b80aac8eb508b5e07e574e0f0687f21b6d6365a1ac8e1add48c03d"
+    },
+    {
+      "from": "references/mathonmars/candidates/base-camp-v2-expanded.md",
+      "to": "../tmp_assets/unused/references/mathonmars/candidates/base-camp-v2-expanded.md",
+      "bytes": 1530,
+      "sha256": "08bb9c4301e668328d44c52ce22c1665cdf1199c2009c34459a591d2b065cc50",
+      "relocatedSha256": "08bb9c4301e668328d44c52ce22c1665cdf1199c2009c34459a591d2b065cc50"
+    },
+    {
+      "from": "references/mathonmars/candidates/base-camp-v2-expanded.png",
+      "to": "../tmp_assets/unused/references/mathonmars/candidates/base-camp-v2-expanded.png",
+      "bytes": 2834710,
+      "sha256": "0751ef9208226cfa95767de931507edd2131f34bd606dc6b4b28c06fe7a8d9e7",
+      "relocatedSha256": "0751ef9208226cfa95767de931507edd2131f34bd606dc6b4b28c06fe7a8d9e7"
+    },
+    {
+      "from": "references/mathonmars/candidates/reference-sheet-v1.md",
+      "to": "../tmp_assets/unused/references/mathonmars/candidates/reference-sheet-v1.md",
+      "bytes": 2678,
+      "sha256": "8cb42b80be7ba067acf22f0e0ce46c11dbd1ea0cd4f3c349e06e11ae17fc8633",
+      "relocatedSha256": "8cb42b80be7ba067acf22f0e0ce46c11dbd1ea0cd4f3c349e06e11ae17fc8633"
+    },
+    {
+      "from": "references/mathonmars/candidates/reference-sheet-v1.png",
+      "to": "../tmp_assets/unused/references/mathonmars/candidates/reference-sheet-v1.png",
+      "bytes": 2101287,
+      "sha256": "7a445447983c2cca60afd5a7c19d16e518a85f21ed4f2f05c574c191b26dbdc3",
+      "relocatedSha256": "7a445447983c2cca60afd5a7c19d16e518a85f21ed4f2f05c574c191b26dbdc3"
+    },
+    {
+      "from": "references/quizcaster/01-upgrade-selection.png",
+      "to": "../tmp_assets/unused/references/quizcaster/01-upgrade-selection.png",
+      "bytes": 890111,
+      "sha256": "bd6018d05d18cf8f8a1db1dfc2b6f922d6104c10e4d06e5422d2eb99dc5756fe",
+      "relocatedSha256": "bd6018d05d18cf8f8a1db1dfc2b6f922d6104c10e4d06e5422d2eb99dc5756fe"
+    },
+    {
+      "from": "references/quizcaster/02-math-question.png",
+      "to": "../tmp_assets/unused/references/quizcaster/02-math-question.png",
+      "bytes": 449114,
+      "sha256": "fadf15df9336dd68dae2cd78611ef1b4cca5b496ddd024baea1558ccc0347059",
+      "relocatedSha256": "fadf15df9336dd68dae2cd78611ef1b4cca5b496ddd024baea1558ccc0347059"
+    },
+    {
+      "from": "references/quizcaster/03-study-menu.png",
+      "to": "../tmp_assets/unused/references/quizcaster/03-study-menu.png",
+      "bytes": 1131887,
+      "sha256": "60037f38ed796ec90af60cb2b8c098c41a686fedee98684a4bd4cd6704d83ba3",
+      "relocatedSha256": "60037f38ed796ec90af60cb2b8c098c41a686fedee98684a4bd4cd6704d83ba3"
+    },
+    {
+      "from": "tmp_assets/.DS_Store",
+      "to": "../tmp_assets/.DS_Store",
+      "bytes": 6148,
+      "sha256": "a74ea021657569041530055a0ec2757a23f4a30453cbfce413f84e3cfd4d0aec",
+      "relocatedSha256": "a74ea021657569041530055a0ec2757a23f4a30453cbfce413f84e3cfd4d0aec"
+    },
+    {
+      "from": "tmp_assets/01_brand/typography/space_mission_full_specimen_v001.json",
+      "to": "../tmp_assets/01_brand/typography/space_mission_full_specimen_v001.json",
+      "bytes": 1851,
+      "sha256": "e779c78db4e51a528cbc05a765f9c184fdaec3c0b964e3b155733c38287fb151",
+      "relocatedSha256": "0aead78edf624cfe6828140385c32de9a70efcd5cf4b73377c93c281557fbe6e"
+    },
+    {
+      "from": "tmp_assets/01_brand/typography/space_mission_full_specimen_v001_source.png",
+      "to": "../tmp_assets/01_brand/typography/space_mission_full_specimen_v001_source.png",
+      "bytes": 1413401,
+      "sha256": "ca92ad7404e740290311bbbed85ea7c8bbf36a85f84ff05697e38e9eb956b11d",
+      "relocatedSha256": "ca92ad7404e740290311bbbed85ea7c8bbf36a85f84ff05697e38e9eb956b11d"
+    },
+    {
+      "from": "tmp_assets/01_brand/typography/space_mission_type_scale_v001.json",
+      "to": "../tmp_assets/01_brand/typography/space_mission_type_scale_v001.json",
+      "bytes": 2154,
+      "sha256": "9f2d6e85cf8b7cd2edef9a775f2acd02156e61bfbd757ee8f14a3fc6cc94ef94",
+      "relocatedSha256": "9f2d6e85cf8b7cd2edef9a775f2acd02156e61bfbd757ee8f14a3fc6cc94ef94"
+    },
+    {
+      "from": "tmp_assets/01_brand/typography/space_mission_type_scale_v001_source.png",
+      "to": "../tmp_assets/01_brand/typography/space_mission_type_scale_v001_source.png",
+      "bytes": 1310287,
+      "sha256": "3a6912b2635b526b21e4b9dda104eb1932db0d9fa46307b4a04584eb2df8b8b6",
+      "relocatedSha256": "3a6912b2635b526b21e4b9dda104eb1932db0d9fa46307b4a04584eb2df8b8b6"
+    },
+    {
+      "from": "tmp_assets/02_screens/.DS_Store",
+      "to": "../tmp_assets/02_screens/.DS_Store",
+      "bytes": 8196,
+      "sha256": "330b1099e586086f9af9cebaa69669572aaa9b126c69634198e7d713433de0d3",
+      "relocatedSha256": "330b1099e586086f9af9cebaa69669572aaa9b126c69634198e7d713433de0d3"
+    },
+    {
+      "from": "tmp_assets/03_characters/.DS_Store",
+      "to": "../tmp_assets/03_characters/.DS_Store",
+      "bytes": 6148,
+      "sha256": "6ad6f7570fdc4a63333612569cbe63280abc58b9361e0eba76440a3d2828b929",
+      "relocatedSha256": "6ad6f7570fdc4a63333612569cbe63280abc58b9361e0eba76440a3d2828b929"
+    },
+    {
+      "from": "tmp_assets/03_characters/marine/marine_master_v004.json",
+      "to": "../tmp_assets/03_characters/marine/marine_master_v004.json",
+      "bytes": 1682,
+      "sha256": "2e8ba110adfa09f5d226975b47c8896651f663e3da091e12dd75ed6d0138efcb",
+      "relocatedSha256": "2e8ba110adfa09f5d226975b47c8896651f663e3da091e12dd75ed6d0138efcb"
+    },
+    {
+      "from": "tmp_assets/03_characters/marine/marine_master_v004_source.png",
+      "to": "../tmp_assets/03_characters/marine/marine_master_v004_source.png",
+      "bytes": 1163050,
+      "sha256": "76ad3fac5a55e4b4209296832e798a3e60d5e711b10945b68d652133acb67c28",
+      "relocatedSha256": "76ad3fac5a55e4b4209296832e798a3e60d5e711b10945b68d652133acb67c28"
+    },
+    {
+      "from": "tmp_assets/04_weapons/.DS_Store",
+      "to": "../tmp_assets/04_weapons/.DS_Store",
+      "bytes": 6148,
+      "sha256": "e2ad28be351108cc869ca0155c6dd7bce47adf005c980181f83846659d889054",
+      "relocatedSha256": "e2ad28be351108cc869ca0155c6dd7bce47adf005c980181f83846659d889054"
+    },
+    {
+      "from": "tmp_assets/05_environment/.DS_Store",
+      "to": "../tmp_assets/05_environment/.DS_Store",
+      "bytes": 6148,
+      "sha256": "ab8f4c6761bc7a03a2334a7b41ff2fbe2274b78944b8e96c1f64822c6207b5f5",
+      "relocatedSha256": "ab8f4c6761bc7a03a2334a7b41ff2fbe2274b78944b8e96c1f64822c6207b5f5"
+    },
+    {
+      "from": "tmp_assets/06_items/ammo/README.md",
+      "to": "../tmp_assets/06_items/ammo/README.md",
+      "bytes": 1401,
+      "sha256": "3f5a39c7152a3c6771471e0503d277235811df3183018a27f67cf5b2d1181ff9",
+      "relocatedSha256": "db21c4dbeccbcc6405978759bb75b34ae8baa97d7f030d0a898152288897da1e"
+    },
+    {
+      "from": "tmp_assets/06_items/ammo/ammo_electric_chain_v001.png",
+      "to": "../tmp_assets/06_items/ammo/ammo_electric_chain_v001.png",
+      "bytes": 865579,
+      "sha256": "a718c95fa397e9a0ead62fd28f3847937534dedea775f760cf21405e0a2c2760",
+      "relocatedSha256": "a718c95fa397e9a0ead62fd28f3847937534dedea775f760cf21405e0a2c2760"
+    },
+    {
+      "from": "tmp_assets/06_items/ammo/ammo_fiery_v001.png",
+      "to": "../tmp_assets/06_items/ammo/ammo_fiery_v001.png",
+      "bytes": 743232,
+      "sha256": "b8da25626988c9a143286e60b75bc26b90cf6e45051701ab8ea7c9f851b80dad",
+      "relocatedSha256": "b8da25626988c9a143286e60b75bc26b90cf6e45051701ab8ea7c9f851b80dad"
+    },
+    {
+      "from": "tmp_assets/06_items/ammo/ammo_frost_v001.png",
+      "to": "../tmp_assets/06_items/ammo/ammo_frost_v001.png",
+      "bytes": 869173,
+      "sha256": "fcb8d8075c394e5b2320877139887fb5ec78cf2cc4761b2563af3de26c6f8552",
+      "relocatedSha256": "fcb8d8075c394e5b2320877139887fb5ec78cf2cc4761b2563af3de26c6f8552"
+    },
+    {
+      "from": "tmp_assets/06_items/ammo/ammo_legendary_omni_v001.png",
+      "to": "../tmp_assets/06_items/ammo/ammo_legendary_omni_v001.png",
+      "bytes": 1115340,
+      "sha256": "f9565da74c5a41d74faa649d95ff9fe6d1f0ef4345f1f6688bd215b089992633",
+      "relocatedSha256": "f9565da74c5a41d74faa649d95ff9fe6d1f0ef4345f1f6688bd215b089992633"
+    },
+    {
+      "from": "tmp_assets/06_items/ammo/ammo_multi_shot_v001.png",
+      "to": "../tmp_assets/06_items/ammo/ammo_multi_shot_v001.png",
+      "bytes": 1102444,
+      "sha256": "4af762876ae496c7a874595b4897d1950db8e646f68cdd52b3bfb3f068047efe",
+      "relocatedSha256": "4af762876ae496c7a874595b4897d1950db8e646f68cdd52b3bfb3f068047efe"
+    },
+    {
+      "from": "tmp_assets/06_items/ammo/ammo_piercing_v001.png",
+      "to": "../tmp_assets/06_items/ammo/ammo_piercing_v001.png",
+      "bytes": 482091,
+      "sha256": "1a83253997d5a4e5e5b02eefaf22c09af4f81059b21614d2fd2b45e68156e1fa",
+      "relocatedSha256": "1a83253997d5a4e5e5b02eefaf22c09af4f81059b21614d2fd2b45e68156e1fa"
+    },
+    {
+      "from": "tmp_assets/06_items/ammo/generation-v002.json",
+      "to": "../tmp_assets/06_items/ammo/generation-v002.json",
+      "bytes": 11989,
+      "sha256": "349b632ab724546b5131009f3a2d0c484316e5d0105d6c7c51f91732d23cda93",
+      "relocatedSha256": "349b632ab724546b5131009f3a2d0c484316e5d0105d6c7c51f91732d23cda93"
+    },
+    {
+      "from": "tmp_assets/06_items/ammo/generation.json",
+      "to": "../tmp_assets/06_items/ammo/generation.json",
+      "bytes": 8256,
+      "sha256": "7f5f51a28b5df93364198c0635d2408300c62dcf0dc61c80b23e087aa512f144",
+      "relocatedSha256": "7f5f51a28b5df93364198c0635d2408300c62dcf0dc61c80b23e087aa512f144"
+    },
+    {
+      "from": "tmp_assets/06_items/ammo/review-v002.html",
+      "to": "../tmp_assets/06_items/ammo/review-v002.html",
+      "bytes": 4465,
+      "sha256": "b448dfec119edec3b16ff7d41550c24009f9348a171cfa57ecb4ad6e15b36324",
+      "relocatedSha256": "fe269e2d8126cfc3797e54fb592b722d33e18266fbe9085a055581e10c166cee"
+    },
+    {
+      "from": "tmp_assets/06_items/healing_loot/README.md",
+      "to": "../tmp_assets/06_items/healing_loot/README.md",
+      "bytes": 1153,
+      "sha256": "ce2286098d8aba29bd4e4a486e510bc3a452fc4c5ba5b835a415cbed52abfe89",
+      "relocatedSha256": "130c8a8e068b6765ebdbb67e466668162de00f7767949101655cc4f39141dd82"
+    },
+    {
+      "from": "tmp_assets/06_items/healing_loot/generation.json",
+      "to": "../tmp_assets/06_items/healing_loot/generation.json",
+      "bytes": 8580,
+      "sha256": "9ad439d93e1b88b83eb46c2449818f9060be74a17c445c71a3b882e9da8b6e33",
+      "relocatedSha256": "9ad439d93e1b88b83eb46c2449818f9060be74a17c445c71a3b882e9da8b6e33"
+    },
+    {
+      "from": "tmp_assets/06_items/healing_loot/review-v001.html",
+      "to": "../tmp_assets/06_items/healing_loot/review-v001.html",
+      "bytes": 3358,
+      "sha256": "1113ec618bab8b02dcc5b9cf61e2f12639a6834140ceaa848558c88e915b489c",
+      "relocatedSha256": "ef487390c9113be6f39483187e4003a368521ecb3b9fcc01ba6c874c4bda81a2"
+    },
+    {
+      "from": "tmp_assets/06_items/trinkets/README.md",
+      "to": "../tmp_assets/06_items/trinkets/README.md",
+      "bytes": 1934,
+      "sha256": "7d1ef37d6712b4f8800a9b19618d3007723608ce7726949f340ab3a101bec1be",
+      "relocatedSha256": "f4adc1db69361c30951bc6791122156aefe14f1926ddceb150f6bd61532d9163"
+    },
+    {
+      "from": "tmp_assets/06_items/trinkets/generation.json",
+      "to": "../tmp_assets/06_items/trinkets/generation.json",
+      "bytes": 13066,
+      "sha256": "6700546509a531e0a8195863a4e2dcec990e1936df566159bb90748e2facba5c",
+      "relocatedSha256": "6700546509a531e0a8195863a4e2dcec990e1936df566159bb90748e2facba5c"
+    },
+    {
+      "from": "tmp_assets/06_items/trinkets/review-v001.html",
+      "to": "../tmp_assets/06_items/trinkets/review-v001.html",
+      "bytes": 4518,
+      "sha256": "a1450d8f685b43ba7db873ce119e293607e4a42fa0ecd6c6b247c0eecbd4f606",
+      "relocatedSha256": "5fc94d4ea008860b02596d8642883e1274852bd3b4c4e372282fd8a476cef633"
+    },
+    {
+      "from": "tmp_assets/07_ui/README.md",
+      "to": "../tmp_assets/07_ui/README.md",
+      "bytes": 2674,
+      "sha256": "dfbee87de7ab4eadb0658ded9faf11908ecac55b980b3cf16d3e48a38006e962",
+      "relocatedSha256": "dfbee87de7ab4eadb0658ded9faf11908ecac55b980b3cf16d3e48a38006e962"
+    },
+    {
+      "from": "tmp_assets/07_ui/archive-v001/ui_answer_field_v001.png",
+      "to": "../tmp_assets/07_ui/archive-v001/ui_answer_field_v001.png",
+      "bytes": 412243,
+      "sha256": "15d942264f3fddb988eaf053f5ece16928c90d6338b56b0ae8f66a6d41e5af75",
+      "relocatedSha256": "15d942264f3fddb988eaf053f5ece16928c90d6338b56b0ae8f66a6d41e5af75"
+    },
+    {
+      "from": "tmp_assets/07_ui/archive-v001/ui_button_icon_v001.png",
+      "to": "../tmp_assets/07_ui/archive-v001/ui_button_icon_v001.png",
+      "bytes": 664071,
+      "sha256": "20c6e81038606b320096916f73e025cd71deffd19af8866e25abd1c772b89a3b",
+      "relocatedSha256": "20c6e81038606b320096916f73e025cd71deffd19af8866e25abd1c772b89a3b"
+    },
+    {
+      "from": "tmp_assets/07_ui/archive-v001/ui_button_primary_v001.png",
+      "to": "../tmp_assets/07_ui/archive-v001/ui_button_primary_v001.png",
+      "bytes": 341519,
+      "sha256": "d0be60a5c1dbbd0b741e61a295e85b3b8551b612813d22df59008ce5833805e7",
+      "relocatedSha256": "d0be60a5c1dbbd0b741e61a295e85b3b8551b612813d22df59008ce5833805e7"
+    },
+    {
+      "from": "tmp_assets/07_ui/archive-v001/ui_button_secondary_v001.png",
+      "to": "../tmp_assets/07_ui/archive-v001/ui_button_secondary_v001.png",
+      "bytes": 316563,
+      "sha256": "a1f400d7e9d5258b381b22285e74bcb5168b0bcd54576b7c9d4eafd1ee69d6ad",
+      "relocatedSha256": "a1f400d7e9d5258b381b22285e74bcb5168b0bcd54576b7c9d4eafd1ee69d6ad"
+    },
+    {
+      "from": "tmp_assets/07_ui/archive-v001/ui_console_panel_v001.png",
+      "to": "../tmp_assets/07_ui/archive-v001/ui_console_panel_v001.png",
+      "bytes": 706649,
+      "sha256": "05aa5c561cf9a64f864ba42a9c3a932deaf1740bb3f05e49075e781fce4e94a1",
+      "relocatedSha256": "05aa5c561cf9a64f864ba42a9c3a932deaf1740bb3f05e49075e781fce4e94a1"
+    },
+    {
+      "from": "tmp_assets/07_ui/archive-v001/ui_defeat_badge_v001.png",
+      "to": "../tmp_assets/07_ui/archive-v001/ui_defeat_badge_v001.png",
+      "bytes": 810672,
+      "sha256": "ac15830cabf8f61ec15fcf0088bb9af960c3387d9a2b4089677696d4f67f6d13",
+      "relocatedSha256": "ac15830cabf8f61ec15fcf0088bb9af960c3387d9a2b4089677696d4f67f6d13"
+    },
+    {
+      "from": "tmp_assets/07_ui/archive-v001/ui_hud_bar_v001.png",
+      "to": "../tmp_assets/07_ui/archive-v001/ui_hud_bar_v001.png",
+      "bytes": 283698,
+      "sha256": "165d4478cffbed129a482799a843b7f58bb81ac6dba8418c33f5699cf1f65ec3",
+      "relocatedSha256": "165d4478cffbed129a482799a843b7f58bb81ac6dba8418c33f5699cf1f65ec3"
+    },
+    {
+      "from": "tmp_assets/07_ui/archive-v001/ui_inset_panel_v001.png",
+      "to": "../tmp_assets/07_ui/archive-v001/ui_inset_panel_v001.png",
+      "bytes": 563087,
+      "sha256": "c047a4c6c0c05f72c60b33170f115574fc167ae2be12f7680acaeb5aaabf9b2d",
+      "relocatedSha256": "c047a4c6c0c05f72c60b33170f115574fc167ae2be12f7680acaeb5aaabf9b2d"
+    },
+    {
+      "from": "tmp_assets/07_ui/archive-v001/ui_item_slot_v001.png",
+      "to": "../tmp_assets/07_ui/archive-v001/ui_item_slot_v001.png",
+      "bytes": 648812,
+      "sha256": "8eea011f889bf8883afddf6647ce89b17a8b001f80145ca9444d550e89984097",
+      "relocatedSha256": "8eea011f889bf8883afddf6647ce89b17a8b001f80145ca9444d550e89984097"
+    },
+    {
+      "from": "tmp_assets/07_ui/archive-v001/ui_joystick_base_v001.png",
+      "to": "../tmp_assets/07_ui/archive-v001/ui_joystick_base_v001.png",
+      "bytes": 891192,
+      "sha256": "1cd659b42b3d3a5f7aab7c22f0da0a4d9cff1362d5da9dd7c0053418c77338a5",
+      "relocatedSha256": "1cd659b42b3d3a5f7aab7c22f0da0a4d9cff1362d5da9dd7c0053418c77338a5"
+    },
+    {
+      "from": "tmp_assets/07_ui/archive-v001/ui_joystick_knob_v001.png",
+      "to": "../tmp_assets/07_ui/archive-v001/ui_joystick_knob_v001.png",
+      "bytes": 643686,
+      "sha256": "a294c3c82db3f2e5e97c36e27e51269eb850a942f583710d27638a292e4cd2be",
+      "relocatedSha256": "a294c3c82db3f2e5e97c36e27e51269eb850a942f583710d27638a292e4cd2be"
+    },
+    {
+      "from": "tmp_assets/07_ui/archive-v001/ui_legendary_crest_v001.png",
+      "to": "../tmp_assets/07_ui/archive-v001/ui_legendary_crest_v001.png",
+      "bytes": 724415,
+      "sha256": "d7530ce8f08d66a4dbdf0b68c37fe79d9da778b2eca6156f58638a0dcca2d735",
+      "relocatedSha256": "d7530ce8f08d66a4dbdf0b68c37fe79d9da778b2eca6156f58638a0dcca2d735"
+    },
+    {
+      "from": "tmp_assets/07_ui/archive-v001/ui_reward_card_v001.png",
+      "to": "../tmp_assets/07_ui/archive-v001/ui_reward_card_v001.png",
+      "bytes": 710775,
+      "sha256": "f531168dd7c15132332425c2d856f06b042e79d43b46ea8618fecf95d38616dd",
+      "relocatedSha256": "f531168dd7c15132332425c2d856f06b042e79d43b46ea8618fecf95d38616dd"
+    },
+    {
+      "from": "tmp_assets/07_ui/archive-v001/ui_victory_badge_v001.png",
+      "to": "../tmp_assets/07_ui/archive-v001/ui_victory_badge_v001.png",
+      "bytes": 711088,
+      "sha256": "da37d51c760ddc9182f216254702f906a8474b33e04559cecddcf61bc35c969d",
+      "relocatedSha256": "da37d51c760ddc9182f216254702f906a8474b33e04559cecddcf61bc35c969d"
+    },
+    {
+      "from": "tmp_assets/07_ui/generation-v002.json",
+      "to": "../tmp_assets/07_ui/generation-v002.json",
+      "bytes": 24682,
+      "sha256": "91edd0d04926f9c3711cdc7a37461e3f5054b8245bf51141d4892ccaf7ca7f77",
+      "relocatedSha256": "91edd0d04926f9c3711cdc7a37461e3f5054b8245bf51141d4892ccaf7ca7f77"
+    },
+    {
+      "from": "tmp_assets/07_ui/generation.json",
+      "to": "../tmp_assets/07_ui/generation.json",
+      "bytes": 24710,
+      "sha256": "942eacc4a16a50306639f31cec5886bc390a0ad308205dae3fef5509963bbd02",
+      "relocatedSha256": "942eacc4a16a50306639f31cec5886bc390a0ad308205dae3fef5509963bbd02"
+    },
+    {
+      "from": "tmp_assets/07_ui/review-v001.html",
+      "to": "../tmp_assets/07_ui/review-v001.html",
+      "bytes": 10744,
+      "sha256": "22cc76d77d8da6cd0a6be0c4065a6b3cb271d9da85d2a4c8ce155dc26f0e00ed",
+      "relocatedSha256": "22cc76d77d8da6cd0a6be0c4065a6b3cb271d9da85d2a4c8ce155dc26f0e00ed"
+    },
+    {
+      "from": "tmp_assets/07_ui/review-v002.html",
+      "to": "../tmp_assets/07_ui/review-v002.html",
+      "bytes": 6095,
+      "sha256": "7548207897cd6a5b1d186d3d077a898f0301e31028e6b5fc5635650fc2a64768",
+      "relocatedSha256": "7548207897cd6a5b1d186d3d077a898f0301e31028e6b5fc5635650fc2a64768"
+    },
+    {
+      "from": "tmp_assets/07_ui/ui_answer_field_v002.png",
+      "to": "../tmp_assets/07_ui/ui_answer_field_v002.png",
+      "bytes": 356118,
+      "sha256": "48e644462800de362ad8c592b7386b042307a54384c0be4d9208624aa0fe8b8e",
+      "relocatedSha256": "48e644462800de362ad8c592b7386b042307a54384c0be4d9208624aa0fe8b8e"
+    },
+    {
+      "from": "tmp_assets/07_ui/ui_button_icon_v002.png",
+      "to": "../tmp_assets/07_ui/ui_button_icon_v002.png",
+      "bytes": 504891,
+      "sha256": "15de9f8c8b2892edda968be3b3191177d1ac932368aa22571f9ed5908f2925c2",
+      "relocatedSha256": "15de9f8c8b2892edda968be3b3191177d1ac932368aa22571f9ed5908f2925c2"
+    },
+    {
+      "from": "tmp_assets/07_ui/ui_button_primary_v002.png",
+      "to": "../tmp_assets/07_ui/ui_button_primary_v002.png",
+      "bytes": 306378,
+      "sha256": "25185b77561d04e1a52914a48ad74cad0de2fc8e1d22d0893148e42948d33020",
+      "relocatedSha256": "25185b77561d04e1a52914a48ad74cad0de2fc8e1d22d0893148e42948d33020"
+    },
+    {
+      "from": "tmp_assets/07_ui/ui_button_secondary_v002.png",
+      "to": "../tmp_assets/07_ui/ui_button_secondary_v002.png",
+      "bytes": 299562,
+      "sha256": "f41ad986e8991575e761362ce3d44adb87bef1f00fdca4850eb18419345d0992",
+      "relocatedSha256": "f41ad986e8991575e761362ce3d44adb87bef1f00fdca4850eb18419345d0992"
+    },
+    {
+      "from": "tmp_assets/07_ui/ui_console_panel_v002.png",
+      "to": "../tmp_assets/07_ui/ui_console_panel_v002.png",
+      "bytes": 640738,
+      "sha256": "6dc4d23315c054a4ea2ffd6909b8e540e8751ff3268c08126cd22e4438ff42fd",
+      "relocatedSha256": "6dc4d23315c054a4ea2ffd6909b8e540e8751ff3268c08126cd22e4438ff42fd"
+    },
+    {
+      "from": "tmp_assets/07_ui/ui_defeat_badge_v002.png",
+      "to": "../tmp_assets/07_ui/ui_defeat_badge_v002.png",
+      "bytes": 684540,
+      "sha256": "c792ee3d5c4d1c7a3bdc887b80e529b090223e8b0cf5a2f6ce207bd1253a2701",
+      "relocatedSha256": "c792ee3d5c4d1c7a3bdc887b80e529b090223e8b0cf5a2f6ce207bd1253a2701"
+    },
+    {
+      "from": "tmp_assets/07_ui/ui_hud_bar_v002.png",
+      "to": "../tmp_assets/07_ui/ui_hud_bar_v002.png",
+      "bytes": 197677,
+      "sha256": "1376fc80235ba95135c12ec697c70032db1f0c0591ea3b0e5441c6bdc0a3c53d",
+      "relocatedSha256": "1376fc80235ba95135c12ec697c70032db1f0c0591ea3b0e5441c6bdc0a3c53d"
+    },
+    {
+      "from": "tmp_assets/07_ui/ui_inset_panel_v002.png",
+      "to": "../tmp_assets/07_ui/ui_inset_panel_v002.png",
+      "bytes": 463384,
+      "sha256": "6eb8321e389b69ccb9a060633f9d967675d994c8a21e1f2a06783fa85ac28720",
+      "relocatedSha256": "6eb8321e389b69ccb9a060633f9d967675d994c8a21e1f2a06783fa85ac28720"
+    },
+    {
+      "from": "tmp_assets/07_ui/ui_item_slot_v002.png",
+      "to": "../tmp_assets/07_ui/ui_item_slot_v002.png",
+      "bytes": 566360,
+      "sha256": "fe399b6b7e3e133f06f47f39b756306ff2af4bf93bdff7c4d3a617619e6a3169",
+      "relocatedSha256": "fe399b6b7e3e133f06f47f39b756306ff2af4bf93bdff7c4d3a617619e6a3169"
+    },
+    {
+      "from": "tmp_assets/07_ui/ui_joystick_base_v002.png",
+      "to": "../tmp_assets/07_ui/ui_joystick_base_v002.png",
+      "bytes": 835515,
+      "sha256": "a9d73094aae40a538dc54874a8e9ff123b9a8b63bc85bdf3ce6e9087d0a0061d",
+      "relocatedSha256": "a9d73094aae40a538dc54874a8e9ff123b9a8b63bc85bdf3ce6e9087d0a0061d"
+    },
+    {
+      "from": "tmp_assets/07_ui/ui_joystick_knob_v002.png",
+      "to": "../tmp_assets/07_ui/ui_joystick_knob_v002.png",
+      "bytes": 471647,
+      "sha256": "e39018c67a57fc2eef35849efc811042b6bd71b964109b17eb512465fa6435e6",
+      "relocatedSha256": "e39018c67a57fc2eef35849efc811042b6bd71b964109b17eb512465fa6435e6"
+    },
+    {
+      "from": "tmp_assets/07_ui/ui_legendary_crest_v002.png",
+      "to": "../tmp_assets/07_ui/ui_legendary_crest_v002.png",
+      "bytes": 564172,
+      "sha256": "5969f090b6bc1368c099431315e88b49f46c976d13c378c5d6cb709d6cad20b0",
+      "relocatedSha256": "5969f090b6bc1368c099431315e88b49f46c976d13c378c5d6cb709d6cad20b0"
+    },
+    {
+      "from": "tmp_assets/07_ui/ui_reward_card_v002.png",
+      "to": "../tmp_assets/07_ui/ui_reward_card_v002.png",
+      "bytes": 645858,
+      "sha256": "1eca28e1ca8c7fb6ee0e2bca5b785b796161d35f64b8b01558027ee49cda7641",
+      "relocatedSha256": "1eca28e1ca8c7fb6ee0e2bca5b785b796161d35f64b8b01558027ee49cda7641"
+    },
+    {
+      "from": "tmp_assets/07_ui/ui_victory_badge_v002.png",
+      "to": "../tmp_assets/07_ui/ui_victory_badge_v002.png",
+      "bytes": 560568,
+      "sha256": "b3683b192d4e3fb4b9b48f3212d7808fb8926d8fe7ae7c062a82a8cd48112b87",
+      "relocatedSha256": "b3683b192d4e3fb4b9b48f3212d7808fb8926d8fe7ae7c062a82a8cd48112b87"
+    },
+    {
+      "from": "tmp_assets/09_previews/marine_twin_rail_held_v001.json",
+      "to": "../tmp_assets/09_previews/marine_twin_rail_held_v001.json",
+      "bytes": 2543,
+      "sha256": "b707efb74ab748cd5473ebd3281ddb15b9027f400f210a804c141f42fbbfff06",
+      "relocatedSha256": "b707efb74ab748cd5473ebd3281ddb15b9027f400f210a804c141f42fbbfff06"
+    },
+    {
+      "from": "tmp_assets/09_previews/marine_twin_rail_held_v001.png",
+      "to": "../tmp_assets/09_previews/marine_twin_rail_held_v001.png",
+      "bytes": 1207795,
+      "sha256": "f3d5d4a02fd4c42c5a3534036a7d79b320462ba43c97c6414e5efe88d96d7ff1",
+      "relocatedSha256": "f3d5d4a02fd4c42c5a3534036a7d79b320462ba43c97c6414e5efe88d96d7ff1"
+    },
+    {
+      "from": "tmp_assets/ART_DECISIONS.md",
+      "to": "../tmp_assets/ART_DECISIONS.md",
+      "bytes": 3166,
+      "sha256": "0c6893ac2770d4c26ad4e6f8038a244d122ca97a6248b459ea5af86fb0c51d8e",
+      "relocatedSha256": "0c6893ac2770d4c26ad4e6f8038a244d122ca97a6248b459ea5af86fb0c51d8e"
+    },
+    {
+      "from": "tmp_assets/README.md",
+      "to": "../tmp_assets/README.md",
+      "bytes": 2124,
+      "sha256": "9d0f6abcd94f47c4445ebd0aa0be472ecc3488a64f01796f8393aa14faf8f708",
+      "relocatedSha256": "37b3ddfd69558a96ecb36bd3277d9f3872b133be1d24fa4f69666fc8b4ecc4ab"
+    }
+  ]
+}

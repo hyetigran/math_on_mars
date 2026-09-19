@@ -1,0 +1,9 @@
+{
+  "status": "selected",
+  "mode": "built-in imagegen edit",
+  "references": [
+    "/Users/tig/Desktop/tigran/mathonmars/../tmp_assets/03_characters/enemies/overmind/overmind_mantle_v006_floppy_nub_source.png",
+    "/Users/tig/Desktop/tigran/mathonmars/../tmp_assets/02_screens/splash/math_on_mars_splash_v003_confrontation_source.png"
+  ],
+  "prompt": "Update the standalone Overmind character in IMAGE 1 to have the muscular build of the giant magenta boss in IMAGE 2 splash. Output ONE isolated full-body front-facing boss game character, square canvas, solid bright blue background. Give him much broader raised rounded deltoid shoulders, thick powerful upper arms tapering into heavy smooth forearms, broad chest and narrower central waist. Sculpt these as simple connected magenta slime masses with a few dark navy curved contour lines, matching the splash's muscular silhouette. Arms at his sides, no human fingers, no legs or bodybuilding veins. Smooth broad slime base. Preserve the exact identity: magenta body, dark angry eyes and small smile, hexagonal pale yellow reactor with cyan hexagonal center, golden three-rounded-point crown snug on forehead just above eyes, and ONE floppy magenta nub behind crown bending left. Crown remains low on head. Symmetrical frontal orientation apart from floppy nub. Entire character visible with generous margins. Flat uniform color fills, bold navy outlines, absolutely no glare, shadow bands, gradients, highlights or texture. Convey muscles by silhouette and only a few contour lines, not lighting. No other characters, landscape, title, labels or effects. This is the revised muscular standalone model sheet, not a splash scene."
+}

@@ -222,11 +222,11 @@ Use all three references, with a distinct purpose for each:
 
 | Reference | What it guides |
 |---|---|
-| [Backwoods screenshots](/Users/tig/Desktop/tigran/mathonmars/references/backwoods/) | Arena and future hub composition, relative character scale, enemy readability, environmental detail, and combat HUD placement |
+| [Backwoods screenshots](/Users/tig/Desktop/tigran/mathonmars/../tmp_assets/unused/references/backwoods/) | Arena and future hub composition, relative character scale, enemy readability, environmental detail, and combat HUD placement |
 | Goblin Gutter | Established smooth chibi rendering, outline weight, cel shading, camera/view consistency, and animation conventions |
 | Quizcaster screenshots | Math-question layout, upgrade selection, progress indicators, and the menu structure for future subjects |
 
-The ten supplied Backwoods screenshots are preserved with their original filenames in [references/backwoods/](/Users/tig/Desktop/tigran/mathonmars/references/backwoods/), copied unchanged from `/Users/tig/Desktop/gauntlet/goblin-gutter/backwoods_ref/`. The set contains `gameplay_1.png` through `gameplay_3.png`, `post_wave_shop_1.png` and `post_wave_shop_2.png`, `base_camp_1.png` and `base_camp_2.png`, `level_selection.png`, `level_selection_locked.png`, and `splash_screen.jpg`. Use these project-local copies for reference review and the Math on Mars reference sheet.
+The ten supplied Backwoods screenshots are preserved with their original filenames in [../tmp_assets/unused/references/backwoods/](/Users/tig/Desktop/tigran/mathonmars/../tmp_assets/unused/references/backwoods/), copied unchanged from `/Users/tig/Desktop/gauntlet/goblin-gutter/backwoods_ref/`. The set contains `gameplay_1.png` through `gameplay_3.png`, `post_wave_shop_1.png` and `post_wave_shop_2.png`, `base_camp_1.png` and `base_camp_2.png`, `level_selection.png`, `level_selection_locked.png`, and `splash_screen.jpg`. Use these project-local copies for reference review and the Math on Mars reference sheet.
 
 Translate these references into one consistent science-fiction style. Backwoods supplies spatial composition and readability; Goblin Gutter supplies rendering continuity; Quizcaster supplies the educational interaction layout. Their pictured mechanics, fantasy scenery, and pixel treatment do not override this document's gameplay or art requirements. A future hub composition reference does not bring the hub into launch scope.
 

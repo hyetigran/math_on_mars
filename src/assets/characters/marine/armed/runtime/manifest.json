@@ -1,0 +1,418 @@
+[
+  {
+    "key": "idle-n",
+    "direction": "n",
+    "state": "idle",
+    "frameWidth": 192,
+    "frameHeight": 192,
+    "frameCount": 30,
+    "fps": 15,
+    "pivot": {
+      "x": 0.5,
+      "y": 0.8182299359467653
+    }
+  },
+  {
+    "key": "run-n",
+    "direction": "n",
+    "state": "run",
+    "frameWidth": 192,
+    "frameHeight": 192,
+    "frameCount": 10,
+    "fps": 15,
+    "pivot": {
+      "x": 0.5,
+      "y": 0.8182299359467653
+    }
+  },
+  {
+    "key": "attack-n",
+    "direction": "n",
+    "state": "attack",
+    "frameWidth": 192,
+    "frameHeight": 192,
+    "frameCount": 10,
+    "fps": 15,
+    "pivot": {
+      "x": 0.5,
+      "y": 0.8182299359467653
+    }
+  },
+  {
+    "key": "run-attack-n",
+    "direction": "n",
+    "state": "run-attack",
+    "frameWidth": 192,
+    "frameHeight": 192,
+    "frameCount": 10,
+    "fps": 15,
+    "pivot": {
+      "x": 0.5,
+      "y": 0.8182299359467653
+    }
+  },
+  {
+    "key": "idle-ne",
+    "direction": "ne",
+    "state": "idle",
+    "frameWidth": 192,
+    "frameHeight": 192,
+    "frameCount": 30,
+    "fps": 15,
+    "pivot": {
+      "x": 0.5,
+      "y": 0.8182299359467653
+    }
+  },
+  {
+    "key": "run-ne",
+    "direction": "ne",
+    "state": "run",
+    "frameWidth": 192,
+    "frameHeight": 192,
+    "frameCount": 10,
+    "fps": 15,
+    "pivot": {
+      "x": 0.5,
+      "y": 0.8182299359467653
+    }
+  },
+  {
+    "key": "attack-ne",
+    "direction": "ne",
+    "state": "attack",
+    "frameWidth": 192,
+    "frameHeight": 192,
+    "frameCount": 10,
+    "fps": 15,
+    "pivot": {
+      "x": 0.5,
+      "y": 0.8182299359467653
+    }
+  },
+  {
+    "key": "run-attack-ne",
+    "direction": "ne",
+    "state": "run-attack",
+    "frameWidth": 192,
+    "frameHeight": 192,
+    "frameCount": 10,
+    "fps": 15,
+    "pivot": {
+      "x": 0.5,
+      "y": 0.8182299359467653
+    }
+  },
+  {
+    "key": "idle-e",
+    "direction": "e",
+    "state": "idle",
+    "frameWidth": 192,
+    "frameHeight": 192,
+    "frameCount": 30,
+    "fps": 15,
+    "pivot": {
+      "x": 0.5,
+      "y": 0.8182299359467653
+    }
+  },
+  {
+    "key": "run-e",
+    "direction": "e",
+    "state": "run",
+    "frameWidth": 192,
+    "frameHeight": 192,
+    "frameCount": 10,
+    "fps": 15,
+    "pivot": {
+      "x": 0.5,
+      "y": 0.8182299359467653
+    }
+  },
+  {
+    "key": "attack-e",
+    "direction": "e",
+    "state": "attack",
+    "frameWidth": 192,
+    "frameHeight": 192,
+    "frameCount": 10,
+    "fps": 15,
+    "pivot": {
+      "x": 0.5,
+      "y": 0.8182299359467653
+    }
+  },
+  {
+    "key": "run-attack-e",
+    "direction": "e",
+    "state": "run-attack",
+    "frameWidth": 192,
+    "frameHeight": 192,
+    "frameCount": 10,
+    "fps": 15,
+    "pivot": {
+      "x": 0.5,
+      "y": 0.8182299359467653
+    }
+  },
+  {
+    "key": "idle-se",
+    "direction": "se",
+    "state": "idle",
+    "frameWidth": 192,
+    "frameHeight": 192,
+    "frameCount": 30,
+    "fps": 15,
+    "pivot": {
+      "x": 0.5,
+      "y": 0.8182299359467653
+    }
+  },
+  {
+    "key": "run-se",
+    "direction": "se",
+    "state": "run",
+    "frameWidth": 192,
+    "frameHeight": 192,
+    "frameCount": 10,
+    "fps": 15,
+    "pivot": {
+      "x": 0.5,
+      "y": 0.8182299359467653
+    }
+  },
+  {
+    "key": "attack-se",
+    "direction": "se",
+    "state": "attack",
+    "frameWidth": 192,
+    "frameHeight": 192,
+    "frameCount": 10,
+    "fps": 15,
+    "pivot": {
+      "x": 0.5,
+      "y": 0.8182299359467653
+    }
+  },
+  {
+    "key": "run-attack-se",
+    "direction": "se",
+    "state": "run-attack",
+    "frameWidth": 192,
+    "frameHeight": 192,
+    "frameCount": 10,
+    "fps": 15,
+    "pivot": {
+      "x": 0.5,
+      "y": 0.8182299359467653
+    }
+  },
+  {
+    "key": "idle-s",
+    "direction": "s",
+    "state": "idle",
+    "frameWidth": 192,
+    "frameHeight": 192,
+    "frameCount": 30,
+    "fps": 15,
+    "pivot": {
+      "x": 0.5,
+      "y": 0.8182299359467653
+    }
+  },
+  {
+    "key": "run-s",
+    "direction": "s",
+    "state": "run",
+    "frameWidth": 192,
+    "frameHeight": 192,
+    "frameCount": 10,
+    "fps": 15,
+    "pivot": {
+      "x": 0.5,
+      "y": 0.8182299359467653
+    }
+  },
+  {
+    "key": "attack-s",
+    "direction": "s",
+    "state": "attack",
+    "frameWidth": 192,
+    "frameHeight": 192,
+    "frameCount": 10,
+    "fps": 15,
+    "pivot": {
+      "x": 0.5,
+      "y": 0.8182299359467653
+    }
+  },
+  {
+    "key": "run-attack-s",
+    "direction": "s",
+    "state": "run-attack",
+    "frameWidth": 192,
+    "frameHeight": 192,
+    "frameCount": 10,
+    "fps": 15,
+    "pivot": {
+      "x": 0.5,
+      "y": 0.8182299359467653
+    }
+  },
+  {
+    "key": "idle-sw",
+    "direction": "sw",
+    "state": "idle",
+    "frameWidth": 192,
+    "frameHeight": 192,
+    "frameCount": 30,
+    "fps": 15,
+    "pivot": {
+      "x": 0.5,
+      "y": 0.8182299359467653
+    }
+  },
+  {
+    "key": "run-sw",
+    "direction": "sw",
+    "state": "run",
+    "frameWidth": 192,
+    "frameHeight": 192,
+    "frameCount": 10,
+    "fps": 15,
+    "pivot": {
+      "x": 0.5,
+      "y": 0.8182299359467653
+    }
+  },
+  {
+    "key": "attack-sw",
+    "direction": "sw",
+    "state": "attack",
+    "frameWidth": 192,
+    "frameHeight": 192,
+    "frameCount": 10,
+    "fps": 15,
+    "pivot": {
+      "x": 0.5,
+      "y": 0.8182299359467653
+    }
+  },
+  {
+    "key": "run-attack-sw",
+    "direction": "sw",
+    "state": "run-attack",
+    "frameWidth": 192,
+    "frameHeight": 192,
+    "frameCount": 10,
+    "fps": 15,
+    "pivot": {
+      "x": 0.5,
+      "y": 0.8182299359467653
+    }
+  },
+  {
+    "key": "idle-w",
+    "direction": "w",
+    "state": "idle",
+    "frameWidth": 192,
+    "frameHeight": 192,
+    "frameCount": 30,
+    "fps": 15,
+    "pivot": {
+      "x": 0.5,
+      "y": 0.8182299359467653
+    }
+  },
+  {
+    "key": "run-w",
+    "direction": "w",
+    "state": "run",
+    "frameWidth": 192,
+    "frameHeight": 192,
+    "frameCount": 10,
+    "fps": 15,
+    "pivot": {
+      "x": 0.5,
+      "y": 0.8182299359467653
+    }
+  },
+  {
+    "key": "attack-w",
+    "direction": "w",
+    "state": "attack",
+    "frameWidth": 192,
+    "frameHeight": 192,
+    "frameCount": 10,
+    "fps": 15,
+    "pivot": {
+      "x": 0.5,
+      "y": 0.8182299359467653
+    }
+  },
+  {
+    "key": "run-attack-w",
+    "direction": "w",
+    "state": "run-attack",
+    "frameWidth": 192,
+    "frameHeight": 192,
+    "frameCount": 10,
+    "fps": 15,
+    "pivot": {
+      "x": 0.5,
+      "y": 0.8182299359467653
+    }
+  },
+  {
+    "key": "idle-nw",
+    "direction": "nw",
+    "state": "idle",
+    "frameWidth": 192,
+    "frameHeight": 192,
+    "frameCount": 30,
+    "fps": 15,
+    "pivot": {
+      "x": 0.5,
+      "y": 0.8182299359467653
+    }
+  },
+  {
+    "key": "run-nw",
+    "direction": "nw",
+    "state": "run",
+    "frameWidth": 192,
+    "frameHeight": 192,
+    "frameCount": 10,
+    "fps": 15,
+    "pivot": {
+      "x": 0.5,
+      "y": 0.8182299359467653
+    }
+  },
+  {
+    "key": "attack-nw",
+    "direction": "nw",
+    "state": "attack",
+    "frameWidth": 192,
+    "frameHeight": 192,
+    "frameCount": 10,
+    "fps": 15,
+    "pivot": {
+      "x": 0.5,
+      "y": 0.8182299359467653
+    }
+  },
+  {
+    "key": "run-attack-nw",
+    "direction": "nw",
+    "state": "run-attack",
+    "frameWidth": 192,
+    "frameHeight": 192,
+    "frameCount": 10,
+    "fps": 15,
+    "pivot": {
+      "x": 0.5,
+      "y": 0.8182299359467653
+    }
+  }
+]

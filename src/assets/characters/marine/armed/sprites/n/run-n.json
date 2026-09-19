@@ -1,0 +1,34 @@
+{
+  "name": "run-n",
+  "direction": "n",
+  "motion": "run",
+  "image": "run-n.png",
+  "frameWidth": 512,
+  "frameHeight": 512,
+  "columns": 5,
+  "rows": 2,
+  "frameCount": 10,
+  "fps": 15,
+  "durationSeconds": 0.6666666865348816,
+  "loop": true,
+  "endpointExcluded": true,
+  "pivot": {
+    "x": 512,
+    "y": 837.8674544094877
+  },
+  "sourceModel": "../../../marine-v005/animations/running.glb",
+  "sourceClip": "Armature|running|baselayer",
+  "loadout": "dual-pistols-prototype",
+  "camera": {
+    "projection": "orthographic",
+    "elevationDegrees": 30,
+    "characterYawDegrees": 180
+  },
+  "loopQa": {
+    "seamDelta": 0.022213,
+    "medianStepDelta": 0.025968,
+    "seamToMedianRatio": 0.855,
+    "passThreshold": 1.5,
+    "pass": true
+  }
+}

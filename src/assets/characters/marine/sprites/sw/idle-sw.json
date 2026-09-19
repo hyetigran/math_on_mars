@@ -1,0 +1,42 @@
+{
+  "name": "idle-sw",
+  "direction": "sw",
+  "image": "idle-sw.png",
+  "frameWidth": 512,
+  "frameHeight": 512,
+  "columns": 1,
+  "rows": 1,
+  "frameCount": 1,
+  "fps": 15,
+  "durationSeconds": 0,
+  "loop": false,
+  "endpointExcluded": false,
+  "pivot": {
+    "x": 256,
+    "y": 418.93,
+    "normalizedX": 0.5,
+    "normalizedY": 0.81823,
+    "meaning": "fixed world origin at ground level"
+  },
+  "sourceModel": "../../source/rigged/character-rigged-1789585407607.glb",
+  "sourceClip": "model-bind-pose",
+  "poseCorrections": {
+    "armStabilization": 0,
+    "neutralPose": "model bind pose",
+    "armOffsets": {},
+    "staticPose": true,
+    "proceduralMotion": null
+  },
+  "camera": {
+    "projection": "orthographic",
+    "elevationDegrees": 30,
+    "characterYawDegrees": 315,
+    "facingConvention": "Yaw 315 renders southwest for marine-v005"
+  },
+  "loopQa": {
+    "seamDelta": 0,
+    "medianStepDelta": 0,
+    "seamToMedianRatio": 0,
+    "pass": true
+  }
+}

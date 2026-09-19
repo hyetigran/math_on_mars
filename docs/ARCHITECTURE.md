@@ -163,7 +163,7 @@ Progression exposes preview and apply operations using the same validation path.
 |---|---|
 | Combat pickup | Add the fixed instance and auto-equip a new type only with a free slot, as one in-memory step. Persist in the next periodic checkpoint or wave-clear transaction; no per-pickup IDB write/freeze |
 | Normal merge | Consume two selected matching type/tier instances below purple; create one next-tier instance; replace an equipped ingredient in its existing slot when applicable |
-| Legendary forge | Consume exactly one selected purple of each of the five types; create Omni; reconcile active references/order; set the once-per-run flag and receipt |
+| Legendary forge | Consume exactly one selected purple of each of the five types; create Omni; reconcile active ../tmp_assets/unused/references/order; set the once-per-run flag and receipt |
 | Equip/reorder | Update ordered references to owned instances within capacity; preserve all reserve ownership |
 | Sell ammo | Require unequipped, sellable ammo; remove the selected instance and add salvage together |
 | Buy Ammo Expander | Validate capacity and offer; spend salvage; increment purchases once; invalidate and replace capped expander offers once |
@@ -265,7 +265,7 @@ The combat view positions one separate Pulse Blaster sprite at the marine's shou
 
 Use the PRD's visual authority order: Backwoods for spatial composition/readability, Goblin Gutter for smooth rendering/animation, and Quizcaster for educational layout. After approval, the Math on Mars reference sheet resolves visual conflicts. The sheet is not yet created or approved. Future hub imagery does not add a hub to launch scope.
 
-The ten original Backwoods screenshots are preserved in [references/backwoods/](/Users/tig/Desktop/tigran/mathonmars/references/backwoods/); the PRD's reference section lists their filenames and source folder. Use these local copies alongside [references/quizcaster/](/Users/tig/Desktop/tigran/mathonmars/references/quizcaster/) during visual review. Reference images are development inputs and stay outside the shipped runtime asset bundle.
+The ten original Backwoods screenshots are preserved in [../tmp_assets/unused/references/backwoods/](/Users/tig/Desktop/tigran/mathonmars/../tmp_assets/unused/references/backwoods/); the PRD's reference section lists their filenames and source folder. Use these local copies alongside [../tmp_assets/unused/references/quizcaster/](/Users/tig/Desktop/tigran/mathonmars/../tmp_assets/unused/references/quizcaster/) during visual review. Reference images are development inputs and stay outside the shipped runtime asset bundle.
 
 Math screens render explicit Check and Replay controls with visible focus; the correction round also offers help/explanation. Initial wrong answers advance, and initial items cannot be skipped. Keypad and physical keys route through the same input parser. Fractions have labeled numerator/denominator fields; decimal entry has an explicit decimal key. Use text labels and pips for module quality, T1–T4 for ammo, and a separate capacity indicator. Do not bake labels into generated UI frames. Keep countdown animation and decorative effects away from the answer field.
 
@@ -317,9 +317,9 @@ Pin content, balance, simulation-rule, reward-rule, and asset-manifest versions 
 
 **12. Planned repository layout**
 
-All planning documents are stored in `docs/`: `GAME_PLAN.md` is the PRD, this file describes architecture, the older prompt pack and screen-reference notes retain reference material with supersession notices, and `DESIGN_VALIDATION.md` with `design_checks.py` preserves historical calculations rather than current quiz acceptance checks. Keep future planning documents in `docs/` as well. Reference images remain under repository-root `references/` and are not runtime assets. Paths inside copyable prompts are relative to the repository root.
+All planning documents are stored in `docs/`: `GAME_PLAN.md` is the PRD, this file describes architecture, the older prompt pack and screen-reference notes retain reference material with supersession notices, and `DESIGN_VALIDATION.md` with `design_checks.py` preserves historical calculations rather than current quiz acceptance checks. Keep future planning documents in `docs/` as well. Reference images remain under repository-root `../tmp_assets/unused/references/` and are not runtime assets. Paths inside copyable prompts are relative to the repository root.
 
-`docs/` and `references/` below exist today; `src/`, content/build directories, and tests are the proposed implementation layout. Keep rule tests next to the Module they exercise; browser journeys and cross-Module fixtures live under `tests/`.
+`docs/` and `../tmp_assets/unused/references/` below exist today; `src/`, content/build directories, and tests are the proposed implementation layout. Keep rule tests next to the Module they exercise; browser journeys and cross-Module fixtures live under `tests/`.
 
 ```text
 docs/
@@ -361,8 +361,8 @@ tests/
   fixtures/                    # versioned saves, seeds, validated boundary items
   integration/                 # command/persistence failure and migration cases
   browser/                     # desktop/mobile layouts, input, audio, resume, offline
-references/backwoods/          # ten preserved Backwoods screenshots
-references/quizcaster/         # existing preserved screenshots
+../tmp_assets/unused/references/backwoods/          # ten preserved Backwoods screenshots
+../tmp_assets/unused/references/quizcaster/         # existing preserved screenshots
 ```
 
 Keep balance values in `content/balance`, validated instructional data in `content/reviewed`, and runtime schemas with their owning Modules. This document defines boundaries and invariants; avoid copying every table of tuning values from the PRD into another specification. The build must copy only installed runtime assets and validated compiled packs into the distributable output.

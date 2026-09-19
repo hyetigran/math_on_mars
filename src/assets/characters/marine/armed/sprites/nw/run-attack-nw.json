@@ -1,0 +1,138 @@
+{
+  "name": "run-attack-nw",
+  "direction": "nw",
+  "motion": "run-attack",
+  "image": "run-attack-nw.png",
+  "frameWidth": 512,
+  "frameHeight": 512,
+  "columns": 5,
+  "rows": 2,
+  "frameCount": 10,
+  "fps": 15,
+  "durationSeconds": 0.6666666865348816,
+  "loop": true,
+  "endpointExcluded": true,
+  "pivot": {
+    "x": 512,
+    "y": 837.8674544094877
+  },
+  "sourceModel": "../../../marine-v005/animations/running.glb",
+  "sourceClip": "Armature|running|baselayer+procedural-dual-pistol-recoil",
+  "loadout": "dual-pistols-prototype",
+  "camera": {
+    "projection": "orthographic",
+    "elevationDegrees": 30,
+    "characterYawDegrees": 225
+  },
+  "loopQa": {
+    "purpose": "loop-seam",
+    "seamDelta": 0.031373,
+    "medianStepDelta": 0.036439,
+    "seamToMedianRatio": 0.861,
+    "passThreshold": 1.5,
+    "pass": true
+  },
+  "fireFrame": 1,
+  "muzzlePivots": [
+    {
+      "right": {
+        "x": 0.340967,
+        "y": 0.338319
+      },
+      "left": {
+        "x": 0.230669,
+        "y": 0.382349
+      }
+    },
+    {
+      "right": {
+        "x": 0.346842,
+        "y": 0.334165
+      },
+      "left": {
+        "x": 0.242544,
+        "y": 0.376667
+      }
+    },
+    {
+      "right": {
+        "x": 0.360412,
+        "y": 0.326258
+      },
+      "left": {
+        "x": 0.255074,
+        "y": 0.367831
+      }
+    },
+    {
+      "right": {
+        "x": 0.365496,
+        "y": 0.332306
+      },
+      "left": {
+        "x": 0.252053,
+        "y": 0.374836
+      }
+    },
+    {
+      "right": {
+        "x": 0.353133,
+        "y": 0.343395
+      },
+      "left": {
+        "x": 0.253248,
+        "y": 0.381413
+      }
+    },
+    {
+      "right": {
+        "x": 0.336469,
+        "y": 0.341743
+      },
+      "left": {
+        "x": 0.249763,
+        "y": 0.381202
+      }
+    },
+    {
+      "right": {
+        "x": 0.336047,
+        "y": 0.333417
+      },
+      "left": {
+        "x": 0.240129,
+        "y": 0.373563
+      }
+    },
+    {
+      "right": {
+        "x": 0.33762,
+        "y": 0.324912
+      },
+      "left": {
+        "x": 0.242679,
+        "y": 0.369882
+      }
+    },
+    {
+      "right": {
+        "x": 0.348642,
+        "y": 0.334538
+      },
+      "left": {
+        "x": 0.248629,
+        "y": 0.375622
+      }
+    },
+    {
+      "right": {
+        "x": 0.360539,
+        "y": 0.339687
+      },
+      "left": {
+        "x": 0.237811,
+        "y": 0.379298
+      }
+    }
+  ]
+}

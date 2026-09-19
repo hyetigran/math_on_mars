@@ -1,0 +1,450 @@
+[
+  {
+    "id": "ammo_electric_chain",
+    "source": "items/ammo/ammo_electric_chain.png",
+    "runtime": "items/ammo/runtime/ammo_electric_chain.webp",
+    "crop": {
+      "left": 281,
+      "top": 55,
+      "width": 690,
+      "height": 1161
+    },
+    "width": 152,
+    "height": 256,
+    "bytes": 13244
+  },
+  {
+    "id": "ammo_fiery",
+    "source": "items/ammo/ammo_fiery.png",
+    "runtime": "items/ammo/runtime/ammo_fiery.webp",
+    "crop": {
+      "left": 266,
+      "top": 51,
+      "width": 725,
+      "height": 1149
+    },
+    "width": 162,
+    "height": 256,
+    "bytes": 13492
+  },
+  {
+    "id": "ammo_frost",
+    "source": "items/ammo/ammo_frost.png",
+    "runtime": "items/ammo/runtime/ammo_frost.webp",
+    "crop": {
+      "left": 284,
+      "top": 57,
+      "width": 688,
+      "height": 1157
+    },
+    "width": 152,
+    "height": 256,
+    "bytes": 13890
+  },
+  {
+    "id": "ammo_legendary_omni",
+    "source": "items/ammo/ammo_legendary_omni.png",
+    "runtime": "items/ammo/runtime/ammo_legendary_omni.webp",
+    "crop": {
+      "left": 225,
+      "top": 24,
+      "width": 832,
+      "height": 1212
+    },
+    "width": 176,
+    "height": 256,
+    "bytes": 21942
+  },
+  {
+    "id": "ammo_multi_shot",
+    "source": "items/ammo/ammo_multi_shot.png",
+    "runtime": "items/ammo/runtime/ammo_multi_shot.webp",
+    "crop": {
+      "left": 84,
+      "top": 53,
+      "width": 1094,
+      "height": 1163
+    },
+    "width": 241,
+    "height": 256,
+    "bytes": 19130
+  },
+  {
+    "id": "ammo_piercing",
+    "source": "items/ammo/ammo_piercing.png",
+    "runtime": "items/ammo/runtime/ammo_piercing.webp",
+    "crop": {
+      "left": 396,
+      "top": 37,
+      "width": 463,
+      "height": 1171
+    },
+    "width": 101,
+    "height": 256,
+    "bytes": 10476
+  },
+  {
+    "id": "trinket_ammo_expander",
+    "source": "items/trinkets/trinket_ammo_expander.png",
+    "runtime": "items/trinkets/runtime/trinket_ammo_expander.webp",
+    "crop": {
+      "left": 75,
+      "top": 123,
+      "width": 1104,
+      "height": 1022
+    },
+    "width": 256,
+    "height": 237,
+    "bytes": 20212
+  },
+  {
+    "id": "trinket_med_service_module",
+    "source": "items/trinkets/trinket_med_service_module.png",
+    "runtime": "items/trinkets/runtime/trinket_med_service_module.webp",
+    "crop": {
+      "left": 109,
+      "top": 67,
+      "width": 1068,
+      "height": 1129
+    },
+    "width": 242,
+    "height": 256,
+    "bytes": 16822
+  },
+  {
+    "id": "trinket_overclock_chip",
+    "source": "items/trinkets/trinket_overclock_chip.png",
+    "runtime": "items/trinkets/runtime/trinket_overclock_chip.webp",
+    "crop": {
+      "left": 44,
+      "top": 137,
+      "width": 1195,
+      "height": 963
+    },
+    "width": 256,
+    "height": 206,
+    "bytes": 16730
+  },
+  {
+    "id": "trinket_salvage_module",
+    "source": "items/trinkets/trinket_salvage_module.png",
+    "runtime": "items/trinkets/runtime/trinket_salvage_module.webp",
+    "crop": {
+      "left": 207,
+      "top": 80,
+      "width": 868,
+      "height": 1100
+    },
+    "width": 202,
+    "height": 256,
+    "bytes": 15234
+  },
+  {
+    "id": "trinket_shield_capacitor",
+    "source": "items/trinkets/trinket_shield_capacitor.png",
+    "runtime": "items/trinkets/runtime/trinket_shield_capacitor.webp",
+    "crop": {
+      "left": 206,
+      "top": 55,
+      "width": 844,
+      "height": 1119
+    },
+    "width": 193,
+    "height": 256,
+    "bytes": 14684
+  },
+  {
+    "id": "trinket_targeting_module",
+    "source": "items/trinkets/trinket_targeting_module.png",
+    "runtime": "items/trinkets/runtime/trinket_targeting_module.webp",
+    "crop": {
+      "left": 146,
+      "top": 79,
+      "width": 994,
+      "height": 1104
+    },
+    "width": 230,
+    "height": 256,
+    "bytes": 21218
+  },
+  {
+    "id": "trinket_thruster_coupler",
+    "source": "items/trinkets/trinket_thruster_coupler.png",
+    "runtime": "items/trinkets/runtime/trinket_thruster_coupler.webp",
+    "crop": {
+      "left": 25,
+      "top": 141,
+      "width": 1208,
+      "height": 953
+    },
+    "width": 256,
+    "height": 202,
+    "bytes": 17028
+  },
+  {
+    "id": "med_gel",
+    "source": "items/healing_loot/med_gel.png",
+    "runtime": "items/healing_loot/runtime/med_gel.webp",
+    "crop": {
+      "left": 161,
+      "top": 48,
+      "width": 933,
+      "height": 1155
+    },
+    "width": 207,
+    "height": 256,
+    "bytes": 16690
+  },
+  {
+    "id": "med_kit",
+    "source": "items/healing_loot/med_kit.png",
+    "runtime": "items/healing_loot/runtime/med_kit.webp",
+    "crop": {
+      "left": 49,
+      "top": 237,
+      "width": 1158,
+      "height": 785
+    },
+    "width": 256,
+    "height": 174,
+    "bytes": 14524
+  },
+  {
+    "id": "salvage_bundle",
+    "source": "items/healing_loot/salvage_bundle.png",
+    "runtime": "items/healing_loot/runtime/salvage_bundle.webp",
+    "crop": {
+      "left": 116,
+      "top": 141,
+      "width": 1032,
+      "height": 992
+    },
+    "width": 256,
+    "height": 246,
+    "bytes": 12356
+  },
+  {
+    "id": "supply_cache_closed",
+    "source": "items/healing_loot/supply_cache_closed.png",
+    "runtime": "items/healing_loot/runtime/supply_cache_closed.webp",
+    "crop": {
+      "left": 55,
+      "top": 345,
+      "width": 1149,
+      "height": 804
+    },
+    "width": 256,
+    "height": 179,
+    "bytes": 14648
+  },
+  {
+    "id": "supply_cache_open",
+    "source": "items/healing_loot/supply_cache_open.png",
+    "runtime": "items/healing_loot/runtime/supply_cache_open.webp",
+    "crop": {
+      "left": 55,
+      "top": 148,
+      "width": 1178,
+      "height": 1002
+    },
+    "width": 256,
+    "height": 218,
+    "bytes": 18884
+  },
+  {
+    "id": "ui_answer_field",
+    "source": "ui/masters/ui_answer_field_v002.png",
+    "runtime": "ui/runtime/ui_answer_field.webp",
+    "crop": {
+      "left": 51,
+      "top": 437,
+      "width": 1154,
+      "height": 373
+    },
+    "width": 768,
+    "height": 248,
+    "bytes": 17980
+  },
+  {
+    "id": "ui_button_icon",
+    "source": "ui/masters/ui_button_icon_v002.png",
+    "runtime": "ui/runtime/ui_button_icon.webp",
+    "crop": {
+      "left": 222,
+      "top": 224,
+      "width": 810,
+      "height": 804
+    },
+    "width": 768,
+    "height": 762,
+    "bytes": 29002
+  },
+  {
+    "id": "ui_button_primary",
+    "source": "ui/masters/ui_button_primary_v002.png",
+    "runtime": "ui/runtime/ui_button_primary.webp",
+    "crop": {
+      "left": 63,
+      "top": 467,
+      "width": 1128,
+      "height": 314
+    },
+    "width": 768,
+    "height": 214,
+    "bytes": 14560
+  },
+  {
+    "id": "ui_button_secondary",
+    "source": "ui/masters/ui_button_secondary_v002.png",
+    "runtime": "ui/runtime/ui_button_secondary.webp",
+    "crop": {
+      "left": 61,
+      "top": 464,
+      "width": 1131,
+      "height": 319
+    },
+    "width": 768,
+    "height": 217,
+    "bytes": 12178
+  },
+  {
+    "id": "ui_console_panel",
+    "source": "ui/masters/ui_console_panel_v002.png",
+    "runtime": "ui/runtime/ui_console_panel.webp",
+    "crop": {
+      "left": 56,
+      "top": 226,
+      "width": 1142,
+      "height": 771
+    },
+    "width": 768,
+    "height": 519,
+    "bytes": 24258
+  },
+  {
+    "id": "ui_defeat_badge",
+    "source": "ui/masters/ui_defeat_badge_v002.png",
+    "runtime": "ui/runtime/ui_defeat_badge.webp",
+    "crop": {
+      "left": 161,
+      "top": 159,
+      "width": 931,
+      "height": 960
+    },
+    "width": 745,
+    "height": 768,
+    "bytes": 55046
+  },
+  {
+    "id": "ui_hud_bar",
+    "source": "ui/masters/ui_hud_bar_v002.png",
+    "runtime": "ui/runtime/ui_hud_bar.webp",
+    "crop": {
+      "left": 53,
+      "top": 523,
+      "width": 1148,
+      "height": 201
+    },
+    "width": 768,
+    "height": 134,
+    "bytes": 13618
+  },
+  {
+    "id": "ui_inset_panel",
+    "source": "ui/masters/ui_inset_panel_v002.png",
+    "runtime": "ui/runtime/ui_inset_panel.webp",
+    "crop": {
+      "left": 50,
+      "top": 353,
+      "width": 1154,
+      "height": 539
+    },
+    "width": 768,
+    "height": 359,
+    "bytes": 14354
+  },
+  {
+    "id": "ui_item_slot",
+    "source": "ui/masters/ui_item_slot_v002.png",
+    "runtime": "ui/runtime/ui_item_slot.webp",
+    "crop": {
+      "left": 198,
+      "top": 199,
+      "width": 859,
+      "height": 848
+    },
+    "width": 768,
+    "height": 758,
+    "bytes": 26560
+  },
+  {
+    "id": "ui_joystick_base",
+    "source": "ui/masters/ui_joystick_base_v002.png",
+    "runtime": "ui/runtime/ui_joystick_base.webp",
+    "crop": {
+      "left": 96,
+      "top": 85,
+      "width": 1062,
+      "height": 1071
+    },
+    "width": 762,
+    "height": 768,
+    "bytes": 52434
+  },
+  {
+    "id": "ui_joystick_knob",
+    "source": "ui/masters/ui_joystick_knob_v002.png",
+    "runtime": "ui/runtime/ui_joystick_knob.webp",
+    "crop": {
+      "left": 244,
+      "top": 239,
+      "width": 766,
+      "height": 765
+    },
+    "width": 766,
+    "height": 765,
+    "bytes": 46540
+  },
+  {
+    "id": "ui_legendary_crest",
+    "source": "ui/masters/ui_legendary_crest_v002.png",
+    "runtime": "ui/runtime/ui_legendary_crest.webp",
+    "crop": {
+      "left": 229,
+      "top": 168,
+      "width": 796,
+      "height": 892
+    },
+    "width": 685,
+    "height": 768,
+    "bytes": 47404
+  },
+  {
+    "id": "ui_reward_card",
+    "source": "ui/masters/ui_reward_card_v002.png",
+    "runtime": "ui/runtime/ui_reward_card.webp",
+    "crop": {
+      "left": 243,
+      "top": 87,
+      "width": 769,
+      "height": 1061
+    },
+    "width": 557,
+    "height": 768,
+    "bytes": 31298
+  },
+  {
+    "id": "ui_victory_badge",
+    "source": "ui/masters/ui_victory_badge_v002.png",
+    "runtime": "ui/runtime/ui_victory_badge.webp",
+    "crop": {
+      "left": 131,
+      "top": 210,
+      "width": 992,
+      "height": 838
+    },
+    "width": 768,
+    "height": 649,
+    "bytes": 52308
+  }
+]

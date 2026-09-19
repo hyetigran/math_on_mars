@@ -35,7 +35,7 @@ The draft's asset sequencing needs an explicit production gate: ticket 16 establ
 
 For a copyable project-conventions skill, optional memory seeds and session opener, use [WIZARDGENIE_SETUP.md](./WIZARDGENIE_SETUP.md). It points back to the current PRD, architecture and memory bank instead of duplicating their rules.
 
-All paths inside the copyable prompts are relative to the repository root. Planning files live in `docs/`; preserved screenshots remain under `references/`. Apply the PRD's mobile launch requirements to every implementation prompt, including early prototypes.
+All paths inside the copyable prompts are relative to the repository root. Planning files live in `docs/`; preserved screenshots remain under `../tmp_assets/unused/references/`. Apply the PRD's mobile launch requirements to every implementation prompt, including early prototypes.
 
 For implementation and asset integration, also read [ARCHITECTURE.md](/Users/tig/Desktop/tigran/mathonmars/docs/ARCHITECTURE.md) for state ownership, save contracts, and installed asset/content manifests. GAME_PLAN.md continues to govern gameplay and launch scope.
 
@@ -47,7 +47,7 @@ The reference sheet must include desktop, phone portrait, and phone landscape co
 
 Follow the reference roles in GAME_PLAN.md: Backwoods screenshots guide arena/future-hub composition, character scale, enemy readability, environmental detail, and combat HUD placement; Goblin Gutter guides smooth chibi rendering, outlines, shading, view, and animation conventions; Quizcaster guides the educational UI and expansion menus. Resolve visual conflicts using the approved Math on Mars sheet. Gameplay and launch scope continue to come from GAME_PLAN.md.
 
-For UI work, read [QUIZCASTER_REFERENCES.md](/Users/tig/Desktop/tigran/mathonmars/docs/QUIZCASTER_REFERENCES.md) and inspect the three preserved images under `references/quizcaster`. They guide layout and hierarchy; GAME_PLAN.md controls scoring, reward pools, ammo capacity, and the forge-only legendary. Use the question image for Prompt 8A, upgrade image for Prompt 8B, and study-menu image for Prompt 8C. Their artwork and pictured future features are not instructions to change our art style or launch scope.
+For UI work, read [QUIZCASTER_REFERENCES.md](/Users/tig/Desktop/tigran/mathonmars/docs/QUIZCASTER_REFERENCES.md) and inspect the three preserved images under `../tmp_assets/unused/references/quizcaster`. They guide layout and hierarchy; GAME_PLAN.md controls scoring, reward pools, ammo capacity, and the forge-only legendary. Use the question image for Prompt 8A, upgrade image for Prompt 8B, and study-menu image for Prompt 8C. Their artwork and pictured future features are not instructions to change our art style or launch scope.
 
 At execution time, inspect the actual WizardGenie project, available generation tools, supported animation/keying workflow, and current schemas and prices. Historical AutoSprite version names are not proof of live availability. Retain source IDs, installed outputs, and returned metadata.
 

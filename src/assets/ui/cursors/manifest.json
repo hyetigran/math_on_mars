@@ -1,0 +1,13 @@
+{
+  "style": "Cyan edge",
+  "approvedSource": "tmp_assets/08_cursors/cursor_set_02_cyan.png",
+  "size": 32,
+  "arrow": {
+    "file": "arrow.png",
+    "hotspot": [5, 0]
+  },
+  "pointer": {
+    "file": "pointer.png",
+    "hotspot": [12, 0]
+  }
+}

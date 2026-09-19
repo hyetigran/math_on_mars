@@ -1,0 +1,248 @@
+{
+  "version": "marine-dual-pistols-v001",
+  "frameWidth": 512,
+  "frameHeight": 512,
+  "fps": 15,
+  "animations": [
+    {
+      "state": "run",
+      "direction": "s",
+      "image": "s/run-s.png",
+      "metadata": "s/run-s.json",
+      "frameWidth": 512,
+      "frameHeight": 512,
+      "frameCount": 10,
+      "fps": 15
+    },
+    {
+      "state": "run",
+      "direction": "se",
+      "image": "se/run-se.png",
+      "metadata": "se/run-se.json",
+      "frameWidth": 512,
+      "frameHeight": 512,
+      "frameCount": 10,
+      "fps": 15
+    },
+    {
+      "state": "run",
+      "direction": "e",
+      "image": "e/run-e.png",
+      "metadata": "e/run-e.json",
+      "frameWidth": 512,
+      "frameHeight": 512,
+      "frameCount": 10,
+      "fps": 15
+    },
+    {
+      "state": "run",
+      "direction": "ne",
+      "image": "ne/run-ne.png",
+      "metadata": "ne/run-ne.json",
+      "frameWidth": 512,
+      "frameHeight": 512,
+      "frameCount": 10,
+      "fps": 15
+    },
+    {
+      "state": "run",
+      "direction": "n",
+      "image": "n/run-n.png",
+      "metadata": "n/run-n.json",
+      "frameWidth": 512,
+      "frameHeight": 512,
+      "frameCount": 10,
+      "fps": 15
+    },
+    {
+      "state": "run",
+      "direction": "nw",
+      "image": "nw/run-nw.png",
+      "metadata": "nw/run-nw.json",
+      "frameWidth": 512,
+      "frameHeight": 512,
+      "frameCount": 10,
+      "fps": 15
+    },
+    {
+      "state": "run",
+      "direction": "w",
+      "image": "w/run-w.png",
+      "metadata": "w/run-w.json",
+      "frameWidth": 512,
+      "frameHeight": 512,
+      "frameCount": 10,
+      "fps": 15
+    },
+    {
+      "state": "run",
+      "direction": "sw",
+      "image": "sw/run-sw.png",
+      "metadata": "sw/run-sw.json",
+      "frameWidth": 512,
+      "frameHeight": 512,
+      "frameCount": 10,
+      "fps": 15
+    },
+    {
+      "state": "attack",
+      "direction": "s",
+      "image": "s/attack-s.png",
+      "metadata": "s/attack-s.json",
+      "frameWidth": 512,
+      "frameHeight": 512,
+      "frameCount": 10,
+      "fps": 15
+    },
+    {
+      "state": "attack",
+      "direction": "se",
+      "image": "se/attack-se.png",
+      "metadata": "se/attack-se.json",
+      "frameWidth": 512,
+      "frameHeight": 512,
+      "frameCount": 10,
+      "fps": 15
+    },
+    {
+      "state": "attack",
+      "direction": "e",
+      "image": "e/attack-e.png",
+      "metadata": "e/attack-e.json",
+      "frameWidth": 512,
+      "frameHeight": 512,
+      "frameCount": 10,
+      "fps": 15
+    },
+    {
+      "state": "attack",
+      "direction": "ne",
+      "image": "ne/attack-ne.png",
+      "metadata": "ne/attack-ne.json",
+      "frameWidth": 512,
+      "frameHeight": 512,
+      "frameCount": 10,
+      "fps": 15
+    },
+    {
+      "state": "attack",
+      "direction": "n",
+      "image": "n/attack-n.png",
+      "metadata": "n/attack-n.json",
+      "frameWidth": 512,
+      "frameHeight": 512,
+      "frameCount": 10,
+      "fps": 15
+    },
+    {
+      "state": "attack",
+      "direction": "nw",
+      "image": "nw/attack-nw.png",
+      "metadata": "nw/attack-nw.json",
+      "frameWidth": 512,
+      "frameHeight": 512,
+      "frameCount": 10,
+      "fps": 15
+    },
+    {
+      "state": "attack",
+      "direction": "w",
+      "image": "w/attack-w.png",
+      "metadata": "w/attack-w.json",
+      "frameWidth": 512,
+      "frameHeight": 512,
+      "frameCount": 10,
+      "fps": 15
+    },
+    {
+      "state": "attack",
+      "direction": "sw",
+      "image": "sw/attack-sw.png",
+      "metadata": "sw/attack-sw.json",
+      "frameWidth": 512,
+      "frameHeight": 512,
+      "frameCount": 10,
+      "fps": 15
+    },
+    {
+      "state": "run-attack",
+      "direction": "s",
+      "image": "s/run-attack-s.png",
+      "metadata": "s/run-attack-s.json",
+      "frameWidth": 512,
+      "frameHeight": 512,
+      "frameCount": 10,
+      "fps": 15
+    },
+    {
+      "state": "run-attack",
+      "direction": "se",
+      "image": "se/run-attack-se.png",
+      "metadata": "se/run-attack-se.json",
+      "frameWidth": 512,
+      "frameHeight": 512,
+      "frameCount": 10,
+      "fps": 15
+    },
+    {
+      "state": "run-attack",
+      "direction": "e",
+      "image": "e/run-attack-e.png",
+      "metadata": "e/run-attack-e.json",
+      "frameWidth": 512,
+      "frameHeight": 512,
+      "frameCount": 10,
+      "fps": 15
+    },
+    {
+      "state": "run-attack",
+      "direction": "ne",
+      "image": "ne/run-attack-ne.png",
+      "metadata": "ne/run-attack-ne.json",
+      "frameWidth": 512,
+      "frameHeight": 512,
+      "frameCount": 10,
+      "fps": 15
+    },
+    {
+      "state": "run-attack",
+      "direction": "n",
+      "image": "n/run-attack-n.png",
+      "metadata": "n/run-attack-n.json",
+      "frameWidth": 512,
+      "frameHeight": 512,
+      "frameCount": 10,
+      "fps": 15
+    },
+    {
+      "state": "run-attack",
+      "direction": "nw",
+      "image": "nw/run-attack-nw.png",
+      "metadata": "nw/run-attack-nw.json",
+      "frameWidth": 512,
+      "frameHeight": 512,
+      "frameCount": 10,
+      "fps": 15
+    },
+    {
+      "state": "run-attack",
+      "direction": "w",
+      "image": "w/run-attack-w.png",
+      "metadata": "w/run-attack-w.json",
+      "frameWidth": 512,
+      "frameHeight": 512,
+      "frameCount": 10,
+      "fps": 15
+    },
+    {
+      "state": "run-attack",
+      "direction": "sw",
+      "image": "sw/run-attack-sw.png",
+      "metadata": "sw/run-attack-sw.json",
+      "frameWidth": 512,
+      "frameHeight": 512,
+      "frameCount": 10,
+      "fps": 15
+    }
+  ]
+}

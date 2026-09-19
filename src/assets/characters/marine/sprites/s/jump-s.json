@@ -1,0 +1,43 @@
+{
+  "name": "jump-s",
+  "direction": "s",
+  "image": "jump-s.png",
+  "frameWidth": 512,
+  "frameHeight": 512,
+  "columns": 5,
+  "rows": 2,
+  "frameCount": 10,
+  "fps": 15,
+  "durationSeconds": 0.6,
+  "displayScale": 1.116071,
+  "loop": false,
+  "endpointExcluded": false,
+  "pivot": {
+    "x": 256,
+    "y": 428.69,
+    "normalizedX": 0.5,
+    "normalizedY": 0.837293,
+    "meaning": "fixed world origin at ground level"
+  },
+  "sourceModel": "../../source/rigged/character-rigged-1789585407607.glb",
+  "sourceClip": "jump",
+  "poseCorrections": {
+    "armStabilization": 0,
+    "neutralPose": "model bind pose",
+    "armOffsets": {},
+    "staticPose": false,
+    "proceduralMotion": "jump"
+  },
+  "camera": {
+    "projection": "orthographic",
+    "elevationDegrees": 30,
+    "characterYawDegrees": 360,
+    "facingConvention": "Yaw 360 renders south for marine-v005"
+  },
+  "loopQa": {
+    "seamDelta": 0,
+    "medianStepDelta": 0.065518,
+    "seamToMedianRatio": 0,
+    "pass": true
+  }
+}

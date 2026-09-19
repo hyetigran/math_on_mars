@@ -1,0 +1,9 @@
+{
+  "generator": "built-in image_gen",
+  "status": "candidate",
+  "prompt": "Edit this exact Math on Mars Spitter slime. Change ONLY the curled crest into a STRAIGHT UPRIGHT SPOUT positioned at the top center of its head. Remove the hook and forward-facing circular nozzle. Instead, extend a short thick organic green tube VERTICALLY UPWARD from the head, aligned with body centerline, with an opening on its TOP surface. Show the top opening as a narrow horizontal dark navy ellipse encircled by a simple green outlined lip, so it clearly points upward rather than toward the camera. The tube is part of the jelly body, not mechanical. Keep the spout compact and broad, like a small organic chimney, with no curl, no sideways bend and no flare toward viewer. Preserve exact tall pear-shaped green body, two level front-facing dark eyes, tiny curved mischievous smile, one pale-yellow oval belly core and wide squishy base. One front-facing body direction, same clean thick navy outline and simple cartoon style. STRICT FLAT COLORS: uniform green body/spout, pale-yellow core, dark navy outline/features/opening, solid bright blue background. NO shadows, glare, gradients, reflections, texture or shine anywhere. No projectiles, effects, extra characters, floor, cast shadow, labels or text. Single complete centered creature with generous margins, square image. This is a neutral upright-spout character master.",
+  "reference_paths": [
+    "../tmp_assets/03_characters/enemies/spitter/spitter_siphon_v002_crest_source.png"
+  ],
+  "notes": "Straight upward spout replaces curled crest; single frontal orientation. No runtime integration."
+}
