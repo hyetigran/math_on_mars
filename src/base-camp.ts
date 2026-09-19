@@ -1,3 +1,4 @@
+import { BattleAudio, playUiSound, preloadCampMusic } from "./battle-audio";
 import {
   campBackgroundUrl,
   splashUrl,
@@ -92,6 +93,7 @@ function loadImage(url: string): Promise<HTMLImageElement> {
 export async function loadCampAssets(
   progress: (fraction: number) => void,
 ): Promise<void> {
+  preloadCampMusic();
   if (assets) {
     progress(1);
     return;
@@ -157,6 +159,8 @@ export async function loadCampAssets(
 
 /** A quiet exploration scene; combat remains owned by CombatController. */
 export class BaseCampController {
+  private audio = new BattleAudio("camp");
+  private footstepDistance = 0;
   private boundaries = loadBoundaries();
   private canvas: HTMLCanvasElement;
   private context: CanvasRenderingContext2D;
@@ -254,6 +258,8 @@ export class BaseCampController {
       () => {
         this.clearInput();
         this.lastTime = 0;
+        if (document.hidden) this.audio.pause();
+        else if (!this.stopped) this.audio.resume();
       },
       { signal },
     );
@@ -308,6 +314,8 @@ export class BaseCampController {
 
   setPaused(paused: boolean): void {
     this.stopped = paused;
+    if (paused || document.hidden) this.audio.pause();
+    else this.audio.resume();
     this.bubble.disabled = paused;
     this.clearInput();
     if (paused) {
@@ -338,6 +346,7 @@ export class BaseCampController {
 
   private enter(): void {
     if (this.stopped || !nearPortal(this.position)) return;
+    playUiSound("portal_enter");
     this.setPaused(true);
     this.onEnter();
   }
@@ -376,6 +385,14 @@ export class BaseCampController {
       next.y - this.position.y,
     );
     const walking = distance > 0.01;
+    if (this.jumpElapsed === null) {
+      this.footstepDistance += distance;
+      if (this.footstepDistance >= 28) {
+        this.footstepDistance %= 28;
+        this.audio.play("marine_footstep_01", 0.16, 160);
+      }
+    }
+    this.audio.setAmbient("amb_portal_hum", nearPortal(next));
     if (Math.hypot(input.x, input.y) > 0.1)
       this.direction = facing(input.x, input.y);
     this.position = next;
@@ -538,6 +555,7 @@ export class BaseCampController {
   }
 
   destroy(): void {
+    this.audio.destroy();
     cancelAnimationFrame(this.frame);
     this.clearInput();
     this.abort.abort();

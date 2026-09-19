@@ -1,7 +1,8 @@
-import { qaControls, bindQAControls } from "./qa-controls";
-import "./qa-controls.css";
 import { installDisplayMode, usesTouchControls } from "./display-mode";
 import "./display-mode.css";
+import { playUiSound, resetBattleMusic } from "./battle-audio";
+import { qaControls, bindQAControls } from "./qa-controls";
+import "./qa-controls.css";
 import { bindAmmoDragging } from "./ammo-drag";
 import { arenaBackgroundUrl } from "./assets/battleAssets";
 import { BATTLE_WORLD, BATTLE_CENTER } from "./battle-world";
@@ -232,6 +233,7 @@ async function openProfile(id: string): Promise<void> {
       return;
     }
     activeProfileId = id;
+    resetBattleMusic();
     await perform(() => session.start(id, campGrade), renderCombat);
   } catch (error) {
     profileLease.release();
@@ -658,6 +660,9 @@ function renderQuiz(message = ""): void {
       submitInitial(quizDraft, question.id);
       return;
     }
+    playUiSound(
+      key === "back" || key === "clear" ? "quiz_backspace" : "quiz_key",
+    );
     if (editFraction) {
       editFraction(key);
       return;
@@ -699,10 +704,16 @@ function renderQuiz(message = ""): void {
   updateTierRail();
 }
 
+let expiredQuiz = "";
 function updateTimer(): void {
   const run = activeRun();
   if (run.phase !== "quiz" || paused) return;
   const remaining = 30000 - currentElapsed();
+  const timerKey = `${run.id}:${run.wave}`;
+  if (remaining <= 0 && expiredQuiz !== timerKey) {
+    expiredQuiz = timerKey;
+    playUiSound("quiz_timer_zero");
+  }
   const timer = document.querySelector<HTMLElement>("#countdown b");
   if (timer) timer.textContent = formatTime(remaining);
   updateTierRail(remaining);
@@ -725,6 +736,7 @@ function updateTierRail(remaining = activeRun().quiz!.remainingMs): void {
 function submitInitial(value: string, occurrenceId: string): void {
   if (paused || activeRun().phase !== "quiz") return;
   if (!parseNumericAnswer(value)) {
+    playUiSound("ui_unavailable");
     document.querySelector("#input-error")!.textContent =
       "Enter a complete number or fraction.";
     return;
@@ -733,17 +745,25 @@ function submitInitial(value: string, occurrenceId: string): void {
   perform(
     () => session.submit(activeProfileId!, occurrenceId, value, elapsed),
     (message) => {
+      if (message)
+        playUiSound(message === "Correct." ? "quiz_correct" : "quiz_incorrect");
       if (activeRun().phase === "quiz") renderQuiz(message ?? "");
       else resumeRun();
     },
   );
 }
 
+let revealedReward = "";
 function renderReward(): void {
   cleanup();
   const run = activeRun();
   const quiz = run.quiz!;
   const quality = quiz.rewardQuality!;
+  const revealKey = `${run.id}:${run.wave}`;
+  if (revealedReward !== revealKey) {
+    revealedReward = revealKey;
+    playUiSound(`reward_reveal_${quality}`);
+  }
   app.innerHTML = shell(
     `<section class="reward-screen" id="content" aria-labelledby="reward-title">
     <header class="reward-heading"><div><p class="flow-step">2 / 4</p><h1 id="reward-title">Select reward</h1></div><span>Wave ${run.wave}</span></header>
@@ -779,7 +799,13 @@ function renderReward(): void {
 
 function chooseReward(id: string): void {
   if (paused) return;
-  perform(() => session.chooseReward(activeProfileId!, id), resumeRun);
+  perform(
+    () => session.chooseReward(activeProfileId!, id),
+    () => {
+      playUiSound("reward_select");
+      resumeRun();
+    },
+  );
 }
 
 function renderCorrection(message = ""): void {
@@ -807,6 +833,7 @@ function renderCorrection(message = ""): void {
     if (paused || activeRun().phase !== "correction") return;
     const value = input.value;
     if (!parseNumericAnswer(value)) {
+      playUiSound("ui_unavailable");
       document.querySelector("#correction-error")!.textContent =
         "Enter a complete number or fraction.";
       return;
@@ -821,6 +848,14 @@ function renderCorrection(message = ""): void {
           correctionId,
         ),
       (message) => {
+        if (message)
+          playUiSound(
+            message !== "Correct."
+              ? "quiz_incorrect"
+              : activeRun().phase === "correction"
+                ? "quiz_correct"
+                : "corrections_complete",
+          );
         if (activeRun().phase === "correction") renderCorrection(message ?? "");
         else resumeRun();
       },
@@ -841,6 +876,9 @@ function renderCorrection(message = ""): void {
       button.addEventListener("click", () => {
         if (paused) return;
         const key = button.dataset.correctionKey!;
+        playUiSound(
+          key === "back" || key === "clear" ? "quiz_backspace" : "quiz_key",
+        );
         if (editFraction) {
           editFraction(key);
           return;
@@ -877,12 +915,18 @@ function manageLoot(run: RunState): string {
   </section>`;
 }
 
+let revealedLoot = "";
 function renderLoot(): void {
   cleanup();
   const run = activeRun();
   if (!run.waveLoot?.length) {
     renderShop();
     return;
+  }
+  const lootKey = `${run.id}:${run.wave}`;
+  if (revealedLoot !== lootKey) {
+    revealedLoot = lootKey;
+    playUiSound("cache_open");
   }
   app.innerHTML = shell(
     `<section class="shop-screen manage-screen loot-screen" id="content" aria-labelledby="manage-title">
@@ -902,7 +946,14 @@ function renderLoot(): void {
               button.dataset.loot!,
               button.dataset.disposition as "accept" | "sell",
             ),
-          () => renderLoot(),
+          () => {
+            playUiSound(
+              button.dataset.disposition === "sell"
+                ? "shop_sell"
+                : "reward_select",
+            );
+            renderLoot();
+          },
         );
     }),
   );
@@ -990,7 +1041,14 @@ function renderShop(message = ""): void {
   document.querySelector("#reroll-shop")!.addEventListener("click", () => {
     void perform(
       () => session.reroll(activeProfileId!),
-      (message) => renderShop(message ?? ""),
+      (message) => {
+        playUiSound(
+          message === "Unpurchased offers refreshed."
+            ? "shop_refresh"
+            : "ui_unavailable",
+        );
+        renderShop(message ?? "");
+      },
     );
   });
   document
@@ -1009,7 +1067,15 @@ function renderShop(message = ""): void {
     if (!paused)
       void perform(
         () => session.mergeAll(activeProfileId!),
-        (message) => renderShop(message),
+        (message) => {
+          playUiSound(
+            message?.startsWith("Combined ") ||
+              message === "Cartridges combined."
+              ? "ammo_merge"
+              : "ui_unavailable",
+          );
+          renderShop(message);
+        },
       );
   });
   bindAmmoDragging(
@@ -1023,7 +1089,15 @@ function renderShop(message = ""): void {
               ...mergePreview,
               pairs: [pair],
             }),
-          (message) => renderShop(message),
+          (message) => {
+            playUiSound(
+              message?.startsWith("Combined ") ||
+                message === "Cartridges combined."
+                ? "ammo_merge"
+                : "ui_unavailable",
+            );
+            renderShop(message);
+          },
         );
     },
   );
@@ -1032,7 +1106,12 @@ function renderShop(message = ""): void {
       if (!paused)
         void perform(
           () => session.sellAmmo(activeProfileId!, button.dataset.sellAmmo!),
-          (message) => renderShop(message),
+          (message) => {
+            playUiSound(
+              message === "Cartridge sold." ? "shop_sell" : "ui_unavailable",
+            );
+            renderShop(message);
+          },
         );
     }),
   );
@@ -1057,7 +1136,14 @@ function buyOffer(id: string): void {
   if (!paused)
     perform(
       () => session.buy(activeProfileId!, id),
-      (message) => renderShop(message),
+      (message) => {
+        playUiSound(
+          message === "Purchase installed."
+            ? "shop_purchase"
+            : "ui_unavailable",
+        );
+        renderShop(message);
+      },
     );
 }
 
@@ -1065,7 +1151,16 @@ function toggleAmmo(id: string): void {
   if (!paused)
     perform(
       () => session.toggleAmmo(activeProfileId!, id),
-      (message) => renderShop(message),
+      (message) => {
+        playUiSound(
+          message !== "Loadout updated."
+            ? "ui_unavailable"
+            : activeRun().activeAmmoIds.includes(id)
+              ? "ammo_equip"
+              : "ammo_unequip",
+        );
+        renderShop(message);
+      },
     );
 }
 
@@ -1109,6 +1204,7 @@ function forgeOmni(): void {
 }
 
 function showForgeDialog(run: RunState): void {
+  playUiSound("ui_open");
   const preview = previewForge(run);
   const dialog = document.createElement("dialog");
   dialog.className = "forge-dialog";
@@ -1147,7 +1243,10 @@ function showForgeDialog(run: RunState): void {
     if (!paused)
       void perform(
         () => session.forge(activeProfileId!, { ...preview, ingredientIds }),
-        () => renderShop("Omni forged."),
+        () => {
+          playUiSound(activeRun().forgedOmni ? "omni_forge" : "ui_unavailable");
+          renderShop("Omni forged.");
+        },
       );
   });
   dialog.showModal();
@@ -1193,10 +1292,10 @@ function endRun(victory: boolean, state?: CombatSnapshot): void {
           button.parentElement!.append(status);
           try {
             if (generation !== screenGeneration) return;
-            await perform(
-              () => session.start(profile.id, run.grade),
-              renderCombat,
-            );
+            await perform(() => {
+              resetBattleMusic();
+              return session.start(profile.id, run.grade);
+            }, renderCombat);
           } catch (error) {
             if (generation === screenGeneration)
               status.textContent = String(error);
@@ -1308,6 +1407,7 @@ function showPause(title: string): void {
     return;
   }
   if (paused || !activeProfileId || !activeProfile().activeRun) return;
+  playUiSound("ui_pause");
   const elapsed = currentElapsed();
   const data = checkpoint();
   setBlocked(true);
@@ -1325,6 +1425,7 @@ function showPause(title: string): void {
       overlay.querySelector<HTMLButtonElement>("#resume-button")!.focus();
       overlay.querySelector("#resume-button")!.addEventListener("click", () => {
         if (saving) return;
+        playUiSound("ui_resume");
         overlay.remove();
         setBlocked(false);
         combat?.resume();
@@ -1604,3 +1705,33 @@ const displayMode = installDisplayMode(
   },
 );
 boot();
+
+// Capture before a click replaces its screen, and keep action feedback distinct.
+document.addEventListener(
+  "click",
+  (event) => {
+    const button = (event.target as Element).closest?.("button");
+    if (!button || button.disabled || button.closest("[inert]")) return;
+    if (
+      button.matches(
+        "[data-key], [data-correction-key], [data-reward], [data-loot], [data-buy], [data-ammo-id], [data-sell-ammo], #merge-all, #reroll-shop, #confirm-forge, #correction-check, #resume-button, #pause-button, #forge-button, .portal-bubble",
+      )
+    )
+      return;
+    playUiSound(
+      button.matches("#close-forge, #cancel-track") ? "ui_close" : "ui_select",
+    );
+  },
+  true,
+);
+document.addEventListener(
+  "keydown",
+  (event) => {
+    if (paused || event.repeat || !(event.target instanceof HTMLInputElement))
+      return;
+    if (!event.target.matches("[data-fraction], #correction-input")) return;
+    if (/^[0-9./-]$/.test(event.key)) playUiSound("quiz_key");
+    else if (event.key === "Backspace") playUiSound("quiz_backspace");
+  },
+  true,
+);

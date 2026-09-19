@@ -216,6 +216,8 @@ class MarsCombatScene extends Phaser.Scene {
     this.cameras.main.setBounds(0, 0, BATTLE_WORLD.width, BATTLE_WORLD.height);
     this.resizeCamera();
     this.audio = new BattleAudio(this.options.wave === this.options.totalWaves);
+    if (this.simulation.state.enemies.some((enemy) => enemy.boss))
+      this.audio.play("overmind_enter");
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () =>
       this.audio?.destroy(),
     );
@@ -674,11 +676,18 @@ class MarsCombatScene extends Phaser.Scene {
       delta,
       Math.hypot(this.touch.x, this.touch.y) > 0.1 ? this.touch : keyboard,
     );
+    if (this.simulation.drainPiercingImpact())
+      this.audio?.play("ammo_piercing_hit", 0.3);
     for (const cue of this.feedback.update(this.simulation.state)) {
+      if (
+        this.simulation.outcome &&
+        (cue === "marine_shutdown" || cue === "overmind_death")
+      )
+        continue;
       this.audio?.play(
         cue,
         cue.startsWith("marine_footstep") ? 0.16 : 0.4,
-        cue === "marine_damage" ? 650 : 120,
+        cue === "marine_damage" ? 650 : cue === "slime_move_01" ? 2000 : 120,
       );
     }
     this.renderState();

@@ -146,6 +146,7 @@ export class CombatSimulation {
   readonly moveSpeed: number;
   outcome: "victory" | "defeat" | null = null;
   visibleBounds?: { left: number; right: number; top: number; bottom: number };
+  private piercingImpact = false;
   private chainFlashes: ChainFlash[] = [];
   private revealedChestLoot: Ammo[] = [];
 
@@ -443,6 +444,7 @@ export class CombatSimulation {
 
   private applyHit(bolt: CombatBoltSaveV2, enemy: CombatEnemySaveV2): void {
     const shot = this.state.shots.find((s) => s.id === bolt.shotId)!;
+    if (shot.ammoTypes?.includes("Piercing")) this.piercingImpact = true;
     enemy.hp -= bolt.damage;
     this.applyEffects(shot, enemy, bolt.damage);
     if (shot.chainStarted) return;
@@ -705,6 +707,12 @@ export class CombatSimulation {
   serialize(): CombatSaveV2 {
     return structuredClone(this.state);
   }
+  drainPiercingImpact(): boolean {
+    const impact = this.piercingImpact;
+    this.piercingImpact = false;
+    return impact;
+  }
+
   drainChainFlashes(): ChainFlash[] {
     const flashes = this.chainFlashes;
     this.chainFlashes = [];

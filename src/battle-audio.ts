@@ -1,5 +1,10 @@
 import { battleAudioUrl } from "./assets/battleAssets";
 
+const battleOffsets = new Map<string, number>();
+export function resetBattleMusic(): void {
+  battleOffsets.clear();
+}
+
 let context: AudioContext | undefined;
 const buffers = new Map<string, Promise<AudioBuffer | undefined>>();
 function audioContext(): AudioContext {
@@ -7,6 +12,38 @@ function audioContext(): AudioContext {
     context = new AudioContext();
   }
   return context;
+}
+
+async function loadAudioBuffer(
+  name: string,
+  ctx: AudioContext | undefined,
+): Promise<AudioBuffer | undefined> {
+  const url = battleAudioUrl(name);
+  if (!url || !ctx) return;
+  if (!buffers.has(name)) {
+    buffers.set(
+      name,
+      fetch(url)
+        .then((response) =>
+          response.ok ? response.arrayBuffer() : Promise.reject(),
+        )
+        .then((data) => ctx.decodeAudioData(data))
+        .catch(() => {
+          buffers.delete(name);
+          return undefined;
+        }),
+    );
+  }
+  return buffers.get(name);
+}
+
+/** Prepare music during the splash without delaying camp or starting audio early. */
+export function preloadCampMusic(): void {
+  try {
+    void loadAudioBuffer("music_camp", audioContext());
+  } catch {
+    /* Optional audio must not block loading the game. */
+  }
 }
 
 // Prime the context during the portal/start gesture, before Phaser's async loader.
@@ -30,6 +67,7 @@ export class BattleAudio {
   private sources = new Set<AudioBufferSourceNode>();
   private lastPlayed = new Map<string, number>();
   private track: string;
+  private ambience: [string, number][];
   private loops = new Map<
     AudioBufferSourceNode,
     { name: string; started: number; offset: number }
@@ -37,8 +75,25 @@ export class BattleAudio {
   private offsets = new Map<string, number>();
   private ctx: AudioContext | undefined;
 
-  constructor(boss: boolean) {
-    this.track = boss ? "music_boss" : "music_battle";
+  constructor(mode: boolean | "camp" | "ui") {
+    this.track =
+      mode === "camp"
+        ? "music_camp"
+        : mode === "ui"
+          ? ""
+          : mode
+            ? "music_boss"
+            : "music_battle";
+    this.ambience =
+      mode === "ui"
+        ? []
+        : mode === "camp"
+          ? [
+              ["amb_camp_machinery", 0.09],
+              ["amb_mars_wind", 0.06],
+            ]
+          : [["amb_mars_wind", 0.12]];
+    if (mode === false) this.offsets = battleOffsets;
     try {
       this.ctx = audioContext();
     } catch {
@@ -46,24 +101,9 @@ export class BattleAudio {
     }
     void this.ctx?.resume().catch(() => {});
     this.startLoops();
-    this.play("wave_start");
-  }
-
-  private async buffer(name: string): Promise<AudioBuffer | undefined> {
-    const url = battleAudioUrl(name);
-    if (!url || !this.ctx) return;
-    if (!buffers.has(name)) {
-      buffers.set(
-        name,
-        fetch(url)
-          .then((response) =>
-            response.ok ? response.arrayBuffer() : Promise.reject(),
-          )
-          .then((data) => this.ctx!.decodeAudioData(data))
-          .catch(() => undefined),
-      );
+    if (typeof mode === "boolean") {
+      this.play("wave_start");
     }
-    return buffers.get(name);
   }
 
   private async start(
@@ -73,7 +113,7 @@ export class BattleAudio {
     outro = false,
   ): Promise<void> {
     const generation = this.generation;
-    const buffer = await this.buffer(name);
+    const buffer = await loadAudioBuffer(name, this.ctx);
     if (
       !buffer ||
       !this.ctx ||
@@ -83,11 +123,26 @@ export class BattleAudio {
       return;
     // Do not accumulate effects behind the browser's audio unlock gate.
     if (!loop && this.ctx.state !== "running") return;
+    if (
+      loop &&
+      name !== this.track &&
+      !this.ambience.some(([key]) => key === name)
+    )
+      return;
+    if (
+      loop &&
+      [...this.loops].some(
+        ([source, info]) => info.name === name && this.sources.has(source),
+      )
+    )
+      return;
     const source = this.ctx.createBufferSource();
     const gain = this.ctx.createGain();
     source.buffer = buffer;
     source.loop = loop;
-    gain.gain.value = volume;
+    gain.gain.value = loop ? 0 : volume;
+    if (loop)
+      gain.gain.linearRampToValueAtTime(volume, this.ctx.currentTime + 0.5);
     source.connect(gain).connect(this.ctx.destination);
     if (!outro) this.sources.add(source);
     source.onended = () => {
@@ -110,9 +165,28 @@ export class BattleAudio {
     void this.start(name, volume, false);
   }
 
+  setAmbient(name: string, enabled: boolean, volume = 0.12): void {
+    const exists = this.ambience.some(([key]) => key === name);
+    if (exists === enabled) return;
+    if (enabled) {
+      this.ambience.push([name, volume]);
+      if (this.active && !this.disposed) void this.start(name, volume, true);
+    } else {
+      this.ambience = this.ambience.filter(([key]) => key !== name);
+      for (const [source, loop] of this.loops) {
+        if (loop.name === name) {
+          source.stop();
+          this.loops.delete(source);
+          this.sources.delete(source);
+        }
+      }
+    }
+  }
+
   private startLoops(): void {
-    void this.start(this.track, 0.24, true);
-    void this.start("amb_mars_wind", 0.12, true);
+    if (this.track) void this.start(this.track, 0.24, true);
+    for (const [name, volume] of this.ambience)
+      void this.start(name, volume, true);
   }
 
   private stopSources(): void {
@@ -130,6 +204,7 @@ export class BattleAudio {
   }
 
   pause(): void {
+    if (!this.active) return;
     this.active = false;
     this.stopSources();
   }
@@ -159,4 +234,11 @@ export class BattleAudio {
     this.disposed = true;
     if (this.active) this.pause();
   }
+}
+
+let interfaceAudio: BattleAudio | undefined;
+export function playUiSound(name: string): void {
+  if (document.hidden) return;
+  interfaceAudio ??= new BattleAudio("ui");
+  interfaceAudio.play(name, 0.35);
 }

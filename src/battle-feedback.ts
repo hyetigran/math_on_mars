@@ -1,6 +1,8 @@
 import type { CombatSaveV2 } from "./types";
 
 type EnemyFeedback = {
+  x: number;
+  y: number;
   hp: number;
   boss: boolean;
   kind: string;
@@ -20,8 +22,6 @@ export class BattleFeedback {
   private x: number;
   private y: number;
   private travel = 0;
-  private foot = 0;
-  private fire = 0;
   constructor(
     state: CombatSaveV2,
     private readonly maxHp: number,
@@ -40,6 +40,8 @@ export class BattleFeedback {
       state.enemies.map((e) => [
         e.id,
         {
+          x: e.x,
+          y: e.y,
           hp: e.hp,
           boss: e.boss,
           kind: e.kind ?? "drifter",
@@ -58,7 +60,7 @@ export class BattleFeedback {
     this.y = state.marine.y;
     if (this.travel >= 28) {
       this.travel %= 28;
-      cues.add(`marine_footstep_0${(this.foot++ % 4) + 1}`);
+      cues.add("marine_footstep_01");
     }
     if (state.nextShotId > this.shot) {
       const inventory = state.ammoInventory;
@@ -66,9 +68,7 @@ export class BattleFeedback {
         inventory?.ammo.filter((a) => inventory.activeAmmoIds.includes(a.id)) ??
         [];
       cues.add(
-        ammo.some((a) => a.legendary)
-          ? "ammo_omni_fire"
-          : `blaster_fire_0${(this.fire++ % 3) + 1}`,
+        ammo.some((a) => a.legendary) ? "ammo_omni_fire" : "blaster_fire_01",
       );
       if (ammo.some((a) => a.type === "Multi Shot" && !a.legendary))
         cues.add("ammo_multishot_accent");
@@ -110,6 +110,12 @@ export class BattleFeedback {
         if (e.boss) cues.add("overmind_enter");
         continue;
       }
+      if (
+        !e.boss &&
+        Math.hypot(e.x - old.x, e.y - old.y) > 0.1 &&
+        Math.hypot(e.x - state.marine.x, e.y - state.marine.y) < 180
+      )
+        cues.add("slime_move_01");
       if (e.hp < old.hp) cues.add("slime_hit_01");
       if (e.slowRemainingMs > old.frost) cues.add("ammo_frost_apply");
       if (e.burnRemainingDamage > old.burn) cues.add("ammo_fiery_apply");
