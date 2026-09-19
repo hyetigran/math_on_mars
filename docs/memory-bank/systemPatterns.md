@@ -1,15 +1,23 @@
 # System patterns
 
-Status: RunSession commands, pure CombatSimulation rules, and a validated ProfileRepository now implement the core separation. IndexedDB and remaining architecture contracts are still planned. Consult [ARCHITECTURE.md](../ARCHITECTURE.md) before changing these contracts.
+Status: a published static app implements RunSession commands, a plain CombatSimulation, IndexedDB profiles, a Canvas 2D camp, Phaser battle, and DOM overlays. [ARCHITECTURE.md](../ARCHITECTURE.md) still describes a fuller module split and mission resume; do not treat unbuilt pieces as present.
 
-- One responsive static browser application: Phaser combat rendering and semantic HTML math/menu controls.
-- RunSession coordinates authoritative commands and phase transitions. Views send commands and render state.
-- Plain, serializable game rules are separate from rendering, browser APIs, persistence, and narration.
-- Combat, progression, practice, rewards, history, catalog, and persistence have explicit responsibilities.
-- Local profile transactions preserve initial answers, rewards, correction state, and inventory consistently. Stable action IDs prevent duplicate settlement.
-- Save/resume restores the same timer, question instances, original answers, correction queue, offers, RNG, and combat state. Paused time does not advance play.
-- The correction phase follows reward selection and blocks caches/shop/next wave until complete. Empty correction queues continue directly.
-- Keep content, asset, and rule versions pinned for resumable runs. Installed static assets and authored questions avoid runtime generation dependencies.
-- Touch and keyboard invoke the same commands. Mobile layouts preserve game rules and keep controls readable.
+## Implemented
 
-Current regression tests cover timer boundaries, timeout continuation, first-pass/correction separation, stale commands, failed saves, ammo merging/forge, shared shot budgets, and save migration. Complete browser flows still need verification. See [review fixes](../REVIEW_FIXES.md). Historical design calculations are not current runtime tests.
+- One Vite SPA published to GitHub Pages. Camp and battle art are Canvas/Phaser; math, reward, loot, shop, and pause are semantic HTML.
+- `RunSession` is the command coordinator. Views send commands and render after durable commit. Stable command IDs prevent duplicate settlement.
+- `combat-rules.ts` owns serializable simulation. Phaser (`combat.ts`) renders and feeds input. Camp (`base-camp.ts`, `camp-world.ts`) is a separate 2D walkable hub.
+- `indexeddb.ts` + `persistence.ts` store cadet profiles and practice history. Missions are disposable: portal entry always starts wave one; camp exit or reload drops the run. Pause still holds the live session.
+- Correction follows the initial five answers and blocks reward until complete. Empty miss lists go to reward. Loot must be accepted or sold before shop/next wave; the final wave skips that intermission into victory.
+- Offline: hashed manifest + service worker. Saved historical runs can pin a release; current play does not resume a mission after leaving camp. Offline install must not block arena entry.
+- Touch and keyboard reach the same commands. Production hides QA (wave jump, skip quiz). Phones/tablets are landscape-only.
+- Balance and catalogs live under `content/balance/`. Glossary terms come from [CONTEXT.md](../../CONTEXT.md).
+
+## Remaining / exploratory
+
+- Full ARCHITECTURE RunSession isolation of every catalog/learning module.
+- Mission Save & Exit (explicitly superseded).
+- V2 3D street-level town (proposal only; camera direction confirmed).
+- Owner-managed Mars visual-style ticket and integrated-MVP ticket (#5, #23).
+
+Regression tests cover combat, quiz grades, shop/ammo/forge, luck, camp/arena bounds, offline worker policy, profile transfer/leases, and audio wiring. Published HTTPS/device loops still need live checks. Historical `design_checks.py` formulas are not current tests.

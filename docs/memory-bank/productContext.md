@@ -1,8 +1,10 @@
 # Product context
 
-## Confirmed quiz loop
+Implemented behavior follows [CONTEXT.md](../../CONTEXT.md). [GAME_PLAN.md](../GAME_PLAN.md) still describes the original interview decisions; where they conflict, CONTEXT wins.
 
-Combat wave → five initial math answers → choose reward → correct misses → caches/shop/loadout → next wave. Defeat and final victory end the run directly.
+## Implemented session loop
+
+Walkable camp → portal (grade + mission) → combat wave → five initial answers → **correction round (if any misses)** → choose reward → accept/sell loot → shop/inventory → next wave. Defeat and final victory end the run and return toward camp. There is no Save & Exit for a mission; pause keeps the current session only.
 
 Every grade gets exactly five mandatory questions sharing one 30-second countdown. Freeze remaining time after the fifth initial answer:
 
@@ -13,16 +15,16 @@ Every grade gets exactly five mandatory questions sharing one 30-second countdow
 | More than zero, up to 10 seconds | Green |
 | Zero | White |
 
-Each wrong initial answer lowers the reward one tier, with white as the floor. A wrong answer advances to the next question. At zero, finish all unanswered questions before choosing the white reward; expiry never skips them.
+Each wrong initial answer lowers the reward one tier, with white as the floor. Timeout never skips unanswered questions. Development builds may use a labeled QA skip; production hides it.
 
-After reward selection, retry every missed question untimed until correct. Help is available. Corrections do not change the reward or overwrite original accuracy. There is no skip control, charge score, per-question speed bonus, accuracy streak, or immediate scored retry.
+The correction round is untimed and happens **before** reward selection. Corrections do not change the earned reward power level or rewrite first-try accuracy. There is no skip in normal play, charge score, per-question speed bonus, or accuracy streak.
 
-## Confirmed ammo model
+Supply caches / milestone ammo bundles are removed. Progression is quiz rewards, enemy loot (sealed chests revealed after reward), and shop purchases. Luck can raise chest chance, bonus salvage, and shop-offer rarity; it does not change quiz rewards.
 
-The Pulse Blaster fires continuous projectiles. Ammo represents reusable effect types: Piercing, Multi Shot, Electric Chain, Frost, and Fiery. Equipped effects combine on each shot. Matching type/tier pairs merge upward through purple.
+## Implemented ammo model
 
-One purple of each distinct type forges Legendary Omni Ammo, applying all five effects in one active slot. Active capacity starts at one; shop Ammo Expanders raise it to four. Reserve ownership is separate from active capacity.
+The Pulse Blaster fires continuously. Each equipped ammo type fires its own projectiles in the volley. Only Piercing passes through enemies; others stop on impact. Electric Chain can jump on impact. Direct damage per volley is shared across types. Matching type/tier pairs merge through purple. One purple of each type forges Legendary Omni Ammo (all five streams, one slot). Capacity starts at one; shop Expanders raise it to four.
 
 ## Adjustable defaults
 
-White reward magnitude is provisionally half of green's first stat modifier; blue/purple add further modifiers. This is tuning, not a specifically chosen owner value. Six/ten-wave mission presets, supply schedules, the Omni capacity stabilizer, media timing details, prices, and numerical combat balance remain prototype defaults or proposals. Preserve their status when implementing.
+White reward magnitude, mission lengths (Short 6 / Standard 10), prices, weapon range, wave timer caps, and luck rates are prototype tuning in `content/balance/` and [BALANCE.md](../BALANCE.md). Preserve that status when changing numbers.

@@ -1,25 +1,34 @@
 # Technical context
 
-Observed September 13, 2026.
+Observed September 18, 2026.
 
-- Git remote: `https://github.com/hyetigran/math_on_mars.git`.
-- The repository contains a runnable Vite browser project, planning Markdown, reference images, and a historical Python calculation script.
-- Current stack: strict TypeScript, Vite 7.3.6, Phaser 4.2.1, and semantic DOM/CSS screens. `pnpm` is the workspace package manager.
-- Runtime profiles now use IndexedDB transactions, with one-time migration from legacy localStorage snapshots. Browser-generated question speech was removed at the owner's request; reviewed installed K–1 audio remains planned alongside a service worker.
-- Deployment target and concrete supported device versions remain to be established.
-- `pnpm test` runs 21 Node regression tests through `scripts/test.mjs`; `pnpm build` type-checks and builds the app. `tests/browser.html` provides isolated development fixtures for interactive pause, fraction, and save-failure checks.
-- `src/session.ts` owns committed run commands; `src/combat-rules.ts` owns plain simulation state; `src/persistence.ts` validates localStorage snapshots and offers explicit backup recovery. Combat saves are version 2; see [migration limits](../REVIEW_FIXES.md).
+- Git remote: `https://github.com/hyetigran/math_on_mars.git`. Published site: https://hyetigran.github.io/math_on_mars/
+- Stack: strict TypeScript, Vite `7.3.6`, Phaser `4.2.1`, pnpm `12.4.1`. Node 22 in CI. Three.js is **asset tooling** (sprite baker), not the game runtime.
+- Commands: `pnpm dev`, `pnpm test` (`scripts/test.mjs`, 30 `tests/*.test.ts` files), `pnpm build` (version stamp + `tsc` + Vite + offline manifest), `pnpm preview`, `pnpm format` / `format:check`.
+- Deploy: `.github/workflows/deploy-pages.yml` formats, tests, builds, and publishes `dist/` on `main`. Vite `base` is relative so the Pages subdirectory and service worker work. HTTPS is required for offline. See [DEPLOYMENT.md](../DEPLOYMENT.md) and [OFFLINE.md](../OFFLINE.md).
+- Persistence: IndexedDB profile envelopes, one-time localStorage migration, leases for conflicting tabs, export/import. Fake-indexeddb is a test/dev dependency.
+- Assets: finalized families under `src/assets/`. Historical generation lives in sibling `../tmp_assets`. Prepare scripts regenerate runtime WebP/MP3/sprites from in-repo masters.
+- Fonts: Oxanium + Atkinson Hyperlegible Next, bundled and offline-packed.
+- Production UI: landscape lock on phones/tablets; QA controls compile out. Arena-entry and production-ui browser scripts exist for local preview checks.
+
+## Source map
+
+- `src/main.ts`: screens and camp/arena chrome.
+- `src/session.ts`: committed run commands.
+- `src/combat.ts` / `src/combat-rules.ts`: Phaser view and plain simulation.
+- `src/base-camp.ts` / `src/camp-world.ts`: walkable hub.
+- `src/indexeddb.ts` / `src/persistence.ts`: profile I/O and validation.
+- `src/questions.ts`, `src/shop.ts`, `src/ammo.ts`, `src/forge.ts`, `src/modules.ts`, `src/luck.ts`.
+- `content/balance/`: live combat, ammo, enemies, missions, luck, status, chain.
 
 ## References
 
-- [GAME_PLAN.md](../GAME_PLAN.md): authoritative product rules.
-- [ARCHITECTURE.md](../ARCHITECTURE.md): proposed runtime, state, and persistence contracts.
-- [CONTEXT.md](../../CONTEXT.md): project vocabulary.
-- `../tmp_assets/unused/references/backwoods/`: composition and combat readability.
-- `../tmp_assets/unused/references/quizcaster/`: math and upgrade screen layouts.
-- Goblin Gutter: rendering and gameplay reference described in the plan.
-- WizardGenie: intended development-time asset workflow. The project reference sheet is not yet created or approved.
+- [CONTEXT.md](../../CONTEXT.md): implemented vocabulary and presentation.
+- [GAME_PLAN.md](../GAME_PLAN.md): original product rules (stale “unimplemented” / no-hub lines).
+- [ARCHITECTURE.md](../ARCHITECTURE.md): planned contracts.
+- [BALANCE.md](../BALANCE.md), [AUDIO_AUDIT.md](../AUDIO_AUDIT.md), [ART_ASSET_CHECKLIST.md](../ART_ASSET_CHECKLIST.md).
+- [V2_TOWN_BUILDER_PLAN.md](../V2_TOWN_BUILDER_PLAN.md): exploratory town; street-level camera confirmed.
+- Goblin Gutter: arena proportions, wave timers, shop/loot feel.
+- WizardGenie: still the generation workflow for leftover art.
 
-[WIZARDGENIE_PROMPTS.md](../WIZARDGENIE_PROMPTS.md) now reflects the current plan and maps all 20 draft tickets to prompts. `QUIZCASTER_REFERENCES.md` and `DESIGN_VALIDATION.md` still carry supersession notices; their old quiz rules and formal review gates are historical. `docs/design_checks.py` still contains old formulas and must be revised before use as current validation.
-
-Ticket 3 adds `src/indexeddb.ts`, private RunSession command preparation, durable receipts and post-command backups. `fake-indexeddb` is development-only; 39 tests cover transactions and existing rules. Browser fixtures now inject IndexedDB write failures.
+`QUIZCASTER_REFERENCES.md` and `DESIGN_VALIDATION.md` remain superseded for scoring. `docs/design_checks.py` is historical.
