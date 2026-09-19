@@ -45,9 +45,13 @@ async function install() {
   await cache.put(manifestUrl, new Response(JSON.stringify(BUILD)));
 }
 self.addEventListener("install", (event) =>
-  event.waitUntil(localPreview ? self.skipWaiting() : install()),
+  event.waitUntil(
+    localPreview
+      ? self.skipWaiting()
+      : install().then(() => self.skipWaiting()),
+  ),
 );
-// Published builds never force activation over a live page; localhost workers retire themselves.
+// Activate verified updates without reloading live pages. Retained packs keep their assets available.
 self.addEventListener("activate", (event) =>
   event.waitUntil(
     localPreview
@@ -100,12 +104,22 @@ self.addEventListener("fetch", (event) => {
       const client = event.clientId
         ? await self.clients.get(event.clientId)
         : undefined;
-      const version =
+      const pinnedVersion =
         url.searchParams.get("build") ||
-        (client && new URL(client.url).searchParams.get("build")) ||
-        BUILD.version;
+        (client && new URL(client.url).searchParams.get("build"));
+      const version = pinnedVersion || BUILD.version;
       if (!/^[a-f0-9]{16}$/.test(version))
         return new Response("Invalid content version", { status: 400 });
+      // Online launches use the latest HTML; a failed request falls back to the
+      // verified offline shell. Explicit archived-build requests stay pinned.
+      if (event.request.mode === "navigate" && !pinnedVersion) {
+        try {
+          const fresh = await fetch(event.request, { cache: "no-cache" });
+          if (fresh.ok) return fresh;
+        } catch {
+          // Offline: continue to the installed pack.
+        }
+      }
       const cache = await caches.open(prefix + version);
       const key =
         event.request.mode === "navigate"
@@ -113,6 +127,15 @@ self.addEventListener("fetch", (event) => {
           : new URL(url.pathname, url.origin).href;
       const response = await cache.match(key);
       if (response) return response;
+      // Vite assets have content-hashed URLs. A page already open during an
+      // update can safely finish using its old assets, even while offline.
+      if (!pinnedVersion && key.startsWith(absolute("assets/"))) {
+        for (const name of await caches.keys()) {
+          if (!name.startsWith(prefix)) continue;
+          const retained = await (await caches.open(name)).match(key);
+          if (retained) return retained;
+        }
+      }
       // Never substitute current content for a requested older version.
       const marker = await cache.match(manifestUrl);
       const manifest = marker ? await marker.json() : BUILD;

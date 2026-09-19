@@ -21,3 +21,5 @@ Production hides all QA shortcuts, including quiz skipping. Phones and tablets r
 Run `GAME_URL=http://localhost:4173/ node tests/production-ui.browser.mjs` against a production preview to verify desktop and mobile controls, portrait blocking and pausing, and the absence of QA controls on quiz, correction and pause screens.
 
 The splash preloads and decodes camp and battle artwork, selected audio, and fonts before opening camp. Arena scenes reuse the decoded images. To check failed-download retry and repeated arena entry without networking, run `GAME_URL=http://localhost:4173/ node tests/splash-loading.browser.mjs` against a production preview.
+
+Online reloads request fresh HTML instead of the offline shell. Verified worker updates activate without reloading an open mission; retained content-hashed assets keep existing pages working. Offline launches fall back to the installed pack, and explicit archived-build requests remain pinned. Run `node tests/offline-update.browser.mjs` to verify an upgrade with an open tab.

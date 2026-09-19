@@ -37,6 +37,7 @@ function worker(
 ) {
   const listeners = new Map<string, (event: any) => void>();
   let network = true;
+  let networkFiles = files;
   let clientVersion: string | undefined;
   let broken = "";
   let networkRequests = 0;
@@ -83,14 +84,20 @@ function worker(
         const path = (typeof url === "string" ? url : url.url).slice(
           workerScope.length,
         );
-        return new Response(path === broken ? "wrong content" : files[path], {
-          status: path in files ? 200 : 404,
-        });
+        return new Response(
+          broken && path === broken ? "wrong content" : networkFiles[path],
+          {
+            status: path in networkFiles ? 200 : 404,
+          },
+        );
       },
     },
   );
   return {
     caches,
+    publish: (next: Record<string, string>) => {
+      networkFiles = next;
+    },
     stats: () => ({ networkRequests, skippedWaiting, unregistered }),
     network: (enabled: boolean) => {
       network = enabled;
@@ -214,6 +221,7 @@ test("interrupted or corrupted installs stay unready; missing pinned files never
   pack.corruptDownload("audio/task.mp3");
   await assert.rejects(pack.install(), /verification/);
   assert.equal(await pack.ready(), false);
+  assert.equal(pack.stats().skippedWaiting, 0);
   pack.corruptDownload("");
   await pack.install();
   const cache = await pack.caches.open(`math-on-mars:${scope}:${version}`);
@@ -229,5 +237,58 @@ test("interrupted or corrupted installs stay unready; missing pinned files never
   assert.equal(
     await (await pack.fetch(`audio/task.mp3?build=${version}`)).text(),
     "speech",
+  );
+});
+
+test("online reloads get current HTML while offline and pinned launches retain verified packs", async () => {
+  const version = "4444444444444444";
+  const pack = worker(version, { "index.html": "old shell" });
+  await pack.install();
+  assert.equal(pack.stats().skippedWaiting, 1);
+  pack.publish({ "": "latest shell", "index.html": "latest shell" });
+  assert.equal(await (await pack.fetch("", true)).text(), "latest shell");
+  assert.equal(
+    await (await pack.fetch("index.html", true)).text(),
+    "latest shell",
+  );
+  assert.equal(
+    await (await pack.fetch(`?build=${version}`, true)).text(),
+    "old shell",
+  );
+  pack.publish({});
+  assert.equal(await (await pack.fetch("", true)).text(), "old shell");
+  pack.network(false);
+  assert.equal(await (await pack.fetch("", true)).text(), "old shell");
+});
+
+test("activated updates retain hashed assets needed by open pages without substituting pinned files", async () => {
+  const first = worker("5555555555555555", {
+    "index.html": "old shell",
+    "assets/marine-oldhash.png": "old marine",
+  });
+  await first.install();
+  const next = worker(
+    "6666666666666666",
+    {
+      "index.html": "new shell",
+      "assets/marine-newhash.png": "new marine",
+    },
+    first.caches,
+  );
+  await next.install();
+  await next.activate();
+  next.network(false);
+  assert.equal(
+    await (await next.fetch("assets/marine-oldhash.png")).text(),
+    "old marine",
+  );
+  assert.equal(
+    await (await next.fetch("assets/marine-newhash.png")).text(),
+    "new marine",
+  );
+  assert.equal(
+    (await next.fetch("assets/marine-oldhash.png?build=6666666666666666"))
+      .status,
+    503,
   );
 });
