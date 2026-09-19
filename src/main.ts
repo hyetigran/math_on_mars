@@ -78,6 +78,10 @@ import {
   type RunState,
 } from "./types";
 
+const LOCAL_QA =
+  import.meta.env.DEV ||
+  ["localhost", "127.0.0.1", "[::1]"].includes(location.hostname);
+
 const STORAGE_KEY =
   (import.meta.env.DEV && document.documentElement.dataset.profileStorageKey) ||
   "math-on-mars-profiles-v1";
@@ -127,6 +131,7 @@ function announce(message: string): void {
 }
 
 function cleanup(keepBattle = false): void {
+  document.querySelector("#qa-floating-button")?.remove();
   // Retain the last rendered battlefield before disposing of its simulation.
   if (
     combat &&
@@ -196,8 +201,9 @@ function shell(content: string, screenClass = ""): string {
 }
 
 function bindHome(): void {
+  mountFloatingQA();
   document.querySelector("#qa-skip-quiz")?.addEventListener("click", () => {
-    if (import.meta.env.DEV && !paused)
+    if (LOCAL_QA && !paused)
       void perform(() => session.skipQuizForQA(activeProfileId!), resumeRun);
   });
   decorateControls();
@@ -278,7 +284,7 @@ function renderBaseCamp(): void {
   app.innerHTML = `<section class="camp-screen" aria-label="Base camp">
     <div id="camp-world" class="camp-world"></div>
     ${
-      import.meta.env.DEV
+      LOCAL_QA
         ? `<header class="camp-hud">
       <button class="camp-edit-boundaries" id="edit-boundaries" aria-label="Edit map boundaries"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5 19 7 17 19 4 17Z" fill="none" stroke="currentColor" stroke-width="1.5"/><g fill="currentColor"><circle cx="5" cy="5" r="2"/><circle cx="19" cy="7" r="2"/><circle cx="17" cy="19" r="2"/><circle cx="4" cy="17" r="2"/></g></svg></button>
     </header>`
@@ -422,6 +428,29 @@ function resumeRun(): void {
   else renderShop();
 }
 
+function mountFloatingQA(): void {
+  document.querySelector("#qa-floating-button")?.remove();
+  if (!LOCAL_QA || !activeProfileId || !activeProfile().activeRun) return;
+  const button = document.createElement("button");
+  button.id = "qa-floating-button";
+  button.className = "qa-floating-button";
+  button.type = "button";
+  button.textContent = "QA";
+  button.setAttribute("aria-label", "QA · Jump to wave and choose ammo");
+  button.addEventListener("click", () => {
+    if (saving) return;
+    if (paused) {
+      const controls =
+        document.querySelector<HTMLDetailsElement>(".qa-controls");
+      if (controls) {
+        controls.open = true;
+        controls.querySelector<HTMLSelectElement>("select")?.focus();
+      }
+    } else showPause("Mission paused", true);
+  });
+  document.body.append(button);
+}
+
 function renderCombat(): void {
   cleanup();
   document.querySelector("#battle-backdrop")?.remove();
@@ -440,6 +469,7 @@ function renderCombat(): void {
       <button id="medkit-button" class="medkit-button" aria-label="Use med-kit">${itemArt("med_kit")}<span>MED-GEL <b id="medkit-count">${run.medkits}</b></span></button></div>
   </div>`;
   decorateControls();
+  mountFloatingQA();
   const host = document.querySelector<HTMLElement>("#combat-canvas")!;
   let checkpointTick =
     run.combatSave?.version === 2 ? (run.combatSave.simulationTick ?? 0) : 0;
@@ -626,7 +656,7 @@ function renderQuiz(message = ""): void {
       <div class="mobile-tier-strip" id="mobile-tier">${qualityLevel(timeQuality(quiz.remainingMs))}</div>
       <div class="question-panel"><div class="question-copy"><p class="prompt">${escapeHtml(question.prompt)}</p>${questionVisuals(question)}
         ${usesFractionInput(question) ? fractionFields : '<label for="answer">Your answer</label>'}<output id="answer" class="answer-field" aria-live="polite" ${usesFractionInput(question) ? "hidden" : ""}>&nbsp;</output><p class="input-error" id="input-error">${escapeHtml(message)}</p>
-        ${import.meta.env.DEV ? '<div class="quiz-tools"><button id="qa-skip-quiz" class="text-button" type="button">QA · Skip quiz</button></div>' : ""}</div>
+        ${LOCAL_QA ? '<div class="quiz-tools"><button id="qa-skip-quiz" class="text-button" type="button">QA · Skip quiz</button></div>' : ""}</div>
         <div class="keypad" aria-label="Number keypad">${[7, 8, 9, 4, 5, 6, 1, 2, 3].map((n) => `<button data-key="${n}" aria-label="${n}">${n}</button>`).join("")}
           <button data-key="." aria-label="Decimal point">.</button><button data-key="0" aria-label="0">0</button><button data-key="/" aria-label="Fraction bar">⁄</button>
           <button data-key="back" class="key-muted" aria-label="Backspace">⌫</button><button data-key="clear" class="key-muted">Clear</button><button data-key="check" class="key-check">Check</button>
@@ -822,7 +852,7 @@ function renderCorrection(message = ""): void {
     `<section class="correction-screen" id="content"><div class="correction-copy"><p class="eyebrow warm">1 / 4 · QUIZ REVIEW</p><h1>Try this one again.</h1><p>Untimed · Your reward level is already set.</p></div>
     <div class="correction-card"><div><span class="correction-count">${quiz.attempts.filter((a) => !a.correct).length - misses.length + 1} / ${quiz.attempts.filter((a) => !a.correct).length}</span><p class="prompt">${escapeHtml(attempt.question.prompt)}</p>${questionVisuals(attempt.question)}<div class="hint-box"><b>Hint</b><p>${escapeHtml(attempt.question.hint)}</p></div><details><summary>Show solution</summary><p>${escapeHtml(attempt.question.explanation)}</p></details></div>
       <div>${usesFractionInput(attempt.question) ? fractionFields : '<label for="correction-input">Correct answer</label>'}<input id="correction-input" ${usesFractionInput(attempt.question) ? "hidden" : ""} inputmode="none" autocomplete="off" value="${escapeHtml(quiz.correctionDraft ?? "")}"><div class="keypad correction-keypad" aria-label="Correction number keypad">${["7", "8", "9", "4", "5", "6", "1", "2", "3", ".", "0", "/", "back", "clear", "-"].map((key) => `<button type="button" data-correction-key="${key}" aria-label="${key === "/" ? "Fraction bar" : key === "back" ? "Backspace" : key === "-" ? "Minus" : key}">${key === "back" ? "⌫" : key === "clear" ? "Clear" : key}</button>`).join("")}</div><p class="input-error" id="correction-error">${escapeHtml(message)}</p><button id="correction-check" class="button primary">Check answer</button></div></div>
-    ${import.meta.env.DEV ? '<button id="qa-skip-quiz" class="text-button centered">QA · Skip quiz</button>' : ""}</section>`,
+    ${LOCAL_QA ? '<button id="qa-skip-quiz" class="text-button centered">QA · Skip quiz</button>' : ""}</section>`,
     "correction-shell",
   );
   bindHome();
@@ -1401,7 +1431,7 @@ async function perform<T>(
   await attempt();
 }
 
-function showPause(title: string): void {
+function showPause(title: string, openQA = false): void {
   if (saving) {
     pendingPause = title;
     return;
@@ -1419,7 +1449,7 @@ function showPause(title: string): void {
       const overlay = document.createElement("div");
       overlay.className = "pause-overlay mission-pause";
       overlay.id = "pause-overlay";
-      overlay.innerHTML = `<div class="pause-dialog" role="dialog" aria-modal="true" aria-labelledby="pause-title"><h2 id="pause-title">Paused</h2>${title.includes("failed") ? `<p>${escapeHtml(title)}</p>` : ""}<button id="resume-button" class="button primary">Resume</button>${import.meta.env.DEV && activeRun().phase === "combat" ? '<button id="edit-arena-bounds" class="button secondary">Edit arena bounds</button>' : ""}${import.meta.env.DEV ? qaControls(activeRun()) : ""}<button id="pause-exit" class="text-button">Exit mission</button><p class="pause-exit-note">Exiting loses this mission’s progress.</p></div>`;
+      overlay.innerHTML = `<div class="pause-dialog" role="dialog" aria-modal="true" aria-labelledby="pause-title"><h2 id="pause-title">Paused</h2>${title.includes("failed") ? `<p>${escapeHtml(title)}</p>` : ""}<button id="resume-button" class="button primary">Resume</button>${LOCAL_QA && activeRun().phase === "combat" ? '<button id="edit-arena-bounds" class="button secondary">Edit arena bounds</button>' : ""}${LOCAL_QA ? qaControls(activeRun()) : ""}<button id="pause-exit" class="text-button">Exit mission</button><p class="pause-exit-note">Exiting loses this mission’s progress.</p></div>`;
       document.body.append(overlay);
       decorateControls(overlay);
       overlay.querySelector<HTMLButtonElement>("#resume-button")!.focus();
@@ -1449,7 +1479,7 @@ function showPause(title: string): void {
                 ?.focus();
           }, arenaBoundaryOptions());
         });
-      if (import.meta.env.DEV)
+      if (LOCAL_QA)
         bindQAControls(overlay, (wave, loadout) => {
           if (saving) return;
           void perform(
@@ -1463,6 +1493,12 @@ function showPause(title: string): void {
             },
           );
         });
+      if (openQA && LOCAL_QA) {
+        overlay.querySelector<HTMLDetailsElement>(".qa-controls")!.open = true;
+        overlay
+          .querySelector<HTMLSelectElement>("#qa-wave-form select")!
+          .focus();
+      }
       overlay.querySelector("#pause-exit")!.addEventListener("click", () => {
         if (saving) return;
         exitMission();
@@ -1630,7 +1666,7 @@ async function boot(): Promise<void> {
           throw new Error("Use a durable command.");
         },
       },
-      import.meta.env.DEV,
+      LOCAL_QA,
     );
     // Opt-in development fixture; production always enters camp.
     if (
@@ -1661,7 +1697,7 @@ async function boot(): Promise<void> {
                 throw new Error("Use a durable command.");
               },
             },
-            import.meta.env.DEV,
+            LOCAL_QA,
           );
           renderBaseCamp();
         } catch (failure) {
@@ -1680,7 +1716,7 @@ async function boot(): Promise<void> {
                 throw new Error("Use a durable command.");
               },
             },
-            import.meta.env.DEV,
+            LOCAL_QA,
           );
           renderBaseCamp();
         } catch (failure) {

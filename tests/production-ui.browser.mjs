@@ -6,8 +6,13 @@ const browser = await puppeteer.launch({
     process.env.CHROME_PATH ||
     "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
   headless: true,
+  args: ["--host-resolver-rules=MAP production.localhost 127.0.0.1"],
 });
-const url = process.env.GAME_URL || "http://localhost:4173/";
+// Exercise a non-QA hostname even when serving the production build locally.
+const target = new URL(process.env.GAME_URL || "http://localhost:4173/");
+if (["localhost", "127.0.0.1", "[::1]"].includes(target.hostname))
+  target.hostname = "production.localhost";
+const url = target.href;
 const errors = [];
 async function camp(viewport) {
   const context = await browser.createBrowserContext();
@@ -53,7 +58,7 @@ async function visible(page, selector) {
 async function noQA(page) {
   assert.equal(
     await page.$(
-      "#qa-skip-quiz, #qa-wave-form, .qa-controls, #edit-boundaries, #edit-arena-bounds",
+      "#qa-floating-button, #qa-skip-quiz, #qa-wave-form, .qa-controls, #edit-boundaries, #edit-arena-bounds",
     ),
     null,
   );
