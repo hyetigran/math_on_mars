@@ -25,11 +25,6 @@ export function installDisplayMode(
   const refresh = () => {
     const touch = usesTouchControls();
     document.documentElement.dataset.touchControls = String(touch);
-    const tip = document.querySelector(".combat-tip");
-    if (tip)
-      tip.textContent = touch
-        ? "DRAG TO MOVE · TAP MED-GEL TO HEAL · FIRING IS AUTOMATIC"
-        : "MOVE: WASD / ARROWS · MED-GEL: Q · FIRING IS AUTOMATIC";
     const next = isMobileDevice() && innerHeight > innerWidth;
     if (next) {
       onPortrait();

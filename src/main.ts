@@ -437,7 +437,6 @@ function renderCombat(): void {
     <div id="combat-canvas" class="combat-canvas" aria-label="Combat arena"></div>
     <div class="touch-controls"><div id="joystick" class="joystick" aria-label="Movement control"><div id="stick-knob"></div></div>
       <button id="medkit-button" class="medkit-button" aria-label="Use med-kit">${itemArt("med_kit")}<span>MED-GEL <b id="medkit-count">${run.medkits}</b></span></button></div>
-    <div class="combat-tip">${usesTouchControls() ? "DRAG TO MOVE · TAP MED-GEL TO HEAL · FIRING IS AUTOMATIC" : "MOVE: WASD / ARROWS · MED-GEL: Q · FIRING IS AUTOMATIC"}</div>
   </div>`;
   decorateControls();
   const host = document.querySelector<HTMLElement>("#combat-canvas")!;
