@@ -1,3 +1,4 @@
+import { BATTLE_CENTER } from "../../src/battle-world";
 export const ENEMY_BALANCE = {
   spitter: {
     windupMs: 800,
@@ -33,9 +34,9 @@ export const SPLITTER_BALANCE = {
 };
 
 export const OVERMIND_BALANCE = {
-  spawnX: 480,
-  spawnY: 220,
-  marineSpawnY: 450,
+  spawnX: BATTLE_CENTER.x,
+  spawnY: BATTLE_CENTER.y - 50,
+  marineSpawnY: BATTLE_CENTER.y + 180,
   cooldownMs: 2200,
   windupMs: 1200,
   slamDurationMs: 1100,

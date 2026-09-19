@@ -1,3 +1,4 @@
+import { clampBattleX, clampBattleY } from "./battle-world";
 import {
   ENEMY_BALANCE,
   OVERMIND_BALANCE,
@@ -26,8 +27,8 @@ function mini(
     id: state.nextEnemyId++,
     kind: "mini",
     boss: false,
-    x: Math.max(24, Math.min(936, parent.x + offset)),
-    y: Math.max(24, Math.min(516, parent.y)),
+    x: clampBattleX(parent.x + offset, SPLITTER_BALANCE.childRadius),
+    y: clampBattleY(parent.y, SPLITTER_BALANCE.childRadius),
     hp,
     maxHp: hp,
     speed,

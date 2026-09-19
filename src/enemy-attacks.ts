@@ -1,3 +1,4 @@
+import { BATTLE_WORLD, clampBattleX, clampBattleY } from "./battle-world";
 import { moveOvermind } from "./overmind";
 import { ENEMY_BALANCE } from "../content/balance/enemies";
 import type { CombatEnemySaveV2, CombatSaveV2 } from "./types";
@@ -103,8 +104,8 @@ export function moveEnemy(
     state.hp -= ENEMY_BALANCE.charger.damage * armorMultiplier;
     attack.hit = true;
   }
-  enemy.x = Math.max(24, Math.min(936, enemy.x));
-  enemy.y = Math.max(24, Math.min(516, enemy.y));
+  enemy.x = clampBattleX(enemy.x, enemy.radius);
+  enemy.y = clampBattleY(enemy.y, enemy.radius);
   if (attack.remainingMs === 0) {
     attack.phase = "cooldown";
     attack.remainingMs = tuning.cooldownMs;
@@ -129,9 +130,9 @@ export function advanceEnemyProjectiles(
     return (
       shot.remainingMs > 0 &&
       shot.x >= 0 &&
-      shot.x <= 960 &&
+      shot.x <= BATTLE_WORLD.width &&
       shot.y >= 0 &&
-      shot.y <= 540
+      shot.y <= BATTLE_WORLD.height
     );
   });
 }

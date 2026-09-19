@@ -1,5 +1,18 @@
+import { bonusSalvage, chestDropChance } from "./luck";
+import { COMBAT_BALANCE } from "../content/balance/combat";
+import { moveInBattle, placeInBattle } from "./battle-boundaries";
+import type { CampBoundaries } from "./camp-world";
+import {
+  BATTLE_CENTER,
+  BATTLE_PLAY_BOUNDS,
+  BATTLE_WORLD,
+  clampBattleX,
+  clampBattleY,
+} from "./battle-world";
+import { combatAim } from "./combat-aim";
 import {
   MISSION_PRESETS,
+  waveDurationMs,
   missionLengthForWaves,
 } from "../content/balance/missions";
 import { splitEnemy } from "./overmind";
@@ -12,8 +25,7 @@ import { moveEnemy, advanceEnemyProjectiles } from "./enemy-attacks";
 import { omniRateBonus } from "./forge";
 import { STATUS_BALANCE } from "../content/balance/status";
 import { CHAIN_BALANCE } from "../content/balance/chain";
-import { AMMO_BALANCE } from "../content/balance/ammo";
-import { acquireAmmo, drawAmmo } from "./ammo";
+import { drawAmmo } from "./ammo";
 import { moduleTotal } from "./modules";
 import {
   AMMO_TYPES,
@@ -29,6 +41,7 @@ import {
 } from "./types";
 
 export interface CombatSnapshot {
+  chestLoot?: Ammo[];
   ammoInventory?: AmmoInventory;
   simulationTick?: number;
   hp: number;
@@ -36,10 +49,12 @@ export interface CombatSnapshot {
   salvage: number;
   medkits: number;
   enemiesLeft: number;
+  remainingMs: number | null;
   wave: number;
 }
 
 export interface CombatRulesOptions {
+  boundaries?: CampBoundaries;
   wave: number;
   totalWaves: number;
   difficulty: "easy" | "standard";
@@ -130,19 +145,24 @@ export class CombatSimulation {
   readonly shotDelay: number;
   readonly moveSpeed: number;
   outcome: "victory" | "defeat" | null = null;
+  visibleBounds?: { left: number; right: number; top: number; bottom: number };
   private chainFlashes: ChainFlash[] = [];
+  private revealedChestLoot: Ammo[] = [];
 
   constructor(private readonly options: CombatRulesOptions) {
-    this.baseDamage = 18 * (1 + moduleTotal(options.modules, "damage"));
+    this.baseDamage =
+      COMBAT_BALANCE.baseDamage * (1 + moduleTotal(options.modules, "damage"));
     this.shotDelay =
-      520 /
+      COMBAT_BALANCE.shotDelayMs /
       ((1 + moduleTotal(options.modules, "attackSpeed")) *
         (1 +
           omniRateBonus({
             ...options,
             ammoCapacity: options.ammoCapacity ?? 1,
           })));
-    this.moveSpeed = 220 * (1 + moduleTotal(options.modules, "moveSpeed"));
+    this.moveSpeed =
+      COMBAT_BALANCE.marineSpeed *
+      (1 + moduleTotal(options.modules, "moveSpeed"));
     const mission = MISSION_PRESETS[missionLengthForWaves(options.totalWaves)];
     this.state =
       options.restore?.wave === options.wave
@@ -154,11 +174,11 @@ export class CombatSimulation {
             salvage: options.salvage,
             medkits: options.medkits,
             marine: {
-              x: 480,
+              x: BATTLE_CENTER.x,
               y:
                 options.wave === options.totalWaves
                   ? OVERMIND_BALANCE.marineSpawnY
-                  : 270,
+                  : BATTLE_CENTER.y,
             },
             spawned: 0,
             spawnTotal:
@@ -180,6 +200,8 @@ export class CombatSimulation {
             enemies: [],
             bolts: [],
           };
+    if (options.boundaries)
+      this.state.marine = placeInBattle(this.state.marine, options.boundaries);
     this.state.ammoInventory ??= structuredClone({
       ammo: options.ammo,
       activeAmmoIds: options.activeAmmoIds,
@@ -199,11 +221,48 @@ export class CombatSimulation {
     return Math.floor(this.random() * (max - min + 1)) + min;
   }
 
+  private enemySpawnPoint(): Position {
+    const { left, right, top, bottom } = BATTLE_PLAY_BOUNDS;
+    for (let attempt = 0; attempt < 16; attempt++) {
+      const edge = this.randomBetween(0, 3);
+      const point = {
+        x:
+          edge === 0
+            ? left + 24
+            : edge === 1
+              ? right - 24
+              : this.randomBetween(left + 24, right - 24),
+        y:
+          edge === 2
+            ? top + 24
+            : edge === 3
+              ? bottom - 24
+              : this.randomBetween(top + 24, bottom - 24),
+      };
+      const spawn = this.options.boundaries
+        ? placeInBattle(point, this.options.boundaries)
+        : point;
+      if (distance(spawn, this.state.marine) >= 360) return spawn;
+    }
+    // A bounded deterministic fallback keeps arrivals away from a marine at an edge.
+    return [
+      { x: left + 24, y: top + 24 },
+      { x: right - 24, y: top + 24 },
+      { x: left + 24, y: bottom - 24 },
+      { x: right - 24, y: bottom - 24 },
+    ]
+      .map((p) =>
+        this.options.boundaries ? placeInBattle(p, this.options.boundaries) : p,
+      )
+      .sort(
+        (a, b) =>
+          distance(b, this.state.marine) - distance(a, this.state.marine),
+      )[0];
+  }
+
   private spawnEnemy(): void {
     const boss = this.options.wave === this.options.totalWaves;
-    const edge = this.randomBetween(0, 3);
-    const x = edge === 0 ? 40 : edge === 1 ? 920 : this.randomBetween(40, 920);
-    const y = edge === 2 ? 40 : edge === 3 ? 500 : this.randomBetween(40, 500);
+    const { x, y } = this.enemySpawnPoint();
     const hp = boss ? 620 : 42 + this.options.wave * 10;
     const schedule =
       missionLengthForWaves(this.options.totalWaves) === "short"
@@ -260,52 +319,90 @@ export class CombatSimulation {
     return tiers;
   }
 
+  private isVisible(point: Position): boolean {
+    const b = this.visibleBounds;
+    return (
+      !b ||
+      (point.x >= b.left &&
+        point.x <= b.right &&
+        point.y >= b.top &&
+        point.y <= b.bottom)
+    );
+  }
+
   private fire(): void {
     const state = this.state;
     if (state.shotCooldownMs > 0 || !state.enemies.length) return;
     const tiers = this.activeTiers();
-    const pellets = tiers["Multi Shot"] ? tiers["Multi Shot"] + 1 : 1;
-    if (state.bolts.length + pellets > 160) return;
-    const origin = { x: state.marine.x + 32, y: state.marine.y - 26 };
-    const target = [...state.enemies]
-      .filter((e) => e.hp > 0)
-      .sort(
-        (a, b) => distance(origin, a) - distance(origin, b) || a.id - b.id,
-      )[0];
-    if (!target) return;
-    const shot: CombatShotSave = {
-      id: state.nextShotId++,
-      baseDamage: this.baseDamage,
-      chainRemaining: tiers["Electric Chain"],
-      chainStarted: false,
-      chainVisited: [],
-      burnFunds: STATUS_BALANCE.burnFractions[tiers.Fiery] * this.baseDamage,
-      frost: tiers.Frost,
-      fiery: tiers.Fiery,
-    };
-    state.shots.push(shot);
-    const damage =
-      (this.baseDamage * [1, 1.15, 1.3, 1.45, 1.6][tiers["Multi Shot"]]) /
-      pellets;
-    const angle = Math.atan2(target.y - origin.y, target.x - origin.x);
-    for (let i = 0; i < pellets; i++) {
-      const spread = (i - (pellets - 1) / 2) * 0.12;
-      state.bolts.push({
-        id: state.nextBoltId++,
-        shotId: shot.id,
-        ...origin,
-        vx:
-          Math.cos(angle + spread) *
-          560 *
-          (1 + moduleTotal(this.options.modules, "projectileSpeed")),
-        vy:
-          Math.sin(angle + spread) *
-          560 *
-          (1 + moduleTotal(this.options.modules, "projectileSpeed")),
-        damage,
-        pierce: tiers.Piercing,
-        hitIds: [],
-      });
+    const equipped = AMMO_TYPES.filter((type) => tiers[type] > 0);
+    const streams: (AmmoType | undefined)[] = equipped.length
+      ? equipped
+      : [undefined];
+    const projectileCount = streams.reduce(
+      (sum, type) => sum + (type === "Multi Shot" ? tiers[type] + 1 : 1),
+      0,
+    );
+    if (state.bolts.length + projectileCount > COMBAT_BALANCE.maxProjectiles)
+      return;
+    const aim = combatAim(
+      state.marine,
+      state.enemies.filter((e) => this.isVisible(e)),
+      COMBAT_BALANCE.weaponRange,
+    );
+    if (!aim) return;
+    const angle = Math.atan2(
+      aim.target.y - aim.origin.y,
+      aim.target.x - aim.origin.x,
+    );
+    // Keep the volley's direct damage unchanged when splitting it into ammo streams.
+    const streamDamage =
+      (this.baseDamage * COMBAT_BALANCE.multiShotDamage[tiers["Multi Shot"]]) /
+      streams.length;
+    for (const [streamIndex, type] of streams.entries()) {
+      const pellets = type === "Multi Shot" ? tiers[type] + 1 : 1;
+      const tier = type ? tiers[type] : 0;
+      const shot: CombatShotSave = {
+        id: state.nextShotId++,
+        ammoTypes: type ? [type] : [],
+        baseDamage: streamDamage,
+        chainRemaining: type === "Electric Chain" ? tier : 0,
+        chainStarted: false,
+        chainVisited: [],
+        burnFunds:
+          type === "Fiery"
+            ? STATUS_BALANCE.burnFractions[tier] * streamDamage
+            : 0,
+        frost: type === "Frost" ? tier : 0,
+        fiery: type === "Fiery" ? tier : 0,
+      };
+      state.shots.push(shot);
+      const offset = (streamIndex - (streams.length - 1) / 2) * 6;
+      const origin = {
+        x: aim.origin.x - Math.sin(angle) * offset,
+        y: aim.origin.y + Math.cos(angle) * offset,
+      };
+      const streamAngle = Math.atan2(
+        aim.target.y - origin.y,
+        aim.target.x - origin.x,
+      );
+      for (let i = 0; i < pellets; i++) {
+        const spread =
+          (i - (pellets - 1) / 2) * COMBAT_BALANCE.multiShotSpreadRadians;
+        const speed =
+          COMBAT_BALANCE.projectileSpeed *
+          (1 + moduleTotal(this.options.modules, "projectileSpeed"));
+        state.bolts.push({
+          id: state.nextBoltId++,
+          shotId: shot.id,
+          remainingRange: COMBAT_BALANCE.weaponRange,
+          ...origin,
+          vx: Math.cos(streamAngle + spread) * speed,
+          vy: Math.sin(streamAngle + spread) * speed,
+          damage: streamDamage / pellets,
+          pierce: type === "Piercing" ? tier : 0,
+          hitIds: [],
+        });
+      }
     }
     state.shotCooldownMs = this.shotDelay;
   }
@@ -358,7 +455,8 @@ export class CombatSimulation {
           (e) =>
             e.hp > 0 &&
             !shot.chainVisited.includes(e.id) &&
-            distance(preceding, e) <= CHAIN_BALANCE.range,
+            distance(preceding, e) <= CHAIN_BALANCE.range &&
+            this.isVisible(e),
         )
         .sort(
           (a, b) =>
@@ -400,16 +498,25 @@ export class CombatSimulation {
       state.spawnCooldownMs = this.spawnDelay();
     }
     const norm = Math.max(1, Math.hypot(movement.x, movement.y));
-    state.marine.x = clamp(
-      state.marine.x + (movement.x / norm) * this.moveSpeed * dt,
-      44,
-      916,
-    );
-    state.marine.y = clamp(
-      state.marine.y + (movement.y / norm) * this.moveSpeed * dt,
-      58,
-      495,
-    );
+    if (this.options.boundaries) {
+      state.marine = moveInBattle(
+        state.marine,
+        {
+          x: state.marine.x + (movement.x / norm) * this.moveSpeed * dt,
+          y: state.marine.y + (movement.y / norm) * this.moveSpeed * dt,
+        },
+        this.options.boundaries,
+      );
+    } else {
+      state.marine.x = clampBattleX(
+        state.marine.x + (movement.x / norm) * this.moveSpeed * dt,
+        20,
+      );
+      state.marine.y = clampBattleY(
+        state.marine.y + (movement.y / norm) * this.moveSpeed * dt,
+        20,
+      );
+    }
     // Settle old reservoirs before new impacts fund them at this timestamp.
     for (const enemy of state.enemies) {
       const burn = Math.min(enemy.burnRemainingDamage, enemy.burnRate * dt);
@@ -418,7 +525,8 @@ export class CombatSimulation {
       if (enemy.burnRemainingDamage <= 0) enemy.burnRate = 0;
       const slow = enemy.slowRemainingMs > 0 ? 1 - enemy.slowAmount : 1;
       enemy.slowRemainingMs = Math.max(0, enemy.slowRemainingMs - STEP_MS);
-      if (enemy.hp > 0)
+      if (enemy.hp > 0) {
+        const from = { x: enemy.x, y: enemy.y };
         moveEnemy(
           enemy,
           state,
@@ -426,15 +534,36 @@ export class CombatSimulation {
           slow,
           20 / (20 + Math.min(20, moduleTotal(this.options.modules, "armor"))),
         );
+        if (this.options.boundaries)
+          Object.assign(
+            enemy,
+            moveInBattle(from, enemy, this.options.boundaries),
+          );
+      }
     }
     state.shotCooldownMs = Math.max(0, state.shotCooldownMs - STEP_MS);
     this.fire();
     const surviving: CombatBoltSaveV2[] = [];
     for (const bolt of state.bolts) {
-      const from = { x: bolt.x, y: bolt.y },
-        to = { x: bolt.x + bolt.vx * dt, y: bolt.y + bolt.vy * dt };
+      const from = { x: bolt.x, y: bolt.y };
+      bolt.remainingRange ??= COMBAT_BALANCE.weaponRange;
+      const length = Math.hypot(bolt.vx, bolt.vy) * dt;
+      const fraction = length ? Math.min(1, bolt.remainingRange / length) : 0;
+      const to = {
+        x: bolt.x + bolt.vx * dt * fraction,
+        y: bolt.y + bolt.vy * dt * fraction,
+      };
+      bolt.remainingRange = Math.max(
+        0,
+        bolt.remainingRange - length * fraction,
+      );
       const collisions = state.enemies
-        .filter((enemy) => enemy.hp > 0 && !bolt.hitIds.includes(enemy.id))
+        .filter(
+          (enemy) =>
+            enemy.hp > 0 &&
+            this.isVisible(enemy) &&
+            !bolt.hitIds.includes(enemy.id),
+        )
         .map((enemy) => ({ enemy, time: collisionTime(from, to, enemy) }))
         .filter(
           (hit): hit is { enemy: CombatEnemySaveV2; time: number } =>
@@ -458,10 +587,12 @@ export class CombatSimulation {
       bolt.y = to.y;
       if (
         !removed &&
+        bolt.remainingRange > 0 &&
+        this.isVisible(bolt) &&
         bolt.x >= -20 &&
-        bolt.x <= 980 &&
+        bolt.x <= BATTLE_WORLD.width + 20 &&
         bolt.y >= -20 &&
-        bolt.y <= 560
+        bolt.y <= BATTLE_WORLD.height + 20
       )
         surviving.push(bolt);
     }
@@ -483,8 +614,14 @@ export class CombatSimulation {
           id: enemy.id,
           x: enemy.x,
           y: enemy.y,
-          value: enemy.boss ? 12 : 1,
-          ...(enemy.id % AMMO_BALANCE.dropEveryEnemyId === 0
+          value:
+            (enemy.boss ? 12 : 1) +
+            bonusSalvage(
+              moduleTotal(this.options.modules, "luck"),
+              this.random(),
+            ),
+          ...(this.random() <
+          chestDropChance(moduleTotal(this.options.modules, "luck"))
             ? {
                 ammo: drawAmmo(
                   state.ammoInventory!,
@@ -510,7 +647,7 @@ export class CombatSimulation {
       )
         return true;
       state.salvage += pickup.value;
-      if (pickup.ammo) acquireAmmo(state.ammoInventory!, [pickup.ammo]);
+      if (pickup.ammo) (state.chestLoot ??= []).push(pickup.ammo);
       return false;
     });
     advanceEnemyProjectiles(
@@ -523,19 +660,32 @@ export class CombatSimulation {
       state.enemyProjectiles = [];
       this.outcome = "defeat";
     } else if (
-      state.spawned >= state.spawnTotal &&
-      state.enemies.length === 0
+      (state.spawned >= state.spawnTotal && state.enemies.length === 0) ||
+      this.remainingWaveMs() === 0
     ) {
       state.salvage += state.pickups.reduce(
         (sum, pickup) => sum + pickup.value,
         0,
       );
       for (const pickup of state.pickups)
-        if (pickup.ammo) acquireAmmo(state.ammoInventory!, [pickup.ammo]);
+        if (pickup.ammo) (state.chestLoot ??= []).push(pickup.ammo);
+      this.revealedChestLoot = structuredClone(state.chestLoot ?? []);
+      state.chestLoot = [];
       state.pickups = [];
       state.enemyProjectiles = [];
+      state.enemies = [];
+      state.bolts = [];
+      state.shots = [];
+      state.spawned = state.spawnTotal;
       this.outcome = "victory";
     }
+  }
+
+  private remainingWaveMs(): number | null {
+    const duration = waveDurationMs(this.options.wave, this.options.totalWaves);
+    return duration === null
+      ? null
+      : Math.max(0, duration - (this.state.simulationTick ?? 0) * STEP_MS);
   }
 
   useMedkit(): void {
@@ -562,6 +712,11 @@ export class CombatSimulation {
   }
   snapshot(): CombatSnapshot {
     return {
+      chestLoot: structuredClone(
+        this.outcome === "victory"
+          ? this.revealedChestLoot
+          : (this.state.chestLoot ?? []),
+      ),
       ammoInventory: structuredClone(this.state.ammoInventory),
       simulationTick: this.state.simulationTick ?? 0,
       hp: this.state.hp,
@@ -569,6 +724,7 @@ export class CombatSimulation {
       salvage: this.state.salvage,
       medkits: this.state.medkits,
       wave: this.options.wave,
+      remainingMs: this.remainingWaveMs(),
       enemiesLeft: Math.max(
         0,
         this.state.spawnTotal - this.state.spawned + this.state.enemies.length,
