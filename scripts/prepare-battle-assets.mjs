@@ -1,13 +1,7 @@
 import { mkdir, readdir } from "node:fs/promises";
 import { spawnSync } from "node:child_process";
-import sharp from "sharp";
 
-const arena = "src/assets/environment/arena";
-await mkdir(`${arena}/runtime`, { recursive: true });
-await sharp(`${arena}/masters/mars_arena_fence_v001.png`)
-  .resize({ width: 3840, height: 2160, fit: "fill" })
-  .webp({ quality: 88 })
-  .toFile(`${arena}/runtime/mars-arena-fence.webp`);
+// The supplied 4K arena PNG is used directly; no image conversion is needed.
 const output = "src/assets/audio/runtime";
 await mkdir(output, { recursive: true });
 const files = [
@@ -41,4 +35,4 @@ for (const file of files) {
   );
   if (result.status !== 0) throw new Error(`Could not encode ${file}`);
 }
-console.log(`Prepared arena and ${files.length} audio assets.`);
+console.log(`Prepared ${files.length} audio assets.`);

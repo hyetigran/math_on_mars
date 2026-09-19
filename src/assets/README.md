@@ -5,7 +5,7 @@ All finalized artwork and its reproducible source files live here. Runtime files
 - `brand/`: approved title artwork and provenance.
 - `screens/splash/`: splash master and runtime WebP.
 - `environment/camp/`: current v3 camp master and runtime WebP.
-- `environment/arena/`: rectangular chain-link-fence arena master and integrated 3840px runtime WebP; historical crater master retained.
+- `environment/arena/`: `mars-arena-4k.png` is the user-supplied Sorceress 3840×2160 arena, renamed from `sorceress-301b41a5-1789782162227.png` and used directly without conversion. Historical masters and WebP versions are retained.
 - `characters/marine/`: current v005 rig/walk sources, unarmed camp sprites, and `armed/` dual-pistol battle sprites.
 - `characters/enemies/`: approved enemy masters plus lossless run/attack runtime sheets.
 - `weapons/pulse_blaster/`: approved Twin Rail master and provenance.

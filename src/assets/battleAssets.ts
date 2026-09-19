@@ -1,5 +1,5 @@
 export const arenaBackgroundUrl = new URL(
-  "./environment/arena/runtime/mars-arena-fence.webp",
+  "./environment/arena/mars-arena-4k.png",
   import.meta.url,
 ).href;
 
