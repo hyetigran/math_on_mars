@@ -57,11 +57,35 @@ export function moveEnemy(
     hit: false,
   });
   attack.remainingMs = Math.max(0, attack.remainingMs - deltaMs);
-  if (attack.phase === "cooldown") {
-    if (kind === "charger" || distance > ENEMY_BALANCE.spitter.range) {
+  if (kind === "spitter") {
+    if (distance > ENEMY_BALANCE.spitter.range) {
       enemy.x += (dx * enemy.speed * slow * deltaMs) / 1000;
       enemy.y += (dy * enemy.speed * slow * deltaMs) / 1000;
     }
+    if (attack.remainingMs > 0) return;
+    state.nextEnemyProjectileId ??= 1;
+    state.enemyProjectiles ??= [];
+    const shot = ENEMY_BALANCE.spitter;
+    state.enemyProjectiles.push({
+      id: state.nextEnemyProjectileId++,
+      x: enemy.x,
+      y: enemy.y,
+      vx: dx * shot.projectileSpeed,
+      vy: dy * shot.projectileSpeed,
+      damage: shot.damage,
+      remainingMs: shot.projectileLifeMs,
+    });
+    Object.assign(attack, {
+      phase: "cooldown",
+      remainingMs: shot.cooldownMs,
+      dx,
+      dy,
+    });
+    return;
+  }
+  if (attack.phase === "cooldown") {
+    enemy.x += (dx * enemy.speed * slow * deltaMs) / 1000;
+    enemy.y += (dy * enemy.speed * slow * deltaMs) / 1000;
     if (attack.remainingMs === 0)
       Object.assign(attack, {
         phase: "windup",
@@ -74,23 +98,6 @@ export function moveEnemy(
   }
   if (attack.phase === "windup") {
     if (attack.remainingMs > 0) return;
-    if (kind === "spitter") {
-      state.nextEnemyProjectileId ??= 1;
-      state.enemyProjectiles ??= [];
-      const shot = ENEMY_BALANCE.spitter;
-      state.enemyProjectiles.push({
-        id: state.nextEnemyProjectileId++,
-        x: enemy.x,
-        y: enemy.y,
-        vx: attack.dx * shot.projectileSpeed,
-        vy: attack.dy * shot.projectileSpeed,
-        damage: shot.damage,
-        remainingMs: shot.projectileLifeMs,
-      });
-      attack.phase = "cooldown";
-      attack.remainingMs = tuning.cooldownMs;
-      return;
-    }
     attack.phase = "active";
     attack.remainingMs = ENEMY_BALANCE.charger.activeMs;
   }

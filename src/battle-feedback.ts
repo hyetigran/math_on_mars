@@ -16,6 +16,7 @@ export class BattleFeedback {
   private salvage: number;
   private chests: number;
   private shot: number;
+  private enemyShot: number;
   private x: number;
   private y: number;
   private travel = 0;
@@ -29,6 +30,7 @@ export class BattleFeedback {
     this.salvage = state.salvage;
     this.chests = state.chestLoot?.length ?? 0;
     this.shot = state.nextShotId;
+    this.enemyShot = state.nextEnemyProjectileId ?? 1;
     this.x = state.marine.x;
     this.y = state.marine.y;
     this.captureEnemies(state);
@@ -72,6 +74,12 @@ export class BattleFeedback {
         cues.add("ammo_multishot_accent");
     }
     this.shot = state.nextShotId;
+    if (
+      (state.nextEnemyProjectileId ?? 1) > this.enemyShot &&
+      state.enemies.some((e) => e.kind === "spitter")
+    )
+      cues.add("spitter_fire");
+    this.enemyShot = state.nextEnemyProjectileId ?? 1;
     if (state.hp < this.hp)
       cues.add(state.hp === 0 ? "marine_shutdown" : "marine_damage");
     if (

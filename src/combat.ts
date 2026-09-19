@@ -146,6 +146,7 @@ export class CombatController {
 }
 
 class MarsCombatScene extends Phaser.Scene {
+  private chargeIndicators?: Phaser.GameObjects.Graphics;
   private statusIndicators?: Phaser.GameObjects.Graphics;
   private marine!: Phaser.GameObjects.Container;
   private marineSprite!: Phaser.GameObjects.Sprite;
@@ -358,6 +359,8 @@ class MarsCombatScene extends Phaser.Scene {
       .graphics()
       .setDepth(6));
     indicators.clear();
+    const charges = (this.chargeIndicators ??= this.add.graphics().setDepth(1));
+    charges.clear();
     this.updateMarine();
     const enemyIds = new Set(state.enemies.map((e) => e.id));
     for (const [id, body] of this.enemies)
@@ -392,51 +395,37 @@ class MarsCombatScene extends Phaser.Scene {
         Math.hypot(enemy.x - state.marine.x, enemy.y - state.marine.y) <=
           enemy.radius + 30;
       const motion: EnemyBody["motion"] =
-        hasSpecialAttack || contactAttack ? "attack" : "run";
+        hasSpecialAttack ||
+        contactAttack ||
+        (enemy.kind === "spitter" &&
+          enemy.attack?.phase === "cooldown" &&
+          enemy.attack.remainingMs > ENEMY_BALANCE.spitter.cooldownMs - 200)
+          ? "attack"
+          : "run";
       if (motion !== body.motion) {
         body.motion = motion;
         body.sprite.play(`enemy-${enemyAnimationKey(body.visualKind, motion)}`);
       }
-      if (
-        enemy.attack?.phase === "windup" &&
-        (enemy.kind === "spitter" || enemy.kind === "charger")
-      ) {
-        const attack = enemy.attack;
+      if (enemy.attack?.phase === "windup" && enemy.kind === "charger") {
+        const { dx, dy } = enemy.attack;
         const length =
-          enemy.kind === "charger"
-            ? (ENEMY_BALANCE.charger.speed * ENEMY_BALANCE.charger.activeMs) /
-              1000
-            : ENEMY_BALANCE.spitter.range;
-        const tx = enemy.x + attack.dx * length;
-        const ty = enemy.y + attack.dy * length;
-        indicators
-          .lineStyle(enemy.kind === "charger" ? 18 : 8, 0x241d2e, 0.75)
-          .lineBetween(enemy.x, enemy.y, tx, ty);
-        indicators
-          .lineStyle(4, 0xffec91, 1)
-          .lineBetween(enemy.x, enemy.y, tx, ty);
-        indicators.lineBetween(
-          tx,
-          ty,
-          tx - attack.dx * 18 - attack.dy * 12,
-          ty - attack.dy * 18 + attack.dx * 12,
-        );
-        indicators.lineBetween(
-          tx,
-          ty,
-          tx - attack.dx * 18 + attack.dy * 12,
-          ty - attack.dy * 18 - attack.dx * 12,
-        );
-        indicators
-          .lineStyle(4, 0xffffff, 1)
-          .strokeCircle(enemy.x, enemy.y, enemy.radius + 7);
-        indicators
-          .fillStyle(0xffec91, 1)
-          .fillRect(
-            enemy.x - 18,
-            enemy.y + enemy.radius + 10,
-            (36 * attack.remainingMs) / ENEMY_BALANCE[enemy.kind].windupMs,
-            5,
+          (ENEMY_BALANCE.charger.speed * ENEMY_BALANCE.charger.activeMs) / 1000;
+        const tx = enemy.x + dx * length;
+        const ty = enemy.y + dy * length;
+        const neckX = tx - dx * 34;
+        const neckY = ty - dy * 34;
+        charges
+          .lineStyle(18, 0xe63740, 0.8)
+          .lineBetween(enemy.x, enemy.y, neckX, neckY);
+        charges
+          .fillStyle(0xe63740, 0.9)
+          .fillTriangle(
+            tx,
+            ty,
+            neckX - dy * 24,
+            neckY + dx * 24,
+            neckX + dy * 24,
+            neckY - dx * 24,
           );
       }
       const bossAttack = enemy.bossAttack;
@@ -566,6 +555,7 @@ class MarsCombatScene extends Phaser.Scene {
                   : []);
         body = this.add.graphics().setDepth(6);
         const looks = types.length ? types : ["Standard"];
+        body.setData("ammoType", looks[0]);
         looks.forEach((type, index) => {
           const y = (index - (looks.length - 1) / 2) * 5;
           if (type === "Fiery") {
@@ -604,9 +594,31 @@ class MarsCombatScene extends Phaser.Scene {
         });
         this.bolts.set(bolt.id, body);
       }
+      const phase = (state.simulationTick ?? 0) * 0.65 + bolt.id * 1.7;
+      const pulse = Math.sin(phase);
+      const type = body.getData("ammoType");
+      // Animate each stream independently, using simulation time so pausing freezes it.
+      body.setAlpha(
+        type === "Electric Chain" ? 0.65 + 0.35 * Math.abs(pulse) : 1,
+      );
+      body.setScale(
+        type === "Fiery"
+          ? 1 + 0.25 * pulse
+          : type === "Piercing"
+            ? 1 + 0.12 * pulse
+            : 1,
+        type === "Frost"
+          ? 0.65 + 0.35 * Math.abs(pulse)
+          : type === "Multi Shot"
+            ? 1 + 0.25 * pulse
+            : 1,
+      );
       body
         .setPosition(bolt.x, bolt.y)
-        .setRotation(Math.atan2(bolt.vy, bolt.vx));
+        .setRotation(
+          Math.atan2(bolt.vy, bolt.vx) +
+            (type === "Electric Chain" ? 0.1 * pulse : 0),
+        );
     }
     for (const { from, to } of this.simulation.drainChainFlashes()) {
       this.audio?.play("ammo_electric_arc", 0.3);

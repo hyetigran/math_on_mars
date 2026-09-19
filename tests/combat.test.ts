@@ -974,3 +974,61 @@ test("Luck increases real chest drops and bonus salvage across defeated mobs", (
   assert.ok(results[1].salvage > 1400 && results[1].salvage < 1600);
   assert.ok(results[1].chestLoot!.length > results[0].chestLoot!.length);
 });
+
+test("all four equipped ammo types fire their own projectiles every volley", () => {
+  for (const omitted of [
+    "Piercing",
+    "Multi Shot",
+    "Electric Chain",
+    "Frost",
+    "Fiery",
+  ] as const) {
+    const ammo = (
+      ["Piercing", "Multi Shot", "Electric Chain", "Frost", "Fiery"] as const
+    )
+      .filter((type) => type !== omitted)
+      .map((type) => ({ id: type, type, tier: 1 as const }));
+    const sim = new CombatSimulation({
+      ...options,
+      ammo,
+      activeAmmoIds: ammo.map((a) => a.id),
+      ammoCapacity: 4,
+    });
+    sim.state.marine = { x: 480, y: 270 };
+    sim.state.enemies = [enemy(1, 720, 270)];
+    sim.state.spawned = sim.state.spawnTotal = 1;
+    for (let volley = 0; volley < 2; volley++) {
+      sim.state.shotCooldownMs = 0;
+      const firstId = sim.state.nextShotId;
+      sim.advance(STEP);
+      const shots = sim.state.shots.filter((s) => s.id >= firstId);
+      assert.deepEqual(
+        shots.map((s) => s.ammoTypes?.[0]).sort(),
+        ammo.map((a) => a.type).sort(),
+      );
+      for (const shot of shots)
+        assert.ok(sim.state.bolts.some((b) => b.shotId === shot.id));
+    }
+  }
+});
+
+test("spitters fire immediately when cooldown ends without a windup phase", () => {
+  const sim = fixture([
+    {
+      ...enemy(1, 700, 270),
+      kind: "spitter",
+      attack: {
+        phase: "cooldown",
+        remainingMs: STEP,
+        dx: 0,
+        dy: 1,
+        hit: false,
+      },
+    },
+  ]);
+  sim.advance(STEP);
+  assert.equal(sim.state.enemies[0].attack!.phase, "cooldown");
+  assert.equal(sim.state.enemyProjectiles!.length, 1);
+  assert.ok(sim.state.enemyProjectiles![0].vx < 0);
+  assert.equal(sim.state.enemyProjectiles![0].vy, 0);
+});

@@ -1,7 +1,7 @@
 import { BATTLE_CENTER } from "../../src/battle-world";
 export const ENEMY_BALANCE = {
   spitter: {
-    windupMs: 800,
+    windupMs: 0,
     cooldownMs: 2400,
     projectileSpeed: 180,
     damage: 10,

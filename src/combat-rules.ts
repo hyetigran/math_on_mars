@@ -376,7 +376,7 @@ export class CombatSimulation {
         fiery: type === "Fiery" ? tier : 0,
       };
       state.shots.push(shot);
-      const offset = (streamIndex - (streams.length - 1) / 2) * 6;
+      const offset = (streamIndex - (streams.length - 1) / 2) * 12;
       const origin = {
         x: aim.origin.x - Math.sin(angle) * offset,
         y: aim.origin.y + Math.cos(angle) * offset,
