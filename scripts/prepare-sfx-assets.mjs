@@ -11,13 +11,8 @@ const outputDir = join(root, "src/assets/sfx");
 
 const effects = [
   ["marine_footstep_01", "marine_footstep_01_source.mp3", 0.18, -24, -5],
-  ["marine_footstep_02", "marine_footstep_02_source.mp3", 0.2, -24, -5],
-  ["marine_footstep_03", "marine_footstep_03_source.mp3", 0.18, -24, -5],
-  ["marine_footstep_04", "marine_footstep_04_source.mp3", 0.22, -24, -5],
   ["portal_enter", "portal_enter_source.mp3", 1.55, -20, -3],
   ["blaster_fire_01", "blaster_fire_01_source.mp3", 0.24, -19, -2.5],
-  ["blaster_fire_02", "blaster_fire_02_source.mp3", 0.24, -19, -2.5],
-  ["blaster_fire_03", "blaster_fire_03_source.mp3", 0.22, -19, -2.5],
   ["ammo_piercing_hit", "ammo_piercing_hit_source.mp3", 0.22, -22, -4],
   ["ammo_multishot_accent", "ammo_multishot_accent_source.mp3", 0.28, -22, -4],
   ["ammo_electric_arc", "ammo_electric_arc_source.mp3", 0.45, -22, -4],

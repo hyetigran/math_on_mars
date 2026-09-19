@@ -27,8 +27,6 @@ const oneShots = [
   ],
   ["reward_select", "reward_select_source.mp3", 0.55, 1, -22, -4],
   ["salvage_pickup_01", "salvage_pickup_01_source.mp3", 0.16, 1, -26, -7],
-  ["salvage_pickup_02", "salvage_pickup_02_source.mp3", 0.18, 1, -26, -7],
-  ["salvage_pickup_03", "salvage_pickup_03_source.mp3", 0.2, 1, -26, -7],
   ["ammo_pickup", "ammo_pickup_source.mp3", 0.4, 1, -23, -5],
   ["cache_open", "cache_open_source.mp3", 1.0, 1, -21, -3.5],
   ["shop_purchase", "shop_purchase_source.mp3", 0.4, 1, -24, -5],

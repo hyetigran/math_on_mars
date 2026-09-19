@@ -5,7 +5,7 @@ All finalized artwork and its reproducible source files live here. Runtime files
 - `brand/`: approved title artwork and provenance.
 - `screens/splash/`: splash master and runtime WebP.
 - `environment/camp/`: current v3 camp master and runtime WebP.
-- `environment/arena/`: `mars-arena-4k.png` is the user-supplied Sorceress 3840×2160 arena, renamed from `sorceress-301b41a5-1789782162227.png` and used directly without conversion. Historical masters and WebP versions are retained.
+- `environment/arena/`: `mars-arena-4k.png` is the user-supplied Sorceress 3840×2160 arena, renamed from `sorceress-301b41a5-1789782162227.png` and used directly without conversion. Superseded masters and WebP versions are archived outside the repository.
 - `characters/marine/`: current v005 rig/walk sources, unarmed camp sprites, and `armed/` dual-pistol battle sprites.
 - `characters/enemies/`: approved enemy masters plus lossless run/attack runtime sheets.
 - `weapons/pulse_blaster/`: approved Twin Rail master and provenance.
@@ -47,4 +47,6 @@ Unused assets, prior models, experiments, reference screenshots and historical g
 
 `battleAssets.ts` and `armedMarineAssets.ts` expose the arena, battle audio, and all 32 armed marine runtime sheets. The armed source sheets were recovered from the sibling archive’s `unused/assets/sorceress/3d/marine-dual-pistols-v001/sprites/`; their original metadata is retained for provenance. Historical `sourceModel` paths in that metadata are not runtime or regeneration dependencies. The source manifest omitted idle, so preparation explicitly covers all four states and eight directions.
 
-Run `node scripts/prepare-armed-marine.mjs` to regenerate the armed sheets from their in-repository PNGs. It independently resizes each frame and normalizes the original 1024px bake pivot for the 512px source exports. Run `node scripts/prepare-battle-assets.mjs` to regenerate the arena WebP and compressed audio in `audio/runtime/` (requires ffmpeg). WAV masters remain unchanged. Vite includes the runtime assets in the production build and offline pack.
+Run `node scripts/prepare-armed-marine.mjs` to regenerate the armed sheets from their in-repository PNGs. It independently resizes each frame and normalizes the original 1024px bake pivot for the 512px source exports. Run `node scripts/prepare-battle-assets.mjs` to regenerate compressed audio in `audio/runtime/` (requires ffmpeg). The native 4K arena PNG is used directly. WAV masters remain unchanged. Vite includes the runtime assets in the production build and offline pack.
+
+Unused alternate audio takes, superseded arena images and local asset experiments are stored outside the repository. [Cleanup manifest](../../docs/ASSET_CLEANUP.json) records the archive path, original paths and SHA-256 checksums. Active runtime files and sources required by the current preparation tools remain in the repository.

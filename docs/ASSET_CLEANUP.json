@@ -1,0 +1,551 @@
+{
+  "archive": "../tmp_assets/unused/repo-cleanup-20260918-235253",
+  "files": [
+    {
+      "path": "assets/sorceress/audio/enemy-sfx/source/slime_hit_02_source.mp3",
+      "sha256": "e104f6bc1d10902138d8e2f60c81f32ba1f8d942985df0846f7e1e2e803b3a78",
+      "bytes": 160044,
+      "tracked": true
+    },
+    {
+      "path": "assets/sorceress/audio/enemy-sfx/source/slime_hit_03_source.mp3",
+      "sha256": "8ec9d9188cc87c94eb740932ccf82335baafa2769d9db17fc2de715ad7e07182",
+      "bytes": 160044,
+      "tracked": true
+    },
+    {
+      "path": "assets/sorceress/audio/enemy-sfx/source/slime_hit_04_source.mp3",
+      "sha256": "f96f3bb23a7da9db94c84fb36a19e2fd0b7b679b95165d460c28fcb50d30578e",
+      "bytes": 160044,
+      "tracked": true
+    },
+    {
+      "path": "assets/sorceress/audio/enemy-sfx/source/slime_move_02_source.mp3",
+      "sha256": "9d4c7c29aa0ec6f6c27d209455590e311f4e20b61a7ae00f9e01f1e47429f7ca",
+      "bytes": 160044,
+      "tracked": true
+    },
+    {
+      "path": "assets/sorceress/audio/enemy-sfx/source/slime_move_03_source.mp3",
+      "sha256": "d9acda88e1be13527fc2a3a1f3f27e9d69423251d7a09919bbc091dd6c28cff4",
+      "bytes": 160044,
+      "tracked": true
+    },
+    {
+      "path": "assets/sorceress/audio/marine-sfx/source/blaster_fire_02_source.mp3",
+      "sha256": "bac0066967f207916a87a5e7a0a02fd991b86bb21b07d3d36224d836aa611a7c",
+      "bytes": 160044,
+      "tracked": true
+    },
+    {
+      "path": "assets/sorceress/audio/marine-sfx/source/blaster_fire_03_source.mp3",
+      "sha256": "c490d1eadeae9755978fce9b45a759df3a7d88ed5426f5b86adbc45a03facfee",
+      "bytes": 160044,
+      "tracked": true
+    },
+    {
+      "path": "assets/sorceress/audio/marine-sfx/source/marine_footstep_02_source.mp3",
+      "sha256": "940ab3e9ab629b6f7e1cde11d330a42c260b46627dc07b47e40dbe9f9511b6db",
+      "bytes": 160044,
+      "tracked": true
+    },
+    {
+      "path": "assets/sorceress/audio/marine-sfx/source/marine_footstep_03_source.mp3",
+      "sha256": "01b7ad0ae84a1ae43248987b4fcd3146112c4fb0becb13637e528c8c076d4cb1",
+      "bytes": 160044,
+      "tracked": true
+    },
+    {
+      "path": "assets/sorceress/audio/marine-sfx/source/marine_footstep_04_source.mp3",
+      "sha256": "8af8502037107c82bc676733c96674200b51c38fd0b59fc5fda7688a3611d68b",
+      "bytes": 160044,
+      "tracked": true
+    },
+    {
+      "path": "assets/sorceress/audio/rewards-equipment-env/source/salvage_pickup_02_source.mp3",
+      "sha256": "ecd74cf470b2d9b0b94efe74938345c2f4a4bef40213f65ece907981a72d9557",
+      "bytes": 160044,
+      "tracked": true
+    },
+    {
+      "path": "assets/sorceress/audio/rewards-equipment-env/source/salvage_pickup_03_source.mp3",
+      "sha256": "1342f49b5342bfb2e613b384e4482d77a0ae3153d889161d2e5a8250ddc0d79f",
+      "bytes": 160044,
+      "tracked": true
+    },
+    {
+      "path": "assets/sorceress/autosprite/keyed-keyed-1789672309767.png",
+      "sha256": "739709116481d72f498f366a3c3667031985faae62b4b0f9a45b12c638e79c20",
+      "bytes": 12619468,
+      "tracked": false
+    },
+    {
+      "path": "assets/sorceress/autosprite/keyed-keyed-1789672315037.png",
+      "sha256": "ab085c4c6225201fe3551ee8cdaec604116acc55eb3aee48ce11e424510cfca8",
+      "bytes": 11941903,
+      "tracked": false
+    },
+    {
+      "path": "assets/sorceress/enemies/charger-attack-1789671338076.mp4",
+      "sha256": "49609f4d233f6c0a780397cb661f84a912ec46353be55cd7873f9a3098a5918d",
+      "bytes": 640150,
+      "tracked": false
+    },
+    {
+      "path": "assets/sorceress/enemies/charger-run-1789671336894.mp4",
+      "sha256": "b7ad90b1b58cc9c8c96c63e9fad7608bb75db2b40aed88747efda129501dbda4",
+      "bytes": 742726,
+      "tracked": false
+    },
+    {
+      "path": "assets/sorceress/enemies/drifter-attack-1789671332824.mp4",
+      "sha256": "74a3d2890b631e2dcc56135cabd93d35c2ccdb76b99d6cb9cf1d7d02e26f9722",
+      "bytes": 527955,
+      "tracked": false
+    },
+    {
+      "path": "assets/sorceress/enemies/drifter-run-1789671330499.mp4",
+      "sha256": "e08a40cf9226449554b5140505be516a62224fef2219e78136db8501f1a7e3e1",
+      "bytes": 701350,
+      "tracked": false
+    },
+    {
+      "path": "assets/sorceress/enemies/overmind-attack-1789671346122.mp4",
+      "sha256": "2c93846ab3bc9f4f7ea103db50f0f7cfbe4bc5a9ae764d20d8af0e2630c933a2",
+      "bytes": 1127177,
+      "tracked": false
+    },
+    {
+      "path": "assets/sorceress/enemies/overmind-run-1789671343913.mp4",
+      "sha256": "c25cfc5ed73bdd70f8af8b2e09122315c8c3c09c180b30612889aeee50ff9158",
+      "bytes": 1043674,
+      "tracked": false
+    },
+    {
+      "path": "assets/sorceress/enemies/spitter-attack-1789671335572.mp4",
+      "sha256": "0b8999b5e795c4a31f4ec063d6bd2f061b5e372eef7df01f851a18285399bed4",
+      "bytes": 478604,
+      "tracked": false
+    },
+    {
+      "path": "assets/sorceress/enemies/spitter-run-1789671334249.mp4",
+      "sha256": "1a359fd3e8345d904ed3830a6cc6dda4e69577ee0c3b971beced57d366b67468",
+      "bytes": 664840,
+      "tracked": false
+    },
+    {
+      "path": "assets/sorceress/enemies/sprites/drifter-run-hd.png",
+      "sha256": "85fbce9cf6c1b8b5072038de59df5ddeab9a579792417ab4fc33e054d0731715",
+      "bytes": 2865574,
+      "tracked": false
+    },
+    {
+      "path": "assets/sorceress/enemies/sprites/overmind-attack-hd.png",
+      "sha256": "fe48c1906f49964b080ac03a27eaea4c78dccaa2fadeb4047244fc198110ffaf",
+      "bytes": 4653110,
+      "tracked": false
+    },
+    {
+      "path": "assets/sorceress/enemies/sprites/overmind-run-hd.png",
+      "sha256": "06df2a88da1ec78ea2b1f420984ec1b140c9561c1573dcbb705dd1bfb28cb074",
+      "bytes": 5232842,
+      "tracked": false
+    },
+    {
+      "path": "assets/sorceress/enemies/sprites/rekeyed-blue/keyed-keyed-1789673732923.png",
+      "sha256": "ca539f9440b9e69d1f8f788a4dd63c6dc125f25c04a2fa782c81995a9267d348",
+      "bytes": 7425625,
+      "tracked": false
+    },
+    {
+      "path": "assets/sorceress/enemies/sprites/rekeyed-blue/keyed-keyed-1789673738020.png",
+      "sha256": "925eec8a5f9e93b262dff3848ec666af0f26f05a60cada247bfca4d5e8b90ba7",
+      "bytes": 7023445,
+      "tracked": false
+    },
+    {
+      "path": "assets/sorceress/enemies/sprites/spitter-run-hd.png",
+      "sha256": "ca9c32e42b341067083b29272ddfe97c48f46aa4cf330fdfe9fbb07fdb43f6db",
+      "bytes": 2999035,
+      "tracked": false
+    },
+    {
+      "path": "assets/sorceress/enemies/summoner-attack-1789671342104.mp4",
+      "sha256": "b8332b889a6f17337c9781b31f4d095cdd28857c177c279a3374f1664b83e34b",
+      "bytes": 637529,
+      "tracked": false
+    },
+    {
+      "path": "assets/sorceress/enemies/summoner-run-1789671339579.mp4",
+      "sha256": "49b312593309ddabd7ee6e072a58058a2db20262654935542502d58d2e4826f3",
+      "bytes": 789009,
+      "tracked": false
+    },
+    {
+      "path": "src/assets/audio/runtime/blaster_fire_02.mp3",
+      "sha256": "cf5b42657d964abc25e6987013b90db309121a861d9016cef9079cd004766ccf",
+      "bytes": 3943,
+      "tracked": true
+    },
+    {
+      "path": "src/assets/audio/runtime/blaster_fire_03.mp3",
+      "sha256": "27c5b18b3494cd572964978ae87d038e5d6188dac356322555b73de764ad532e",
+      "bytes": 3607,
+      "tracked": true
+    },
+    {
+      "path": "src/assets/audio/runtime/marine_footstep_02.mp3",
+      "sha256": "d9b3edcfe1430d7c2e730dc1cee9c86b49c5480262a8414078f876dc86faeee6",
+      "bytes": 3322,
+      "tracked": true
+    },
+    {
+      "path": "src/assets/audio/runtime/marine_footstep_03.mp3",
+      "sha256": "6a096c996b29e404f26e45aac5dae6ea8448767bc5d9a542b0fa2ba02b7fca66",
+      "bytes": 3082,
+      "tracked": true
+    },
+    {
+      "path": "src/assets/audio/runtime/marine_footstep_04.mp3",
+      "sha256": "870e5f741fa2aa6d6a9552a1e2cad11eb442f89dae86f131b5511dad59a3f716",
+      "bytes": 3658,
+      "tracked": true
+    },
+    {
+      "path": "src/assets/audio/runtime/salvage_pickup_02.mp3",
+      "sha256": "02f47d5967f0b074ba1b506f52b01a047e428e7f06384c95a62ebcbe6765da7f",
+      "bytes": 3630,
+      "tracked": true
+    },
+    {
+      "path": "src/assets/audio/runtime/salvage_pickup_03.mp3",
+      "sha256": "32eb173adffbb37d6eaca3020cf139cef62c46699574b3ac778d844ee593ae4c",
+      "bytes": 4350,
+      "tracked": true
+    },
+    {
+      "path": "src/assets/audio/runtime/slime_hit_02.mp3",
+      "sha256": "ce4a8483580f4607055504057af17d55ea844113f76b0849d7bcae80aa87bb37",
+      "bytes": 3274,
+      "tracked": true
+    },
+    {
+      "path": "src/assets/audio/runtime/slime_hit_03.mp3",
+      "sha256": "dc7a4518008724acad4cc78fbb84000474314e96ce6833d198024f00bda8b717",
+      "bytes": 3514,
+      "tracked": true
+    },
+    {
+      "path": "src/assets/audio/runtime/slime_hit_04.mp3",
+      "sha256": "a724c444c58be5a5148710a7253b25b5a70540ce656301d2da7d12e735487360",
+      "bytes": 2962,
+      "tracked": true
+    },
+    {
+      "path": "src/assets/audio/runtime/slime_move_02.mp3",
+      "sha256": "f1f8eb38bef2e1c4e6c61dc8e3790659699541c55bdb0beee127e56b8236febe",
+      "bytes": 4859,
+      "tracked": true
+    },
+    {
+      "path": "src/assets/audio/runtime/slime_move_03.mp3",
+      "sha256": "aa51e4723296840109bdd898362864ca6d8c4f1fe8ad5dd4cdc6b7060ca42a2d",
+      "bytes": 4355,
+      "tracked": true
+    },
+    {
+      "path": "src/assets/environment/arena/masters/mars_arena_fence_v001.md",
+      "sha256": "1d2194fa168aab3ee2b50d81b51b26b69afc43e9cf1a989fae9b2dde6b09124a",
+      "bytes": 2234,
+      "tracked": true
+    },
+    {
+      "path": "src/assets/environment/arena/masters/mars_arena_fence_v001.png",
+      "sha256": "46a328d4104876ba683634d0e9fc4fc138d46f48e44c85748a4986d014a4321b",
+      "bytes": 2407536,
+      "tracked": true
+    },
+    {
+      "path": "src/assets/environment/arena/masters/mars_arena_fence_v002.md",
+      "sha256": "13839433fdfd528ebe6b4df698383a064f0b1d271f23a230f22b0080183ccd04",
+      "bytes": 1545,
+      "tracked": false
+    },
+    {
+      "path": "src/assets/environment/arena/masters/mars_arena_fence_v002.png",
+      "sha256": "704ce547f53aac4dbf54559f5e51d78de7a738b40bed08d1409fc6f3d9e41086",
+      "bytes": 2344645,
+      "tracked": false
+    },
+    {
+      "path": "src/assets/environment/arena/masters/mars_arena_fence_v003.md",
+      "sha256": "b1d304ca62216ad6f8db9eda2093764bac7dd84e2ff500be5586aade6d49e3cf",
+      "bytes": 399,
+      "tracked": false
+    },
+    {
+      "path": "src/assets/environment/arena/masters/mars_arena_fence_v003.png",
+      "sha256": "d465c9f2067b4b785d356a492f01a1c77b73459e367fa0c64458fa4669216f3c",
+      "bytes": 1582184,
+      "tracked": false
+    },
+    {
+      "path": "src/assets/environment/arena/masters/mars_arena_fence_v004.md",
+      "sha256": "b13acbf227451099d8f05214c29911b352c4826bc9c732c527deef16a478b05d",
+      "bytes": 389,
+      "tracked": false
+    },
+    {
+      "path": "src/assets/environment/arena/masters/mars_arena_fence_v004.png",
+      "sha256": "d5a914aa81e13806fc9ff5c455cadf3641fddadea20fa450fcea8644bec6ad81",
+      "bytes": 2313850,
+      "tracked": false
+    },
+    {
+      "path": "src/assets/environment/arena/masters/mars_arena_fence_v005.md",
+      "sha256": "ed22d0200711fc9c98ea3a62887c6811995e5add0d260ca1b217a6da63452e6d",
+      "bytes": 370,
+      "tracked": false
+    },
+    {
+      "path": "src/assets/environment/arena/masters/mars_arena_fence_v006.md",
+      "sha256": "ac1c511b39469278f491ef8a533492f9e8164277bc95cc8c6d2be6d3bb41c027",
+      "bytes": 1125,
+      "tracked": false
+    },
+    {
+      "path": "src/assets/environment/arena/masters/mars_arena_fence_v006.png",
+      "sha256": "ca85e1655a7209d3d93c167f58f85afd4ff98367da402721ba25e68f87006d19",
+      "bytes": 2181909,
+      "tracked": false
+    },
+    {
+      "path": "src/assets/environment/arena/masters/mars_arena_fence_v007.md",
+      "sha256": "b366dd72662974f2acfa0ff3309da11fd05365872258e758cb5e29d548b01807",
+      "bytes": 1066,
+      "tracked": false
+    },
+    {
+      "path": "src/assets/environment/arena/masters/mars_arena_fence_v007.png",
+      "sha256": "9089cd470f0b8abe3b73283860cb8a5cb0215a0821b823374f5d0bca2746e8b9",
+      "bytes": 2154256,
+      "tracked": false
+    },
+    {
+      "path": "src/assets/environment/arena/masters/mars_arena_fence_v008_4k.md",
+      "sha256": "169e615b7503f37daa811e9fe38b7a022b0ca7d80c58f0f293390955da3b7dff",
+      "bytes": 459,
+      "tracked": false
+    },
+    {
+      "path": "src/assets/environment/arena/masters/mars_arena_fence_v008_4k.png",
+      "sha256": "c4f620d2ab2fde24e8d4ec659aa56f1af83b3042a2755fb9284c1ef49a85b493",
+      "bytes": 14819262,
+      "tracked": false
+    },
+    {
+      "path": "src/assets/environment/arena/masters/mars_arena_v005_light_center_source.png",
+      "sha256": "df9a344f4f32a69bcb03850ebd80204730d3eab0b6f14f9cbcef78a9f37e90cb",
+      "bytes": 11440135,
+      "tracked": true
+    },
+    {
+      "path": "src/assets/environment/arena/runtime/mars-arena-fence.webp",
+      "sha256": "f53d7892e59a2333349cda33e3ced2b24be317f1b6236f5b777ded423fee8ca1",
+      "bytes": 10115372,
+      "tracked": true
+    },
+    {
+      "path": "src/assets/environment/arena/runtime/mars-arena.webp",
+      "sha256": "400a37ce744776529608bd21a3d9463b262e60b61da5cd2192c3f91c9b06d7e8",
+      "bytes": 727630,
+      "tracked": true
+    },
+    {
+      "path": "src/assets/sfx/blaster_fire_02.wav",
+      "sha256": "867acfdb35ce07ed9f367d00e51c38c512684c23480f9c498f45a39e99c041dd",
+      "bytes": 34752,
+      "tracked": true
+    },
+    {
+      "path": "src/assets/sfx/blaster_fire_03.wav",
+      "sha256": "a0e7b508eb6e24c952e9c83bbfa92c16c1afaa80be89d961ba16bb7d5ea8a0dc",
+      "bytes": 31872,
+      "tracked": true
+    },
+    {
+      "path": "src/assets/sfx/enemies/slime_hit_02.wav",
+      "sha256": "fab9309c614f73008d10f138d24dcf63eb41c33f18826d8b6fc80edcfe6427b3",
+      "bytes": 28996,
+      "tracked": true
+    },
+    {
+      "path": "src/assets/sfx/enemies/slime_hit_03.wav",
+      "sha256": "4e25badc5fc72eeaa46c085dd80b83d312d8e53095872339492f5e7b8e266068",
+      "bytes": 31876,
+      "tracked": true
+    },
+    {
+      "path": "src/assets/sfx/enemies/slime_hit_04.wav",
+      "sha256": "586365abae8efbeb5984ff0f9a914e66591da3578554ad870f6c1aa725780bbf",
+      "bytes": 23236,
+      "tracked": true
+    },
+    {
+      "path": "src/assets/sfx/enemies/slime_move_02.wav",
+      "sha256": "81275e5932fbf8730782dd6670c1c406ff6e8b88a5bc442b33f85c0d5ddf8c2e",
+      "bytes": 49156,
+      "tracked": true
+    },
+    {
+      "path": "src/assets/sfx/enemies/slime_move_03.wav",
+      "sha256": "cb5b4394f08a71bf6b03408f6ca2ed42019f28d09eaa96a15c100000e1e4463e",
+      "bytes": 40516,
+      "tracked": true
+    },
+    {
+      "path": "src/assets/sfx/marine_footstep_02.wav",
+      "sha256": "d152683269e79b6ab3f2e176ab64a0b532bcb5d53c6ebb23437f68995e43d442",
+      "bytes": 28996,
+      "tracked": true
+    },
+    {
+      "path": "src/assets/sfx/marine_footstep_03.wav",
+      "sha256": "ef62f0e0ec1222eed79e0efb120f53873ffe4d3c73ce6559249f1f9f1f2b201c",
+      "bytes": 26116,
+      "tracked": true
+    },
+    {
+      "path": "src/assets/sfx/marine_footstep_04.wav",
+      "sha256": "5461917e0ae9e8c89833d350d628c7081a734c4c799d8ef010a5b77ac0397b7e",
+      "bytes": 31876,
+      "tracked": true
+    },
+    {
+      "path": "src/assets/sfx/rewards-equipment-environment/salvage_pickup_02.wav",
+      "sha256": "020660346f0f4660c0b577af4b655bfdbfc62b3bb2ef11dbbea572bb9291ae8d",
+      "bytes": 26136,
+      "tracked": true
+    },
+    {
+      "path": "src/assets/sfx/rewards-equipment-environment/salvage_pickup_03.wav",
+      "sha256": "7a0bb9942996239ed801c04f5f790313410f9607393bc72e4185af825e64fdb6",
+      "bytes": 29016,
+      "tracked": true
+    },
+    {
+      "path": "tmp_assets/.DS_Store",
+      "sha256": "a1d4507cbcb4f6e783ff76bcc3d2a306e0799ef30d36fdc4ab32d325f2679f4f",
+      "bytes": 6148,
+      "tracked": false
+    },
+    {
+      "path": "tmp_assets/06_items/.DS_Store",
+      "sha256": "2bf1dc6054f11998e6d61d7b8a246bda7ce002c46127052972000215aafaea34",
+      "bytes": 6148,
+      "tracked": false
+    },
+    {
+      "path": "tmp_assets/06_items/salvage_variants/generation.json",
+      "sha256": "ea16861e2ba1e3bb47ef62418719e426c55c0e516aeb71c2d577339ba04dc488",
+      "bytes": 4034,
+      "tracked": false
+    },
+    {
+      "path": "tmp_assets/06_items/salvage_variants/review.html",
+      "sha256": "8cdf916ae866f3d853344e547d99bfdb84fff3c821f8c3a460ac9991388f5e83",
+      "bytes": 2954,
+      "tracked": false
+    },
+    {
+      "path": "tmp_assets/06_items/salvage_variants/salvage_bundle_previous.png",
+      "sha256": "1e6b047630ab359886eb4055981250572d9dc3a911c5a42045e2f7324183bf70",
+      "bytes": 847920,
+      "tracked": false
+    },
+    {
+      "path": "tmp_assets/06_items/salvage_variants/salvage_gear_v001.png",
+      "sha256": "df19c7b2b3eb7b38a1c3d6977c74421355e049b2f69750b03176eae02c6f10bc",
+      "bytes": 719919,
+      "tracked": false
+    },
+    {
+      "path": "tmp_assets/06_items/salvage_variants/salvage_hex_nut_v001.png",
+      "sha256": "7afd13c01f51ca7de416db8a7b068ded79807cdab30745e8790c7b44b3160062",
+      "bytes": 644349,
+      "tracked": false
+    },
+    {
+      "path": "tmp_assets/06_items/salvage_variants/salvage_plate_stack_v001.png",
+      "sha256": "4786000e54c1a45da9eee13aa8567f506d8fa827578df12cd89d66b5051f6cb1",
+      "bytes": 761894,
+      "tracked": false
+    },
+    {
+      "path": "tmp_assets/08_cursors/cursor_set_01_classic.png",
+      "sha256": "a1bd24705058603c8db45df96a75f365a78206c0652703035f7fd9a09157d730",
+      "bytes": 362993,
+      "tracked": false
+    },
+    {
+      "path": "tmp_assets/08_cursors/cursor_set_01_classic_arrow_32.png",
+      "sha256": "d255ab0c1ecef8b04581b0098d63c18a31aedd6ec15dfcb895a97db89fe872f8",
+      "bytes": 1728,
+      "tracked": false
+    },
+    {
+      "path": "tmp_assets/08_cursors/cursor_set_01_classic_pointer_32.png",
+      "sha256": "dc3f02eea726c883f1563e4607220d6bbab4b32a51d6ee49865f70647f590d81",
+      "bytes": 1910,
+      "tracked": false
+    },
+    {
+      "path": "tmp_assets/08_cursors/cursor_set_02_cyan.png",
+      "sha256": "284eb3c9a815ec265105396d3dd3fd4c2a72051c7201ebbaef38411e88846719",
+      "bytes": 462771,
+      "tracked": false
+    },
+    {
+      "path": "tmp_assets/08_cursors/cursor_set_02_cyan_arrow_32.png",
+      "sha256": "f52dbe32ecbfa5f175e65f91e9c12d1a73947ef259fed6b06047e11b08e9ae19",
+      "bytes": 1724,
+      "tracked": false
+    },
+    {
+      "path": "tmp_assets/08_cursors/cursor_set_02_cyan_pointer_32.png",
+      "sha256": "c55b427bd2e1e21d08ff06efe41e8da42cf2566725173b33c97145b1a4d1c42d",
+      "bytes": 1785,
+      "tracked": false
+    },
+    {
+      "path": "tmp_assets/08_cursors/cursor_set_03_rounded.png",
+      "sha256": "601f750b31ee9ec05e04b33d79b6f93dbcc27c209ada0957d6d4e0a9e4098770",
+      "bytes": 488930,
+      "tracked": false
+    },
+    {
+      "path": "tmp_assets/08_cursors/cursor_set_03_rounded_arrow_32.png",
+      "sha256": "8fd3b9fec0cb75f8c0656b7524c1dabc43cbf554089eaebcb5024c1428f3a93e",
+      "bytes": 1967,
+      "tracked": false
+    },
+    {
+      "path": "tmp_assets/08_cursors/cursor_set_03_rounded_pointer_32.png",
+      "sha256": "f1f77555c45eb765ede7bff7f7a0c2698b8b10ffb7018bcd57d76444e3babc70",
+      "bytes": 1946,
+      "tracked": false
+    },
+    {
+      "path": "tmp_assets/08_cursors/generation.json",
+      "sha256": "7a456a1a5f739034b01cbb6702d5942706b4953198a72ce2f6c37e7b1eb7f918",
+      "bytes": 5689,
+      "tracked": false
+    },
+    {
+      "path": "tmp_assets/08_cursors/review.html",
+      "sha256": "6cc7893af2c7ab915a6f5fcdc4b3c456ff372b79c87c1bf32eb5cfc9f3fa29b8",
+      "bytes": 3246,
+      "tracked": false
+    }
+  ]
+}

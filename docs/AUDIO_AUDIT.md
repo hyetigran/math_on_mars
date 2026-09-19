@@ -80,7 +80,7 @@ SHA-256 comparison found no byte-identical files across supplied source MP3s, WA
 | Slime hits | slime_hit_01 | _02, _03, _04 |
 | Salvage pickups | salvage_pickup_01 | _02, _03 |
 
-64 selected runtime assets: 3 music tracks, 3 ambience loops, and 58 effects/stings. The 12 alternate runtime files and their source/master versions remain on disk, but the asset catalog excludes them and the preparation script skips them. No supplied originals were deleted.
+64 selected runtime assets: 3 music tracks, 3 ambience loops, and 58 effects/stings. The 12 alternate runtime files and their source/master versions are archived outside the repository; see `ASSET_CLEANUP.json`. The asset catalog excludes them, and preparation scripts no longer reference them. No supplied originals were deleted.
 
 ## Verification
 

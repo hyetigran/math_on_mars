@@ -13,12 +13,7 @@ const outputDir = join(root, "src/assets/sfx/enemies");
 // optional initial gain fraction and curve power for a rising warning envelope
 const effects = [
   ["slime_move_01", "slime_move_01_source.mp3", 0.3, -24, -5],
-  ["slime_move_02", "slime_move_02_source.mp3", 0.34, -24, -5],
-  ["slime_move_03", "slime_move_03_source.mp3", 0.28, -24, -5],
   ["slime_hit_01", "slime_hit_01_source.mp3", 0.18, -21, -3.5],
-  ["slime_hit_02", "slime_hit_02_source.mp3", 0.2, -21, -3.5],
-  ["slime_hit_03", "slime_hit_03_source.mp3", 0.22, -21, -3.5],
-  ["slime_hit_04", "slime_hit_04_source.mp3", 0.16, -21, -3.5],
   ["slime_death", "slime_death_source.mp3", 0.22, -22, -5],
   ["spitter_windup", "spitter_windup_source.mp3", 0.8, -22, -4, 0.25],
   ["spitter_fire", "spitter_fire_source.mp3", 0.32, -20.5, -3.5],
