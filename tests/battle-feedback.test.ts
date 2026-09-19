@@ -28,7 +28,7 @@ test("feedback observes shots and movement without mutating gameplay or repeatin
   const before = sim.serialize();
   const cues = feedback.update(sim.state);
   assert.ok(cues.some((cue) => cue.startsWith("blaster_fire_")));
-  assert.ok(cues.some((cue) => cue.startsWith("marine_footstep_")));
+  assert.ok(!cues.some((cue) => cue.startsWith("marine_footstep_")));
   assert.deepEqual(sim.serialize(), before);
   assert.deepEqual(feedback.update(sim.state), []);
 });
@@ -110,14 +110,14 @@ test("automatic fire and sprite facing use the same muzzle side in every directi
   }
 });
 
-test("repeated shots and steps always select the same approved take", () => {
+test("repeated shots use the approved take while marine movement stays silent", () => {
   const { sim, feedback } = fixture();
   for (let i = 0; i < 8; i++) {
     sim.state.nextShotId++;
     sim.state.marine.x += 30;
     const cues = feedback.update(sim.state);
     assert.ok(cues.includes("blaster_fire_01"));
-    assert.ok(cues.includes("marine_footstep_01"));
+    assert.ok(!cues.some((cue) => cue.startsWith("marine_footstep_")));
     assert.ok(!cues.some((cue) => /_0[2-4]$/.test(cue)));
   }
 });

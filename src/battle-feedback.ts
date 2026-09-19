@@ -19,9 +19,6 @@ export class BattleFeedback {
   private chests: number;
   private shot: number;
   private enemyShot: number;
-  private x: number;
-  private y: number;
-  private travel = 0;
   constructor(
     state: CombatSaveV2,
     private readonly maxHp: number,
@@ -31,8 +28,6 @@ export class BattleFeedback {
     this.chests = state.chestLoot?.length ?? 0;
     this.shot = state.nextShotId;
     this.enemyShot = state.nextEnemyProjectileId ?? 1;
-    this.x = state.marine.x;
-    this.y = state.marine.y;
     this.captureEnemies(state);
   }
   private captureEnemies(state: CombatSaveV2): void {
@@ -55,13 +50,6 @@ export class BattleFeedback {
   }
   update(state: CombatSaveV2): string[] {
     const cues = new Set<string>();
-    this.travel += Math.hypot(state.marine.x - this.x, state.marine.y - this.y);
-    this.x = state.marine.x;
-    this.y = state.marine.y;
-    if (this.travel >= 28) {
-      this.travel %= 28;
-      cues.add("marine_footstep_01");
-    }
     if (state.nextShotId > this.shot) {
       const inventory = state.ammoInventory;
       const ammo =

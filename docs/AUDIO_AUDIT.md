@@ -24,7 +24,7 @@ Names below refer to runtime MP3s under `src/assets/audio/runtime/`.
 
 | Assets | Trigger |
 |---|---|
-| marine_footstep_01 | Ground travel in camp and combat; no camp footsteps while jumping |
+| marine_footstep_01 | Ground travel in camp only; silent in combat and while jumping in camp |
 | portal_enter | Entering the camp portal |
 | blaster_fire_01, ammo_omni_fire | Normal or legendary firing |
 | ammo_multishot_accent | Multi Shot volley accent |
