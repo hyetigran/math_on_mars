@@ -1,3 +1,4 @@
+import { loadImage } from "./image-cache";
 import { BattleAudio, playUiSound, preloadCampMusic } from "./battle-audio";
 import {
   campBackgroundUrl,
@@ -57,38 +58,6 @@ interface CampAssets {
   >;
 }
 let assets: CampAssets | undefined;
-
-function loadImage(url: string): Promise<HTMLImageElement> {
-  return new Promise((resolve, reject) => {
-    const image = new Image();
-    const timeout = window.setTimeout(
-      () =>
-        finish(
-          new Error("Loading timed out. Check your connection and retry."),
-        ),
-      30000,
-    );
-    function finish(error?: Error) {
-      window.clearTimeout(timeout);
-      image.onload = image.onerror = null;
-      if (error) reject(error);
-      else resolve(image);
-    }
-    image.onload = () => {
-      void image.decode().then(
-        () => finish(),
-        () => finish(new Error("Could not decode camp artwork.")),
-      );
-    };
-    image.onerror = () =>
-      finish(
-        new Error(
-          "Could not load camp artwork. Check your connection and retry.",
-        ),
-      );
-    image.src = url;
-  });
-}
 
 export async function loadCampAssets(
   progress: (fraction: number) => void,
@@ -160,7 +129,6 @@ export async function loadCampAssets(
 /** A quiet exploration scene; combat remains owned by CombatController. */
 export class BaseCampController {
   private audio = new BattleAudio("camp");
-  private footstepDistance = 0;
   private boundaries = loadBoundaries();
   private canvas: HTMLCanvasElement;
   private context: CanvasRenderingContext2D;
@@ -385,13 +353,6 @@ export class BaseCampController {
       next.y - this.position.y,
     );
     const walking = distance > 0.01;
-    if (this.jumpElapsed === null) {
-      this.footstepDistance += distance;
-      if (this.footstepDistance >= 28) {
-        this.footstepDistance %= 28;
-        this.audio.play("marine_footstep_01", 0.16, 160);
-      }
-    }
     this.audio.setAmbient("amb_portal_hum", nearPortal(next));
     if (Math.hypot(input.x, input.y) > 0.1)
       this.direction = facing(input.x, input.y);

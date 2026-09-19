@@ -1,3 +1,4 @@
+import { loadGameAssets } from "./game-assets";
 import { installDisplayMode, usesTouchControls } from "./display-mode";
 import "./display-mode.css";
 import { playUiSound, resetBattleMusic } from "./battle-audio";
@@ -13,7 +14,7 @@ import {
   validateBattleBoundaries,
 } from "./battle-boundaries";
 import { openBoundaryEditor } from "./camp-boundary-editor";
-import { BaseCampController, loadCampAssets, splashUrl } from "./base-camp";
+import { BaseCampController, splashUrl } from "./base-camp";
 import { BUILD_VERSION } from "./build-version";
 import { prepareOfflinePack } from "./offline";
 import { cleanGameLocation } from "./offline-policy";
@@ -1593,22 +1594,28 @@ window.addEventListener("orientationchange", () => {
   if (activeProfileId && activeProfile().activeRun) showPause("Screen rotated");
 });
 
+let loadingAttempt = 0;
 async function boot(): Promise<void> {
-  prepareOfflinePack();
+  const attempt = ++loadingAttempt;
   history.replaceState(history.state, "", cleanGameLocation(location.href));
-  app.innerHTML = `<section class="loading-screen" aria-label="Loading Math on Mars"><img class="splash-backdrop" src="${splashUrl}" alt="" aria-hidden="true"><img src="${splashUrl}" alt="Math on Mars"><div class="loading-progress"><p id="loading-status" role="status">Loading base camp…</p><progress id="camp-progress" max="1" value="0" aria-label="Loading base camp"></progress></div></section>`;
+  app.innerHTML = `<section class="loading-screen" aria-label="Loading Math on Mars"><img class="splash-backdrop" src="${splashUrl}" alt="" aria-hidden="true"><img src="${splashUrl}" alt="Math on Mars"><div class="loading-progress"><p id="loading-status" role="status">Loading game assets…</p><progress id="camp-progress" max="1" value="0" aria-label="Loading game assets"></progress></div></section>`;
   try {
-    await loadCampAssets((fraction) => {
+    await loadGameAssets((fraction) => {
+      if (attempt !== loadingAttempt) return;
       const progress =
         document.querySelector<HTMLProgressElement>("#camp-progress");
       if (progress) progress.value = fraction;
+      const status = document.querySelector("#loading-status");
+      if (status)
+        status.textContent = `Loading game assets… ${Math.round(fraction * 100)}%`;
     });
   } catch (error) {
     document.querySelector(".loading-progress")!.innerHTML =
-      `<p role="alert">${escapeHtml(error instanceof Error ? error.message : "Camp could not load.")}</p><button id="retry-camp" class="button primary">Retry loading</button>`;
+      `<p role="alert">${escapeHtml(error instanceof Error ? error.message : "Game assets could not load.")}</p><button id="retry-camp" class="button primary">Retry loading</button>`;
     document.querySelector("#retry-camp")!.addEventListener("click", boot);
     return;
   }
+  prepareOfflinePack();
   try {
     repository?.close();
     repository = new IndexedProfileRepository(

@@ -60,11 +60,20 @@ function harness() {
   }).outputText;
   runInNewContext(code, {
     exports,
-    require: () => ({ battleAudioUrl: (name: string) => name }),
+    require: () => ({
+      battleAudioUrl: (name: string) => name,
+      gameAudioNames: [
+        "music_camp",
+        "music_battle",
+        "music_boss",
+        "blaster_fire_01",
+      ],
+    }),
     AudioContext: Context,
     window: { addEventListener() {} },
     document: { hidden: false },
     performance: { now: () => 10000 },
+    AbortSignal,
     fetch: async (name: string) => {
       fetched.push(name);
       return { ok: true, arrayBuffer: async () => name };
@@ -184,5 +193,26 @@ test("splash preloads camp music silently and camp starts it without a gesture o
     h.started.filter((source: any) => source.buffer.name === "music_camp")
       .length,
     1,
+  );
+});
+
+test("splash audio preload decodes tracks without playing and battle reuses them", async () => {
+  const h = harness();
+  const progress: number[] = [];
+  await h.preloadGameAudio((value: number) => progress.push(value));
+  assert.equal(progress.at(-1), 1);
+  assert.equal(h.started.length, 0);
+  assert.equal(
+    h.fetched.filter((name: string) => name === "music_battle").length,
+    1,
+  );
+  new h.BattleAudio(false);
+  await settle();
+  assert.equal(
+    h.fetched.filter((name: string) => name === "music_battle").length,
+    1,
+  );
+  assert.ok(
+    h.started.some((source: any) => source.buffer.name === "music_battle"),
   );
 });

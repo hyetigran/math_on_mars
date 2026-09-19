@@ -15,3 +15,10 @@ const audio = import.meta.glob(
 export function battleAudioUrl(name: string): string | undefined {
   return audio[`./audio/runtime/${name}.mp3`];
 }
+
+export const gameAudioNames = Object.keys(audio).map((path) =>
+  path
+    .split("/")
+    .at(-1)!
+    .replace(/\.mp3$/, ""),
+);

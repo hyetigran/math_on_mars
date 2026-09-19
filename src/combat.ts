@@ -1,3 +1,4 @@
+import { loadedImage } from "./image-cache";
 import { COMBAT_BALANCE } from "../content/balance/combat";
 import { loadBattleBoundaries } from "./battle-boundaries";
 import { BATTLE_VIEW, BATTLE_WORLD, battleRenderSize } from "./battle-world";
@@ -175,11 +176,11 @@ class MarsCombatScene extends Phaser.Scene {
   }
 
   preload(): void {
-    this.load.image("mars-arena", arenaBackgroundUrl);
+    this.textures.addImage("mars-arena", loadedImage(arenaBackgroundUrl));
     for (const animation of armedMarineAnimations) {
-      this.load.spritesheet(
+      this.textures.addSpriteSheet(
         `marine-${animation.key}`,
-        armedMarineUrl(animation.key),
+        loadedImage(armedMarineUrl(animation.key)),
         {
           frameWidth: animation.frameWidth,
           frameHeight: animation.frameHeight,
@@ -189,10 +190,10 @@ class MarsCombatScene extends Phaser.Scene {
     }
     for (const [key, url] of Object.entries(itemAssets)) {
       if (key === "supply_cache_closed" || key === "salvage_bundle")
-        this.load.image(key, url);
+        this.textures.addImage(key, loadedImage(url));
     }
     for (const [key, url] of Object.entries(enemyAnimationAssets)) {
-      this.load.spritesheet(`enemy-${key}`, url, {
+      this.textures.addSpriteSheet(`enemy-${key}`, loadedImage(url), {
         frameWidth: ENEMY_SHEET_FRAME_SIZE,
         frameHeight: ENEMY_SHEET_FRAME_SIZE,
         endFrame: ENEMY_SHEET_FRAME_COUNT - 1,
@@ -686,7 +687,7 @@ class MarsCombatScene extends Phaser.Scene {
         continue;
       this.audio?.play(
         cue,
-        cue.startsWith("marine_footstep") ? 0.16 : 0.4,
+        0.4,
         cue === "marine_damage" ? 650 : cue === "slime_move_01" ? 2000 : 120,
       );
     }

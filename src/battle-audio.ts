@@ -1,4 +1,4 @@
-import { battleAudioUrl } from "./assets/battleAssets";
+import { battleAudioUrl, gameAudioNames } from "./assets/battleAssets";
 
 const battleOffsets = new Map<string, number>();
 export function resetBattleMusic(): void {
@@ -17,13 +17,14 @@ function audioContext(): AudioContext {
 async function loadAudioBuffer(
   name: string,
   ctx: AudioContext | undefined,
+  signal = AbortSignal.timeout(30000),
 ): Promise<AudioBuffer | undefined> {
   const url = battleAudioUrl(name);
   if (!url || !ctx) return;
   if (!buffers.has(name)) {
     buffers.set(
       name,
-      fetch(url)
+      fetch(url, { signal })
         .then((response) =>
           response.ok ? response.arrayBuffer() : Promise.reject(),
         )
@@ -44,6 +45,32 @@ export function preloadCampMusic(): void {
   } catch {
     /* Optional audio must not block loading the game. */
   }
+}
+
+/** Decode selected sounds without starting playback or requiring an audio gesture. */
+export async function preloadGameAudio(
+  progress: (fraction: number) => void,
+): Promise<void> {
+  let ctx: AudioContext;
+  try {
+    ctx = audioContext();
+  } catch {
+    progress(1);
+    return;
+  }
+  const signal = AbortSignal.timeout(30000);
+  let index = 0,
+    complete = 0;
+  await Promise.all(
+    Array.from({ length: 4 }, async () => {
+      while (index < gameAudioNames.length && !signal.aborted) {
+        const name = gameAudioNames[index++];
+        await loadAudioBuffer(name, ctx, signal);
+        progress(++complete / gameAudioNames.length);
+      }
+    }),
+  );
+  progress(1);
 }
 
 // Prime the context during the portal/start gesture, before Phaser's async loader.

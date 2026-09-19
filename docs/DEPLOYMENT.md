@@ -19,3 +19,5 @@ Boundary-editing controls are available only in development builds. Production e
 Production hides all QA shortcuts, including quiz skipping. Phones and tablets require landscape orientation; portrait opens a blocking rotate prompt and pauses active missions. Rotate back and resume to continue. Touch controls appear on mobile devices or viewports up to 900 px wide, including after resizing. Wide desktop screens use keyboard controls.
 
 Run `GAME_URL=http://localhost:4173/ node tests/production-ui.browser.mjs` against a production preview to verify desktop and mobile controls, portrait blocking and pausing, and the absence of QA controls on quiz, correction and pause screens.
+
+The splash preloads and decodes camp and battle artwork, selected audio, and fonts before opening camp. Arena scenes reuse the decoded images. To check failed-download retry and repeated arena entry without networking, run `GAME_URL=http://localhost:4173/ node tests/splash-loading.browser.mjs` against a production preview.
