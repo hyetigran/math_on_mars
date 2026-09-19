@@ -68,6 +68,8 @@
 }
 .manage-screen .salvage-chip .item-art {
   position: static;
+  transform: none;
+  flex-shrink: 0;
   width: 28px;
   height: 28px;
 }

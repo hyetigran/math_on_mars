@@ -1076,7 +1076,36 @@ legend {
 }
 .question-copy {
   align-self: center;
-  padding: 1rem;
+  min-width: 0;
+  padding: 0.5rem;
+}
+.question-copy .prompt {
+  margin: 0 0 0.8rem;
+  font-size: clamp(1.25rem, 2.2vw, 1.75rem);
+  line-height: 1.2;
+}
+.question-copy .input-error:empty {
+  display: none;
+}
+.question-visuals {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 0.8rem;
+}
+.question-visuals > div > p {
+  margin: 0 0 0.4rem;
+  text-align: center;
+}
+.question-visuals .cell-grid {
+  margin: 0 auto;
+  gap: 0.3rem;
+}
+.question-visuals .cell-grid i {
+  width: 24px;
+  height: 30px;
+  border-width: 3px;
+  box-shadow: inset 0 0 0 2px #dff9ef;
 }
 .prompt {
   margin-bottom: 1.4rem;
@@ -2227,7 +2256,10 @@ legend {
     gap: 0.45rem;
   }
   .keypad button {
-    min-height: 54px;
+    min-height: 48px;
+  }
+  .quiz-tools {
+    margin-top: 0;
   }
   .question-progress i {
     width: 28px;

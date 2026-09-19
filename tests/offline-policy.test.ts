@@ -3,7 +3,25 @@ import assert from "node:assert/strict";
 import {
   shouldVerifyOfflinePack,
   shouldLoadSavedRelease,
+  cleanGameLocation,
 } from "../src/offline-policy";
+
+test("game URLs hide preview and build controls while preserving the hosting base", () => {
+  assert.equal(
+    cleanGameLocation("https://example.com/index.html?wgPlay=1&build=abc"),
+    "https://example.com/",
+  );
+  assert.equal(
+    cleanGameLocation(
+      "http://localhost:5176/dist/index.html?wgPlay=1&build=abc",
+    ),
+    "http://localhost:5176/dist/",
+  );
+  assert.equal(
+    cleanGameLocation("https://example.com/?verifyOffline=1#play"),
+    "https://example.com/?verifyOffline=1#play",
+  );
+});
 
 test("portal resumes older saves in local previews instead of reloading splash and camp", () => {
   const old = "0000000000000001";

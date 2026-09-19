@@ -1,5 +1,14 @@
 const LOCAL_HOSTS = new Set(["localhost", "127.0.0.1", "[::1]"]);
 
+/** Keep preview/cache controls out of the address bar without changing the hosting base. */
+export function cleanGameLocation(href: string): string {
+  const url = new URL(href);
+  url.searchParams.delete("build");
+  url.searchParams.delete("wgPlay");
+  url.pathname = url.pathname.replace(/\/index\.html$/, "/");
+  return url.href;
+}
+
 export function shouldLoadSavedRelease(
   savedVersion: string | undefined,
   currentVersion: string,

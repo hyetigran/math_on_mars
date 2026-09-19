@@ -67,9 +67,3 @@ export async function requireOfflinePack(
     );
   }
 }
-
-export function releaseLocation(version: string): string {
-  const url = new URL(location.href);
-  url.searchParams.set("build", version);
-  return url.href;
-}

@@ -40,7 +40,12 @@
           const store = new ProfileRepository(localStorage, key);
           let session = new RunSession([], store);
           const id = session.createProfile("Art review");
-          session.start(id, "4");
+          const grade =
+            new URLSearchParams(location.search).get("grade") ?? "4";
+          session.start(
+            id,
+            ["K", "1", "2", "3", "4", "5"].includes(grade) ? grade : "4",
+          );
           let profiles = session.profiles;
           const run = profiles[0].activeRun;
           run.salvage = 100;

@@ -10,7 +10,8 @@ import {
 import { openBoundaryEditor } from "./camp-boundary-editor";
 import { BaseCampController, loadCampAssets, splashUrl } from "./base-camp";
 import { BUILD_VERSION } from "./build-version";
-import { requireOfflinePack, releaseLocation } from "./offline";
+import { requireOfflinePack } from "./offline";
+import { cleanGameLocation } from "./offline-policy";
 import { ProfileLease } from "./profile-lease";
 import {
   usesFractionInput,
@@ -591,12 +592,13 @@ function questionVisuals(question: Question): string {
   const groups =
     question.visualGroups ??
     (question.visualCount !== undefined ? [question.visualCount] : []);
-  return groups
+  if (!groups.length) return "";
+  return `<div class="question-visuals">${groups
     .map(
       (count, index) =>
         `<div>${groups.length > 1 ? `<p>${escapeHtml(question.visualGroupLabels?.[index] ?? `Group ${index + 1}`)}</p>` : ""}<div class="cell-grid" aria-label="${count} energy cells">${count === 0 ? "<span>No cells</span>" : Array.from({ length: count }, () => "<i></i>").join("")}</div></div>`,
     )
-    .join("");
+    .join("")}</div>`;
 }
 
 function renderQuiz(message = ""): void {
@@ -1470,6 +1472,7 @@ window.addEventListener("orientationchange", () => {
 });
 
 async function boot(): Promise<void> {
+  history.replaceState(history.state, "", cleanGameLocation(location.href));
   app.innerHTML = `<section class="loading-screen" aria-label="Loading Math on Mars"><img class="splash-backdrop" src="${splashUrl}" alt="" aria-hidden="true"><img src="${splashUrl}" alt="Math on Mars"><div class="loading-progress"><p id="loading-status" role="status">Loading base camp…</p><progress id="camp-progress" max="1" value="0" aria-label="Loading base camp"></progress></div></section>`;
   try {
     await loadCampAssets((fraction) => {
@@ -1483,8 +1486,6 @@ async function boot(): Promise<void> {
     document.querySelector("#retry-camp")!.addEventListener("click", boot);
     return;
   }
-  if (!import.meta.env.DEV)
-    history.replaceState(null, "", releaseLocation(BUILD_VERSION));
   try {
     repository?.close();
     repository = new IndexedProfileRepository(
