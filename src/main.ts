@@ -1,3 +1,5 @@
+import { qaControls, bindQAControls } from "./qa-controls";
+import "./qa-controls.css";
 import { installDisplayMode, usesTouchControls } from "./display-mode";
 import "./display-mode.css";
 import { bindAmmoDragging } from "./ammo-drag";
@@ -1317,7 +1319,7 @@ function showPause(title: string): void {
       const overlay = document.createElement("div");
       overlay.className = "pause-overlay mission-pause";
       overlay.id = "pause-overlay";
-      overlay.innerHTML = `<div class="pause-dialog" role="dialog" aria-modal="true" aria-labelledby="pause-title"><h2 id="pause-title">Paused</h2>${title.includes("failed") ? `<p>${escapeHtml(title)}</p>` : ""}<button id="resume-button" class="button primary">Resume</button>${import.meta.env.DEV && activeRun().phase === "combat" ? '<button id="edit-arena-bounds" class="button secondary">Edit arena bounds</button>' : ""}<button id="pause-exit" class="text-button">Exit mission</button><p class="pause-exit-note">Exiting loses this mission’s progress.</p></div>`;
+      overlay.innerHTML = `<div class="pause-dialog" role="dialog" aria-modal="true" aria-labelledby="pause-title"><h2 id="pause-title">Paused</h2>${title.includes("failed") ? `<p>${escapeHtml(title)}</p>` : ""}<button id="resume-button" class="button primary">Resume</button>${import.meta.env.DEV && activeRun().phase === "combat" ? '<button id="edit-arena-bounds" class="button secondary">Edit arena bounds</button>' : ""}${import.meta.env.DEV ? qaControls(activeRun()) : ""}<button id="pause-exit" class="text-button">Exit mission</button><p class="pause-exit-note">Exiting loses this mission’s progress.</p></div>`;
       document.body.append(overlay);
       decorateControls(overlay);
       overlay.querySelector<HTMLButtonElement>("#resume-button")!.focus();
@@ -1345,6 +1347,20 @@ function showPause(title: string): void {
                 .querySelector<HTMLButtonElement>("#edit-arena-bounds")
                 ?.focus();
           }, arenaBoundaryOptions());
+        });
+      if (import.meta.env.DEV)
+        bindQAControls(overlay, (wave, loadout) => {
+          if (saving) return;
+          void perform(
+            () => {
+              session.setPaused(false);
+              session.jumpToWaveForQA(activeProfileId!, wave, loadout);
+            },
+            () => {
+              overlay.remove();
+              resumeRun();
+            },
+          );
         });
       overlay.querySelector("#pause-exit")!.addEventListener("click", () => {
         if (saving) return;
@@ -1500,11 +1516,15 @@ async function boot(): Promise<void> {
       STORAGE_KEY,
       localStorage,
     );
-    session = new RunSession(await repository.load(), {
-      commit: () => {
-        throw new Error("Use a durable command.");
+    session = new RunSession(
+      await repository.load(),
+      {
+        commit: () => {
+          throw new Error("Use a durable command.");
+        },
       },
-    });
+      import.meta.env.DEV,
+    );
     // Opt-in development fixture; production always enters camp.
     if (
       import.meta.env.DEV &&
@@ -1527,11 +1547,15 @@ async function boot(): Promise<void> {
       .querySelector("#recover-save")!
       .addEventListener("click", async () => {
         try {
-          session = new RunSession(await repository.recoverBackup(), {
-            commit: () => {
-              throw new Error("Use a durable command.");
+          session = new RunSession(
+            await repository.recoverBackup(),
+            {
+              commit: () => {
+                throw new Error("Use a durable command.");
+              },
             },
-          });
+            import.meta.env.DEV,
+          );
           renderBaseCamp();
         } catch (failure) {
           document.querySelector("#recovery-error")!.textContent =
@@ -1542,11 +1566,15 @@ async function boot(): Promise<void> {
       .querySelector("#recover-history")!
       .addEventListener("click", async () => {
         try {
-          session = new RunSession(await repository.recoverBackup(true), {
-            commit: () => {
-              throw new Error("Use a durable command.");
+          session = new RunSession(
+            await repository.recoverBackup(true),
+            {
+              commit: () => {
+                throw new Error("Use a durable command.");
+              },
             },
-          });
+            import.meta.env.DEV,
+          );
           renderBaseCamp();
         } catch (failure) {
           document.querySelector("#recovery-error")!.textContent =

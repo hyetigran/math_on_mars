@@ -24,6 +24,7 @@ export { shopOffers } from "./shop";
 import { rewardModules, installModule } from "./modules";
 import { isCorrect, makeQuestions, parseNumericAnswer } from "./questions";
 import {
+  AMMO_TYPES,
   QUALITY_ORDER,
   GRADES,
   uid,
@@ -100,6 +101,7 @@ export class RunSession {
   constructor(
     profiles: Profile[],
     private readonly store: ProfileStore,
+    private readonly qaEnabled = false,
   ) {
     this.state = structuredClone(profiles);
   }
@@ -534,6 +536,40 @@ export class RunSession {
   forge(id: string, preview?: ForgePreview): void {
     this.command(id, "shop", (run) => {
       applyForge(run, preview ?? previewForge(run));
+    });
+  }
+  jumpToWaveForQA(id: string, wave: number, loadout: Omit<Ammo, "id">[]): void {
+    if (!this.qaEnabled)
+      throw new Error("QA controls are only available in development.");
+    this.command(id, null, (run) => {
+      if (!Number.isInteger(wave) || wave < 1 || wave > run.totalWaves)
+        throw new Error("Choose a wave in this mission.");
+      if (
+        loadout.length > 4 ||
+        loadout.some(
+          (ammo) =>
+            !AMMO_TYPES.includes(ammo.type) ||
+            ![1, 2, 3, 4].includes(ammo.tier) ||
+            (ammo.legendary && (ammo.type !== "Piercing" || ammo.tier !== 4)),
+        )
+      )
+        throw new Error("Choose up to four valid ammo pieces.");
+      run.wave = wave;
+      run.phase = "combat";
+      run.hp = run.maxHp;
+      run.ammo = loadout.map((ammo) => ({ ...ammo, id: uid("ammo") }));
+      run.activeAmmoIds = run.ammo.map((ammo) => ammo.id);
+      run.ammoCapacity = Math.max(run.ammoCapacity, loadout.length);
+      run.forgedOmni = run.ammo.some((ammo) => ammo.legendary);
+      run.ammoBag = undefined;
+      run.waveLoot = undefined;
+      run.forgeIngredientIds = undefined;
+      run.quiz = undefined;
+      run.combatSave = undefined;
+      run.cacheClaimed = false;
+      run.choiceCache = undefined;
+      run.shopBought = [];
+      run.shop = undefined;
     });
   }
   nextWave(id: string): void {
