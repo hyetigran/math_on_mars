@@ -1,0 +1,38 @@
+html[data-touch-controls="false"] .touch-controls,
+html[data-touch-controls="false"] .camp-joystick {
+  display: none;
+}
+html[data-touch-controls="true"] .touch-controls {
+  display: flex;
+}
+html[data-touch-controls="true"] .camp-joystick {
+  display: block;
+}
+#rotate-device {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100dvh;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  border: 0;
+  padding: max(24px, env(safe-area-inset-top)) 24px;
+  background: #171216;
+  color: #fff4dd;
+  text-align: center;
+}
+#rotate-device[open] {
+  display: grid;
+  place-items: center;
+}
+#rotate-device::backdrop {
+  background: #171216;
+}
+#rotate-device span {
+  font-size: 5rem;
+  color: #ffc04a;
+}
+#rotate-device h1 {
+  font-size: 1.8rem;
+}

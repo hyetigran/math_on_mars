@@ -1,3 +1,5 @@
+import { installDisplayMode, usesTouchControls } from "./display-mode";
+import "./display-mode.css";
 import { bindAmmoDragging } from "./ammo-drag";
 import { arenaBackgroundUrl } from "./assets/battleAssets";
 import { BATTLE_WORLD, BATTLE_CENTER } from "./battle-world";
@@ -191,7 +193,7 @@ function shell(content: string, screenClass = ""): string {
 
 function bindHome(): void {
   document.querySelector("#qa-skip-quiz")?.addEventListener("click", () => {
-    if (!paused)
+    if (import.meta.env.DEV && !paused)
       void perform(() => session.skipQuizForQA(activeProfileId!), resumeRun);
   });
   decorateControls();
@@ -321,6 +323,7 @@ function renderBaseCamp(): void {
     );
     picker.showModal();
   });
+  displayMode.refresh();
   camp.bindJoystick(
     document.querySelector("#camp-joystick")!,
     document.querySelector("#camp-stick")!,
@@ -430,7 +433,7 @@ function renderCombat(): void {
     <div id="combat-canvas" class="combat-canvas" aria-label="Combat arena"></div>
     <div class="touch-controls"><div id="joystick" class="joystick" aria-label="Movement control"><div id="stick-knob"></div></div>
       <button id="medkit-button" class="medkit-button" aria-label="Use med-kit">${itemArt("med_kit")}<span>MED-GEL <b id="medkit-count">${run.medkits}</b></span></button></div>
-    <div class="combat-tip">${matchMedia("(pointer: coarse)").matches ? "DRAG TO MOVE · TAP MED-GEL TO HEAL · FIRING IS AUTOMATIC" : "MOVE: WASD / ARROWS · MED-GEL: Q · FIRING IS AUTOMATIC"}</div>
+    <div class="combat-tip">${usesTouchControls() ? "DRAG TO MOVE · TAP MED-GEL TO HEAL · FIRING IS AUTOMATIC" : "MOVE: WASD / ARROWS · MED-GEL: Q · FIRING IS AUTOMATIC"}</div>
   </div>`;
   decorateControls();
   const host = document.querySelector<HTMLElement>("#combat-canvas")!;
@@ -464,6 +467,7 @@ function renderCombat(): void {
     onDefeat: (state) => endRun(false, state),
   });
   bindTouchControls();
+  displayMode.refresh();
   document
     .querySelector("#pause-button")!
     .addEventListener("click", () => showPause("Mission paused"));
@@ -618,7 +622,7 @@ function renderQuiz(message = ""): void {
       <div class="mobile-tier-strip" id="mobile-tier">${qualityLevel(timeQuality(quiz.remainingMs))}</div>
       <div class="question-panel"><div class="question-copy"><p class="prompt">${escapeHtml(question.prompt)}</p>${questionVisuals(question)}
         ${usesFractionInput(question) ? fractionFields : '<label for="answer">Your answer</label>'}<output id="answer" class="answer-field" aria-live="polite" ${usesFractionInput(question) ? "hidden" : ""}>&nbsp;</output><p class="input-error" id="input-error">${escapeHtml(message)}</p>
-        <div class="quiz-tools"><button id="qa-skip-quiz" class="text-button" type="button">QA · Skip quiz</button></div></div>
+        ${import.meta.env.DEV ? '<div class="quiz-tools"><button id="qa-skip-quiz" class="text-button" type="button">QA · Skip quiz</button></div>' : ""}</div>
         <div class="keypad" aria-label="Number keypad">${[7, 8, 9, 4, 5, 6, 1, 2, 3].map((n) => `<button data-key="${n}" aria-label="${n}">${n}</button>`).join("")}
           <button data-key="." aria-label="Decimal point">.</button><button data-key="0" aria-label="0">0</button><button data-key="/" aria-label="Fraction bar">⁄</button>
           <button data-key="back" class="key-muted" aria-label="Backspace">⌫</button><button data-key="clear" class="key-muted">Clear</button><button data-key="check" class="key-check">Check</button>
@@ -790,7 +794,7 @@ function renderCorrection(message = ""): void {
     `<section class="correction-screen" id="content"><div class="correction-copy"><p class="eyebrow warm">1 / 4 · QUIZ REVIEW</p><h1>Try this one again.</h1><p>Untimed · Your reward level is already set.</p></div>
     <div class="correction-card"><div><span class="correction-count">${quiz.attempts.filter((a) => !a.correct).length - misses.length + 1} / ${quiz.attempts.filter((a) => !a.correct).length}</span><p class="prompt">${escapeHtml(attempt.question.prompt)}</p>${questionVisuals(attempt.question)}<div class="hint-box"><b>Hint</b><p>${escapeHtml(attempt.question.hint)}</p></div><details><summary>Show solution</summary><p>${escapeHtml(attempt.question.explanation)}</p></details></div>
       <div>${usesFractionInput(attempt.question) ? fractionFields : '<label for="correction-input">Correct answer</label>'}<input id="correction-input" ${usesFractionInput(attempt.question) ? "hidden" : ""} inputmode="none" autocomplete="off" value="${escapeHtml(quiz.correctionDraft ?? "")}"><div class="keypad correction-keypad" aria-label="Correction number keypad">${["7", "8", "9", "4", "5", "6", "1", "2", "3", ".", "0", "/", "back", "clear", "-"].map((key) => `<button type="button" data-correction-key="${key}" aria-label="${key === "/" ? "Fraction bar" : key === "back" ? "Backspace" : key === "-" ? "Minus" : key}">${key === "back" ? "⌫" : key === "clear" ? "Clear" : key}</button>`).join("")}</div><p class="input-error" id="correction-error">${escapeHtml(message)}</p><button id="correction-check" class="button primary">Check answer</button></div></div>
-    <button id="qa-skip-quiz" class="text-button centered">QA · Skip quiz</button></section>`,
+    ${import.meta.env.DEV ? '<button id="qa-skip-quiz" class="text-button centered">QA · Skip quiz</button>' : ""}</section>`,
     "correction-shell",
   );
   bindHome();
@@ -1561,4 +1565,14 @@ async function boot(): Promise<void> {
       });
   }
 }
+const displayMode = installDisplayMode(
+  () => {
+    if (activeProfileId && activeProfile().activeRun)
+      showPause("Screen rotated");
+    else camp?.setPaused(true);
+  },
+  () => {
+    if (!paused && !saving) camp?.setPaused(false);
+  },
+);
 boot();

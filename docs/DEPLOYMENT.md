@@ -15,3 +15,7 @@ To restore a previous release, revert the relevant commits on `main` and let the
 GitHub reference: https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages
 
 Boundary-editing controls are available only in development builds. Production entry regression: serve a production build with Vite preview, then run `GAME_URL=http://localhost:4173/?verifyOffline=1 node tests/arena-entry.browser.mjs` (set `CHROME_PATH` if Chrome is elsewhere). The check simulates stalled and failed offline installation and verifies arena entry, pause/resume, and absence of production editing controls.
+
+Production hides all QA shortcuts, including quiz skipping. Phones and tablets require landscape orientation; portrait opens a blocking rotate prompt and pauses active missions. Rotate back and resume to continue. Touch controls appear on mobile devices or viewports up to 900 px wide, including after resizing. Wide desktop screens use keyboard controls.
+
+Run `GAME_URL=http://localhost:4173/ node tests/production-ui.browser.mjs` against a production preview to verify desktop and mobile controls, portrait blocking and pausing, and the absence of QA controls on quiz, correction and pause screens.
