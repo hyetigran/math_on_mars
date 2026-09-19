@@ -18,37 +18,6 @@ export function acquireAmmo(run: AmmoInventory, items: Ammo[]): void {
   }
 }
 
-export function createChoiceCache(run: RunState): void {
-  if (run.choiceCache) return;
-  run.choiceCache = {
-    id: uid("cache"),
-    kind: "choice",
-    options: [
-      ...AMMO_TYPES.map((type) => ({
-        id: uid("option"),
-        kind: "ammo" as const,
-        sellPrice: AMMO_BALANCE.cachePairSale,
-        ammo: [
-          { id: uid("ammo"), type, tier: 3 as const },
-          { id: uid("ammo"), type, tier: 3 as const },
-        ],
-      })),
-      {
-        id: uid("option"),
-        kind: "module",
-        sellPrice: AMMO_BALANCE.cacheModuleSale,
-        module: {
-          id: uid("module"),
-          name: "Field Plating",
-          stat: "armor",
-          value: 2,
-          quality: "green",
-        },
-      },
-    ],
-  };
-}
-
 export const ammoSellPrice = (ammo: Ammo): number =>
   AMMO_BALANCE.sellPrices[ammo.tier - 1];
 export interface MergePreview {

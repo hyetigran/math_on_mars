@@ -1,4 +1,4 @@
-export const GRADES = ["K", "1", "2", "3", "4", "5", "6"] as const;
+export const GRADES = ["K", "1", "2", "3", "4", "5"] as const;
 export type Grade = (typeof GRADES)[number];
 
 export const AMMO_TYPES = [
@@ -28,6 +28,7 @@ export const STAT_NAMES = [
   "healing",
   "projectileSpeed",
   "pickupRadius",
+  "luck",
 ] as const;
 export type Stat = (typeof STAT_NAMES)[number];
 export interface Modifier {
@@ -65,6 +66,7 @@ export interface Attempt {
 }
 
 export interface QuizState {
+  qaSkipped?: boolean;
   draft?: string;
   correctionDraft?: string;
   questions: Question[];
@@ -124,6 +126,7 @@ export interface CombatSaveV1 {
 }
 
 export interface CombatShotSave {
+  ammoTypes?: AmmoType[];
   id: number;
   baseDamage: number;
   chainRemaining: number;
@@ -165,6 +168,7 @@ export interface CombatBoltSaveV2 extends Omit<
 > {
   id: number;
   shotId: number;
+  remainingRange?: number;
 }
 
 export interface CombatSaveV2 extends Omit<
@@ -184,6 +188,7 @@ export interface CombatSaveV2 extends Omit<
   nextEnemyProjectileId?: number;
   simulationTick?: number;
   ammoInventory?: AmmoInventory;
+  chestLoot?: Ammo[];
   pickups?: { id: number; x: number; y: number; value: number; ammo?: Ammo }[];
   nextShotId: number;
   nextBoltId: number;
@@ -245,6 +250,7 @@ export interface RunState extends AmmoInventory {
   activeAmmoIds: string[];
   modules: Module[];
   phase: "combat" | "quiz" | "reward" | "correction" | "cache" | "shop";
+  waveLoot?: Ammo[];
   quiz?: QuizState;
   shopBought: string[];
   cacheClaimed: boolean;
@@ -260,7 +266,7 @@ export interface HistoryEntry {
   }[];
   occurrenceId: string;
   question: string;
-  grade: Grade;
+  grade: Grade | "6"; // Retained only for historical practice records.
   correctInitially: boolean;
   corrected: boolean;
   at: number;

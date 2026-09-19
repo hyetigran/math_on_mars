@@ -29,7 +29,10 @@ test("grade 4 validates fraction drafts without penalties and restores exact fra
     session.start(id, "4");
     session.finishWave(id, { hp: 100, salvage: 8, medkits: 1 });
     const questions = session.profile(id).activeRun!.quiz!.questions;
-    assert.match(questions[2].prompt, /equivalent/);
+    assert.equal(
+      questions.filter((q) => q.prompt.includes("equivalent")).length,
+      1,
+    );
     for (const q of questions) {
       const n = q.prompt.match(/\d+/g)!.map(Number);
       if (q.prompt.includes("equivalent"))
@@ -37,7 +40,12 @@ test("grade 4 validates fraction drafts without penalties and restores exact fra
       else if (q.prompt.includes("×")) assert.equal(q.answer[0], n[0] * n[1]);
       else assert.equal(q.answer[0] * n[1], (n[0] + n[2]) * q.answer[1]);
     }
-    session.submit(id, questions[0].id, String(questions[0].answer[0]), 5000);
+    session.submit(
+      id,
+      questions[0].id,
+      `${questions[0].answer[0]}/${questions[0].answer[1]}`,
+      5000,
+    );
     const before = session.profiles;
     for (const invalid of ["", "1/", "1/0", "1/2/3", ".", "2x"])
       assert.ok(session.submit(id, questions[1].id, invalid, 20000));

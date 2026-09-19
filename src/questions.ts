@@ -75,14 +75,14 @@ function q(
 export function makeQuestions(
   grade: Grade,
   wave: number,
-  profileSeed: string,
+  missionSeed: string,
 ): Question[] {
-  const seed = [...`${profileSeed}-${grade}-${wave}`].reduce(
+  const seed = [...`${missionSeed}-${grade}-${wave}`].reduce(
     (sum, c) => (sum * 31 + c.charCodeAt(0)) >>> 0,
     7,
   );
   const rand = seeded(seed);
-  return Array.from({ length: 5 }, (_, i) => {
+  const questions = Array.from({ length: 5 }, (_, i) => {
     if (grade === "K") {
       const n = pickInt(rand, 0, 10);
       if (i === 1) {
@@ -308,61 +308,12 @@ export function makeQuestions(
         "fraction",
       );
     }
-    if (i === 4) {
-      const fuel = pickInt(rand, 1, 6),
-        coolant = pickInt(rand, 1, 6),
-        scale = pickInt(rand, 2, 6);
-      return q(
-        i,
-        `Fuel and coolant use the ratio ${fuel}:${coolant}. For ${fuel * scale} fuel cells, how many coolant cells?`,
-        [coolant * scale, 1],
-        `Multiply both parts of the ratio by the same number.`,
-        `${fuel * scale} is ${scale} times ${fuel}, so coolant is ${scale} times ${coolant}, or ${coolant * scale}.`,
-      );
-    }
-    if (i === 3) {
-      const x = pickInt(rand, 2, 12),
-        factor = pickInt(rand, 2, 9);
-      return q(
-        i,
-        `${factor} × x = ${factor * x}. x = ?`,
-        [x, 1],
-        `Undo multiplication by dividing both sides by ${factor}.`,
-        `${factor * x} divided by ${factor} is ${x}, so x equals ${x}.`,
-      );
-    }
-    if (i % 3 === 0) {
-      const x = pickInt(rand, 2, 12);
-      const add = pickInt(rand, 2, 9);
-      return q(
-        i,
-        `x + ${add} = ${x + add}.  x = ?`,
-        [x, 1],
-        `Undo plus ${add} by subtracting ${add}.`,
-        `Subtract ${add} from both sides, so x equals ${x}.`,
-      );
-    }
-    if (i % 3 === 1) {
-      const units = pickInt(rand, 2, 6);
-      const value = pickInt(rand, 2, 9);
-      return q(
-        i,
-        `${units} fuel cells cost ${units * value} credits. Cost per cell?`,
-        [value, 1],
-        `Divide ${units * value} by ${units}.`,
-        `The unit rate is ${value} credits per cell.`,
-      );
-    }
-    const d1 = pickInt(rand, 2, 5);
-    const d2 = pickInt(rand, 2, 5);
-    return q(
-      i,
-      `1/${d1} ÷ 1/${d2} = ?`,
-      fraction(d2, d1),
-      "Multiply by the reciprocal of the second fraction.",
-      `1/${d1} times ${d2}/1 equals ${d2}/${d1}.`,
-      undefined,
-      "fraction",
-    );
+    throw new Error("Unsupported grade. Choose Kindergarten through Grade 5.");
   });
+  // Keep each grade's skill mix while varying its presentation order.
+  for (let i = questions.length - 1; i > 0; i--) {
+    const j = pickInt(rand, 0, i);
+    [questions[i], questions[j]] = [questions[j], questions[i]];
+  }
+  return questions;
 }

@@ -328,6 +328,18 @@ function combat(value: unknown, run: RecordValue): void {
       );
     }
   }
+  if (state.chestLoot !== undefined) {
+    const ids = new Set<unknown>();
+    for (const value of list(state.chestLoot, "combat.chestLoot")) {
+      const ammo = ammoRecord(value);
+      ensure(!ammo.legendary && !ids.has(ammo.id), "chest contents");
+      ids.add(ammo.id);
+      ensure(
+        !list(run.ammo, "run.ammo").some((a) => ammoRecord(a).id === ammo.id),
+        "unopened chest already equipped",
+      );
+    }
+  }
   if (state.pickups !== undefined) {
     const ids = new Set<unknown>();
     for (const value of list(state.pickups, "combat.pickups")) {
@@ -387,6 +399,9 @@ function combat(value: unknown, run: RecordValue): void {
       shots.add(shot.id);
       number(shot.baseDamage, "shot.baseDamage");
       number(shot.burnFunds, "shot.burnFunds");
+      if (shot.ammoTypes !== undefined)
+        for (const type of list(shot.ammoTypes, "shot.ammoTypes"))
+          choice(type, AMMO_TYPES, "shot ammo type");
       integer(shot.chainRemaining, "shot.chainRemaining");
       boolean(shot.chainStarted, "shot.chainStarted");
       for (const key of ["frost", "fiery"])
@@ -399,6 +414,8 @@ function combat(value: unknown, run: RecordValue): void {
     const bolt = record(value, "bolt");
     for (const key of ["x", "y", "vx", "vy"])
       number(bolt[key], `bolt.${key}`, -Infinity);
+    if (bolt.remainingRange !== undefined)
+      number(bolt.remainingRange, "bolt.remainingRange");
     number(bolt.damage, "bolt.damage");
     integer(bolt.pierce, "bolt.pierce", 0, 4);
     if (state.version === 1)
@@ -435,6 +452,7 @@ export function decodeProfiles(raw: string): Profile[] {
   for (const value of profiles) {
     const profile = record(value, "profile");
     string(profile.name, "profile.name");
+    if (profile.grade === "6") profile.grade = "5";
     choice(profile.grade, GRADES, "profile.grade");
     choice(profile.handedness, ["left", "right"], "profile.handedness");
     integer(profile.victories, "profile.victories");
@@ -442,7 +460,7 @@ export function decodeProfiles(raw: string): Profile[] {
     for (const [index, value] of history.entries()) {
       const entry = record(value, "history entry");
       string(entry.question, "history.question");
-      choice(entry.grade, GRADES, "history.grade");
+      choice(entry.grade, [...GRADES, "6"], "history.grade");
       boolean(entry.correctInitially, "history.correctInitially");
       boolean(entry.corrected, "history.corrected");
       number(entry.at, "history.at");
@@ -465,6 +483,10 @@ export function decodeProfiles(raw: string): Profile[] {
     }
     if (profile.activeRun === undefined) continue;
     const run = record(profile.activeRun, "run");
+    if (run.grade === "6") {
+      delete profile.activeRun;
+      continue;
+    }
     if (run.releaseVersion !== undefined)
       ensure(
         typeof run.releaseVersion === "string" &&
@@ -489,6 +511,8 @@ export function decodeProfiles(raw: string): Profile[] {
     integer(run.medkits, "run.medkits");
     integer(run.ammoCapacity, "run.ammoCapacity", 1, 4);
     boolean(run.cacheClaimed, "run.cacheClaimed");
+    if (run.waveLoot !== undefined)
+      for (const loot of list(run.waveLoot, "run.waveLoot")) ammoRecord(loot);
     if (run.forgedOmni !== undefined) boolean(run.forgedOmni, "forged flag");
     for (const id of list(run.shopBought, "run.shopBought"))
       string(id, "shop offer ID");
@@ -530,65 +554,10 @@ export function decodeProfiles(raw: string): Profile[] {
           "purchased offer reference",
         );
     }
-    if (run.choiceCache !== undefined) {
-      const cache = record(run.choiceCache, "choice cache");
-      choice(cache.kind, ["choice"], "cache kind");
-      string(cache.id, "cache ID");
-      const options = list(cache.options, "cache options");
-      ensure(options.length === 6, "cache option count");
-      uniqueIds(options, "cache options");
-      const types = new Set();
-      const contents: unknown[] = [];
-      let modules = 0;
-      for (const value of options) {
-        const option = record(value, "cache option");
-        integer(option.sellPrice, "cache sell price");
-        choice(option.kind, ["ammo", "module"], "cache option kind");
-        if (option.kind === "module") {
-          ensure(option.ammo === undefined, "unexpected cache ammo");
-          moduleRecord(option.module);
-          modules++;
-        } else {
-          ensure(option.module === undefined, "unexpected cache module");
-          const pair = list(option.ammo, "cache pair");
-          ensure(pair.length === 2, "cache pair size");
-          const type = record(pair[0], "cache ammo").type;
-          ensure(!types.has(type), "duplicate cache type");
-          types.add(type);
-          for (const value of pair) {
-            const item = record(value, "cache ammo");
-            choice(item.type, AMMO_TYPES, "cache ammo type");
-            ensure(
-              item.type === type && item.tier === 3 && !item.legendary,
-              "cache blue pair",
-            );
-            contents.push(item);
-          }
-        }
-      }
-      uniqueIds(contents, "cache cartridge IDs");
-      ensure(modules === 1, "cache module count");
-      if (cache.selectedOptionId !== undefined) {
-        ensure(
-          options.some(
-            (o) => record(o, "option").id === cache.selectedOptionId,
-          ),
-          "cache selection",
-        );
-        choice(cache.disposition, ["accept", "sell"], "cache disposition");
-        ensure(
-          run.cacheClaimed && run.phase === "shop",
-          "cache settlement phase",
-        );
-      } else {
-        ensure(
-          cache.disposition === undefined &&
-            !run.cacheClaimed &&
-            run.phase === "cache",
-          "pending cache phase",
-        );
-      }
-    }
+    // Retired supply bonuses grant nothing and cannot block legacy missions.
+    delete run.choiceCache;
+    run.cacheClaimed = false;
+    if (run.phase === "cache") run.phase = "shop";
     inventoryRecord(run);
     if (run.forgeIngredientIds !== undefined) {
       ensure(run.phase === "shop", "pending forge phase");
@@ -614,6 +583,8 @@ export function decodeProfiles(raw: string): Profile[] {
       ensure(run.quiz !== undefined, "missing quiz");
     if (run.quiz === undefined) continue;
     const quiz = record(run.quiz, "quiz");
+    if (quiz.qaSkipped !== undefined)
+      ensure(typeof quiz.qaSkipped === "boolean", "quiz.qaSkipped");
     const questions = list(quiz.questions, "quiz.questions");
     ensure(questions.length === 5, "five questions");
     questions.forEach(question);
@@ -643,7 +614,7 @@ export function decodeProfiles(raw: string): Profile[] {
     }
     if (["reward", "correction", "cache", "shop"].includes(run.phase as string))
       ensure(
-        quiz.index === 5 &&
+        (quiz.index === 5 || quiz.qaSkipped === true) &&
           quiz.rewardQuality !== undefined &&
           quiz.rewardChoices !== undefined,
         "settled quiz",
@@ -664,8 +635,7 @@ export function decodeProfiles(raw: string): Profile[] {
             entry.occurrenceId = `${run.id}:${run.wave}:${index}`;
         }
     }
-    if (run.phase === "correction")
-      ensure(quiz.selectedReward !== undefined, "correction before reward");
+
     for (const [index, value] of attempts.entries()) {
       const attempt = record(value, "attempt");
       const occurrenceId = `${run.id}:${run.wave}:${index}`;

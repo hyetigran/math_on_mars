@@ -1,3 +1,4 @@
+import { withAmmoPair } from "./ammo-fixture";
 import { CombatSimulation } from "../src/combat-rules";
 import test from "node:test";
 import assert from "node:assert/strict";
@@ -38,70 +39,24 @@ function clear(session: RunSession, id: string) {
   );
 }
 
-test("choice caches persist exact bundles and settle once across failure and resume", () => {
-  const { session, id, repository, fail } = setup();
-  clear(session, id);
-  const cache = session.profile(id).activeRun!.choiceCache!;
-  assert.equal(cache.kind, "choice");
-  assert.equal(cache.options.length, 6);
-  const option = cache.options.find(
-    (o) => o.kind === "ammo" && o.ammo[0].type === "Multi Shot",
-  )!;
-  const before = session.profiles;
-  fail(true);
-  assert.throws(() => session.settleCache(id, cache.id, option.id, "accept"));
-  assert.deepEqual(session.profiles, before);
-  fail(false);
-  const restored = new RunSession(repository.load(), repository);
-  assert.deepEqual(restored.profile(id).activeRun!.choiceCache, cache);
-  restored.settleCache(id, cache.id, option.id, "accept");
-  restored.settleCache(id, cache.id, cache.options[0].id, "sell");
-  const run = restored.profile(id).activeRun!;
-  assert.equal(run.phase, "shop");
-  assert.equal(run.salvage, 100);
-  assert.deepEqual(
-    run.ammo.filter((a) => a.type === "Multi Shot"),
-    option.ammo,
-  );
-  assert.equal(run.choiceCache!.selectedOptionId, option.id);
-  assert.deepEqual(
-    repository.load(),
-    JSON.parse(JSON.stringify(restored.profiles)),
-  );
-});
-
-test("Standard supply milestones occur after waves 1, 3, 5, 7 and 8 only", () => {
-  const { session, id, repository } = setup();
-  const cacheWaves: number[] = [];
+test("waves enter the shop without supply bonuses or free ammo", () => {
+  let { session, id, repository } = setup();
+  const startingAmmo = session.profile(id).activeRun!.ammo;
   for (let wave = 1; wave <= 9; wave++) {
     clear(session, id);
     const run = session.profile(id).activeRun!;
-    if (run.phase === "cache") {
-      cacheWaves.push(wave);
-      const cache = run.choiceCache!;
-      const option = cache.options[0];
-      const before = run.salvage;
-      session.settleCache(id, cache.id, option.id, "sell");
-      const settled = session.profile(id).activeRun!;
-      assert.equal(settled.salvage, before + option.sellPrice);
-      assert.equal(settled.ammo.length, 1);
-      assert.deepEqual(
-        repository.load(),
-        JSON.parse(JSON.stringify(session.profiles)),
-      );
-    } else {
-      assert.equal(run.phase, "shop");
-      assert.equal(run.shop!.offers.length, 4);
-    }
+    assert.equal(run.choiceCache, undefined);
+    assert.deepEqual(run.ammo, startingAmmo);
+    assert.equal(run.phase, "shop");
     session.nextWave(id);
+    assert.equal(session.profile(id).activeRun!.phase, "combat");
   }
-  assert.deepEqual(cacheWaves, [1, 3, 5, 7, 8]);
 });
 
 test("batch merge preserves equipment and rejects a stale preview; equipped ammo cannot be sold", () => {
-  const { session, id, repository } = setup();
+  let { session, id, repository } = setup();
   clear(session, id);
-  session.claimCache(id, "Multi Shot");
+  session = withAmmoPair(session, id, "Multi Shot", repository);
   const pair = session
     .profile(id)
     .activeRun!.ammo.filter((a) => a.type === "Multi Shot");
@@ -138,9 +93,9 @@ test("batch merge preserves equipment and rejects a stale preview; equipped ammo
 });
 
 test("ammo shop purchases preserve their tier and never displace a full loadout", () => {
-  const { session, id, repository } = setup();
+  let { session, id, repository } = setup();
   clear(session, id);
-  session.claimCache(id, "Piercing");
+  session = withAmmoPair(session, id, "Piercing", repository);
   const initial = session.profile(id).activeRun!;
   const offer = initial.shop!.offers.find((o) => o.kind === "ammo")!;
   session.buy(id, offer.id);
@@ -158,9 +113,8 @@ test("ammo shop purchases preserve their tier and never displace a full loadout"
 });
 
 test("three Expanders stop at capacity four and stale offers never charge for a fifth", () => {
-  const { session, id, repository } = setup();
+  let { session, id, repository } = setup();
   clear(session, id);
-  session.claimCache(id);
   const oldOffers: string[] = [];
   for (let capacity = 1; capacity < 4; capacity++) {
     const run = session.profile(id).activeRun!;
@@ -173,8 +127,6 @@ test("three Expanders stop at capacity four and stale offers never charge for a 
       // Fund the next intermission through the same public wave-clear path.
       session.nextWave(id);
       clear(session, id);
-      if (session.profile(id).activeRun!.phase === "cache")
-        session.claimCache(id);
     }
   }
   const before = session.profile(id).activeRun!;
@@ -226,11 +178,12 @@ test("combat inventory and remaining bag commit together and resume without dupl
 });
 
 test("a selected batch merges only chosen pairs and leaves other cartridges available", () => {
-  const { session, id } = setup();
+  let { session, id, repository } = setup();
   for (let wave = 1; wave <= 3; wave++) {
     clear(session, id);
-    if (wave === 1) session.claimCache(id, "Multi Shot");
-    if (wave === 3) session.claimCache(id, "Frost");
+    if (wave === 1)
+      session = withAmmoPair(session, id, "Multi Shot", repository);
+    if (wave === 3) session = withAmmoPair(session, id, "Frost", repository);
     if (wave < 3) session.nextWave(id);
   }
   const preview = session.previewMerges(id);
@@ -315,4 +268,24 @@ test("forge selection is atomic, preserves overflow and duplicates, and cannot r
   const before = resumed.profiles;
   resumed.forge(id, selected);
   assert.deepEqual(resumed.profiles, before);
+});
+
+test("one-click merge cascades matching pairs to purple and preserves equipped ammo", () => {
+  const { session, id } = setup();
+  clear(session, id);
+  const profiles = session.profiles;
+  const run = profiles[0].activeRun!;
+  run.ammo = Array.from({ length: 8 }, (_, i) => ({
+    id: `merge-${i}`,
+    type: "Frost",
+    tier: 1,
+  }));
+  run.activeAmmoIds = ["merge-0"];
+  const updated = new RunSession(profiles, { commit() {} });
+  assert.equal(updated.mergeAll(id), "Combined 7 matching pairs.");
+  const merged = updated.profile(id).activeRun!;
+  assert.equal(merged.ammo.length, 1);
+  assert.equal(merged.ammo[0].tier, 4);
+  assert.deepEqual(merged.activeAmmoIds, [merged.ammo[0].id]);
+  assert.equal(updated.mergeAll(id), "No matching ammo to merge.");
 });

@@ -1,3 +1,4 @@
+import { withAmmoPair } from "./ammo-fixture";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { RunSession, timeQuality } from "../src/session";
@@ -90,11 +91,11 @@ test("identical counting prompts correct the exact occurrence and preserve origi
   session.nextWave(id);
   assert.equal(session.profile(id).activeRun!.phase, "correction");
   session.chooseReward(id, reward);
-  assert.equal(session.profile(id).activeRun!.modules.length, 1);
+  assert.equal(session.profile(id).activeRun!.modules.length, 0);
 });
 test("failed reward commit is not published; retry awards once", () => {
   const { session, id, setFailure, repository } = setup();
-  for (let i = 0; i < 5; i++) answer(session, id, false);
+  for (let i = 0; i < 5; i++) answer(session, id, true);
   const before = session.profiles;
   const reward = before[0].activeRun!.quiz!.rewardChoices![0].id;
   setFailure(true);
@@ -136,7 +137,7 @@ test("fraction corrections resume with their draft and do not affect reward", ()
 });
 
 test("shop, equipped merge, forge, next wave and end stay behind committed commands", () => {
-  const { session, id, repository } = setup();
+  let { session, id, repository } = setup();
   for (let wave = 1; wave <= 8; wave++) {
     if (wave > 1) session.finishWave(id, { hp: 100, salvage: 100, medkits: 1 });
     for (let i = 0; i < 5; i++) answer(session, id, true);
@@ -148,7 +149,7 @@ test("shop, equipped merge, forge, next wave and end stay behind committed comma
       const type = (
         ["Piercing", "Multi Shot", "Electric Chain", "Frost", "Fiery"] as const
       )[[1, 3, 5, 7, 8].indexOf(wave)];
-      session.claimCache(id, type);
+      session = withAmmoPair(session, id, type, repository);
       session.merge(id, type, 3);
     }
     if (wave < 8) session.nextWave(id);
@@ -236,7 +237,7 @@ test("correction retries persist separately, deduplicate commands and survive fa
 });
 
 test("mission length and combat difficulty preserve five questions and the shared countdown", () => {
-  for (const grade of ["K", "3", "6"] as const) {
+  for (const grade of ["K", "3", "5"] as const) {
     for (const mission of ["standard", "short"] as const) {
       for (const difficulty of ["easy", "standard"] as const) {
         const data = new Map<string, string>();
@@ -289,4 +290,122 @@ test("final-wave victories and defeats remove the active run without a quiz", ()
     assert.equal(restored.profile(id).victories, victory ? 1 : 0);
     assert.equal(repository.load()[0].activeRun, undefined);
   }
+});
+
+test("new mission replaces saved progress while preserving cadet history", () => {
+  const { session, id, repository } = setup();
+  answer(session, id, true);
+  const previous = session.profile(id);
+  // Simulate returning after the game was closed, including an old release save.
+  const profiles = repository.load();
+  profiles[0].activeRun!.releaseVersion = "0000000000000001";
+  const reopened = new RunSession(profiles, repository);
+  reopened.start(id, "K");
+  const fresh = reopened.profile(id);
+  assert.notEqual(fresh.activeRun!.id, previous.activeRun!.id);
+  assert.equal(fresh.activeRun!.wave, 1);
+  assert.equal(fresh.activeRun!.phase, "combat");
+  assert.equal(fresh.activeRun!.grade, "K");
+  assert.equal(fresh.activeRun!.hp, 100);
+  assert.equal(fresh.activeRun!.salvage, 0);
+  assert.equal(fresh.activeRun!.quiz, undefined);
+  assert.deepEqual(fresh.activeRun!.modules, []);
+  assert.equal(fresh.activeRun!.ammo.length, 1);
+  assert.deepEqual(fresh.history, previous.history);
+  assert.equal(fresh.victories, previous.victories);
+  assert.deepEqual(repository.load()[0], fresh);
+});
+
+test("exiting discards a mission and stale checkpoints cannot restore it", () => {
+  const { session, id, repository } = setup();
+  answer(session, id, true);
+  const before = session.profile(id);
+  session.end(id, false);
+  session.checkpoint(id, { runId: before.activeRun!.id, elapsedMs: 12000 });
+  assert.equal(session.profile(id).activeRun, undefined);
+  assert.equal(repository.load()[0].activeRun, undefined);
+  assert.deepEqual(session.profile(id).history, before.history);
+  session.start(id, "3");
+  const fresh = session.profile(id);
+  session.checkpoint(id, { runId: before.activeRun!.id, elapsedMs: 12000 });
+  assert.deepEqual(session.profile(id), fresh);
+});
+
+test("all wave loot stays pending through quiz and reward, then accepts or sells exactly once", () => {
+  const { session, id, repository } = setup();
+  session.start(id, "3");
+  const owned = session.profile(id).activeRun!.ammo;
+  const first = { id: "drop-1-4", type: "Frost" as const, tier: 1 as const };
+  const second = { id: "drop-1-8", type: "Fiery" as const, tier: 3 as const };
+  session.finishWave(id, {
+    hp: 90,
+    salvage: 10,
+    medkits: 1,
+    chestLoot: [first, second],
+  });
+  assert.equal(session.profile(id).activeRun!.phase, "quiz");
+  assert.equal(session.profile(id).activeRun!.quiz!.remainingMs, 30000);
+  assert.deepEqual(session.profile(id).activeRun!.ammo, owned);
+  session.settleWaveLoot(id, first.id, "accept");
+  assert.deepEqual(session.profile(id).activeRun!.ammo, owned);
+  for (let i = 0; i < 5; i++) answer(session, id, true);
+  session.chooseReward(
+    id,
+    session.profile(id).activeRun!.quiz!.rewardChoices![0].id,
+  );
+  assert.equal(session.profile(id).activeRun!.phase, "shop");
+  assert.deepEqual(session.profile(id).activeRun!.waveLoot, [first, second]);
+  session.nextWave(id);
+  assert.equal(session.profile(id).activeRun!.wave, 1);
+  session.settleWaveLoot(id, first.id, "accept");
+  session.settleWaveLoot(id, first.id, "accept");
+  assert.deepEqual(session.profile(id).activeRun!.ammo, [...owned, first]);
+  session.settleWaveLoot(id, second.id, "sell");
+  const salvage = session.profile(id).activeRun!.salvage;
+  assert.ok(salvage > 10);
+  session.settleWaveLoot(id, second.id, "sell");
+  assert.equal(session.profile(id).activeRun!.salvage, salvage);
+  assert.deepEqual(repository.load()[0].activeRun!.waveLoot, []);
+  session.nextWave(id);
+  assert.equal(session.profile(id).activeRun!.phase, "combat");
+});
+
+test("quiz corrections finish before reward selection without changing its earned level", () => {
+  const { session, id } = setup();
+  for (let i = 0; i < 5; i++) answer(session, id, i !== 0);
+  let run = session.profile(id).activeRun!;
+  const quality = run.quiz!.rewardQuality;
+  const reward = run.quiz!.rewardChoices![0].id;
+  assert.equal(run.phase, "correction");
+  session.chooseReward(id, reward);
+  assert.equal(session.profile(id).activeRun!.modules.length, 0);
+  const question = run.quiz!.attempts[0].question;
+  session.correct(
+    id,
+    question.id,
+    `${question.answer[0]}/${question.answer[1]}`,
+  );
+  run = session.profile(id).activeRun!;
+  assert.equal(run.phase, "reward");
+  assert.equal(run.quiz!.rewardQuality, quality);
+  session.chooseReward(id, reward);
+  assert.equal(session.profile(id).activeRun!.phase, "shop");
+});
+
+test("QA skip opens rewards without inventing answers or practice history", () => {
+  const { session, id, repository } = setup();
+  answer(session, id, false);
+  const history = session.profile(id).history;
+  session.skipQuizForQA(id);
+  const run = session.profile(id).activeRun!;
+  assert.equal(run.phase, "reward");
+  assert.equal(run.quiz!.qaSkipped, true);
+  assert.equal(run.quiz!.index, 1);
+  assert.deepEqual(session.profile(id).history, history);
+  assert.equal(repository.load()[0].activeRun!.phase, "reward");
+  session.chooseReward(id, run.quiz!.rewardChoices![0].id);
+  assert.equal(session.profile(id).activeRun!.phase, "shop");
+  const before = session.profiles;
+  session.skipQuizForQA(id);
+  assert.deepEqual(session.profiles, before);
 });

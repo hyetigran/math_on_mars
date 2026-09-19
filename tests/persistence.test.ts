@@ -297,3 +297,30 @@ test("legacy question speech references are removed without changing quiz progre
   assert.deepEqual(repository.load(), original);
   assert.equal(storage.getItem(key), raw);
 });
+
+test("retired Grade 6 profiles migrate to Grade 5 without losing practice history", () => {
+  const storage = new MemoryStorage();
+  const repository = new ProfileRepository(storage, key);
+  const history = [
+    {
+      question: "x + 2 = 5",
+      grade: "6",
+      correctInitially: true,
+      corrected: true,
+      at: 123,
+      occurrenceId: "old-question",
+    },
+  ];
+  storage.setItem(
+    key,
+    JSON.stringify([
+      { ...sample(), grade: "6", history, activeRun: { grade: "6" } },
+    ]),
+  );
+  const profiles = repository.load();
+  assert.equal(profiles[0].grade, "5");
+  assert.equal(profiles[0].activeRun, undefined);
+  assert.deepEqual(profiles[0].history, history);
+  repository.commit(profiles);
+  assert.deepEqual(repository.load(), profiles);
+});

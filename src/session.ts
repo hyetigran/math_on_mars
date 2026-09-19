@@ -6,10 +6,8 @@ import {
 } from "../content/balance/missions";
 import { applyForge, previewForge, type ForgePreview } from "./forge";
 export { canForge } from "./forge";
-import { AMMO_BALANCE } from "../content/balance/ammo";
 import {
   acquireAmmo,
-  createChoiceCache,
   ammoSellPrice,
   previewMerges,
   applyMerges,
@@ -27,6 +25,7 @@ import { rewardModules, installModule } from "./modules";
 import { isCorrect, makeQuestions, parseNumericAnswer } from "./questions";
 import {
   QUALITY_ORDER,
+  GRADES,
   uid,
   type Ammo,
   type AmmoInventory,
@@ -43,6 +42,7 @@ export interface ProfileStore {
   commit(profiles: Profile[]): void;
 }
 export interface CombatOutcome {
+  chestLoot?: Ammo[];
   ammoInventory?: AmmoInventory;
   hp: number;
   salvage: number;
@@ -216,10 +216,12 @@ export class RunSession {
     mission: MissionLength = "standard",
     difficulty: RunState["difficulty"] = "standard",
   ): void {
+    if (!GRADES.includes(grade))
+      throw new Error("Choose Kindergarten through Grade 5.");
     if (this.paused) return;
     this.change((profiles) => {
       const profile = profiles.find((p) => p.id === id)!;
-      if (profile.activeRun) throw new Error("Resume the active run first.");
+      // Portal entry always replaces any previous mission, including legacy saves.
       profile.grade = grade;
       profile.activeRun = newRun(grade, mission, difficulty);
     });
@@ -257,13 +259,14 @@ export class RunSession {
     this.command(id, "combat", (run) => {
       if (run.wave >= run.totalWaves)
         throw new Error("The final wave ends the mission.");
-      const { ammoInventory, ...stats } = outcome;
+      const { ammoInventory, chestLoot, ...stats } = outcome;
+      run.waveLoot = structuredClone(chestLoot ?? []);
       Object.assign(run, stats);
       if (ammoInventory) Object.assign(run, structuredClone(ammoInventory));
       run.salvage = Math.max(run.salvage, run.wave === 1 ? 8 : 0);
       run.combatSave = undefined;
       run.phase = "quiz";
-      const questions = makeQuestions(run.grade, run.wave, id).map(
+      const questions = makeQuestions(run.grade, run.wave, run.id).map(
         (q, index) => ({ ...q, id: `${run.id}:${run.wave}:${index}` }),
       );
       run.quiz = {
@@ -275,6 +278,27 @@ export class RunSession {
         correctionIndex: 0,
         draft: "",
       };
+    });
+  }
+  settleWaveLoot(
+    id: string,
+    lootId: string | "all",
+    disposition: "accept" | "sell",
+  ): void {
+    this.command(id, "shop", (run) => {
+      if (disposition !== "accept" && disposition !== "sell") return;
+      const selected = (run.waveLoot ?? []).filter(
+        (item) => lootId === "all" || item.id === lootId,
+      );
+      if (!selected.length) return;
+      if (disposition === "accept") acquireAmmo(run, structuredClone(selected));
+      else
+        run.salvage += selected.reduce(
+          (sum, item) => sum + ammoSellPrice(item),
+          0,
+        );
+      const ids = new Set(selected.map((item) => item.id));
+      run.waveLoot = run.waveLoot!.filter((item) => !ids.has(item.id));
     });
   }
   submit(
@@ -318,11 +342,23 @@ export class RunSession {
           run.wave,
           run.modules,
         );
-        run.phase = "reward";
+        run.phase = wrong ? "correction" : "reward";
       }
-      return correct
-        ? "Correct — reactor stable."
-        : "Logged — you’ll fix that one after choosing a reward.";
+      return correct ? "Correct." : "We’ll review that after question 5.";
+    });
+  }
+  skipQuizForQA(id: string): void {
+    this.command(id, null, (run) => {
+      if (run.phase !== "quiz" && run.phase !== "correction") return;
+      const quiz = run.quiz!;
+      quiz.qaSkipped = true;
+      quiz.rewardQuality ??= "purple";
+      quiz.rewardChoices ??= rewardModules(
+        quiz.rewardQuality,
+        run.wave,
+        run.modules,
+      );
+      run.phase = "reward";
     });
   }
   chooseReward(id: string, rewardId: string): void {
@@ -333,10 +369,7 @@ export class RunSession {
       if (!module) return;
       quiz.selectedReward = rewardId;
       installModule(run, module);
-      run.phase = quiz.attempts.some((a) => !a.corrected)
-        ? "correction"
-        : "cache";
-      if (run.phase === "cache") this.enterSupply(run);
+      this.enterShop(run);
     });
   }
   correct(
@@ -371,78 +404,23 @@ export class RunSession {
       quiz.correctionDraft = "";
       history.corrected = true;
       if (quiz.attempts.every((a) => a.corrected)) {
-        this.enterSupply(run);
+        if (quiz.selectedReward) this.enterShop(run);
+        else run.phase = "reward";
       }
-      return "Correct — repair complete.";
+      return "Correct.";
     });
   }
-  private enterSupply(run: RunState): void {
-    const milestones =
-      run.totalWaves === 6
-        ? AMMO_BALANCE.shortCacheWaves
-        : AMMO_BALANCE.standardCacheWaves;
-    if (milestones.some((wave) => wave === run.wave)) {
-      run.phase = "cache";
-      createChoiceCache(run);
-    } else {
-      run.phase = "shop";
-      createShop(run);
-    }
-  }
-  openCache(id: string): void {
-    this.command(id, "cache", (run) => createChoiceCache(run));
-  }
-  claimCache(id: string, type?: AmmoType): void {
-    // Compatibility for existing callers; settlement still uses the saved bundle.
-    this.command(id, "cache", (run) => {
-      createChoiceCache(run);
-      const option = run.choiceCache!.options.find((o) =>
-        type
-          ? o.kind === "ammo" && o.ammo[0].type === type
-          : o.kind === "module",
-      );
-      if (option) this.applyCache(run, option.id, "accept");
-    });
-  }
-  settleCache(
-    id: string,
-    cacheId: string,
-    optionId: string,
-    disposition: "accept" | "sell",
-  ): void {
-    this.command(id, "cache", (run) => {
-      if (run.choiceCache?.id !== cacheId) return;
-      this.applyCache(run, optionId, disposition);
-    });
-  }
-  private applyCache(
-    run: RunState,
-    optionId: string,
-    disposition: "accept" | "sell",
-  ): void {
-    const cache = run.choiceCache;
-    if (
-      !cache ||
-      cache.kind !== "choice" ||
-      cache.selectedOptionId ||
-      run.cacheClaimed
-    )
-      return;
-    if (disposition !== "accept" && disposition !== "sell") return;
-    const option = cache.options.find((o) => o.id === optionId);
-    if (!option) return;
-    if (disposition === "sell") run.salvage += option.sellPrice;
-    else if (option.kind === "ammo")
-      acquireAmmo(run, structuredClone(option.ammo));
-    else installModule(run, structuredClone(option.module));
-    cache.selectedOptionId = optionId;
-    cache.disposition = disposition;
-    run.cacheClaimed = true;
+  private enterShop(run: RunState): void {
     run.phase = "shop";
     createShop(run);
   }
+
   openShop(id: string): void {
-    this.command(id, "shop", (run) => migrateShop(run));
+    this.command(id, null, (run) => {
+      if (run.phase !== "cache" && run.phase !== "shop") return;
+      run.phase = "shop";
+      migrateShop(run);
+    });
   }
   reroll(id: string): string | undefined {
     return this.command(id, "shop", (run) => rerollShop(run));
@@ -493,6 +471,19 @@ export class RunSession {
   }
   previewMerges(id: string): MergePreview {
     return previewMerges(this.profile(id).activeRun!);
+  }
+  mergeAll(id: string): string | undefined {
+    return this.command(id, "shop", (run) => {
+      let count = 0;
+      for (;;) {
+        const preview = previewMerges(run);
+        if (!applyMerges(run, preview)) break;
+        count += preview.pairs.length;
+      }
+      return count
+        ? `Combined ${count} matching pairs.`
+        : "No matching ammo to merge.";
+    });
   }
   mergePreview(id: string, preview: MergePreview): string | undefined {
     return this.command(id, "shop", (run) =>
@@ -547,6 +538,8 @@ export class RunSession {
   }
   nextWave(id: string): void {
     this.command(id, "shop", (run) => {
+      if (run.waveLoot?.length) return;
+      run.waveLoot = undefined;
       run.forgeIngredientIds = undefined;
       run.wave++;
       run.phase = "combat";

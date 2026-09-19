@@ -25,7 +25,6 @@ function setup() {
     id,
     session.profile(id).activeRun!.quiz!.rewardChoices![0].id,
   );
-  session.claimCache(id, "Piercing");
   return {
     session,
     id,
@@ -151,7 +150,6 @@ test("nine-wave spending routes keep useful math rewards after purchases and arm
       const quiz = session.profile(id).activeRun!.quiz!;
       assert.equal(quiz.rewardChoices!.length, 3);
       session.chooseReward(id, quiz.rewardChoices![route % 3].id);
-      session.claimCache(id);
       for (let i = 0; i < 100; i++) {
         const run = session.profile(id).activeRun!;
         const choices = run.shop!.offers.filter(

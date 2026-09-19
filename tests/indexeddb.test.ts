@@ -141,10 +141,9 @@ test("reload preserves each intermission phase and checkpoints do not change int
       ),
     );
   const reward = session.profile(id).activeRun!.quiz!.rewardChoices![0];
-  assert.equal(session.profile(id).activeRun!.phase, "reward");
-  await execute(() => session.chooseReward(id, reward.id));
   assert.equal(session.profile(id).activeRun!.phase, "correction");
-  assert.deepEqual(session.profile(id).activeRun!.modules[0], reward);
+  await execute(() => session.chooseReward(id, reward.id));
+  assert.equal(session.profile(id).activeRun!.modules.length, 0);
   await execute(() => session.checkpoint(id, { correctionDraft: "1/3" }));
   assert.equal(session.profile(id).activeRun!.quiz!.correctionDraft, "1/3");
   assert.equal(session.profile(id).history.length, 5);

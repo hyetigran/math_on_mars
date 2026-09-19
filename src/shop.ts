@@ -1,3 +1,4 @@
+import { luckyShopTier, shopLuckRoll } from "./luck";
 import { AMMO_BALANCE } from "../content/balance/ammo";
 import { ammoDropTier } from "./ammo";
 import { moduleCandidates, modifiers, moduleTotal, STAT_CAPS } from "./modules";
@@ -23,9 +24,17 @@ function createOffer(run: RunState, slot: number): ShopItem {
     (run.shop?.round ?? 0) * 4 +
     (run.shop?.paidRerolls ?? 0) * 7 +
     slot;
+  const luck = moduleTotal(run.modules, "luck");
+  const luckRoll = shopLuckRoll(
+    `${run.id}:${run.wave}:${run.shop?.round ?? 0}:${run.shop?.paidRerolls ?? 0}:${slot}`,
+  );
   if (slot === 2) {
     const ammoType = AMMO_TYPES[seed % AMMO_TYPES.length];
-    const ammoTier = ammoDropTier(run.wave, ((seed * 37) % 100) / 100);
+    const ammoTier = luckyShopTier(
+      ammoDropTier(run.wave, ((seed * 37) % 100) / 100),
+      luck,
+      luckRoll,
+    );
     return {
       id: uid("offer"),
       kind: "ammo",
@@ -35,7 +44,10 @@ function createOffer(run: RunState, slot: number): ShopItem {
       price: AMMO_BALANCE.buyPrices[ammoTier - 1],
     };
   }
-  const quality = QUALITY_ORDER[seed % 4];
+  const quality =
+    QUALITY_ORDER[
+      luckyShopTier(((seed % 4) + 1) as 1 | 2 | 3 | 4, luck, luckRoll) - 1
+    ];
   const module = moduleCandidates(quality, seed, run.modules)[0];
   if (slot === 3 || !module)
     return { id: uid("offer"), kind: "medkit", title: "Med-gel", price: 5 };

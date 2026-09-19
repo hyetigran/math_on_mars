@@ -1,3 +1,4 @@
+import { LUCK_BALANCE } from "../content/balance/luck";
 import {
   type Module,
   type Modifier,
@@ -16,6 +17,7 @@ export const STAT_CAPS: Record<Stat, number> = {
   healing: 0.75,
   maxHp: 100,
   armor: 20,
+  luck: LUCK_BALANCE.maximum,
 };
 export function modifiers(module: Module): Modifier[] {
   return [
@@ -113,6 +115,7 @@ const CATALOG: Variant[] = [
     ["damage", 0.05],
     ["projectileSpeed", 0.08],
   ),
+  variant("Lucky Salvage", ["luck", 0.1], ["pickupRadius", 0.12], ["armor", 1]),
   variant(
     "Collector Salvage",
     ["pickupRadius", 0.2],

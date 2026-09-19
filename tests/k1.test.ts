@@ -24,25 +24,36 @@ test("K–1 missions use exact deterministic text-only tasks and persistent corr
     assert.deepEqual(questions, replay.profile(id).activeRun!.quiz!.questions);
     assert.equal(questions.length, 5);
     if (grade === "K") {
-      assert.notEqual(questions[0].visualCount, undefined);
-      assert.equal(questions[1].visualGroups!.length, 2);
-      for (const [index, q] of questions.entries()) {
+      assert.equal(
+        questions.filter((q) => q.visualCount !== undefined).length,
+        2,
+      );
+      assert.equal(
+        questions.filter((q) => q.visualGroups?.length === 2).length,
+        3,
+      );
+      for (const q of questions) {
         const groups = q.visualGroups;
         const expected =
           q.visualCount ??
-          (index === 1
+          (q.prompt.includes("more")
             ? Math.max(...groups!)
-            : index === 2
+            : q.prompt.includes("altogether")
               ? groups![0] + groups![1]
               : groups![0] - groups![1]);
         assert.equal(q.answer[0], expected);
-        if (index === 2 || index === 3)
+        if (q.prompt.includes("altogether") || q.prompt.includes("taken away"))
           assert.ok(expected >= 0 && expected <= 5);
       }
     } else {
-      assert.match(questions[0].prompt, /\+/);
-      assert.match(questions[1].prompt, /−/);
-      assert.match(questions[2].prompt, /\+ \?/);
+      assert.equal(
+        questions.filter(
+          (q) => q.prompt.includes("+ ") && !q.prompt.includes("+ ?"),
+        ).length,
+        2,
+      );
+      assert.equal(questions.filter((q) => q.prompt.includes("−")).length, 2);
+      assert.equal(questions.filter((q) => q.prompt.includes("+ ?")).length, 1);
       for (const q of questions) {
         const numbers = q.prompt.match(/\d+/g)!.map(Number);
         const expected = q.prompt.includes("−")

@@ -3,8 +3,8 @@ import assert from "node:assert/strict";
 import { RunSession } from "../src/session";
 import { ProfileRepository } from "../src/persistence";
 
-test("grades 5–6 preserve exact decimal, fraction, ratio and equation work across reload", () => {
-  for (const grade of ["5", "6"] as const)
+test("grade 5 preserves exact decimal and fraction work across reload", () => {
+  for (const grade of ["5"] as const)
     for (let seed = 0; seed < 30; seed++) {
       const data = new Map<string, string>();
       const repository = new ProfileRepository({
