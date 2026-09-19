@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en" data-profile-storage-key="math-on-mars-camp-review">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Base camp regression fixture</title>
+    <style>
+      aside button {
+        color: white;
+        background: #27394e;
+        border: 1px solid #8595a6;
+        padding: 6px;
+        margin-bottom: 6px;
+      }
+      aside button:disabled {
+        opacity: 0.5;
+      }
+    </style>
+  </head>
+  <body>
+    <main id="app"></main>
+    <div id="announcer" class="sr-only" role="status" aria-live="polite"></div>
+    <aside
+      style="
+        position: fixed;
+        top: 90px;
+        left: 12px;
+        z-index: 1000;
+        max-width: 260px;
+        background: #17202ce8;
+        padding: 10px;
+        border-radius: 10px;
+      "
+    >
+      <button id="walk-route">Walk around heater to portal</button>
+      <button id="enter-key">Press E</button>
+      <output id="test-result" style="display: block; font-size: 12px"></output>
+    </aside>
+    <script type="module">
+      await import("../src/main.ts");
+      const result = document.querySelector("#test-result");
+      const route = document.querySelector("#walk-route");
+      const key = (type, value) =>
+        window.dispatchEvent(
+          new KeyboardEvent(type, { key: value, bubbles: true }),
+        );
+      document.querySelector("#enter-key").onclick = () => {
+        key("keydown", "e");
+        key("keyup", "e");
+      };
+      route.onclick = async () => {
+        const canvas = document.querySelector(".camp-canvas");
+        if (!canvas) {
+          result.textContent = "Return to base camp before walking the route.";
+          return;
+        }
+        route.disabled = true;
+        canvas.focus();
+        // Real key handlers, movement clock, collision and proximity checks.
+        for (const [value, milliseconds] of [
+          ["w", 340],
+          ["d", 820],
+          ["w", 1200],
+          ["a", 840],
+          ["w", 370],
+        ]) {
+          key("keydown", value);
+          await new Promise((resolve) => setTimeout(resolve, milliseconds));
+          key("keyup", value);
+        }
+        const bubble = document.querySelector(".portal-bubble");
+        result.textContent =
+          bubble && !bubble.hidden
+            ? "PASS: walked to portal; interaction bubble visible."
+            : "FAIL: portal did not become reachable.";
+        route.disabled = false;
+      };
+    </script>
+  </body>
+</html>

@@ -1,0 +1,104 @@
+.boundary-editor {
+  width: min(1500px, 97vw);
+  max-width: 97vw;
+  height: 96dvh;
+  max-height: 96dvh;
+  padding: 16px;
+  border: 1px solid #6a99ae;
+  border-radius: 12px;
+  color: #edf7fb;
+  background: #14212d;
+}
+.boundary-editor[open] {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.boundary-editor::backdrop {
+  background: #050e18da;
+}
+.boundary-editor header,
+.boundary-editor footer,
+.boundary-tools,
+.boundary-editor footer > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.boundary-editor h1 {
+  margin: 0 0 5px;
+  font-size: 22px;
+}
+.boundary-editor p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.4;
+}
+.boundary-editor button,
+.boundary-editor select {
+  padding: 8px 12px;
+  border: 1px solid #648397;
+  border-radius: 6px;
+  color: #edf7fb;
+  background: #243b4d;
+  font-size: 13px;
+  cursor: var(--game-cursor-pointer, pointer);
+}
+.boundary-editor button:disabled {
+  opacity: 0.4;
+  cursor: var(--game-cursor-arrow, default);
+}
+.boundary-editor button:focus-visible,
+.boundary-editor select:focus-visible {
+  outline: 3px solid #72efff;
+  outline-offset: 2px;
+}
+.boundary-editor [data-action="save"] {
+  background: #146170;
+  border-color: #59dcee;
+}
+.boundary-tools {
+  justify-content: flex-start;
+}
+.boundary-tools label {
+  font-size: 12px;
+}
+.boundary-image {
+  flex: 1;
+  min-height: 180px;
+  background: #0a131c;
+  overflow: hidden;
+}
+.boundary-image svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+  user-select: none;
+}
+.boundary-image circle[data-vertex] {
+  cursor: grab;
+}
+.boundary-image polygon {
+  cursor: var(--game-cursor-pointer, pointer);
+}
+.boundary-message {
+  min-height: 20px;
+  color: #ffe39b;
+}
+.boundary-editor small {
+  font-size: 12px;
+  color: #bbcfdb;
+}
+.camp-edit-boundaries {
+  pointer-events: auto;
+  background: #19202cdd;
+  border: 1px solid #f4ead740;
+  color: #e4edf4;
+  border-radius: 9px;
+  padding: 10px 12px;
+  font-size: 12px;
+  cursor: var(--game-cursor-pointer, pointer);
+}
