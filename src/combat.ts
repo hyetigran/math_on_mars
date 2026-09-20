@@ -212,8 +212,8 @@ class MarsCombatScene extends Phaser.Scene {
   }
 
   create(): void {
-    const context = this.game.canvas.getContext("2d");
-    if (context) context.imageSmoothingQuality = "high";
+    // Keep normal Canvas smoothing. The high-quality resampler repeats expensive
+    // 4K terrain scaling every frame and drops frames on Retina displays.
     this.cameras.main.setBounds(0, 0, BATTLE_WORLD.width, BATTLE_WORLD.height);
     this.resizeCamera();
     this.audio = new BattleAudio(this.options.wave === this.options.totalWaves);
