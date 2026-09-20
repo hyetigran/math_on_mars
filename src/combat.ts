@@ -3,6 +3,7 @@ import { COMBAT_BALANCE } from "../content/balance/combat";
 import { loadBattleBoundaries } from "./battle-boundaries";
 import { BATTLE_VIEW, BATTLE_WORLD, battleRenderSize } from "./battle-world";
 import { combatAim, facingDirection, marineAnimation } from "./combat-aim";
+import { CombatInterpolation, combatCameraLerp } from "./combat-interpolation";
 import {
   armedMarineAnimations,
   armedMarineUrl,
@@ -161,6 +162,7 @@ class MarsCombatScene extends Phaser.Scene {
   private keys!: Record<string, Phaser.Input.Keyboard.Key>;
   private touch = { x: 0, y: 0 };
   private simulation: CombatSimulation;
+  private interpolation: CombatInterpolation;
   private ended = false;
   private hudAt = 0;
   private audio?: BattleAudio;
@@ -172,6 +174,7 @@ class MarsCombatScene extends Phaser.Scene {
       ...options,
       boundaries: loadBattleBoundaries(),
     });
+    this.interpolation = new CombatInterpolation(this.simulation.state);
     this.feedback = new BattleFeedback(this.simulation.state, options.maxHp);
   }
 
@@ -286,10 +289,11 @@ class MarsCombatScene extends Phaser.Scene {
     return this.add.container(x, y, [shadow, this.marineSprite]).setDepth(5);
   }
 
-  private updateMarine(): void {
+  private updateMarine(alpha: number): void {
     const state = this.simulation.state;
-    const dx = state.marine.x - this.marine.x,
-      dy = state.marine.y - this.marine.y;
+    const position = this.interpolation.marine(alpha);
+    const dx = position.x - this.marine.x,
+      dy = position.y - this.marine.y;
     if (Math.hypot(dx, dy) > 0.01) this.movingUntil = this.time.now + 80;
     const moving = this.time.now < this.movingUntil;
     const aim = combatAim(
@@ -319,8 +323,8 @@ class MarsCombatScene extends Phaser.Scene {
     const motion = animation.motion;
     this.marineSprite.play(`marine-${motion}-${this.marineFacing}`, true);
     this.marine
-      .setPosition(state.marine.x, state.marine.y)
-      .setDepth(4 + state.marine.y / BATTLE_WORLD.height);
+      .setPosition(position.x, position.y)
+      .setDepth(4 + position.y / BATTLE_WORLD.height);
   }
 
   private makeEnemyBody(
@@ -358,13 +362,14 @@ class MarsCombatScene extends Phaser.Scene {
 
   private renderState(): void {
     const state = this.simulation.state;
+    const alpha = this.simulation.outcome ? 1 : this.interpolation.alpha;
     const indicators = (this.statusIndicators ??= this.add
       .graphics()
       .setDepth(6));
     indicators.clear();
     const charges = (this.chargeIndicators ??= this.add.graphics().setDepth(1));
     charges.clear();
-    this.updateMarine();
+    this.updateMarine(alpha);
     const enemyIds = new Set(state.enemies.map((e) => e.id));
     for (const [id, body] of this.enemies)
       if (!enemyIds.has(id)) {
@@ -372,6 +377,7 @@ class MarsCombatScene extends Phaser.Scene {
         this.enemies.delete(id);
       }
     for (const enemy of state.enemies) {
+      const position = this.interpolation.entity(enemy, alpha);
       let body = this.enemies.get(enemy.id);
       if (!body) {
         body = this.makeEnemyBody(
@@ -384,8 +390,8 @@ class MarsCombatScene extends Phaser.Scene {
         this.enemies.set(enemy.id, body);
       }
       body.container
-        .setPosition(enemy.x, enemy.y)
-        .setDepth(4 + enemy.y / BATTLE_WORLD.height);
+        .setPosition(position.x, position.y)
+        .setDepth(4 + position.y / BATTLE_WORLD.height);
       const hasSpecialAttack =
         (enemy.attack && enemy.attack.phase !== "cooldown") ||
         (enemy.bossAttack && enemy.bossAttack.phase !== "cooldown");
@@ -413,13 +419,13 @@ class MarsCombatScene extends Phaser.Scene {
         const { dx, dy } = enemy.attack;
         const length =
           (ENEMY_BALANCE.charger.speed * ENEMY_BALANCE.charger.activeMs) / 1000;
-        const tx = enemy.x + dx * length;
-        const ty = enemy.y + dy * length;
+        const tx = position.x + dx * length;
+        const ty = position.y + dy * length;
         const neckX = tx - dx * 34;
         const neckY = ty - dy * 34;
         charges
           .lineStyle(18, 0xe63740, 0.8)
-          .lineBetween(enemy.x, enemy.y, neckX, neckY);
+          .lineBetween(position.x, position.y, neckX, neckY);
         charges
           .fillStyle(0xe63740, 0.9)
           .fillTriangle(
@@ -442,35 +448,35 @@ class MarsCombatScene extends Phaser.Scene {
                 (1 - bossAttack.remainingMs / tuning.slamDurationMs);
           indicators
             .lineStyle(bossAttack.phase === "windup" ? 3 : 10, 0xffe790, 1)
-            .strokeCircle(enemy.x, enemy.y, radius);
+            .strokeCircle(position.x, position.y, radius);
         } else if (bossAttack.pattern === "fan") {
           indicators.lineStyle(3, 0xffa1c0, 1);
           for (const angle of overmindFanAngles(bossAttack.dx, bossAttack.dy)) {
             indicators.lineBetween(
-              enemy.x,
-              enemy.y,
-              enemy.x + Math.cos(angle) * 200,
-              enemy.y + Math.sin(angle) * 200,
+              position.x,
+              position.y,
+              position.x + Math.cos(angle) * 200,
+              position.y + Math.sin(angle) * 200,
             );
           }
         } else {
           indicators.lineStyle(5, 0xc4ff99, 1);
           for (const offset of [-65, 65])
-            indicators.strokeCircle(enemy.x + offset, enemy.y, 20);
+            indicators.strokeCircle(position.x + offset, position.y, 20);
         }
         if (bossAttack.phase === "windup")
           indicators
             .fillStyle(0xffffff, 1)
             .fillRect(
-              enemy.x - 30,
-              enemy.y - enemy.radius - 18,
+              position.x - 30,
+              position.y - enemy.radius - 18,
               (60 * bossAttack.remainingMs) / tuning.windupMs,
               6,
             );
       }
-      const y = enemy.y - enemy.radius - 12;
+      const y = position.y - enemy.radius - 12;
       if (enemy.slowRemainingMs > 0) {
-        const x = enemy.x - 11;
+        const x = position.x - 11;
         indicators.lineStyle(2, STATUS_BALANCE.frostColor, 1);
         for (let spoke = 0; spoke < 3; spoke++) {
           const angle = (spoke * Math.PI) / 3;
@@ -492,7 +498,7 @@ class MarsCombatScene extends Phaser.Scene {
           );
       }
       if (enemy.burnRemainingDamage > 0 && enemy.burnRate > 0) {
-        const x = enemy.x + 11;
+        const x = position.x + 11;
         indicators
           .fillStyle(STATUS_BALANCE.burnColor, 1)
           .fillTriangle(x, y - 6, x - 5, y + 4, x + 5, y + 4);
@@ -511,9 +517,10 @@ class MarsCombatScene extends Phaser.Scene {
       }
     }
     for (const shot of state.enemyProjectiles ?? []) {
-      indicators.fillStyle(0x241d2e, 1).fillCircle(shot.x, shot.y, 9);
-      indicators.fillStyle(0xff759d, 1).fillCircle(shot.x, shot.y, 6);
-      indicators.fillStyle(0xffffff, 1).fillCircle(shot.x - 2, shot.y - 2, 2);
+      const { x, y } = this.interpolation.entity(shot, alpha);
+      indicators.fillStyle(0x241d2e, 1).fillCircle(x, y, 9);
+      indicators.fillStyle(0xff759d, 1).fillCircle(x, y, 6);
+      indicators.fillStyle(0xffffff, 1).fillCircle(x - 2, y - 2, 2);
     }
     const pickupIds = new Set((state.pickups ?? []).map((p) => p.id));
     for (const [id, body] of this.pickups) {
@@ -542,6 +549,7 @@ class MarsCombatScene extends Phaser.Scene {
         this.bolts.delete(id);
       }
     for (const bolt of state.bolts) {
+      const position = this.interpolation.entity(bolt, alpha);
       let body = this.bolts.get(bolt.id);
       if (!body) {
         const shot = state.shots.find((shot) => shot.id === bolt.shotId);
@@ -597,7 +605,8 @@ class MarsCombatScene extends Phaser.Scene {
         });
         this.bolts.set(bolt.id, body);
       }
-      const phase = (state.simulationTick ?? 0) * 0.65 + bolt.id * 1.7;
+      const visualTick = Math.max(0, (state.simulationTick ?? 0) - 1 + alpha);
+      const phase = visualTick * 0.65 + bolt.id * 1.7;
       const pulse = Math.sin(phase);
       const type = body.getData("ammoType");
       // Animate each stream independently, using simulation time so pausing freezes it.
@@ -617,7 +626,7 @@ class MarsCombatScene extends Phaser.Scene {
             : 1,
       );
       body
-        .setPosition(bolt.x, bolt.y)
+        .setPosition(position.x, position.y)
         .setRotation(
           Math.atan2(bolt.vy, bolt.vx) +
             (type === "Electric Chain" ? 0.1 * pulse : 0),
@@ -676,7 +685,9 @@ class MarsCombatScene extends Phaser.Scene {
     this.simulation.advance(
       delta,
       Math.hypot(this.touch.x, this.touch.y) > 0.1 ? this.touch : keyboard,
+      this.interpolation.capture,
     );
+    this.cameras.main.setLerp(combatCameraLerp(delta));
     if (this.simulation.drainPiercingImpact())
       this.audio?.play("ammo_piercing_hit", 0.3);
     for (const cue of this.feedback.update(this.simulation.state)) {

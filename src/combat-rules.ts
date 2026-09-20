@@ -76,7 +76,8 @@ export interface ChainFlash {
   from: Position;
   to: Position;
 }
-const STEP_MS = 1000 / 60;
+export const COMBAT_STEP_MS = 1000 / 60;
+const STEP_MS = COMBAT_STEP_MS;
 const distance = (a: Position, b: Position): number =>
   Math.hypot(a.x - b.x, a.y - b.y);
 const clamp = (n: number, min: number, max: number): number =>
@@ -479,7 +480,11 @@ export class CombatSimulation {
     }
   }
 
-  advance(deltaMs: number, movement: Position = { x: 0, y: 0 }): void {
+  advance(
+    deltaMs: number,
+    movement: Position = { x: 0, y: 0 },
+    beforeStep?: () => void,
+  ): void {
     if (this.outcome) return;
     this.state.stepRemainderMs += clamp(deltaMs, 0, 100);
     while (this.state.stepRemainderMs + 1e-8 >= STEP_MS && !this.outcome) {
@@ -487,6 +492,8 @@ export class CombatSimulation {
         0,
         this.state.stepRemainderMs - STEP_MS,
       );
+      // Presentation captures the last two physics poses, including catch-up steps.
+      beforeStep?.();
       this.step(movement);
     }
   }
