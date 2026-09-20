@@ -12,7 +12,23 @@ type Envelope = {
   data: Profile;
   previous?: Profile;
 };
-type Receipt = { id: string; payload: string; envelopes: Envelope[] };
+type LegacyReceipt = { id: string; payload: string; envelopes: Envelope[] };
+type CompactReceipt = {
+  id: string;
+  payloadHash: string;
+  revisions: { id: string; revision: number }[];
+};
+type Receipt = LegacyReceipt | CompactReceipt;
+
+async function fingerprint(payload: string): Promise<string> {
+  const digest = await crypto.subtle.digest(
+    "SHA-256",
+    new TextEncoder().encode(payload),
+  );
+  return Array.from(new Uint8Array(digest), (byte) =>
+    byte.toString(16).padStart(2, "0"),
+  ).join("");
+}
 const request = <T>(value: IDBRequest<T>): Promise<T> =>
   new Promise((resolve, reject) => {
     value.onsuccess = () => resolve(value.result);
@@ -103,6 +119,8 @@ export class IndexedProfileRepository {
     const candidate = decodeProfiles(JSON.stringify(profiles));
     const payload = JSON.stringify(candidate);
     const observedAtAcceptance = new Map(this.observed);
+    // Hash before opening the transaction: awaiting crypto inside it can close it.
+    const payloadHash = await fingerprint(payload);
     const database = await this.open();
     const tx = database.transaction(
       ["profiles", "receipts", "metadata"],
@@ -117,12 +135,25 @@ export class IndexedProfileRepository {
         receipts.get(commandId),
       );
       if (previous) {
-        if (previous.payload !== payload)
+        const matches =
+          "payload" in previous
+            ? previous.payload === payload
+            : previous.payloadHash === payloadHash;
+        if (!matches)
           throw new ProfileStorageError(
             "Command ID was reused for different changes.",
           );
         await done;
-        for (const e of previous.envelopes) this.observed.set(e.id, e);
+        // The matching candidate already contains the exact data acknowledged by
+        // this receipt. Retain only revision metadata, not another profile copy.
+        const envelopes =
+          "envelopes" in previous
+            ? previous.envelopes
+            : previous.revisions.map(({ id, revision }) => {
+                const data = candidate.find((profile) => profile.id === id)!;
+                return { id, revision, data, previous: data };
+              });
+        for (const e of envelopes) this.observed.set(e.id, e);
         return;
       }
       const store = tx.objectStore("profiles");
@@ -150,7 +181,11 @@ export class IndexedProfileRepository {
         store.put(envelope);
         envelopes.push(envelope);
       }
-      receipts.put({ id: commandId, payload, envelopes } satisfies Receipt);
+      receipts.put({
+        id: commandId,
+        payloadHash,
+        revisions: envelopes.map(({ id, revision }) => ({ id, revision })),
+      } satisfies CompactReceipt);
       tx.objectStore("metadata").put(true, "migrated");
       await done;
       for (const e of envelopes) this.observed.set(e.id, e);

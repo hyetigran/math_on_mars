@@ -5,6 +5,7 @@ import puppeteer from "puppeteer-core";
 import assert from "node:assert/strict";
 const browser = await puppeteer.launch({
   executablePath:
+    process.env.CHROME_PATH ||
     "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
   headless: true,
 });
@@ -65,7 +66,10 @@ try {
     };
   });
   console.log(result);
-  await page.screenshot({ path: process.env.SHOT || "/tmp/mars-perf.png" });
+  if (process.env.SHOT) {
+    await page.click("#pause-button");
+    await page.screenshot({ path: process.env.SHOT });
+  }
   assert.ok(
     result.fps >= Number(process.env.MIN_FPS || 55) &&
       result.p95 < Number(process.env.MAX_P95_MS || 25),

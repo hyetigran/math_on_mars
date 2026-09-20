@@ -17,14 +17,14 @@ function audioContext(): AudioContext {
 async function loadAudioBuffer(
   name: string,
   ctx: AudioContext | undefined,
-  signal = AbortSignal.timeout(30000),
+  signal?: AbortSignal,
 ): Promise<AudioBuffer | undefined> {
   const url = battleAudioUrl(name);
   if (!url || !ctx) return;
   if (!buffers.has(name)) {
     buffers.set(
       name,
-      fetch(url, { signal })
+      fetch(url, { signal: signal ?? AbortSignal.timeout(30000) })
         .then((response) =>
           response.ok ? response.arrayBuffer() : Promise.reject(),
         )

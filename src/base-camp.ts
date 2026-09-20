@@ -1,4 +1,5 @@
 import { loadImage } from "./image-cache";
+import { canvasRenderSize } from "./canvas-size";
 import { BattleAudio, playUiSound, preloadCampMusic } from "./battle-audio";
 import {
   campBackgroundUrl,
@@ -322,9 +323,14 @@ export class BaseCampController {
   private resize(): void {
     this.width = this.host.clientWidth;
     this.height = this.host.clientHeight;
-    this.ratio = Math.min(window.devicePixelRatio || 1, 2);
-    this.canvas.width = Math.round(this.width * this.ratio);
-    this.canvas.height = Math.round(this.height * this.ratio);
+    const size = canvasRenderSize(
+      Math.max(1, this.width),
+      Math.max(1, this.height),
+      window.devicePixelRatio || 1,
+    );
+    this.ratio = size.width / Math.max(1, this.width);
+    if (this.canvas.width !== size.width) this.canvas.width = size.width;
+    if (this.canvas.height !== size.height) this.canvas.height = size.height;
   }
 
   private update(time: number): void {

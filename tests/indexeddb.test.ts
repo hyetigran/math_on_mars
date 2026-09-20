@@ -273,3 +273,88 @@ test("unresumable primary and backup retain exact valid history only after expli
   assert.deepEqual(recovered, [saved]);
   assert.deepEqual(await repo.load(), [saved]);
 });
+
+async function inspectStore(
+  factory: IDBFactory,
+  name: string,
+  store: string,
+  key: string,
+) {
+  const db = await new Promise<IDBDatabase>((resolve, reject) => {
+    const req = factory.open(name);
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+  try {
+    return await new Promise<any>((resolve, reject) => {
+      const req = db.transaction(store).objectStore(store).get(key);
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => reject(req.error);
+    });
+  } finally {
+    db.close();
+  }
+}
+
+test("checkpoint receipts stay compact without losing exact retry protection", async () => {
+  const factory = new IDBFactory();
+  const repo = new IndexedProfileRepository(factory, "compact");
+  const session = new RunSession([], { commit: () => {} });
+  const id = session.createProfile("Cadet");
+  session.start(id, "3");
+  const candidate = session.profiles;
+  const run = candidate[0].activeRun!;
+  run.combatSave = new CombatSimulation({ ...run, seed: 42 }).serialize();
+  await repo.commit(candidate, "checkpoint");
+  const receipt = await inspectStore(
+    factory,
+    "compact",
+    "receipts",
+    "checkpoint",
+  );
+  assert.ok(
+    JSON.stringify(receipt).length < JSON.stringify(candidate).length / 4,
+    "A receipt must not duplicate the full mission and practice history",
+  );
+  repo.close();
+  const reopened = new IndexedProfileRepository(factory, "compact");
+  await reopened.load();
+  await reopened.commit(candidate, "checkpoint");
+  const changed = structuredClone(candidate);
+  changed[0].activeRun!.salvage++;
+  await assert.rejects(reopened.commit(changed, "checkpoint"));
+  await reopened.commit(changed, "next");
+  assert.deepEqual(await reopened.load(), changed);
+});
+
+test("legacy full-profile receipts remain retryable after the compact receipt update", async () => {
+  const factory = new IDBFactory();
+  const name = "legacy-receipts";
+  const repo = new IndexedProfileRepository(factory, name);
+  const candidate = [profile("a")];
+  await repo.commit(candidate, "create");
+  const envelope = await inspectStore(factory, name, "profiles", "a");
+  const db = await new Promise<IDBDatabase>((resolve) => {
+    const req = factory.open(name);
+    req.onsuccess = () => resolve(req.result);
+  });
+  await new Promise<void>((resolve, reject) => {
+    const tx = db.transaction("receipts", "readwrite");
+    tx.objectStore("receipts").put({
+      id: "legacy",
+      payload: JSON.stringify(candidate),
+      envelopes: [envelope],
+    });
+    tx.oncomplete = () => resolve();
+    tx.onabort = () => reject(tx.error);
+  });
+  db.close();
+  repo.close();
+  const reopened = new IndexedProfileRepository(factory, name);
+  await reopened.load();
+  await reopened.commit(candidate, "legacy");
+  await assert.rejects(
+    reopened.commit([{ ...candidate[0], victories: 9 }], "legacy"),
+  );
+  assert.deepEqual(await reopened.load(), candidate);
+});

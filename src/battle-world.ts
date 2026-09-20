@@ -24,19 +24,4 @@ export function clampBattleY(y: number, padding = 0): number {
   );
 }
 
-/** Spend a bounded pixel budget, independent of CSS viewport size. */
-export function battleRenderSize(
-  width: number,
-  height: number,
-  pixelRatio: number,
-) {
-  const density = Math.min(
-    Math.max(1, pixelRatio),
-    2,
-    Math.sqrt((BATTLE_VIEW.width * BATTLE_VIEW.height * 4) / (width * height)),
-  );
-  return {
-    width: Math.max(1, Math.floor(width * density)),
-    height: Math.max(1, Math.floor(height * density)),
-  };
-}
+export { canvasRenderSize as battleRenderSize } from "./canvas-size";

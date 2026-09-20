@@ -74,3 +74,5 @@ Development builds and local previews (localhost, 127.0.0.1, or [::1]) include a
 Enemy introductions are the same for all mission lengths: Drifter at wave 1, Spitter at wave 2, Charger at wave 3, and Splitter at wave 4. Earlier types remain in the mix on later regular waves; the final wave retains its boss encounter.
 
 Final waves spawn one Overmind with eight regular adds, then batches of four every 1.5 seconds, up to 64 regular adds total. Reinforcements pause at 32 living adds, counting summoned minis. All four regular types enter from the arena edges. Boss defeat immediately ends the encounter and clears surviving enemies and queued reinforcements.
+
+Camp and combat share a 3.7-million-pixel drawing budget, preserving viewport proportions and capping device density at 2×. Cached audio playback creates no download timeout; timeouts are allocated only for actual fetches. New IndexedDB command receipts retain payload fingerprints and revision metadata rather than duplicating profiles; historical full-profile receipts remain retryable.
