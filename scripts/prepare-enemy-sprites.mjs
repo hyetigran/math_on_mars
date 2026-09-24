@@ -16,9 +16,9 @@ const sheets = [
   ["charger-attack-hd.png", "charger/runtime/charger-attack.webp"],
   ["summoner-run-hd.png", "splitter/runtime/summoner-run.webp"],
   ["summoner-attack-hd.png", "splitter/runtime/summoner-attack.webp"],
-  ["repairs/overmind-run-full-frame.png", "overmind/runtime/overmind-run.webp"],
+  ["repairs/overmind-run-flat-color.png", "overmind/runtime/overmind-run.webp"],
   [
-    "repairs/overmind-attack-full-frame.png",
+    "repairs/overmind-attack-flat-color.png",
     "overmind/runtime/overmind-attack.webp",
   ],
 ];

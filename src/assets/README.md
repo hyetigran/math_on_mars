@@ -22,6 +22,8 @@ Run `node scripts/prepare-game-assets.mjs` to regenerate item/UI exports and `ru
 
 Run `node scripts/prepare-enemy-sprites.mjs` to rebuild the 256px lossless enemy runtime sheets from the retained Corridor Key masters. Full-frame repair sources under `assets/sorceress/enemies/sprites/repairs/` replace generated frames whose silhouettes originally left the camera. The preparation pass gives every frame a fixed scale, stable ground line, transparent-background cleanup, and an 18px safety inset so motion cannot bleed or clip across sprite cells.
 
+The Overmind uses `overmind-run-flat-color.png` and `overmind-attack-flat-color.png` from that repairs folder. These color-corrected sheets retain the 31-pose run/attack layouts and restore the selected character's flat reddish-magenta body, yellow crown, and cyan reactor center throughout. They replace the broad black shading baked into the older full-frame sheets; all 31 frames, including frame zero, are playable. The earlier sheets remain as source references.
+
 Run `python3 scripts/generate-music-assets.py` to regenerate the three music loops. The composer is deterministic and requires only Python 3 plus ffmpeg.
 
 Run `node scripts/prepare-sfx-assets.mjs` to trim, level-match and export the

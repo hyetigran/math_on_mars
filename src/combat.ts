@@ -261,8 +261,7 @@ class MarsCombatScene extends Phaser.Scene {
       this.anims.create({
         key: animationKey,
         frames: this.anims.generateFrameNumbers(animationKey, {
-          // Imagine bakes a dark transition into the Overmind's first frame.
-          start: key.startsWith("overmind-") ? 1 : 0,
+          start: 0,
           end: ENEMY_SHEET_FRAME_COUNT - 1,
         }),
         frameRate: ENEMY_SHEET_FPS,
