@@ -39,6 +39,14 @@ try {
       );
     }
   }
+  await mkdir(join(output, "content/questions"), { recursive: true });
+  for (const file of await readdir("content/questions")) {
+    if (file.endsWith(".json"))
+      await writeFile(
+        join(output, "content/questions", file),
+        await readFile(join("content/questions", file)),
+      );
+  }
   const files = (await readdir(join(output, "tests")))
     .filter((file) => file.endsWith(".test.js"))
     .map((file) => join(output, "tests", file));

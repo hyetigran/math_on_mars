@@ -1,3 +1,4 @@
+import { validQuizSettings } from "./quiz-settings";
 import { ENEMY_BALANCE, OVERMIND_BALANCE } from "../content/balance/enemies";
 import {
   AMMO_TYPES,
@@ -148,8 +149,51 @@ function moduleRecord(value: unknown): void {
     }
   }
 }
+function questionMetadata(item: RecordValue): void {
+  if (item.skill !== undefined) string(item.skill, "question skill");
+  if (item.standards !== undefined)
+    list(item.standards, "question standards").forEach((value) =>
+      string(value, "standard"),
+    );
+  if (item.source === undefined) return;
+  const source = record(item.source, "question source");
+  for (const key of [
+    "itemId",
+    "title",
+    "author",
+    "edition",
+    "license",
+    "licenseUrl",
+    "curriculumUrl",
+    "url",
+    "section",
+    "problem",
+    "part",
+    "original",
+    "changes",
+  ])
+    string(source[key], `source.${key}`);
+  integer(source.unit, "source.unit", 1);
+  ensure(
+    /^https:\/\/im\.kendallhunt\.com\/k5\/teachers\/(kindergarten|grade-[1-5])\/unit-\d+\/practice\.html$/.test(
+      source.url as string,
+    ),
+    "source URL",
+  );
+  ensure(
+    source.licenseUrl === "https://creativecommons.org/licenses/by/4.0/",
+    "source license URL",
+  );
+  ensure(
+    source.curriculumUrl === "https://im.kendallhunt.com/k5/teachers/",
+    "source curriculum URL",
+  );
+}
 function question(value: unknown): void {
   const item = record(value, "question");
+  questionMetadata(item);
+  if (item.choiceDenominator !== undefined)
+    integer(item.choiceDenominator, "question.choiceDenominator", 1, 10000);
   if (item.answerInput !== undefined)
     choice(item.answerInput, ["number", "fraction"], "question input kind");
   for (const key of ["id", "prompt", "spoken", "hint", "explanation"])
@@ -452,6 +496,8 @@ export function decodeProfiles(raw: string): Profile[] {
   for (const value of profiles) {
     const profile = record(value, "profile");
     string(profile.name, "profile.name");
+    if (profile.quizSettings !== undefined)
+      ensure(validQuizSettings(profile.quizSettings), "profile.quizSettings");
     if (profile.grade === "6") profile.grade = "5";
     choice(profile.grade, GRADES, "profile.grade");
     choice(profile.handedness, ["left", "right"], "profile.handedness");
@@ -459,6 +505,7 @@ export function decodeProfiles(raw: string): Profile[] {
     const history = list(profile.history, "profile.history");
     for (const [index, value] of history.entries()) {
       const entry = record(value, "history entry");
+      questionMetadata(entry);
       string(entry.question, "history.question");
       choice(entry.grade, [...GRADES, "6"], "history.grade");
       boolean(entry.correctInitially, "history.correctInitially");
@@ -483,6 +530,8 @@ export function decodeProfiles(raw: string): Profile[] {
     }
     if (profile.activeRun === undefined) continue;
     const run = record(profile.activeRun, "run");
+    if (run.quizSettings !== undefined)
+      ensure(validQuizSettings(run.quizSettings), "run.quizSettings");
     if (run.grade === "6") {
       delete profile.activeRun;
       continue;
@@ -583,15 +632,33 @@ export function decodeProfiles(raw: string): Profile[] {
       ensure(run.quiz !== undefined, "missing quiz");
     if (run.quiz === undefined) continue;
     const quiz = record(run.quiz, "quiz");
+    if (quiz.answerType !== undefined)
+      choice(quiz.answerType, ["input", "multiple-choice"], "quiz.answerType");
     if (quiz.qaSkipped !== undefined)
       ensure(typeof quiz.qaSkipped === "boolean", "quiz.qaSkipped");
     const questions = list(quiz.questions, "quiz.questions");
-    ensure(questions.length === 5, "five questions");
+    if (quiz.timeLimitMs !== undefined) {
+      ensure(
+        questions.length >= 1 && questions.length <= 20,
+        "quiz question count",
+      );
+      integer(
+        quiz.timeLimitMs,
+        "quiz.timeLimitMs",
+        questions.length * 1000,
+        questions.length * 300000,
+      );
+      ensure(
+        (quiz.timeLimitMs as number) % (questions.length * 1000) === 0,
+        "quiz whole seconds per question",
+      );
+    } else ensure(questions.length === 5, "legacy five questions");
+    const timeLimit = (quiz.timeLimitMs as number | undefined) ?? 30000;
     questions.forEach(question);
-    integer(quiz.index, "quiz.index", 0, 5);
-    number(quiz.elapsedMs, "quiz.elapsedMs");
-    number(quiz.remainingMs, "quiz.remainingMs", 0, 30000);
-    integer(quiz.correctionIndex, "quiz.correctionIndex", 0, 5);
+    integer(quiz.index, "quiz.index", 0, questions.length);
+    number(quiz.elapsedMs, "quiz.elapsedMs", 0, timeLimit);
+    number(quiz.remainingMs, "quiz.remainingMs", 0, timeLimit);
+    integer(quiz.correctionIndex, "quiz.correctionIndex", 0, questions.length);
     for (const key of ["draft", "correctionDraft"])
       if (quiz[key] !== undefined) string(quiz[key], `quiz.${key}`);
     const attempts = list(quiz.attempts, "quiz.attempts");
@@ -603,7 +670,8 @@ export function decodeProfiles(raw: string): Profile[] {
       boolean(attempt.correct, "attempt.correct");
       boolean(attempt.corrected, "attempt.corrected");
     }
-    if (run.phase === "quiz") ensure(quiz.index < 5, "quiz initial index");
+    if (run.phase === "quiz")
+      ensure(quiz.index < questions.length, "quiz initial index");
     if (quiz.rewardQuality !== undefined)
       choice(quiz.rewardQuality, QUALITY_ORDER, "quiz.rewardQuality");
     if (quiz.rewardChoices !== undefined) {
@@ -614,7 +682,7 @@ export function decodeProfiles(raw: string): Profile[] {
     }
     if (["reward", "correction", "cache", "shop"].includes(run.phase as string))
       ensure(
-        (quiz.index === 5 || quiz.qaSkipped === true) &&
+        (quiz.index === questions.length || quiz.qaSkipped === true) &&
           quiz.rewardQuality !== undefined &&
           quiz.rewardChoices !== undefined,
         "settled quiz",
@@ -648,6 +716,9 @@ export function decodeProfiles(raw: string): Profile[] {
         history.push({
           occurrenceId,
           question: record(attempt.question, "question").prompt,
+          source: record(attempt.question, "question").source,
+          skill: record(attempt.question, "question").skill,
+          standards: record(attempt.question, "question").standards,
           grade: run.grade,
           correctInitially: attempt.correct,
           corrected: attempt.corrected,

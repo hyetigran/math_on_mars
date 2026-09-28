@@ -1,3 +1,4 @@
+import { QUESTION_BANK, bankQuestion } from "./question-bank";
 import type { Grade, Question } from "./types";
 
 function gcd(a: number, b: number): number {
@@ -39,6 +40,42 @@ export function isCorrect(value: string, expected: [number, number]): boolean {
   return !!parsed && parsed[0] * expected[1] === expected[0] * parsed[1];
 }
 
+/** Stable options across rerenders, with exactly one numerically correct answer. */
+export function makeAnswerChoices(question: Question): string[] {
+  const [n, d] = fraction(...question.answer);
+  // Preserve the task's units even when its answer simplifies (e.g. 5/10).
+  const taskDenominator = question.choiceDenominator ?? d;
+  const denominator = (d * taskDenominator) / gcd(d, taskDenominator);
+  const numerator = n * (denominator / d);
+  const candidates = new Map<string, [number, number]>();
+  for (const offset of [0, -1, 1, -2, 2, -3, 3]) {
+    if (numerator >= 0 && numerator + offset < 0) continue;
+    const value = fraction(numerator + offset, denominator);
+    candidates.set(value.join("/"), value);
+    if (candidates.size === 4) break;
+  }
+  const choices = [...candidates.values()].map(([numerator, denominator]) => {
+    if (denominator === 1) return String(numerator);
+    if (question.answerInput !== "fraction") {
+      let factor = denominator;
+      while (factor % 2 === 0) factor /= 2;
+      while (factor % 5 === 0) factor /= 5;
+      if (factor === 1) return String(numerator / denominator);
+    }
+    return `${numerator}/${denominator}`;
+  });
+  const seed = [...question.id].reduce(
+    (sum, char) => (sum * 31 + char.charCodeAt(0)) >>> 0,
+    7,
+  );
+  const random = seeded(seed);
+  for (let i = choices.length - 1; i > 0; i--) {
+    const j = pickInt(random, 0, i);
+    [choices[i], choices[j]] = [choices[j], choices[i]];
+  }
+  return choices;
+}
+
 function seeded(seed: number): () => number {
   let state = seed >>> 0;
   return () => {
@@ -51,269 +88,31 @@ function pickInt(rand: () => number, min: number, max: number): number {
   return Math.floor(rand() * (max - min + 1)) + min;
 }
 
-function q(
-  index: number,
-  prompt: string,
-  answer: [number, number],
-  hint: string,
-  explanation: string,
-  visualCount?: number,
-  answerInput: Question["answerInput"] = "number",
-): Question {
-  return {
-    id: `q-${index}-${prompt.replace(/\W/g, "").slice(0, 10)}`,
-    prompt,
-    spoken: prompt,
-    answerInput,
-    answer,
-    hint,
-    explanation,
-    visualCount,
-  };
-}
-
+/** Select fixed, attributed items; only their order changes between missions. */
 export function makeQuestions(
   grade: Grade,
   wave: number,
   missionSeed: string,
+  count = 5,
 ): Question[] {
-  const seed = [...`${missionSeed}-${grade}-${wave}`].reduce(
-    (sum, c) => (sum * 31 + c.charCodeAt(0)) >>> 0,
+  if (!Number.isInteger(count) || count < 1 || count > 20)
+    throw new Error("Choose 1–20 questions per wave.");
+  if (!Number.isInteger(wave) || wave < 1)
+    throw new Error("Choose a valid wave.");
+  const deck = QUESTION_BANK.filter((item) => item.grade === grade);
+  if (deck.length < count)
+    throw new Error("Not enough sourced questions for this grade.");
+  const seed = [...`${missionSeed}-${grade}`].reduce(
+    (sum, char) => (sum * 31 + char.charCodeAt(0)) >>> 0,
     7,
   );
-  const rand = seeded(seed);
-  const questions = Array.from({ length: 5 }, (_, i) => {
-    if (grade === "K") {
-      const n = pickInt(rand, 0, 10);
-      if (i === 1) {
-        const other = ((n + pickInt(rand, 1, 9) - 1) % 10) + 1;
-        return {
-          ...q(
-            i,
-            "Which group has more energy cells? Enter the larger number.",
-            [Math.max(n, other), 1],
-            "Count each group. Choose the number that is larger.",
-            `${Math.max(n, other)} is greater than ${Math.min(n, other)}.`,
-          ),
-          visualGroups: [n, other],
-        };
-      }
-      if (i === 2) {
-        const a = pickInt(rand, 0, 5),
-          b = pickInt(rand, 0, 5 - a);
-        return {
-          ...q(
-            i,
-            "How many energy cells are in both groups altogether?",
-            [a + b, 1],
-            "Count the first group, then count on through the second group.",
-            `${a} plus ${b} equals ${a + b}.`,
-          ),
-          visualGroups: [a, b],
-        };
-      }
-      if (i === 3) {
-        const total = pickInt(rand, 0, 5),
-          removed = pickInt(rand, 0, total);
-        return {
-          ...q(
-            i,
-            `${total} cells started. ${removed} were taken away. How many remain?`,
-            [total - removed, 1],
-            "Count the starting cells. Remove the cells taken away. Count what is left.",
-            `${total} minus ${removed} equals ${total - removed}.`,
-          ),
-          visualGroups: [total, removed],
-          visualGroupLabels: ["Starting cells", "Taken away"],
-        };
-      }
-      return {
-        ...q(
-          i,
-          "How many energy cells are there?",
-          [n, 1],
-          "Touch each cell once as you count.",
-          `There are ${n} energy cells.`,
-          n,
-        ),
-      };
-    }
-    if (grade === "1") {
-      const a = pickInt(rand, 2, 12);
-      const b = pickInt(rand, 1, Math.min(8, 20 - a));
-      if (i % 3 === 2)
-        return {
-          ...q(
-            i,
-            `${a} + ? = ${a + b}`,
-            [b, 1],
-            `Count up from ${a} to ${a + b}.`,
-            `${a} plus ${b} equals ${a + b}.`,
-          ),
-          spoken: `What number added to ${a} makes ${a + b}?`,
-        };
-      if (i % 3 === 1)
-        return {
-          ...q(
-            i,
-            `${a + b} − ${a} = ?`,
-            [b, 1],
-            `Start at ${a + b} and count back ${a}.`,
-            `${a + b} minus ${a} equals ${b}.`,
-          ),
-          spoken: `What is ${a + b} minus ${a}?`,
-        };
-      return {
-        ...q(
-          i,
-          `${a} + ${b} = ?`,
-          [a + b, 1],
-          `Start at ${a} and count on ${b}.`,
-          `${a} plus ${b} equals ${a + b}.`,
-        ),
-        spoken: `What is ${a} plus ${b}?`,
-      };
-    }
-    if (grade === "2") {
-      if (i === 2) {
-        const value = pickInt(rand, 10, 99);
-        const tens = Math.floor(value / 10);
-        return q(
-          i,
-          `What is the value of the digit ${tens} in the tens place of ${value}?`,
-          [tens * 10, 1],
-          "The tens digit counts groups of ten.",
-          `${value} has ${tens} tens and ${value % 10} ones. The digit ${tens} in the tens place is worth ${tens * 10}.`,
-        );
-      }
-      if (i === 4) {
-        const tens = pickInt(rand, 0, 9),
-          ones = pickInt(rand, 0, 9);
-        return q(
-          i,
-          `${tens} tens and ${ones} ones make what number?`,
-          [tens * 10 + ones, 1],
-          "Each ten is worth 10. Add the ones.",
-          `${tens} tens is ${tens * 10}; adding ${ones} ones makes ${tens * 10 + ones}.`,
-        );
-      }
-      const a = pickInt(rand, 0, 100);
-      const subtract = i % 2 === 1;
-      const b = pickInt(rand, 0, subtract ? a : 100 - a);
-      return subtract
-        ? q(
-            i,
-            `${a} − ${b} = ?`,
-            [a - b, 1],
-            "Subtract the tens, then the ones. Regroup a ten if needed.",
-            `${a} minus ${b} equals ${a - b}.`,
-          )
-        : q(
-            i,
-            `${a} + ${b} = ?`,
-            [a + b, 1],
-            "Add the ones and tens. Regroup ten ones as one ten if needed.",
-            `${a} plus ${b} equals ${a + b}.`,
-          );
-    }
-    if (grade === "3") {
-      const a = pickInt(rand, 1, 10);
-      const b = pickInt(rand, 0, 10);
-      return i % 2
-        ? q(
-            i,
-            `${a * b} ÷ ${a} = ?`,
-            [b, 1],
-            `Think: ${a} times what equals ${a * b}?`,
-            `${a * b} divided by ${a} equals ${b}.`,
-          )
-        : q(
-            i,
-            `${a} × ${b} = ?`,
-            [a * b, 1],
-            `Use ${a} groups of ${b}.`,
-            `${a} times ${b} equals ${a * b}.`,
-          );
-    }
-    if (grade === "4") {
-      if (i === 2) {
-        const denominator = pickInt(rand, 2, 10);
-        const numerator = pickInt(rand, 1, denominator - 1);
-        const scale = pickInt(rand, 2, 5);
-        return q(
-          i,
-          `Complete the equivalent fraction: ${numerator}/${denominator} = ?/${denominator * scale}. Enter the missing numerator.`,
-          [numerator * scale, 1],
-          `The denominator was multiplied by ${scale}. Multiply the numerator by the same number.`,
-          `${numerator}/${denominator} equals ${numerator * scale}/${denominator * scale}, because both parts were multiplied by ${scale}.`,
-        );
-      }
-      if (i % 2) {
-        const d = pickInt(rand, 3, 8);
-        const a = pickInt(rand, 1, d - 1);
-        const b = pickInt(rand, 1, d - a);
-        return q(
-          i,
-          `${a}/${d} + ${b}/${d} = ?`,
-          fraction(a + b, d),
-          "Keep the denominator and add the numerators.",
-          `${a} plus ${b} is ${a + b}, so the answer is ${a + b}/${d}.`,
-          undefined,
-          "fraction",
-        );
-      }
-      const a = pickInt(rand, 12, 35);
-      const b = pickInt(rand, 3, 9);
-      return q(
-        i,
-        `${a} × ${b} = ?`,
-        [a * b, 1],
-        "Break the larger factor into tens and ones.",
-        `${a} times ${b} equals ${a * b}.`,
-      );
-    }
-    if (grade === "5") {
-      if (i % 2) {
-        const first = pickInt(rand, 11, 49),
-          second = pickInt(rand, 11, 39);
-        const subtract = i === 3;
-        const a = subtract ? Math.max(first, second) : first;
-        const b = subtract ? Math.min(first, second) : second;
-        const result = subtract ? a - b : a + b;
-        return q(
-          i,
-          `${(a / 10).toFixed(1)} ${subtract ? "−" : "+"} ${(b / 10).toFixed(1)} = ?`,
-          fraction(result, 10),
-          "Line up the decimal points and work in tenths.",
-          `${a} tenths ${subtract ? "minus" : "plus"} ${b} tenths is ${result} tenths, or ${(result / 10).toFixed(1)}.`,
-        );
-      }
-      let d1 = pickInt(rand, 2, 9);
-      let d2 = 2 + ((d1 - 2 + pickInt(rand, 1, 7)) % 8);
-      let n1 = pickInt(rand, 1, d1 - 1),
-        n2 = pickInt(rand, 1, d2 - 1);
-      const subtract = i === 2;
-      if (subtract && n1 * d2 < n2 * d1) {
-        [n1, n2] = [n2, n1];
-        [d1, d2] = [d2, d1];
-      }
-      const result = n1 * d2 + (subtract ? -n2 * d1 : n2 * d1);
-      return q(
-        i,
-        `${n1}/${d1} ${subtract ? "−" : "+"} ${n2}/${d2} = ?`,
-        fraction(result, d1 * d2),
-        "Find a common denominator first.",
-        `Rewrite the fractions as ${n1 * d2}/${d1 * d2} and ${n2 * d1}/${d1 * d2}. ${subtract ? "Subtract" : "Add"} the numerators to get ${result}/${d1 * d2}.`,
-        undefined,
-        "fraction",
-      );
-    }
-    throw new Error("Unsupported grade. Choose Kindergarten through Grade 5.");
-  });
-  // Keep each grade's skill mix while varying its presentation order.
-  for (let i = questions.length - 1; i > 0; i--) {
-    const j = pickInt(rand, 0, i);
-    [questions[i], questions[j]] = [questions[j], questions[i]];
+  const random = seeded(seed);
+  for (let i = deck.length - 1; i > 0; i--) {
+    const j = pickInt(random, 0, i);
+    [deck[i], deck[j]] = [deck[j], deck[i]];
   }
-  return questions;
+  const offset = (wave - 1) * count;
+  return Array.from({ length: count }, (_, index) =>
+    bankQuestion(deck[(offset + index) % deck.length]),
+  );
 }

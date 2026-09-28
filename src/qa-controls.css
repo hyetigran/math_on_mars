@@ -16,7 +16,8 @@
   min-width: 0;
   font-size: 0.8rem;
 }
-.qa-controls select {
+.qa-controls select,
+.qa-controls input[type="number"] {
   width: 100%;
   min-width: 0;
   min-height: 40px;
@@ -58,4 +59,15 @@
 .qa-floating-button:focus-visible {
   outline: 3px solid white;
   outline-offset: 4px;
+}
+
+.qa-controls fieldset {
+  min-width: 0;
+  display: grid;
+  gap: 10px;
+}
+.qa-controls .qa-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }

@@ -42,13 +42,13 @@ test("new missions use their own questions, while replaying a mission preserves 
   }
 });
 
-test("question order varies while retaining each grade's five-question skill mix", () => {
+test("question order varies while selecting distinct fixed source items", () => {
   for (const grade of grades) {
     const orders = new Set<string>();
     for (let mission = 0; mission < 20; mission++) {
       const questions = makeQuestions(grade, 1, `mission-${mission}`);
-      const slots = questions.map((q) => Number(q.id.split("-")[1]));
-      assert.deepEqual([...slots].sort(), [0, 1, 2, 3, 4]);
+      const slots = questions.map((q) => q.source!.itemId);
+      assert.equal(new Set(slots).size, 5);
       orders.add(slots.join());
     }
     assert.ok(orders.size > 1, `Grade ${grade} always uses the same order`);

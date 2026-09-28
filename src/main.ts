@@ -1,3 +1,10 @@
+import { IM_ATTRIBUTION, QUESTION_BANK } from "./question-bank";
+import {
+  DEFAULT_QUIZ_SETTINGS,
+  quizTimeLimit,
+  quizRewardTime,
+  validQuizSettings,
+} from "./quiz-settings";
 import { loadGameAssets } from "./game-assets";
 import { installDisplayMode, usesTouchControls } from "./display-mode";
 import "./display-mode.css";
@@ -53,7 +60,7 @@ import {
   decorateControls,
 } from "./game-art";
 import { CombatController, type CombatSnapshot } from "./combat";
-import { parseNumericAnswer } from "./questions";
+import { parseNumericAnswer, makeAnswerChoices } from "./questions";
 import {
   RunSession,
   canForge,
@@ -283,13 +290,16 @@ function renderBaseCamp(): void {
   if (profile) campGrade = profile.grade;
   app.innerHTML = `<section class="camp-screen" aria-label="Base camp">
     <div id="camp-world" class="camp-world"></div>
+    <header class="camp-hud">
+    <button class="button secondary camp-settings" id="camp-settings">Settings</button>
     ${
       LOCAL_QA
-        ? `<header class="camp-hud">
+        ? `
       <button class="camp-edit-boundaries" id="edit-boundaries" aria-label="Edit map boundaries"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5 19 7 17 19 4 17Z" fill="none" stroke="currentColor" stroke-width="1.5"/><g fill="currentColor"><circle cx="5" cy="5" r="2"/><circle cx="19" cy="7" r="2"/><circle cx="17" cy="19" r="2"/><circle cx="4" cy="17" r="2"/></g></svg></button>
-    </header>`
+    `
         : ""
     }
+    </header>
     <p id="profile-status" class="sr-only" role="status"></p>
     <div class="camp-joystick" id="camp-joystick" aria-label="Drag to move"><span id="camp-stick"></span></div>
   </section>`;
@@ -297,6 +307,9 @@ function renderBaseCamp(): void {
   camp = new BaseCampController(host, () => {
     void enterCampPortal();
   });
+  document
+    .querySelector("#camp-settings")!
+    .addEventListener("click", () => enterCampPortal("settings"));
   document.querySelector("#edit-boundaries")?.addEventListener("click", () => {
     camp?.setPaused(true);
     const picker = document.createElement("dialog");
@@ -351,7 +364,7 @@ function renderBaseCamp(): void {
     .focus({ preventScroll: true });
 }
 
-function enterCampPortal(): void {
+function enterCampPortal(initialTab: "track" | "settings" = "track"): void {
   if (openingProfile || saving || document.querySelector("#track-dialog"))
     return;
   camp?.setPaused(true);
@@ -367,14 +380,50 @@ function enterCampPortal(): void {
   dialog.id = "track-dialog";
   dialog.className = "track-dialog";
   dialog.setAttribute("aria-labelledby", "track-title");
-  dialog.innerHTML = `<form id="portal-mission-form">
+  const settings =
+    session.profiles.find((p) => p.id === campProfileId)?.quizSettings ??
+    DEFAULT_QUIZ_SETTINGS;
+  dialog.innerHTML = `<div class="camp-tabs" role="tablist" aria-label="Mission setup">
+    <button type="button" role="tab" id="track-tab" aria-controls="track-panel">Math track</button>
+    <button type="button" role="tab" id="settings-tab" aria-controls="settings-panel">Settings</button>
+  </div><section id="track-panel" role="tabpanel" aria-labelledby="track-tab"><form id="portal-mission-form">
     <p class="eyebrow warm">ARENA MISSION</p>
     <h1 id="track-title">Choose your math track</h1>
     <fieldset><legend>Grade level</legend><div class="portal-tracks">${GRADES.map((grade) => `<label class="portal-track"><input type="radio" name="grade" value="${grade}" ${grade === campGrade ? "checked" : ""} required><span><b>${grade === "K" ? "Kindergarten" : `Grade ${grade}`}</b><small>${labels[grade]}</small></span></label>`).join("")}</div></fieldset>
     <div class="track-actions"><button type="button" id="cancel-track" class="button secondary">Back to camp</button><button type="submit" class="button primary">Start mission</button></div>
-  </form>`;
+  </form></section>
+  <section id="settings-panel" role="tabpanel" aria-labelledby="settings-tab" hidden>
+    <form id="quiz-settings-form">
+      <h1>Quiz settings</h1>
+      <p>Choose the pace and amount of practice. Saved for this cadet and used in new missions.</p>
+      <div class="quiz-settings-fields">
+        <label for="seconds-per-question">Seconds per question
+          <input id="seconds-per-question" name="seconds" type="number" inputmode="numeric" min="1" max="300" step="1" value="${settings.secondsPerQuestion}" required aria-describedby="seconds-help">
+          <small id="seconds-help">1–300 seconds per question, combined into one shared wave timer.</small>
+        </label>
+        <label for="questions-per-wave">Questions per wave
+          <input id="questions-per-wave" name="count" type="number" inputmode="numeric" min="1" max="20" step="1" value="${settings.questionsPerWave}" required aria-describedby="count-help">
+          <small id="count-help">1–20 questions after each non-final wave.</small>
+        </label>
+        <label for="answer-type">Answer type
+          <select id="answer-type" name="answerType">
+            <option value="input" ${(settings.answerType ?? "input") === "input" ? "selected" : ""}>Input</option>
+            <option value="multiple-choice" ${settings.answerType === "multiple-choice" ? "selected" : ""}>Multiple choice</option>
+          </select>
+          <small>Type an answer or choose from four options.</small>
+        </label>
+      </div>
+      <p id="quiz-time-summary" aria-live="polite"></p>
+      <details class="question-source"><summary>Question sources</summary><p>${QUESTION_BANK.length} fixed questions adapted from <a href="${IM_ATTRIBUTION.curriculumUrl}" target="_blank" rel="noopener noreferrer">IM K–5 Math, first edition</a>. © 2021 Illustrative Mathematics, <a href="${IM_ATTRIBUTION.licenseUrl}" target="_blank" rel="noopener noreferrer">CC BY 4.0</a>. Prompts are adapted; hints, explanations, and answer choices are ours.</p><p>This starter bank covers selected skills. Completed questions show practice, not full-grade mastery. Individual source links appear with each question.</p></details>
+      <p id="settings-status" role="status"></p>
+      <div class="track-actions"><button type="button" id="cancel-settings" class="button secondary">Back to camp</button><button type="submit" class="button primary">Save settings</button></div>
+    </form>
+  </section>`;
   document.querySelector(".camp-screen")!.append(dialog);
   let launching = false;
+  dialog.addEventListener("cancel", (event) => {
+    if (launching) event.preventDefault();
+  });
   dialog.addEventListener("close", () => {
     dialog.remove();
     if (!launching) {
@@ -387,21 +436,123 @@ function enterCampPortal(): void {
   dialog
     .querySelector("#cancel-track")!
     .addEventListener("click", () => dialog.close());
-  dialog.querySelector("form")!.addEventListener("submit", (event) => {
-    event.preventDefault();
-    if (launching) return;
-    const grade = new FormData(event.currentTarget as HTMLFormElement).get(
-      "grade",
-    ) as Grade;
-    if (!GRADES.includes(grade)) return;
-    campGrade = grade;
-    launching = true;
-    dialog.close();
-    void startCampMission();
-  });
+  dialog
+    .querySelector("#portal-mission-form")!
+    .addEventListener("submit", (event) => {
+      event.preventDefault();
+      if (launching) return;
+      const grade = new FormData(event.currentTarget as HTMLFormElement).get(
+        "grade",
+      ) as Grade;
+      if (!GRADES.includes(grade)) return;
+      campGrade = grade;
+      launching = true;
+      dialog.close();
+      void startCampMission();
+    });
+  dialog
+    .querySelector("#cancel-settings")!
+    .addEventListener("click", () => dialog.close());
+  const tabs = [...dialog.querySelectorAll<HTMLButtonElement>('[role="tab"]')];
+  const selectTab = (name: "track" | "settings", focus = false) => {
+    for (const tab of tabs) {
+      const selected = tab.id === `${name}-tab`;
+      tab.setAttribute("aria-selected", String(selected));
+      tab.tabIndex = selected ? 0 : -1;
+      dialog.querySelector<HTMLElement>(
+        `#${tab.getAttribute("aria-controls")}`,
+      )!.hidden = !selected;
+      if (selected && focus) tab.focus();
+    }
+    dialog.setAttribute("aria-labelledby", `${name}-tab`);
+  };
+  for (const tab of tabs) {
+    tab.addEventListener("click", () =>
+      selectTab(tab.id === "track-tab" ? "track" : "settings"),
+    );
+    tab.addEventListener("keydown", (event) => {
+      if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key))
+        return;
+      event.preventDefault();
+      selectTab(
+        event.key === "Home"
+          ? "track"
+          : event.key === "End"
+            ? "settings"
+            : tab.id === "track-tab"
+              ? "settings"
+              : "track",
+        true,
+      );
+    });
+  }
+  dialog
+    .querySelector("#quiz-settings-form")!
+    .addEventListener("submit", async (event) => {
+      event.preventDefault();
+      if (launching || saving) return;
+      const form = event.currentTarget as HTMLFormElement;
+      if (!form.reportValidity()) return;
+      const data = new FormData(form);
+      const next = {
+        secondsPerQuestion: Number(data.get("seconds")),
+        questionsPerWave: Number(data.get("count")),
+        answerType: data.get("answerType"),
+      };
+      if (!validQuizSettings(next)) return;
+      launching = true;
+      dialog.inert = true;
+      try {
+        if (campProfileId && !(await profileLease.acquire(campProfileId))) {
+          dialog.querySelector("#settings-status")!.textContent =
+            "This cadet is in use in another tab. Exit the mission there, then save again.";
+          return;
+        }
+        dialog.close();
+        await perform(
+          () => {
+            const id = campProfileId ?? session.createProfile("Cadet");
+            session.setQuizSettings(id, next);
+            return id;
+          },
+          (id) => {
+            campProfileId = id;
+            renderBaseCamp();
+            announce("Quiz settings saved.");
+          },
+        );
+      } catch (error) {
+        profileLease.release();
+        dialog.querySelector("#settings-status")!.textContent =
+          error instanceof Error ? error.message : "Could not save settings.";
+      } finally {
+        launching = false;
+        dialog.inert = false;
+      }
+    });
+  const updateTimeSummary = () => {
+    const seconds = dialog.querySelector<HTMLInputElement>(
+      "#seconds-per-question",
+    )!.valueAsNumber;
+    const count = dialog.querySelector<HTMLInputElement>(
+      "#questions-per-wave",
+    )!.valueAsNumber;
+    dialog.querySelector("#quiz-time-summary")!.textContent = validQuizSettings(
+      { secondsPerQuestion: seconds, questionsPerWave: count },
+    )
+      ? `${count} questions × ${seconds} seconds = ${count * seconds} seconds total. The countdown does not reset between questions.`
+      : "";
+  };
+  dialog
+    .querySelector("#quiz-settings-form")!
+    .addEventListener("input", updateTimeSummary);
+  updateTimeSummary();
+  selectTab(initialTab);
   decorateControls(dialog);
   dialog.showModal();
-  dialog.querySelector<HTMLInputElement>("input:checked")!.focus();
+  if (initialTab === "track")
+    dialog.querySelector<HTMLInputElement>("input:checked")!.focus();
+  else dialog.querySelector<HTMLButtonElement>("#settings-tab")!.focus();
 }
 
 async function startCampMission(): Promise<void> {
@@ -436,7 +587,10 @@ function mountFloatingQA(): void {
   button.className = "qa-floating-button";
   button.type = "button";
   button.textContent = "QA";
-  button.setAttribute("aria-label", "QA · Jump to wave and choose ammo");
+  button.setAttribute(
+    "aria-label",
+    "QA · Jump to section and choose equipment and currency",
+  );
   button.addEventListener("click", () => {
     if (saving) return;
     if (paused) {
@@ -534,6 +688,10 @@ function checkpoint(): Checkpoint {
     runId: run.id,
     combat: run.phase === "combat" ? combat?.snapshot() : undefined,
     elapsedMs: run.phase === "quiz" ? currentElapsed() : undefined,
+    questionId:
+      run.phase === "quiz"
+        ? run.quiz?.questions[run.quiz.index]?.id
+        : undefined,
     draft: run.phase === "quiz" ? quizDraft : undefined,
     correctionDraft:
       run.phase === "correction"
@@ -623,10 +781,18 @@ function finishWave(state: CombatSnapshot): void {
 
 function currentElapsed(): number {
   return Math.min(
-    30000,
+    quizTimeLimit(
+      activeProfileId ? activeProfile().activeRun?.quiz : undefined,
+    ),
     quizElapsedAtStart +
       (paused ? 0 : Math.max(0, performance.now() - quizStartedAt)),
   );
+}
+
+function questionSourceHtml(question: Question): string {
+  const source = question.source;
+  if (!source) return "";
+  return `<details class="question-source" data-source-item="${escapeHtml(source.itemId)}"><summary>Question source</summary><p>Adapted from <a href="${escapeHtml(source.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(source.title)}, ${escapeHtml(source.edition)} · Unit ${source.unit}, Section ${escapeHtml(source.section)}, Problem ${escapeHtml(source.problem)}${source.part ? ` (${escapeHtml(source.part)})` : ""}</a>.</p><p>© 2021 ${escapeHtml(source.author)} · <a href="${escapeHtml(source.licenseUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(source.license)}</a></p><p>${escapeHtml(question.skill ?? "")}</p><p>${escapeHtml(source.changes)}</p></details>`;
 }
 
 function questionVisuals(question: Question): string {
@@ -642,31 +808,65 @@ function questionVisuals(question: Question): string {
     .join("")}</div>`;
 }
 
+function answerChoicesHtml(question: Question): string {
+  return `<div class="answer-choices" role="group" aria-label="Choose your answer">${makeAnswerChoices(
+    question,
+  )
+    .map(
+      (answer, index) =>
+        `<button type="button" data-answer-choice="${escapeHtml(answer)}"><span aria-hidden="true">${String.fromCharCode(65 + index)}</span><b>${escapeHtml(answer)}</b></button>`,
+    )
+    .join("")}</div>`;
+}
+
 function renderQuiz(message = ""): void {
   cleanup();
   const run = activeRun();
   const quiz = run.quiz!;
   const question = quiz.questions[quiz.index];
+  const multipleChoice = quiz.answerType === "multiple-choice";
   quizDraft = quiz.draft ?? "";
   app.innerHTML = shell(
     `<section class="quiz-layout" id="content">
-    <aside class="rarity-rail" aria-label="Reward power bands"><div class="rail-title">POWER LEVEL</div>${["purple", "blue", "green", "white"].map((q) => `<div class="rail-step ${q}" data-quality="${q}">${qualityLevel(q as Quality)}<small>${q === "purple" ? "> 20s" : q === "blue" ? "> 10s" : q === "green" ? "> 0s" : "0s"}</small></div>`).join("")}</aside>
+    <aside class="rarity-rail" aria-label="Reward power bands"><div class="rail-title">POWER LEVEL</div>${["purple", "blue", "green", "white"].map((q) => `<div class="rail-step ${q}" data-quality="${q}">${qualityLevel(q as Quality)}<small>${q === "purple" ? "> ⅔ time" : q === "blue" ? "> ⅓ time" : q === "green" ? "> 0 time" : "0 time"}</small></div>`).join("")}</aside>
     <div class="quiz-main">
-      <div class="quiz-topline"><div><p class="eyebrow warm">1 / 4 · QUIZ</p><h1>Question ${quiz.index + 1} <span>of 5</span></h1></div><div class="countdown" id="countdown" aria-label="Time remaining"><small>TIME LEFT</small><b>${formatTime(quiz.remainingMs)}</b></div></div>
-      <div class="mobile-tier-strip" id="mobile-tier">${qualityLevel(timeQuality(quiz.remainingMs))}</div>
-      <div class="question-panel"><div class="question-copy"><p class="prompt">${escapeHtml(question.prompt)}</p>${questionVisuals(question)}
-        ${usesFractionInput(question) ? fractionFields : '<label for="answer">Your answer</label>'}<output id="answer" class="answer-field" aria-live="polite" ${usesFractionInput(question) ? "hidden" : ""}>&nbsp;</output><p class="input-error" id="input-error">${escapeHtml(message)}</p>
+      <div class="quiz-topline"><div><p class="eyebrow warm">1 / 4 · QUIZ</p><h1>Question ${quiz.index + 1} <span>of ${quiz.questions.length}</span></h1></div><div class="countdown" id="countdown" aria-label="Time remaining"><small>TIME LEFT</small><b>${formatTime(quiz.remainingMs)}</b></div></div>
+      <div class="mobile-tier-strip" id="mobile-tier">${qualityLevel(timeQuality(quizRewardTime(quiz)))}</div>
+      <div class="question-panel"><div class="question-copy"><p class="prompt">${escapeHtml(question.prompt)}</p>${questionVisuals(question)}${questionSourceHtml(question)}
+        ${multipleChoice ? '<p class="answer-choice-help">Choose your answer.</p>' : `${usesFractionInput(question) ? fractionFields : '<label for="answer">Your answer</label>'}<output id="answer" class="answer-field" aria-live="polite" ${usesFractionInput(question) ? "hidden" : ""}>&nbsp;</output>`}<p class="input-error" id="input-error">${escapeHtml(message)}</p>
         ${LOCAL_QA ? '<div class="quiz-tools"><button id="qa-skip-quiz" class="text-button" type="button">QA · Skip quiz</button></div>' : ""}</div>
-        <div class="keypad" aria-label="Number keypad">${[7, 8, 9, 4, 5, 6, 1, 2, 3].map((n) => `<button data-key="${n}" aria-label="${n}">${n}</button>`).join("")}
+        ${
+          multipleChoice
+            ? answerChoicesHtml(question)
+            : `<div class="keypad" aria-label="Number keypad">${[7, 8, 9, 4, 5, 6, 1, 2, 3].map((n) => `<button data-key="${n}" aria-label="${n}">${n}</button>`).join("")}
           <button data-key="." aria-label="Decimal point">.</button><button data-key="0" aria-label="0">0</button><button data-key="/" aria-label="Fraction bar">⁄</button>
           <button data-key="back" class="key-muted" aria-label="Backspace">⌫</button><button data-key="clear" class="key-muted">Clear</button><button data-key="check" class="key-check">Check</button>
-        </div></div>
+        </div>`
+        }</div>
       <div class="question-progress" aria-label="Question progress">${quiz.questions.map((_, i) => `<i class="${i < quiz.index ? "done" : i === quiz.index ? "current" : ""}"></i>`).join("")}</div>
     </div>
   </section>`,
     "quiz-screen",
   );
   bindHome();
+  quizElapsedAtStart = quiz.elapsedMs;
+  quizStartedAt = performance.now();
+  timerId = window.setInterval(updateTimer, 50);
+
+  updateTierRail();
+  if (multipleChoice) {
+    document
+      .querySelectorAll<HTMLButtonElement>("[data-answer-choice]")
+      .forEach((button) => {
+        button.addEventListener("click", () =>
+          submitInitial(button.dataset.answerChoice!, question.id),
+        );
+      });
+    document
+      .querySelector<HTMLButtonElement>("[data-answer-choice]")
+      ?.focus({ preventScroll: true });
+    return;
+  }
   quizDraft = quiz.draft ?? "";
   const output = document.querySelector<HTMLOutputElement>("#answer")!;
   const updateDraft = () => {
@@ -727,18 +927,13 @@ function renderQuiz(message = ""): void {
     }
   };
   window.addEventListener("keydown", quizKeyHandler);
-  quizElapsedAtStart = quiz.elapsedMs;
-  quizStartedAt = performance.now();
-  timerId = window.setInterval(updateTimer, 50);
-
-  updateTierRail();
 }
 
 let expiredQuiz = "";
 function updateTimer(): void {
   const run = activeRun();
   if (run.phase !== "quiz" || paused) return;
-  const remaining = 30000 - currentElapsed();
+  const remaining = quizTimeLimit(run.quiz) - currentElapsed();
   const timerKey = `${run.id}:${run.wave}`;
   if (remaining <= 0 && expiredQuiz !== timerKey) {
     expiredQuiz = timerKey;
@@ -750,7 +945,7 @@ function updateTimer(): void {
 }
 
 function updateTierRail(remaining = activeRun().quiz!.remainingMs): void {
-  const quality = timeQuality(remaining);
+  const quality = timeQuality(quizRewardTime(activeRun().quiz!, remaining));
   document
     .querySelectorAll(".rail-step")
     .forEach((step) =>
@@ -848,17 +1043,18 @@ function renderCorrection(message = ""): void {
     return;
   }
   const attempt = misses[0];
+  const multipleChoice = quiz.answerType === "multiple-choice";
   app.innerHTML = shell(
     `<section class="correction-screen" id="content"><div class="correction-copy"><p class="eyebrow warm">1 / 4 · QUIZ REVIEW</p><h1>Try this one again.</h1><p>Untimed · Your reward level is already set.</p></div>
-    <div class="correction-card"><div><span class="correction-count">${quiz.attempts.filter((a) => !a.correct).length - misses.length + 1} / ${quiz.attempts.filter((a) => !a.correct).length}</span><p class="prompt">${escapeHtml(attempt.question.prompt)}</p>${questionVisuals(attempt.question)}<div class="hint-box"><b>Hint</b><p>${escapeHtml(attempt.question.hint)}</p></div><details><summary>Show solution</summary><p>${escapeHtml(attempt.question.explanation)}</p></details></div>
-      <div>${usesFractionInput(attempt.question) ? fractionFields : '<label for="correction-input">Correct answer</label>'}<input id="correction-input" ${usesFractionInput(attempt.question) ? "hidden" : ""} inputmode="none" autocomplete="off" value="${escapeHtml(quiz.correctionDraft ?? "")}"><div class="keypad correction-keypad" aria-label="Correction number keypad">${["7", "8", "9", "4", "5", "6", "1", "2", "3", ".", "0", "/", "back", "clear", "-"].map((key) => `<button type="button" data-correction-key="${key}" aria-label="${key === "/" ? "Fraction bar" : key === "back" ? "Backspace" : key === "-" ? "Minus" : key}">${key === "back" ? "⌫" : key === "clear" ? "Clear" : key}</button>`).join("")}</div><p class="input-error" id="correction-error">${escapeHtml(message)}</p><button id="correction-check" class="button primary">Check answer</button></div></div>
+    <div class="correction-card"><div><span class="correction-count">${quiz.attempts.filter((a) => !a.correct).length - misses.length + 1} / ${quiz.attempts.filter((a) => !a.correct).length}</span><p class="prompt">${escapeHtml(attempt.question.prompt)}</p>${questionVisuals(attempt.question)}${questionSourceHtml(attempt.question)}<div class="hint-box"><b>Hint</b><p>${escapeHtml(attempt.question.hint)}</p></div><details><summary>Show solution</summary><p>${escapeHtml(attempt.question.explanation)}</p></details></div>
+      <div>${multipleChoice ? `${answerChoicesHtml(attempt.question)}<input id="correction-input" hidden><p class="input-error" id="correction-error">${escapeHtml(message)}</p>` : `${usesFractionInput(attempt.question) ? fractionFields : '<label for="correction-input">Correct answer</label>'}<input id="correction-input" ${usesFractionInput(attempt.question) ? "hidden" : ""} inputmode="none" autocomplete="off" value="${escapeHtml(quiz.correctionDraft ?? "")}"><div class="keypad correction-keypad" aria-label="Correction number keypad">${["7", "8", "9", "4", "5", "6", "1", "2", "3", ".", "0", "/", "back", "clear", "-"].map((key) => `<button type="button" data-correction-key="${key}" aria-label="${key === "/" ? "Fraction bar" : key === "back" ? "Backspace" : key === "-" ? "Minus" : key}">${key === "back" ? "⌫" : key === "clear" ? "Clear" : key}</button>`).join("")}</div><p class="input-error" id="correction-error">${escapeHtml(message)}</p><button id="correction-check" class="button primary">Check answer</button>`}</div></div>
     ${LOCAL_QA ? '<button id="qa-skip-quiz" class="text-button centered">QA · Skip quiz</button>' : ""}</section>`,
     "correction-shell",
   );
   bindHome();
   const input = document.querySelector<HTMLInputElement>("#correction-input")!;
 
-  if (!usesFractionInput(attempt.question)) input.focus();
+  if (!multipleChoice && !usesFractionInput(attempt.question)) input.focus();
   const submit = () => {
     if (paused || activeRun().phase !== "correction") return;
     const value = input.value;
@@ -891,6 +1087,20 @@ function renderCorrection(message = ""): void {
       },
     );
   };
+  if (multipleChoice) {
+    document
+      .querySelectorAll<HTMLButtonElement>("[data-answer-choice]")
+      .forEach((button) => {
+        button.addEventListener("click", () => {
+          input.value = button.dataset.answerChoice!;
+          submit();
+        });
+      });
+    document
+      .querySelector<HTMLButtonElement>("[data-answer-choice]")
+      ?.focus({ preventScroll: true });
+    return;
+  }
   const editFraction = usesFractionInput(attempt.question)
     ? bindFractionInput(
         input.value,
@@ -1480,12 +1690,24 @@ function showPause(title: string, openQA = false): void {
           }, arenaBoundaryOptions());
         });
       if (LOCAL_QA)
-        bindQAControls(overlay, (wave, loadout) => {
+        bindQAControls(overlay, (wave, loadout, options) => {
           if (saving) return;
+          try {
+            const preview = new RunSession(
+              session.profiles,
+              { commit() {} },
+              true,
+            );
+            preview.jumpToWaveForQA(activeProfileId!, wave, loadout, options);
+          } catch (error) {
+            overlay.querySelector("#qa-error")!.textContent =
+              error instanceof Error ? error.message : "Check the QA settings.";
+            return;
+          }
           void perform(
             () => {
               session.setPaused(false);
-              session.jumpToWaveForQA(activeProfileId!, wave, loadout);
+              session.jumpToWaveForQA(activeProfileId!, wave, loadout, options);
             },
             () => {
               overlay.remove();

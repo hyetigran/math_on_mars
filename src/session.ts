@@ -1,3 +1,10 @@
+import {
+  DEFAULT_QUIZ_SETTINGS,
+  validQuizSettings,
+  quizTimeLimit,
+  quizRewardTime,
+  type QuizSettings,
+} from "./quiz-settings";
 import { BUILD_VERSION } from "./build-version";
 import { decodeProfiles } from "./persistence";
 import {
@@ -21,7 +28,12 @@ import {
   shopOffers,
 } from "./shop";
 export { shopOffers } from "./shop";
-import { rewardModules, installModule } from "./modules";
+import {
+  rewardModules,
+  installModule,
+  moduleCandidates,
+  moduleTotal,
+} from "./modules";
 import { isCorrect, makeQuestions, parseNumericAnswer } from "./questions";
 import {
   AMMO_TYPES,
@@ -39,6 +51,34 @@ import {
   type RunState,
 } from "./types";
 
+export interface QAJumpOptions {
+  section?: "combat" | "quiz";
+  salvage?: number;
+  clearTrinkets?: boolean;
+  trinkets?: { name: string; quality: Quality }[];
+}
+
+function initializeQuiz(run: RunState): void {
+  const settings = run.quizSettings ?? DEFAULT_QUIZ_SETTINGS;
+  const questions = makeQuestions(
+    run.grade,
+    run.wave,
+    run.id,
+    settings.questionsPerWave,
+  ).map((q, index) => ({ ...q, id: `${run.id}:${run.wave}:${index}` }));
+  run.quiz = {
+    answerType: settings.answerType ?? "input",
+    questions,
+    index: 0,
+    attempts: [],
+    elapsedMs: 0,
+    remainingMs: settings.secondsPerQuestion * settings.questionsPerWave * 1000,
+    timeLimitMs: settings.secondsPerQuestion * settings.questionsPerWave * 1000,
+    correctionIndex: 0,
+    draft: "",
+  };
+}
+
 export interface ProfileStore {
   commit(profiles: Profile[]): void;
 }
@@ -52,6 +92,7 @@ export interface CombatOutcome {
 export interface Checkpoint {
   runId?: string;
   elapsedMs?: number;
+  questionId?: string;
   draft?: string;
   correctionDraft?: string;
   combat?: CombatSave;
@@ -134,6 +175,15 @@ export class RunSession {
     this.change((profiles) => {
       const run = profiles.find((profile) => profile.id === id)?.activeRun;
       if (run && !run.releaseVersion) run.releaseVersion = BUILD_VERSION;
+    });
+  }
+  setQuizSettings(id: string, settings: QuizSettings): void {
+    if (!validQuizSettings(settings))
+      throw new Error("Choose 1–300 seconds and 1–20 questions.");
+    this.change((profiles) => {
+      const profile = profiles.find((p) => p.id === id);
+      if (!profile) throw new Error("No active profile");
+      profile.quizSettings = { ...settings };
     });
   }
   setHandedness(id: string, handedness: Profile["handedness"]): void {
@@ -226,6 +276,9 @@ export class RunSession {
       // Portal entry always replaces any previous mission, including legacy saves.
       profile.grade = grade;
       profile.activeRun = newRun(grade, mission, difficulty);
+      profile.activeRun.quizSettings = {
+        ...(profile.quizSettings ?? DEFAULT_QUIZ_SETTINGS),
+      };
     });
   }
   checkpoint(id: string, snapshot: Checkpoint): void {
@@ -242,14 +295,19 @@ export class RunSession {
         run.medkits = snapshot.combat.medkits;
       }
       if (run.quiz && run.phase === "quiz") {
+        if (
+          snapshot.questionId &&
+          snapshot.questionId !== run.quiz.questions[run.quiz.index]?.id
+        )
+          return;
         run.quiz.elapsedMs = Math.min(
-          30000,
+          quizTimeLimit(run.quiz),
           Math.max(
             run.quiz.elapsedMs,
             snapshot.elapsedMs ?? run.quiz.elapsedMs,
           ),
         );
-        run.quiz.remainingMs = 30000 - run.quiz.elapsedMs;
+        run.quiz.remainingMs = quizTimeLimit(run.quiz) - run.quiz.elapsedMs;
         run.quiz.draft = snapshot.draft ?? run.quiz.draft;
       }
       if (run.quiz && run.phase === "correction")
@@ -268,18 +326,7 @@ export class RunSession {
       run.salvage = Math.max(run.salvage, run.wave === 1 ? 8 : 0);
       run.combatSave = undefined;
       run.phase = "quiz";
-      const questions = makeQuestions(run.grade, run.wave, run.id).map(
-        (q, index) => ({ ...q, id: `${run.id}:${run.wave}:${index}` }),
-      );
-      run.quiz = {
-        questions,
-        index: 0,
-        attempts: [],
-        elapsedMs: 0,
-        remainingMs: 30000,
-        correctionIndex: 0,
-        draft: "",
-      };
+      initializeQuiz(run);
     });
   }
   settleWaveLoot(
@@ -320,9 +367,15 @@ export class RunSession {
       quiz.attempts.push({ question, input, correct, corrected: correct });
       quiz.index++;
       quiz.draft = "";
-      quiz.elapsedMs = Math.min(30000, Math.max(quiz.elapsedMs, elapsedMs));
-      quiz.remainingMs = 30000 - quiz.elapsedMs;
+      quiz.elapsedMs = Math.min(
+        quizTimeLimit(quiz),
+        Math.max(quiz.elapsedMs, elapsedMs),
+      );
+      quiz.remainingMs = quizTimeLimit(quiz) - quiz.elapsedMs;
       profile.history.push({
+        source: question.source ? structuredClone(question.source) : undefined,
+        skill: question.skill,
+        standards: question.standards ? [...question.standards] : undefined,
         occurrenceId: `${run.id}:${run.wave}:${index}`,
         question: question.prompt,
         grade: run.grade,
@@ -330,13 +383,13 @@ export class RunSession {
         corrected: correct,
         at: Date.now(),
       });
-      if (quiz.index === 5) {
+      if (quiz.index === quiz.questions.length) {
         const wrong = quiz.attempts.filter((a) => !a.correct).length;
         quiz.rewardQuality =
           QUALITY_ORDER[
             Math.max(
               0,
-              QUALITY_ORDER.indexOf(timeQuality(quiz.remainingMs)) - wrong,
+              QUALITY_ORDER.indexOf(timeQuality(quizRewardTime(quiz))) - wrong,
             )
           ];
         quiz.rewardChoices = rewardModules(
@@ -346,7 +399,9 @@ export class RunSession {
         );
         run.phase = wrong ? "correction" : "reward";
       }
-      return correct ? "Correct." : "We’ll review that after question 5.";
+      return correct
+        ? "Correct."
+        : `We’ll review that after question ${quiz.questions.length}.`;
     });
   }
   skipQuizForQA(id: string): void {
@@ -538,7 +593,12 @@ export class RunSession {
       applyForge(run, preview ?? previewForge(run));
     });
   }
-  jumpToWaveForQA(id: string, wave: number, loadout: Omit<Ammo, "id">[]): void {
+  jumpToWaveForQA(
+    id: string,
+    wave: number,
+    loadout: Omit<Ammo, "id">[],
+    options: QAJumpOptions = {},
+  ): void {
     if (!this.qaEnabled)
       throw new Error("QA controls are only available in development.");
     this.command(id, null, (run) => {
@@ -554,6 +614,48 @@ export class RunSession {
         )
       )
         throw new Error("Choose up to four valid ammo pieces.");
+      if (
+        options.section !== undefined &&
+        !["combat", "quiz"].includes(options.section)
+      )
+        throw new Error("Choose combat or quiz.");
+      if (options.section === "quiz" && wave === run.totalWaves)
+        throw new Error("The final wave has no quiz. Choose an earlier wave.");
+      if (
+        options.salvage !== undefined &&
+        (!Number.isInteger(options.salvage) ||
+          options.salvage < 0 ||
+          options.salvage > 1000000)
+      )
+        throw new Error("Choose a salvage balance from 0 to 1,000,000.");
+      if (
+        options.clearTrinkets !== undefined &&
+        typeof options.clearTrinkets !== "boolean"
+      )
+        throw new Error("Choose whether to clear installed trinkets.");
+      if (options.clearTrinkets) {
+        run.maxHp -= moduleTotal(run.modules, "maxHp");
+        run.modules = [];
+      }
+      if ((options.trinkets?.length ?? 0) > 4)
+        throw new Error("Choose up to four trinkets to add at once.");
+      for (const selection of options.trinkets ?? []) {
+        if (!QUALITY_ORDER.includes(selection.quality))
+          throw new Error("Choose a valid trinket rarity.");
+        const module = moduleCandidates(
+          selection.quality,
+          wave,
+          run.modules,
+        ).find((item) => item.name === selection.name);
+        if (!module)
+          throw new Error(
+            "Trinket unavailable or its stats are capped. Clear installed trinkets or choose another.",
+          );
+        installModule(run, module);
+      }
+      if (options.salvage !== undefined) run.salvage = options.salvage;
+      // A new QA attempt must not reuse earlier question/history occurrence IDs.
+      run.id = uid("qa-run");
       run.wave = wave;
       run.phase = "combat";
       run.hp = run.maxHp;
@@ -570,6 +672,10 @@ export class RunSession {
       run.choiceCache = undefined;
       run.shopBought = [];
       run.shop = undefined;
+      if (options.section === "quiz") {
+        run.phase = "quiz";
+        initializeQuiz(run);
+      }
     });
   }
   nextWave(id: string): void {

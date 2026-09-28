@@ -29,17 +29,7 @@ test("grade 4 validates fraction drafts without penalties and restores exact fra
     session.start(id, "4");
     session.finishWave(id, { hp: 100, salvage: 8, medkits: 1 });
     const questions = session.profile(id).activeRun!.quiz!.questions;
-    assert.equal(
-      questions.filter((q) => q.prompt.includes("equivalent")).length,
-      1,
-    );
-    for (const q of questions) {
-      const n = q.prompt.match(/\d+/g)!.map(Number);
-      if (q.prompt.includes("equivalent"))
-        assert.equal(q.answer[0], (n[0] * n[2]) / n[1]);
-      else if (q.prompt.includes("×")) assert.equal(q.answer[0], n[0] * n[1]);
-      else assert.equal(q.answer[0] * n[1], (n[0] + n[2]) * q.answer[1]);
-    }
+    assert.ok(questions.every((q) => q.source?.url.includes("grade-4")));
     session.submit(
       id,
       questions[0].id,
@@ -55,7 +45,7 @@ test("grade 4 validates fraction drafts without penalties and restores exact fra
     const quiz = restored.profile(id).activeRun!.quiz!;
     assert.deepEqual(quiz.questions, JSON.parse(JSON.stringify(questions)));
     assert.equal(quiz.draft, "1/");
-    assert.equal(quiz.remainingMs, 22000);
+    assert.equal(quiz.remainingMs, 32000);
     for (let i = 1; i < 5; i++) {
       const [n, d] = questions[i].answer;
       restored.submit(

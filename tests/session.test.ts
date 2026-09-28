@@ -16,6 +16,8 @@ function setup(grade: "K" | "3" = "3") {
   });
   const session = new RunSession([], repository);
   const id = session.createProfile("Test");
+  // Keep this reward-boundary fixture at its original 30-second wave budget.
+  session.setQuizSettings(id, { secondsPerQuestion: 6, questionsPerWave: 5 });
   session.start(id, grade);
   session.finishWave(id, { hp: 100, salvage: 8, medkits: 1 });
   return {
@@ -236,7 +238,7 @@ test("correction retries persist separately, deduplicate commands and survive fa
   assert.equal(history.corrected, true);
 });
 
-test("mission length and combat difficulty preserve five questions and the shared countdown", () => {
+test("mission length and combat difficulty preserve the default question count and timer", () => {
   for (const grade of ["K", "3", "5"] as const) {
     for (const mission of ["standard", "short"] as const) {
       for (const difficulty of ["easy", "standard"] as const) {
@@ -255,7 +257,7 @@ test("mission length and combat difficulty preserve five questions and the share
         assert.equal(run.difficulty, difficulty);
         session.finishWave(id, { hp: 100, salvage: 8, medkits: 1 });
         assert.equal(session.profile(id).activeRun!.quiz!.questions.length, 5);
-        assert.equal(session.profile(id).activeRun!.quiz!.remainingMs, 30000);
+        assert.equal(session.profile(id).activeRun!.quiz!.remainingMs, 40000);
         assert.deepEqual(
           repository.load(),
           JSON.parse(JSON.stringify(session.profiles)),

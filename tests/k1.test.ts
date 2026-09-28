@@ -23,47 +23,9 @@ test("K–1 missions use exact deterministic text-only tasks and persistent corr
     const questions = session.profile(id).activeRun!.quiz!.questions;
     assert.deepEqual(questions, replay.profile(id).activeRun!.quiz!.questions);
     assert.equal(questions.length, 5);
-    if (grade === "K") {
-      assert.equal(
-        questions.filter((q) => q.visualCount !== undefined).length,
-        2,
-      );
-      assert.equal(
-        questions.filter((q) => q.visualGroups?.length === 2).length,
-        3,
-      );
-      for (const q of questions) {
-        const groups = q.visualGroups;
-        const expected =
-          q.visualCount ??
-          (q.prompt.includes("more")
-            ? Math.max(...groups!)
-            : q.prompt.includes("altogether")
-              ? groups![0] + groups![1]
-              : groups![0] - groups![1]);
-        assert.equal(q.answer[0], expected);
-        if (q.prompt.includes("altogether") || q.prompt.includes("taken away"))
-          assert.ok(expected >= 0 && expected <= 5);
-      }
-    } else {
-      assert.equal(
-        questions.filter(
-          (q) => q.prompt.includes("+ ") && !q.prompt.includes("+ ?"),
-        ).length,
-        2,
-      );
-      assert.equal(questions.filter((q) => q.prompt.includes("−")).length, 2);
-      assert.equal(questions.filter((q) => q.prompt.includes("+ ?")).length, 1);
-      for (const q of questions) {
-        const numbers = q.prompt.match(/\d+/g)!.map(Number);
-        const expected = q.prompt.includes("−")
-          ? numbers[0] - numbers[1]
-          : q.prompt.includes("+ ?")
-            ? numbers[1] - numbers[0]
-            : numbers[0] + numbers[1];
-        assert.deepEqual(q.answer, [expected, 1]);
-      }
-    }
+    assert.ok(
+      questions.every((q) => q.source?.url.includes("im.kendallhunt.com")),
+    );
     for (const q of questions) {
       session.submit(id, q.id, "999", 30000);
     }
@@ -75,6 +37,10 @@ test("K–1 missions use exact deterministic text-only tasks and persistent corr
     for (const q of questions) restored.correct(id, q.id, String(q.answer[0]));
     const history = repository.load()[0].history;
     assert.equal(history.length, 5);
+    assert.deepEqual(
+      history.map((h) => h.source),
+      questions.map((q) => q.source),
+    );
     assert.ok(history.every((h) => !h.correctInitially && h.corrected));
     assert.equal(restored.profile(id).activeRun!.quiz!.rewardQuality, "white");
   }

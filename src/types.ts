@@ -45,7 +45,28 @@ export interface Module {
   quality: Quality;
 }
 
+export interface QuestionSource {
+  itemId: string;
+  title: string;
+  author: string;
+  edition: string;
+  license: string;
+  licenseUrl: string;
+  curriculumUrl: string;
+  url: string;
+  unit: number;
+  section: string;
+  problem: string;
+  part: string;
+  original: string;
+  changes: string;
+}
+
 export interface Question {
+  source?: QuestionSource;
+  skill?: string;
+  standards?: string[];
+  choiceDenominator?: number;
   answerInput?: "number" | "fraction";
   id: string;
   prompt: string;
@@ -66,6 +87,8 @@ export interface Attempt {
 }
 
 export interface QuizState {
+  timeLimitMs?: number;
+  answerType?: "input" | "multiple-choice";
   qaSkipped?: boolean;
   draft?: string;
   correctionDraft?: string;
@@ -230,6 +253,7 @@ export interface AmmoInventory {
   ammoBag?: AmmoType[];
 }
 export interface RunState extends AmmoInventory {
+  quizSettings?: import("./quiz-settings").QuizSettings;
   releaseVersion?: string;
   forgedOmni?: boolean;
   forgeIngredientIds?: string[];
@@ -258,6 +282,9 @@ export interface RunState extends AmmoInventory {
 }
 
 export interface HistoryEntry {
+  source?: QuestionSource;
+  skill?: string;
+  standards?: string[];
   correctionAttempts?: {
     id: string;
     input: string;
@@ -273,6 +300,7 @@ export interface HistoryEntry {
 }
 
 export interface Profile {
+  quizSettings?: import("./quiz-settings").QuizSettings;
   id: string;
   name: string;
   grade: Grade;

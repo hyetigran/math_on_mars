@@ -135,6 +135,8 @@ const CATALOG: Variant[] = [
     ["healing", 0.08],
   ),
 ];
+export const MODULE_NAMES = CATALOG.map((item) => item.name);
+
 /** Store exact, positive gains at offer creation; legacy single-stat modules retain their values. */
 export function moduleCandidates(
   quality: Quality,

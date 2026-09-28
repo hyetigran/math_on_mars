@@ -68,6 +68,59 @@
   padding: 0;
   margin: 24px 0;
 }
+.camp-settings {
+  pointer-events: auto;
+}
+.camp-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+  border-bottom: 1px solid #526175;
+}
+.camp-tabs button {
+  min-height: 44px;
+  padding: 10px 16px;
+  background: transparent;
+  color: #c3cfdd;
+  border: 0;
+  border-bottom: 3px solid transparent;
+}
+.camp-tabs button[aria-selected="true"] {
+  color: #62ddeb;
+  border-bottom-color: #62ddeb;
+}
+.quiz-settings-fields {
+  display: grid;
+  gap: 24px;
+  margin: 24px 0;
+}
+.quiz-settings-fields label {
+  display: grid;
+  gap: 8px;
+  font-size: 16px;
+}
+.quiz-settings-fields input,
+.quiz-settings-fields select {
+  width: 100%;
+  min-height: 48px;
+  padding: 10px 14px;
+  border: 1px solid #879bad;
+  border-radius: 8px;
+  background: #222f40;
+  color: #f8f2e4;
+  font: inherit;
+}
+.quiz-settings-fields small {
+  color: #c3cfdd;
+  font-size: 13px;
+  line-height: 1.5;
+}
+.camp-tabs button:focus-visible,
+.quiz-settings-fields input:focus-visible,
+.quiz-settings-fields select:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 3px;
+}
 .track-dialog legend {
   margin-bottom: 12px;
   font-size: 13px;

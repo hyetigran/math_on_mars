@@ -67,3 +67,73 @@ test("QA jumps forward and backward, resets between-wave state, and equips all t
   assert.deepEqual(session.profile(id).activeRun!.activeAmmoIds, []);
   assert.deepEqual(session.profile(id).history, history);
 });
+
+test("QA quiz jump applies currency and trinkets atomically without fake practice", () => {
+  const { session, id } = setup();
+  session.setQuizSettings(id, {
+    secondsPerQuestion: 8,
+    questionsPerWave: 3,
+    answerType: "multiple-choice",
+  });
+  session.start(id, "3");
+  session.jumpToWaveForQA(id, 2, [], {
+    section: "quiz",
+    salvage: 123,
+    trinkets: [{ name: "Integrity Shield", quality: "purple" }],
+  });
+  let run = session.profile(id).activeRun!;
+  assert.equal(run.phase, "quiz");
+  assert.equal(run.salvage, 123);
+  assert.equal(run.maxHp, 110);
+  assert.equal(run.hp, 110);
+  assert.equal(run.modules[0].name, "Integrity Shield");
+  assert.equal(run.modules[0].quality, "purple");
+  assert.equal(run.quiz!.questions.length, 3);
+  assert.equal(run.quiz!.remainingMs, 24000);
+  assert.equal(run.quiz!.answerType, "multiple-choice");
+  assert.equal(session.profile(id).history.length, 0);
+  const before = session.profiles;
+  for (const options of [
+    { salvage: -1 },
+    { salvage: NaN },
+    { salvage: 1.5 },
+    { salvage: 1000001 },
+    {
+      clearTrinkets: true,
+      trinkets: [{ name: "unknown", quality: "purple" as const }],
+    },
+  ])
+    assert.throws(() => session.jumpToWaveForQA(id, 1, [], options));
+  assert.throws(() =>
+    session.jumpToWaveForQA(id, run.totalWaves, [], { section: "quiz" }),
+  );
+  assert.deepEqual(session.profiles, before);
+  session.jumpToWaveForQA(id, 1, [], {
+    section: "quiz",
+    salvage: 0,
+    clearTrinkets: true,
+  });
+  run = session.profile(id).activeRun!;
+  assert.equal(run.salvage, 0);
+  assert.equal(run.hp, 100);
+  assert.equal(run.maxHp, 100);
+  assert.deepEqual(run.modules, []);
+  assert.deepEqual(run.quiz!.attempts, []);
+});
+
+test("repeating a QA quiz keeps earlier attempt history separate", () => {
+  const { session, id } = setup();
+  session.jumpToWaveForQA(id, 1, [], { section: "quiz" });
+  const first = session.profile(id).activeRun!.quiz!.questions[0];
+  session.submit(id, first.id, "9999", 1000);
+  session.jumpToWaveForQA(id, 1, [], { section: "quiz" });
+  const second = session.profile(id).activeRun!.quiz!.questions[0];
+  assert.notEqual(first.id, second.id);
+  session.submit(id, first.id, "0", 1000);
+  assert.equal(session.profile(id).activeRun!.quiz!.index, 0);
+  session.submit(id, second.id, "9999", 1000);
+  assert.equal(
+    new Set(session.profile(id).history.map((h) => h.occurrenceId)).size,
+    2,
+  );
+});
