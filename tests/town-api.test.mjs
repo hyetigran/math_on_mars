@@ -57,7 +57,7 @@ test("parent can create a cadet town once and load it from a second login", asyn
       login.cookie,
     );
     assert.equal(town.data.houseLevel, 1);
-    assert.equal(town.data.version, 3);
+    assert.equal(town.data.version, 4);
     assert.deepEqual(town.data.recipes.greenhouse, {
       cost: { blocks: 20, parts: 5 },
       duration: 10000,
@@ -355,6 +355,55 @@ test("construction command retries and reload use authoritative elapsed time", a
       (await f.request(path, undefined, parent.cookie)).data.jobs.length,
       1,
     );
+  } finally {
+    await f.close();
+  }
+});
+
+test("House upgrade retries charge once and cancellation preserves its residents", async () => {
+  let clock = 0;
+  const f = await fixture(":memory:", () => clock);
+  try {
+    const parent = await f.request("/api/register", {
+      username: "house-parent",
+      password: "long-test-password",
+    });
+    const cadet = await f.request(
+      "/api/cadets",
+      { name: "Nova", requestId: "house-cadet" },
+      parent.cookie,
+    );
+    const path = `/api/towns/${cadet.data.id}`;
+    await f.request(
+      path + "/management",
+      { deviceId: "house-device", generation: 0, requestId: "house-takeover" },
+      parent.cookie,
+    );
+    const request = {
+      deviceId: "house-device",
+      generation: 1,
+      requestId: "house-upgrade",
+      command: { action: "upgrade-house" },
+    };
+    const first = await f.request(path + "/command", request, parent.cookie);
+    await f.request(path + "/command", request, parent.cookie);
+    let state = (await f.request(path, undefined, parent.cookie)).data;
+    assert.equal(state.resources.blocks, 40);
+    assert.equal(state.jobs.length, 1);
+    clock = 1000;
+    await f.request(
+      path + "/command",
+      {
+        ...request,
+        requestId: "house-cancel",
+        command: { action: "cancel", jobId: first.data.jobs[0].id },
+      },
+      parent.cookie,
+    );
+    state = (await f.request(path, undefined, parent.cookie)).data;
+    assert.equal(state.resources.blocks, 80);
+    assert.equal(state.houseLevel, 1);
+    assert.equal(state.adults, 2);
   } finally {
     await f.close();
   }

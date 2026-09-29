@@ -652,7 +652,7 @@ function select(i: number) {
         ? `${connectedSnapshot.adults} adults · ${connectedSnapshot.houseCapacity} housing capacity`
         : "Open building controls in the town management panel.";
     $("level-note").textContent = job
-      ? `Connected town · Building Greenhouse · ${Math.max(0, Math.ceil((job.endsAt - connectedSnapshot.serverNow) / 1000))} seconds remaining`
+      ? `Connected town · ${job.building === "house" ? "Upgrading House" : "Building Greenhouse"} · ${Math.max(0, Math.ceil((job.endsAt - connectedSnapshot.serverNow) / 1000))} seconds remaining`
       : `Connected town · ${plot.building ? "Saved level " + plot.level : "Empty plot"}`;
     return;
   }

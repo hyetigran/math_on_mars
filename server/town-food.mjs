@@ -22,7 +22,7 @@ export function initializeFood(state, now) {
       };
 }
 export function foodSummary(state) {
-  let power = state.utilities.power,
+  let power = state.utilities.power - (state.housePowerDemand ?? 0),
     water = state.utilities.water - state.adults;
   const assigned = Object.values(state.farms).filter((f) => f.workerId).length;
   const farms = {};

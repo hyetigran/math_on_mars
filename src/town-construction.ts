@@ -4,7 +4,7 @@ export function renderConstruction(
   state: any,
   send: (command: unknown) => void,
 ) {
-  root.innerHTML = `<h3>Construction</h3><p>${state.resources.blocks} blocks · ${state.resources.parts} parts · ${state.resources.credits} credits · ${state.resources.food} food</p><p>Utilities: ${state.utilities.power} power · ${state.utilities.water} water · ${state.utilities.oxygen} oxygen</p><p>${state.jobs.filter((j: any) => j.status === "running").length} / ${state.constructionSlots} construction slots occupied</p>`;
+  root.innerHTML = `<h3>Construction</h3><p>${state.resources.blocks} blocks · ${state.resources.parts} parts · ${state.resources.credits} credits · ${state.resources.food} food</p><p>Utilities: ${state.utilities.power} power · ${state.utilities.water} water · ${state.utilities.oxygen} oxygen · House demand: ${state.housePowerDemand} power</p><p>${state.jobs.filter((j: any) => j.status === "running").length} / ${state.constructionSlots} construction slots occupied</p>`;
   for (const [id, plot] of Object.entries<any>(state.plots)) {
     const section = document.createElement("section");
     section.dataset.plot = id;
@@ -27,6 +27,12 @@ export function renderConstruction(
       section.append(note);
       button.textContent = "Cancel and refund materials";
       button.onclick = () => send({ action: "cancel", jobId: job.id });
+      section.append(button);
+    } else if (plot.building === "house" && plot.level === 1) {
+      const recipe = state.recipes.house;
+      button.textContent = `Upgrade House to level 2 · ${recipe.cost.blocks} blocks + ${recipe.cost.parts} parts · ${recipe.duration / 60000} minutes`;
+      button.dataset.upgradeHouse = "true";
+      button.onclick = () => send({ action: "upgrade-house" });
       section.append(button);
     } else if (!plot.building) {
       const recipe = state.recipes.greenhouse;
