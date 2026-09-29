@@ -12,3 +12,6 @@ dist/
 
 # Isolated V2 visual prototype build
 dist-town/
+
+.town-data/
+dist-connected/

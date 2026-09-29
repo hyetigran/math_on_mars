@@ -636,7 +636,8 @@ function select(i: number) {
         String(Number(el.dataset.building) === i),
       ),
     );
-  $("upgrade").hidden = i !== 0;
+  $("upgrade").hidden =
+    i !== 0 || new URLSearchParams(location.search).has("town");
   $("level-note").textContent =
     i === 0
       ? `House level ${upgraded ? 2 : 1} · Appearance preview only`
@@ -762,7 +763,10 @@ renderer.domElement.addEventListener("pointerup", (e) => {
       camera,
     );
     const hit = r.intersectObjects(
-      [...buildings.map((b) => b.group), neighborhood],
+      [
+        ...buildings.filter((b) => b.group.visible).map((b) => b.group),
+        ...(neighborhood.visible ? [neighborhood] : []),
+      ],
       true,
     )[0];
     if (hit) {
@@ -841,7 +845,10 @@ renderer.setAnimationLoop((now) => {
       offset.length(),
     );
     const hit = ray.intersectObjects(
-      [...buildings.map((b) => b.group), neighborhood],
+      [
+        ...buildings.filter((b) => b.group.visible).map((b) => b.group),
+        ...(neighborhood.visible ? [neighborhood] : []),
+      ],
       true,
     )[0];
     if (hit) offset.setLength(Math.max(0.25, hit.distance - 0.2));
@@ -866,3 +873,43 @@ Object.defineProperty(window, "townPrototype", {
     drawCalls: renderer.info.render.calls,
   }),
 });
+
+// Connected mode renders an owned server snapshot; local appearance controls cannot mutate it.
+const connectedCadet = new URLSearchParams(location.search).get("town");
+if (connectedCadet) {
+  $("upgrade").hidden = true;
+  $("upgrade").onclick = null;
+  document
+    .querySelectorAll<HTMLButtonElement>("[data-building]")
+    .forEach((button) => {
+      button.hidden = button.dataset.building !== "0";
+    });
+  buildings[1].group.visible = false;
+  buildings[2].group.visible = false;
+  neighborhood.visible = false;
+  obstacles.splice(0, obstacles.length, {
+    x: buildings[0].x,
+    z: buildings[0].z,
+    w: 5.4,
+    d: 5.5,
+  });
+  $("building-description").textContent = "Loading your saved House…";
+  $("level-note").textContent = "Connected town · Loading";
+  fetch(`/api/towns/${encodeURIComponent(connectedCadet)}`)
+    .then(async (response) => {
+      const town = await response.json();
+      if (!response.ok) throw Error(town.error ?? "Could not load town");
+      upgraded = town.houseLevel > 1;
+      buildHouse();
+      $("building-description").textContent =
+        `${town.adults} adults · ${town.houseCapacity} housing capacity`;
+      $("level-note").textContent =
+        `Saved House level ${town.houseLevel} · Connected town`;
+    })
+    .catch((error) => {
+      $("building-description").textContent = error.message;
+      $("level-note").textContent =
+        "Unable to load · Refresh connection in the parent page";
+      buildings[0].group.visible = false;
+    });
+}

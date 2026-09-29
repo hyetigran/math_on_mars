@@ -182,6 +182,10 @@ _Avoid_: Trade goods
 
 `town-prototype.html` is an isolated Three.js camera/asset experiment on the V2 worktree. Run `pnpm dev:town`; `pnpm build:town` builds it separately. It contains three selectable geometric buildings, a two-state House appearance preview, overview/walking controls, and a proxy character. The user-provided European-town references now inform additional attached-house scenery, a leafy lane, courtyard, fountain square, and agricultural edge; see `docs/V2_VISUAL_REFERENCES.md`. These scenery instances do not add simulated building functions. All changes are in memory; it does not implement the agreed town simulation or modify cadet saves. See `docs/V2_VISUAL_PROTOTYPE.md`.
 
+## Connected town development slice
+
+The separate connected-town entry uses a Node 24/SQLite development service for parent sign-in and durable parent-owned cadet towns. Server ownership checks guard reads and retry-safe cadet creation; sessions use expiring HttpOnly cookies. A saved House snapshot renders in both prototype camera modes with local upgrade previews disabled. This does not migrate or alter existing local battle profiles. Management leases and gameplay commands follow in later tickets. See `docs/V2_CONNECTED_TOWN.md` and ADR-0005 for setup and production limitations.
+
 ## Presentation
 
 Typography uses locally bundled Oxanium for headings, buttons, and HUD labels, with Atkinson Hyperlegible Next for body copy and math. The archived Space Mission sheets are visual references, not font files; Oxanium approximates their geometric display style. Font files and licenses live in `src/assets/fonts/` and are included in the offline pack. Counters use tabular digits. The base camp has no headings or labels; its portal uses an E interaction bubble and the boundary-editor control uses an accessible icon.
