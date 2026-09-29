@@ -247,3 +247,5 @@ Connected town version 2 introduces starter stocks/utilities, three ordinary plo
 Connected town version 3 adds one-time lettuce seeds, unique adult-worker assignments, paused growth, discrete held harvests, hourly household meals and starter utility/emergency-meal recovery. Food and meal progress is persisted and reconciled on server time; housing capacity and available workers are distinct (#44).
 
 Connected version 4 supports occupied House upgrades using shared construction slots. Level 2 costs 40 blocks/10 parts over 60 minutes, raises capacity to four and adds one power demand only at completion. Residents and existing capacity persist during construction/cancellation (#45).
+
+Connected version 5 adds parent-password-protected topic eligibility and persisted untimed bank practice. Up to five distinct questions per set earn four minutes each after all corrections, retaining first-attempt accuracy. Topic cursors label repeats; completion credits once across retries/handoff. Time credit has no expiry or daily/storage cap. Shared numeric-answer logic and attribution preserve battle behavior (#46).

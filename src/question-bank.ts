@@ -2,14 +2,8 @@ import lower from "../content/questions/im-lower.json";
 import upper from "../content/questions/im-upper.json";
 import type { Grade, Question, QuestionSource } from "./types";
 
-export const IM_ATTRIBUTION = {
-  title: "IM K–5 Math",
-  author: "Illustrative Mathematics",
-  edition: "First edition (2021)",
-  license: "CC BY 4.0",
-  licenseUrl: "https://creativecommons.org/licenses/by/4.0/",
-  curriculumUrl: "https://im.kendallhunt.com/k5/teachers/",
-} as const;
+import attribution from "../content/questions/attribution.json";
+export const IM_ATTRIBUTION = attribution;
 
 export interface BankItem extends Omit<Question, "source" | "spoken"> {
   grade: Grade;

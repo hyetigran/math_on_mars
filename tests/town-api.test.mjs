@@ -57,7 +57,7 @@ test("parent can create a cadet town once and load it from a second login", asyn
       login.cookie,
     );
     assert.equal(town.data.houseLevel, 1);
-    assert.equal(town.data.version, 4);
+    assert.equal(town.data.version, 5);
     assert.deepEqual(town.data.recipes.greenhouse, {
       cost: { blocks: 20, parts: 5 },
       duration: 10000,
@@ -404,6 +404,116 @@ test("House upgrade retries charge once and cancellation preserves its residents
     assert.equal(state.resources.blocks, 80);
     assert.equal(state.houseLevel, 1);
     assert.equal(state.adults, 2);
+  } finally {
+    await f.close();
+  }
+});
+
+test("parent eligibility requires re-entry and a practice award survives retries and handoff", async () => {
+  const { practiceTopics, practiceBank } =
+    await import("../server/town-practice.mjs");
+  const f = await fixture();
+  try {
+    const account = {
+      username: "practice-parent",
+      password: "long-test-password",
+    };
+    const parent = await f.request("/api/register", account);
+    const cadet = await f.request(
+      "/api/cadets",
+      { name: "Nova", requestId: "practice-cadet" },
+      parent.cookie,
+    );
+    const path = `/api/towns/${cadet.data.id}`;
+    await f.request(
+      path + "/management",
+      {
+        deviceId: "practice-device",
+        generation: 0,
+        requestId: "practice-takeover",
+      },
+      parent.cookie,
+    );
+    const command = (requestId, intent) =>
+      f.request(
+        path + "/command",
+        {
+          deviceId: "practice-device",
+          generation: 1,
+          requestId,
+          command: intent,
+        },
+        parent.cookie,
+      );
+    const topic = practiceTopics[0].id;
+    assert.equal(
+      (
+        await command("settings-wrong", {
+          action: "set-topics",
+          topics: [topic],
+          password: "incorrect-password",
+        })
+      ).status,
+      403,
+    );
+    assert.deepEqual(
+      (await f.request(path, undefined, parent.cookie)).data.eligibleTopics,
+      [],
+    );
+    assert.equal(
+      (
+        await command("settings-correct", {
+          action: "set-topics",
+          topics: [topic],
+          password: account.password,
+        })
+      ).status,
+      200,
+    );
+    await command("practice-begin", { action: "begin-practice", topic });
+    let state = (await f.request(path, undefined, parent.cookie)).data;
+    const p = state.practice.attempt;
+    await command("practice-wrong", {
+      action: "answer-practice",
+      attemptId: p.id,
+      questionId: p.questionIds[0],
+      value: "999999",
+    });
+    let last;
+    for (const id of p.questionIds) {
+      last = {
+        action: "answer-practice",
+        attemptId: p.id,
+        questionId: id,
+        value: practiceBank.find((q) => q.id === id).answer.join("/"),
+      };
+      await command("answer-" + id, last);
+    }
+    const other = await f.request("/api/login", account);
+    await f.request(
+      path + "/management",
+      {
+        deviceId: "practice-second",
+        generation: 1,
+        requestId: "practice-handoff",
+      },
+      other.cookie,
+    );
+    const retry = await f.request(
+      path + "/command",
+      {
+        deviceId: "practice-second",
+        generation: 2,
+        requestId: "answer-" + last.questionId,
+        command: last,
+      },
+      other.cookie,
+    );
+    assert.equal(retry.status, 200);
+    state = (await f.request(path, undefined, other.cookie)).data;
+    assert.equal(state.constructionCredit, p.reward);
+    assert.equal(state.practice.attempt.completed, true);
+    assert.equal(state.practice.attempt.firstAttempts[p.questionIds[0]], false);
   } finally {
     await f.close();
   }

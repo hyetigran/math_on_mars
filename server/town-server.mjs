@@ -1,3 +1,4 @@
+import { practiceSummary } from "./town-practice.mjs";
 import { foodSummary, cropRecipes } from "./town-food.mjs";
 import {
   constructionRecipes,
@@ -270,6 +271,16 @@ export function createTownServer({
         }
         if (req.method === "POST") {
           const input = await body(req);
+          if (action === "command" && input.command?.action === "set-topics") {
+            const account = db
+              .prepare("SELECT salt,password FROM parents WHERE id=?")
+              .get(parent);
+            const password = text(input.command.password, 12, 128);
+            const actual = await scrypt(password, account.salt, 64);
+            if (!timingSafeEqual(actual, Buffer.from(account.password, "hex")))
+              fail(403, "Parent password required to change eligible topics");
+            delete input.command.password;
+          }
           const deviceId = text(input.deviceId, 8, 100),
             requestId = text(input.requestId, 8, 100);
           if (!Number.isSafeInteger(input.generation) || input.generation < 0)
@@ -363,6 +374,7 @@ export function createTownServer({
           ...town,
           foodSummary: foodSummary(town),
           cropRecipes,
+          practice: practiceSummary(town),
           serverNow: now(),
           recipes: constructionRecipes,
         });
