@@ -82,6 +82,78 @@ try {
     await page.$eval("iframe", (e) => e.src),
     await other.$eval("iframe", (e) => e.src),
   );
+  await page.waitForFunction(
+    () => !document.querySelector("[data-takeover]")?.disabled,
+  );
+  await page.click("[data-takeover]");
+  await page.waitForFunction(
+    () => !document.querySelector("[data-preference] button")?.disabled,
+  );
+  await page.evaluate(() => {
+    const realFetch = window.fetch;
+    window.fetch = async (...args) => {
+      const response = await realFetch(...args);
+      if (String(args[0]).endsWith("/preference")) {
+        window.fetch = realFetch;
+        throw new Error("Lost response after server commit");
+      }
+      return response;
+    };
+  });
+  await page.type("[name=motto]", "Grow together");
+  await page.click("[data-preference] button");
+  await page.waitForFunction(() =>
+    document
+      .querySelector("[data-management-status]")
+      ?.textContent.includes("Lost response"),
+  );
+  await page.click("[data-sync]");
+  await page.waitForFunction(
+    () => !document.querySelector("[data-preference] button")?.disabled,
+  );
+  await page.click("[data-preference] button");
+  await page.waitForFunction(
+    () =>
+      document.querySelector("[data-management-status]")?.textContent ===
+      "You manage this town.",
+  );
+  const townPath = await page.$eval(
+    "iframe",
+    (e) => "/api/towns/" + new URL(e.src).searchParams.get("town"),
+  );
+  assert.equal(
+    await page.evaluate(
+      async (path) => (await (await fetch(path)).json()).revision,
+      townPath,
+    ),
+    1,
+  );
+  await other.click("[data-sync]");
+  await other.waitForFunction(
+    () => !document.querySelector("[data-takeover]")?.disabled,
+  );
+  await other.click("[data-takeover]");
+  await other.waitForFunction(
+    () => !document.querySelector("[data-preference] button")?.disabled,
+  );
+  assert.match(
+    await other.$eval("[data-motto]", (e) => e.textContent),
+    /Grow together/,
+  );
+  await page.click("[data-preference] button");
+  await page.waitForFunction(() =>
+    document
+      .querySelector("[data-management-status]")
+      ?.textContent.includes("Another device"),
+  );
+  await other.setOfflineMode(true);
+  await other.waitForFunction(
+    () => document.querySelector("[data-preference] button")?.disabled,
+  );
+  await other.setOfflineMode(false);
+  await other.waitForFunction(
+    () => !document.querySelector("[data-preference] button")?.disabled,
+  );
   await other.reload();
   await other.waitForSelector("[data-cadet]");
   assert.equal(await other.$$eval("[data-cadet]", (e) => e.length), 1);

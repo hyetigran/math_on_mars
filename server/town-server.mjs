@@ -58,6 +58,8 @@ export function createTownServer({
  CREATE TABLE IF NOT EXISTS parents(id TEXT PRIMARY KEY,username TEXT NOT NULL UNIQUE,salt TEXT NOT NULL,password TEXT NOT NULL);
  CREATE TABLE IF NOT EXISTS sessions(token TEXT PRIMARY KEY,parent_id TEXT NOT NULL REFERENCES parents(id),expires INTEGER NOT NULL);
  CREATE TABLE IF NOT EXISTS cadets(id TEXT PRIMARY KEY,parent_id TEXT NOT NULL REFERENCES parents(id),name TEXT NOT NULL,request_id TEXT NOT NULL,UNIQUE(parent_id,request_id));
+ CREATE TABLE IF NOT EXISTS management(town_id TEXT PRIMARY KEY,device_id TEXT NOT NULL,session_id TEXT NOT NULL,generation INTEGER NOT NULL,request_id TEXT NOT NULL);
+ CREATE TABLE IF NOT EXISTS commands(town_id TEXT NOT NULL,request_id TEXT NOT NULL,payload TEXT NOT NULL,result TEXT NOT NULL,PRIMARY KEY(town_id,request_id));
  CREATE TABLE IF NOT EXISTS towns(cadet_id TEXT PRIMARY KEY REFERENCES cadets(id),state TEXT NOT NULL);
  `);
   const attempts = new Map();
@@ -229,6 +231,105 @@ export function createTownServer({
           throw e;
         }
         return send(201, { id, name });
+      }
+      const commandPath = path.match(
+        /^\/api\/towns\/([a-f0-9-]+)\/(management|preference)$/,
+      );
+      if (commandPath) {
+        const [, id, action] = commandPath;
+        ownTown(parent, id);
+        if (action === "management" && req.method === "GET") {
+          const lease = db
+            .prepare(
+              "SELECT generation,device_id,session_id FROM management WHERE town_id=?",
+            )
+            .get(id);
+          return send(200, {
+            generation: lease?.generation ?? 0,
+            deviceId:
+              lease?.session_id === digest(sessionToken(req))
+                ? lease.device_id
+                : null,
+          });
+        }
+        if (req.method === "POST") {
+          const input = await body(req);
+          const deviceId = text(input.deviceId, 8, 100),
+            requestId = text(input.requestId, 8, 100);
+          if (!Number.isSafeInteger(input.generation) || input.generation < 0)
+            fail(400, "Invalid management generation");
+          db.exec("BEGIN IMMEDIATE");
+          let result;
+          try {
+            const state = ownTown(parent, id);
+            const lease = db
+              .prepare("SELECT * FROM management WHERE town_id=?")
+              .get(id);
+            const mine =
+              lease?.device_id === deviceId &&
+              lease?.session_id === digest(sessionToken(req));
+            if (action === "management") {
+              if (mine && lease.request_id === requestId)
+                result = { generation: lease.generation, deviceId };
+              else {
+                if ((lease?.generation ?? 0) !== input.generation)
+                  fail(409, "Management changed. Refresh before taking over.");
+                const generation = input.generation + 1;
+                db.prepare(
+                  "INSERT INTO management VALUES(?,?,?,?,?) ON CONFLICT(town_id) DO UPDATE SET device_id=excluded.device_id,session_id=excluded.session_id,generation=excluded.generation,request_id=excluded.request_id",
+                ).run(
+                  id,
+                  deviceId,
+                  digest(sessionToken(req)),
+                  generation,
+                  requestId,
+                );
+                result = { generation, deviceId };
+              }
+            } else {
+              if (!mine || lease.generation !== input.generation)
+                fail(
+                  409,
+                  "Another device manages this town. Refresh to take over.",
+                );
+              const motto = text(input.motto, 1, 80);
+              const payload = JSON.stringify({
+                deviceId,
+                generation: input.generation,
+                motto,
+              });
+              const receipt = db
+                .prepare(
+                  "SELECT payload,result FROM commands WHERE town_id=? AND request_id=?",
+                )
+                .get(id, requestId);
+              if (receipt) {
+                if (receipt.payload !== payload)
+                  fail(409, "Request ID already used for another command");
+                result = JSON.parse(receipt.result);
+              } else {
+                state.motto = motto;
+                state.revision = (state.revision ?? 0) + 1;
+                result = state;
+                db.prepare("UPDATE towns SET state=? WHERE cadet_id=?").run(
+                  JSON.stringify(state),
+                  id,
+                );
+                db.prepare("INSERT INTO commands VALUES(?,?,?,?)").run(
+                  id,
+                  requestId,
+                  payload,
+                  JSON.stringify(result),
+                );
+              }
+            }
+            db.exec("COMMIT");
+          } catch (error) {
+            db.exec("ROLLBACK");
+            throw error;
+          }
+          return send(200, result);
+        }
       }
       const match = path.match(/^\/api\/towns\/([a-f0-9-]+)$/);
       if (match && req.method === "GET")

@@ -7,3 +7,9 @@ The API stores its database in ignored `.town-data/development.sqlite`. Restarti
 Run `pnpm test:town-api` for API ownership/session checks, `pnpm build:connected` for the isolated browser build, and the existing regression suite for the battle game. Tests must use a temporary or in-memory database. Production account recovery and legacy-profile migration are outside this slice.
 
 A server snapshot supplies the connected House’s level, occupancy and capacity. Local upgrade previews are disabled in connected mode; the static prototype remains available separately. Loading/connection errors do not invent local town state or write to existing battle profiles. Device handoff and town mutations follow in later tickets.
+
+## Device handoff
+
+Each open tab has its own management identity. Select **Manage here / take over** to acquire the town's sole management lease. The server increments a durable generation on each takeover; every town mutation must match both the active tab/session and generation. Old tabs can read but their changes are rejected immediately by the service. Opening a town alone never takes management away from another device.
+
+The town motto is a harmless persistent preference for exercising the command path. Command receipts and state changes commit together, so retrying after a lost response returns the same result without applying the command twice. Receipts survive service restarts. A stale takeover retry cannot reacquire a lease after another device takes over. Offline controls disable changes and reconnect refreshes the authoritative lease and state before enabling them. Battle play is unchanged.
