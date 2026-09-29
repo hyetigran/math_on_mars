@@ -3,6 +3,6 @@ export default defineConfig({
   base: "./",
   build: {
     outDir: "dist-town",
-    rollupOptions: { input: "town-prototype.html" },
+    rollupOptions: { input: ["town-prototype.html", "town-rehearsal.html"] },
   },
 });

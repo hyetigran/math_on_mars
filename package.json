@@ -13,7 +13,8 @@
     "format": "prettier --write src tests scripts content \"*.{html,json,ts,yaml}\"",
     "format:check": "prettier --check src tests scripts content \"*.{html,json,ts,yaml}\"",
     "dev:town": "vite --host 127.0.0.1 --open /town-prototype.html",
-    "build:town": "tsc && vite build --config vite.town.config.ts"
+    "build:town": "tsc && vite build --config vite.town.config.ts",
+    "dev:rehearsal": "vite --host 127.0.0.1 --open /town-rehearsal.html"
   },
   "dependencies": {
     "phaser": "4.2.1"

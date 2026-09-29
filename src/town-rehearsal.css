@@ -1,0 +1,138 @@
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  background: #f5f0e4;
+  color: #253d35;
+  font:
+    16px/1.5 system-ui,
+    sans-serif;
+}
+main {
+  max-width: 1250px;
+  margin: auto;
+  padding: 28px;
+}
+header {
+  max-width: 760px;
+}
+h1 {
+  font:
+    44px Georgia,
+    serif;
+  margin: 8px 0;
+}
+h2 {
+  font:
+    25px Georgia,
+    serif;
+}
+.eyebrow {
+  font-size: 12px;
+  letter-spacing: 2px;
+}
+section {
+  background: #fffdf7;
+  border: 1px solid #ddd9c8;
+  border-radius: 15px;
+  padding: 22px;
+  margin-bottom: 20px;
+}
+.columns {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+}
+.stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+}
+.stats span {
+  display: block;
+  font-size: 12px;
+}
+.stats strong {
+  font-size: 21px;
+}
+.buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+button {
+  font: 600 13px system-ui;
+  border: 1px solid #667f6b;
+  background: #315a49;
+  color: white;
+  border-radius: 8px;
+  min-height: 44px;
+  padding: 10px;
+  margin: 4px 0;
+  cursor: pointer;
+}
+button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+input,
+select {
+  font: inherit;
+  max-width: 100%;
+  padding: 9px;
+  border: 1px solid #849582;
+  border-radius: 5px;
+}
+label {
+  display: block;
+  font-size: 13px;
+}
+input {
+  display: block;
+  width: 100%;
+}
+a {
+  color: #276751;
+}
+.settings {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+  margin: 16px 0;
+}
+pre {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+#notice {
+  padding: 14px;
+  background: #e3e8d7;
+  border-radius: 8px;
+}
+.question {
+  font-size: 19px;
+}
+.attribution {
+  font-size: 11px;
+}
+summary {
+  cursor: pointer;
+  padding: 10px 0;
+}
+button:focus-visible,
+summary:focus-visible {
+  outline: 3px solid #b96442;
+  outline-offset: 3px;
+}
+@media (max-width: 900px) {
+  .columns {
+    grid-template-columns: 1fr;
+  }
+  main {
+    padding: 15px;
+  }
+  h1 {
+    font-size: 34px;
+  }
+}
