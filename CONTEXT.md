@@ -243,3 +243,5 @@ Combat rules run at a fixed 60 Hz. The marine, enemies, projectiles, and attache
 Connected town management now uses an explicit per-tab takeover lease, bound to the authenticated parent session and a durable generation. Preference commands have transactional durable retry receipts; stale generations cannot mutate town state. The town motto is the first harmless command exercising this boundary (#42).
 
 Connected town version 2 introduces starter stocks/utilities, three ordinary plots, two construction slots and server-timed Greenhouse jobs. Construction and cancellation use the authoritative command/receipt boundary. Both camera views now poll persisted town snapshots instead of preview state (#43).
+
+Connected town version 3 adds one-time lettuce seeds, unique adult-worker assignments, paused growth, discrete held harvests, hourly household meals and starter utility/emergency-meal recovery. Food and meal progress is persisted and reconciled on server time; housing capacity and available workers are distinct (#44).

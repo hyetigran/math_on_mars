@@ -205,11 +205,24 @@ try {
       .querySelector("#level-note")
       ?.textContent.includes("Saved level 1"),
   );
+  await other.waitForSelector('[data-farm="garden"]');
+  await other.click("[data-unlock-seed]");
+  await other.waitForFunction(
+    () => !document.querySelector("[data-unlock-seed]"),
+  );
+  await other.click('[data-farm="garden"] button');
   await other.waitForFunction(() =>
     document
-      .querySelector('[data-plot="garden"]')
-      ?.textContent.includes("Open Greenhouse"),
+      .querySelector('[data-farm="garden"]')
+      ?.textContent.includes("Remove adult-1"),
   );
+  await other.click('[data-farm="garden"] button:last-child');
+  await other.waitForFunction(() =>
+    document
+      .querySelector('[data-farm="garden"]')
+      ?.textContent.includes("Growing."),
+  );
+
   await other.click('[data-plot="market"] [data-mutation]');
   await other.waitForFunction(() =>
     document
@@ -232,6 +245,20 @@ try {
   await other.reload();
   await other.waitForSelector("[data-cadet]");
   assert.equal(await other.$$eval("[data-cadet]", (e) => e.length), 1);
+  await other.click("[data-cadet]");
+  await other.waitForFunction(() =>
+    document
+      .querySelector('[data-farm="garden"]')
+      ?.textContent.includes("Growing."),
+  );
+  assert.equal(
+    await other.evaluate(
+      async (path) => (await (await fetch(path)).json()).resources.credits,
+      townPath,
+    ),
+    50,
+  );
+
   await page.setViewport({ width: 390, height: 844 });
   assert.equal(
     await page.evaluate(

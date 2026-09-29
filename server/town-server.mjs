@@ -1,3 +1,4 @@
+import { foodSummary, cropRecipes } from "./town-food.mjs";
 import {
   constructionRecipes,
   initializeTown,
@@ -356,12 +357,16 @@ export function createTownServer({
         }
       }
       const match = path.match(/^\/api\/towns\/([a-f0-9-]+)$/);
-      if (match && req.method === "GET")
+      if (match && req.method === "GET") {
+        const town = ownTown(parent, match[1]);
         return send(200, {
-          ...ownTown(parent, match[1]),
+          ...town,
+          foodSummary: foodSummary(town),
+          cropRecipes,
           serverNow: now(),
           recipes: constructionRecipes,
         });
+      }
       fail(404, "Not found");
     } catch (error) {
       if (error instanceof TownRuleError) send(400, { error: error.message });

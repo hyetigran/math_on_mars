@@ -1,10 +1,9 @@
+import { initializeFood, advanceFood, applyFoodCommand } from "./town-food.mjs";
+import { TownRuleError, requireRule } from "./town-rules.mjs";
+export { TownRuleError } from "./town-rules.mjs";
 import { randomUUID } from "node:crypto";
 export const constructionRecipes = {
   greenhouse: { cost: { blocks: 20, parts: 5 }, duration: 10000 },
-};
-export class TownRuleError extends Error {}
-const requireRule = (condition, message) => {
-  if (!condition) throw new TownRuleError(message);
 };
 export function initializeTown(state, now) {
   if (state.version < 2)
@@ -24,15 +23,20 @@ export function initializeTown(state, now) {
       jobs: [],
       lastSimulatedAt: now,
     });
+  initializeFood(state, now);
   return state;
 }
 export function reconcileTown(state, now) {
-  for (const job of state.jobs)
-    if (job.status === "running" && job.endsAt <= now) {
-      job.status = "completed";
-      state.plots[job.plotId] = { building: job.building, level: job.level };
-      state.revision++;
-    }
+  for (const job of state.jobs
+    .filter((j) => j.status === "running" && j.endsAt <= now)
+    .sort((a, b) => a.endsAt - b.endsAt)) {
+    advanceFood(state, job.endsAt);
+    job.status = "completed";
+    state.plots[job.plotId] = { building: job.building, level: job.level };
+    initializeFood(state, job.endsAt);
+    state.revision++;
+  }
+  advanceFood(state, now);
   return state;
 }
 export function applyTownCommand(state, input, now) {
@@ -81,7 +85,8 @@ export function applyTownCommand(state, input, now) {
     job.status = "cancelled";
     state.resources.blocks += job.cost.blocks;
     state.resources.parts += job.cost.parts;
-  } else throw new TownRuleError("Unknown town command");
+  } else if (!applyFoodCommand(state, input))
+    throw new TownRuleError("Unknown town command");
   state.revision++;
   return state;
 }
