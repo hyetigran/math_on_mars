@@ -514,6 +514,59 @@ test("parent eligibility requires re-entry and a practice award survives retries
     assert.equal(state.constructionCredit, p.reward);
     assert.equal(state.practice.attempt.completed, true);
     assert.equal(state.practice.attempt.firstAttempts[p.questionIds[0]], false);
+    const envelope = { deviceId: "practice-second", generation: 2 };
+    const building = await f.request(
+      path + "/command",
+      {
+        ...envelope,
+        requestId: "credit-build",
+        command: { action: "build", plotId: "garden" },
+      },
+      other.cookie,
+    );
+    const project = building.data.jobs.find((j) => j.status === "running");
+    const spend = {
+      requestId: "credit-spend",
+      command: {
+        action: "spend-credit",
+        jobId: project.id,
+        expectedRevision: building.data.revision,
+      },
+    };
+    assert.equal(
+      (
+        await f.request(
+          path + "/command",
+          { ...envelope, ...spend },
+          other.cookie,
+        )
+      ).status,
+      200,
+    );
+    await f.request(
+      path + "/management",
+      {
+        deviceId: "practice-device",
+        generation: 2,
+        requestId: "credit-handoff",
+      },
+      parent.cookie,
+    );
+    assert.equal(
+      (
+        await f.request(
+          path + "/command",
+          { deviceId: "practice-device", generation: 3, ...spend },
+          parent.cookie,
+        )
+      ).status,
+      200,
+    );
+    state = (await f.request(path, undefined, parent.cookie)).data;
+    const completed = state.jobs.find((j) => j.id === project.id);
+    assert.equal(completed.status, "completed");
+    assert.equal(state.constructionCredit, p.reward - completed.creditApplied);
+    assert.ok(completed.creditApplied > 0 && completed.creditApplied <= 10000);
   } finally {
     await f.close();
   }
