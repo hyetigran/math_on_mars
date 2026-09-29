@@ -57,7 +57,7 @@ test("parent can create a cadet town once and load it from a second login", asyn
       login.cookie,
     );
     assert.equal(town.data.houseLevel, 1);
-    assert.equal(town.data.version, 5);
+    assert.equal(town.data.version, 6);
     assert.deepEqual(town.data.recipes.greenhouse, {
       cost: { blocks: 20, parts: 5 },
       duration: 10000,
@@ -567,6 +567,82 @@ test("parent eligibility requires re-entry and a practice award survives retries
     assert.equal(completed.status, "completed");
     assert.equal(state.constructionCredit, p.reward - completed.creditApplied);
     assert.ok(completed.creditApplied > 0 && completed.creditApplied <= 10000);
+  } finally {
+    await f.close();
+  }
+});
+
+test("dashboard and read-only snapshots do not renew absence; connected visits renew once town-wide", async () => {
+  let clock = 0;
+  const f = await fixture(":memory:", () => clock),
+    limit = 48 * 3600000;
+  try {
+    let parent = await f.request("/api/register", {
+      username: "return-parent",
+      password: "long-test-password",
+    });
+    const cadet = await f.request(
+      "/api/cadets",
+      { name: "Nova", requestId: "return-cadet" },
+      parent.cookie,
+    );
+    const path = `/api/towns/${cadet.data.id}`;
+    await f.request(
+      path + "/visit",
+      { event: "open", visitId: "initial-visit" },
+      parent.cookie,
+    );
+    await f.request(
+      path + "/visit",
+      { event: "leave", visitId: "initial-visit" },
+      parent.cookie,
+    );
+    clock = limit * 2;
+    parent = await f.request("/api/login", {
+      username: "return-parent",
+      password: "long-test-password",
+    });
+    await f.request("/api/cadets", undefined, parent.cookie);
+    let state = (await f.request(path, undefined, parent.cookie)).data;
+    assert.equal(state.productionUntil, limit);
+    assert.equal(state.foodTotals.meals + state.foodTotals.emergencyMeals, 96);
+    clock = limit * 3;
+    parent = await f.request("/api/login", {
+      username: "return-parent",
+      password: "long-test-password",
+    });
+    state = (await f.request(path, undefined, parent.cookie)).data;
+    assert.equal(state.foodTotals.meals + state.foodTotals.emergencyMeals, 96);
+    const returned = await f.request(
+      path + "/visit",
+      { event: "open", visitId: "return-visit" },
+      parent.cookie,
+    );
+    assert.equal(returned.data.capped, true);
+    assert.equal(returned.data.simulatedMs, limit);
+    const retry = await f.request(
+      path + "/visit",
+      { event: "open", visitId: "return-visit" },
+      parent.cookie,
+    );
+    assert.deepEqual(retry.data, returned.data);
+    const stranger = await f.request("/api/register", {
+      username: "return-stranger",
+      password: "long-test-password",
+    });
+    assert.equal(
+      (
+        await f.request(
+          path + "/visit",
+          { event: "open", visitId: "other-visit" },
+          stranger.cookie,
+        )
+      ).status,
+      404,
+    );
+    clock += 3600000;
+    state = (await f.request(path, undefined, parent.cookie)).data;
+    assert.equal(state.foodTotals.meals + state.foodTotals.emergencyMeals, 98);
   } finally {
     await f.close();
   }

@@ -1,3 +1,4 @@
+import { visitTown } from "./town-visits.mjs";
 import { practiceSummary } from "./town-practice.mjs";
 import { foodSummary, cropRecipes } from "./town-food.mjs";
 import {
@@ -107,6 +108,10 @@ export function createTownServer({
       id,
     );
     return state;
+  }
+  function publicTown(state) {
+    const { visits, visitBaseline, ...town } = state;
+    return town;
   }
   const server = createServer(async (req, res) => {
     res.setHeader("Content-Type", "application/json");
@@ -249,6 +254,29 @@ export function createTownServer({
         }
         return send(201, { id, name });
       }
+      const visitPath = path.match(/^\/api\/towns\/([a-f0-9-]+)\/visit$/);
+      if (visitPath && req.method === "POST") {
+        const input = await body(req);
+        db.exec("BEGIN IMMEDIATE");
+        try {
+          const state = ownTown(parent, visitPath[1]);
+          const result = visitTown(
+            state,
+            input,
+            digest(sessionToken(req)),
+            now(),
+          );
+          db.prepare("UPDATE towns SET state=? WHERE cadet_id=?").run(
+            JSON.stringify(state),
+            visitPath[1],
+          );
+          db.exec("COMMIT");
+          return send(200, result);
+        } catch (error) {
+          db.exec("ROLLBACK");
+          throw error;
+        }
+      }
       const commandPath = path.match(
         /^\/api\/towns\/([a-f0-9-]+)\/(management|preference|command)$/,
       );
@@ -346,7 +374,7 @@ export function createTownServer({
                   state.motto = intent.motto;
                   state.revision = (state.revision ?? 0) + 1;
                 } else applyTownCommand(state, intent, now());
-                result = state;
+                result = publicTown(state);
                 db.prepare("UPDATE towns SET state=? WHERE cadet_id=?").run(
                   JSON.stringify(state),
                   id,
@@ -371,7 +399,7 @@ export function createTownServer({
       if (match && req.method === "GET") {
         const town = ownTown(parent, match[1]);
         return send(200, {
-          ...town,
+          ...publicTown(town),
           foodSummary: foodSummary(town),
           cropRecipes,
           practice: practiceSummary(town),
