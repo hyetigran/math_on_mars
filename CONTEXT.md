@@ -25,6 +25,163 @@ _Avoid_: Consumable bullet supply
 **Legendary Omni Ammo**:
 An ammo type formed from the five distinct purple ammo types, firing all five ammo types while occupying one active ammo slot.
 
+## V2 language — agreed design, not yet implemented
+
+**Town**:
+A cadet's personal persistent colony, continued across devices, built on plots along predefined streets and inhabited by colonists. A transparent pressurized dome encloses the European-inspired streets, gardens, plazas, and rural plots, with the Martian landscape visible outside. One 3D scene supports elevated management and behind-character walking views; desktop/tablets take priority, with simplified phone controls and detail.
+_Avoid_: Shared colony
+
+**Town practice**:
+The town's learning activity, separate from between-wave quizzes, supporting parent-assigned homework or self-selected topics from the question bank and earning construction progress.
+_Avoid_: Between-wave quiz (when referring to town learning)
+
+**Building inventory**:
+Separate storage for owned buildings removed from plots using Store building instead of demolition. Completed upgrades persist; storage has no fee and placement on a compatible plot is instant and free. Stored buildings provide no services or capacity and still count toward singleton limits. Rehouse residents and transfer goods safely before storage, releasing workers; block storage if housing or goods capacity would be insufficient. Finish/cancel construction first; other job progress is preserved but paused until placement and operating requirements are restored.
+_Avoid_: Warehouse (stores goods), demolition (replaced by building storage)
+
+**Seed variety**:
+A crop option permanently unlocked for the town through a one-time purchase. Automatic replanting requires no additional seed purchases or trade-credit spending; workers, water, and power sustain growing cycles. Basic varieties are immediately purchasable; research makes advanced varieties available for that one-time purchase.
+
+**Growing cycle**:
+The period between planting a player-selected crop and its harvest, with assigned colonists performing tending and harvesting.
+_Avoid_: Continuous food production
+
+**Neighborhood milestone**:
+A development goal that advances the town toward new services or districts while allowing players to customize between goals.
+_Avoid_: Daily task (when referring to town progression)
+
+**Crafted equipment**:
+Permanent armor or weapons retained across missions and after defeat, distinct from temporary mission upgrades. Advanced recipes combine battle-earned materials with town-made parts at the Armory. Progression uses crafted replacements with published stats and material costs; older pieces remain available. Initial V2 has no durability, repair costs, or randomized equipment stats.
+_Avoid_: Legendary Omni Ammo (when referring to permanent equipment crafting)
+
+**Armor slot**:
+One of five permanent pre-mission equipment positions: Helm (firing speed), Armor/chest (damage reduction), Gloves (critical-hit chance), Legs (health), and Boots (movement). Equipped pieces visibly change the character; concrete stat formulas remain to define.
+
+**Critical hit**:
+A firing volley that deals twice its normal direct damage. One critical roll applies across the volley's ammo streams and pellets; Gloves increase its chance. It does not double status durations or trigger additional critical rolls. Chance values and treatment of secondary ammo damage remain to define.
+
+**Hand slot**:
+One of two weapon positions in the permanent pre-mission loadout. A one-handed weapon occupies one position; a two-handed weapon occupies both as a single item. Two distinct one-handed pistols may be dual-wielded. Preserve existing pistol behavior; rifles have higher base damage. Both configurations use one shared mission ammo setup.
+_Avoid_: Ammo slot (a separate mission system)
+
+**Research project**:
+A staffed, timed Research Lab task paid for with trade credits and town materials, permanently unlocking crops, recipes, or advanced building tiers. One project runs at a time, separate from construction and equipment crafting; construction credit cannot accelerate it. Essential buildings do not require research. Projects pause without required staff or utilities, retaining progress until requirements are restored.
+
+**Pending battle reward**:
+A locally saved offline wave-10 victory awaiting once-only settlement on reconnect. Reveal the crafting material when collected; pending materials cannot be spent at the Armory.
+_Avoid_: Available crafting material (before settlement)
+
+**Crafting material**:
+A persistent battle reward randomly awarded on completing the tenth and final wave, used with town-made parts to craft advanced equipment.
+_Avoid_: Salvage (the mission-scoped currency)
+
+**Armory**:
+The staffed town building where permanent armor and weapons are crafted from battle-earned materials and town-made parts, using a queue separate from construction. Crafting pauses without required staff or utilities, retaining progress until requirements are restored.
+_Avoid_: Workshop (the producer of town parts)
+
+**Parent assignment**:
+Town practice assigned by a parent using topics and a question count from the question bank, optionally with a due date. An overdue assignment does not damage the town.
+_Avoid_: Uploaded homework (not included in initial V2 scope)
+
+**Construction credit**:
+Banked time earned by completing town practice and correcting mistakes, spent to accelerate a chosen construction project. Its award increases at town milestones, is shown before practice, and is fixed when earned. Credit neither expires nor has a storage cap; unused time remains banked and cannot accelerate equipment crafting or research.
+_Avoid_: Trade credits, crafting material
+
+**Construction slot**:
+Capacity for one active building construction or upgrade project; a new town has two permanent slots, with more unlocked through the Construction Office. Its additional slots must be empty before the Office can be stored; storage removes them and redeployment restores them.
+_Avoid_: Worker slot, crafting queue
+
+**Held harvest**:
+A completed crop or animal-product batch retained safely at its farm while town storage is full. It cannot be consumed or sold until transferred, and further crop/animal production pauses until transfer is possible.
+_Avoid_: Stored food (before transfer)
+
+**Building level**:
+One of five successive upgrade stages, each improving a building's appearance and function while retaining its identity and plot fit.
+_Avoid_: Floor (a level need not add a storey)
+
+**Solar Plant**:
+A town building that supplies power capacity to operating buildings.
+_Avoid_: Solar Atelier
+
+**Block Factory**:
+A town building that produces building blocks for construction using locally available Martian material.
+_Avoid_: Regolith Works
+
+**Household food reserve**:
+One day of household meals automatically protected before optional processing, trade, or animal-feed production. Inventory shows the protected amount; optional uses draw only from surplus. Serve basic meals for all households before preferences, rotating scarce preferred foods among households. Children receive smaller portions without priority based on happiness or job rank. Exact portions remain to tune.
+
+**Neighborhood benefit**:
+A positive effect from nearby buildings within walkable-street range. Each benefit type applies once using its strongest nearby source; different benefit types can combine, but repeated sources do not multiply the same bonus.
+
+**Food preference**:
+A colonist's stable favorite food or occasional changing craving, fulfilled by consuming a served portion. Preference fulfillment is distinct from simply having enough food. Favorites, cravings, and Café orders draw only from foods the player has unlocked.
+_Avoid_: Food shortage (when referring only to an unmet preference)
+
+**Colonist happiness**:
+A colonist's satisfaction with food, surroundings, work, and relationships, summarized at household and town level. High happiness modestly benefits adult productivity and attracts arrivals; detailed calculation remains under design.
+_Avoid_: Happiness currency
+
+**Neighbor effect**:
+A positive or negative effect arising from buildings or civic spaces being near each other, while ordinary town buildings remain allowed on any ordinary town plot. Proximity follows walkable streets. Block Factories, Workshops, and livestock facilities slightly reduce nearby residential happiness, using only the strongest nuisance. Solar and Water Plants are neutral to homes and benefit from being near each other. Preview affected homes before placement; exact strengths and range remain to tune.
+_Avoid_: Zoning restriction
+
+**Family household**:
+A family formed naturally by colonists, with household formation and a later child request accepted by the player after checking housing and resources. A family may have up to two individually approved children, who remain children permanently; declining or postponing has no penalty. Families stay together when moved.
+_Avoid_: Workforce (when referring to all family members)
+
+**Livestock**:
+Chickens, dairy cows, and pigs raised on larger rural plots to produce eggs, milk, and meat; meat processing is abstract and non-graphic. Workers use grain-based feed from the Mill; starting animals are included, lifecycle management is abstracted, and feed shortages pause output without killing animals.
+_Avoid_: Cultivated meat (the proposed Protein Lab was not chosen)
+
+**Child colonist**:
+A permanent child member of a household, with food preferences, friendships, and street-level activities. Child colonists never age into adults and cannot fill production jobs. They occupy housing and use utilities, with lower food consumption than adults.
+_Avoid_: Future worker
+
+**Rural plot**:
+A larger building plot on a predefined outskirts road, reserved for livestock facilities as an exception to ordinary town-plot placement freedom.
+_Avoid_: Ordinary town plot
+
+**Household unit**:
+Accommodation occupied by one family or a group of single adults. A House contains one unit; Apartments contain multiple units, with exact capacities still to be tuned.
+_Avoid_: Worker slot
+
+**Plant Nursery**:
+The town building that grows decorative trees, flowers, shrubs, and hedges. The Greenhouse remains dedicated to food crops.
+
+**Workshop**:
+The producer of town parts and crafted furnishings, including benches, fountains, planters, lamps, and basketball hoops. Permanent combat equipment is crafted at the Armory.
+
+**Decoration**:
+A decorative plant grown at the Plant Nursery or furnishing crafted at the Workshop, held in inventory before free placement and movement in designated street, plaza, or courtyard spaces. Placement keeps walking paths clear. Small play equipment is distinct from the complete five-level Playground amenity; individual effects and recipes remain to define.
+
+**Playground**:
+A freely relocatable amenity on an ordinary town plot, where children play and form friendships. Its five levels improve equipment and family-serving capacity without requiring a permanent worker.
+_Avoid_: School
+
+**Absence window**:
+Up to 48 hours of production and consumption simulated while a player is away; both pause after that limit until return. Already-running construction, equipment crafting, and research may complete across the full absence. Crafting/research require staff and utilities during the simulated window; preserve their eligibility at its cutoff, letting eligible running jobs finish and leaving blocked jobs paused. New queued jobs start and pay inputs only within the simulated window, then wait for return. Stored buildings remain paused. Opening the town while connected reconciles saved progress and a fresh allowance begins when the player leaves; battle-only or parent-dashboard visits do not reset it.
+_Avoid_: Construction time limit
+
+**Preferred work**:
+An adult colonist's favored work category, providing a small happiness bonus when matched by their assigned job. Other jobs remain available and fully usable; coworker friendships may also improve satisfaction.
+_Avoid_: Job qualification
+
+**Cadet town access**:
+A parent account manages multiple cadet profiles without separate child email addresses, each owning a town. Only one device actively manages a particular town at a time, with explicit handoff.
+_Avoid_: Shared multiplayer town
+
+**Trade credits**:
+Town currency earned through Market sales and Café orders and spent on basic supplies, seeds, decorations, and research projects.
+_Avoid_: Construction credit, mission salvage
+
+**Emergency meals**:
+Starter-habitat food consumed directly to help a struggling town recover, unavailable for sale or processing.
+_Avoid_: Trade goods
+
+## V2 visual experiment
+
+`town-prototype.html` is an isolated Three.js camera/asset experiment on the V2 worktree. Run `pnpm dev:town`; `pnpm build:town` builds it separately. It contains three selectable geometric buildings, a two-state House appearance preview, overview/walking controls, and a proxy character. The user-provided European-town references now inform additional attached-house scenery, a leafy lane, courtyard, fountain square, and agricultural edge; see `docs/V2_VISUAL_REFERENCES.md`. These scenery instances do not add simulated building functions. All changes are in memory; it does not implement the agreed town simulation or modify cadet saves. See `docs/V2_VISUAL_PROTOTYPE.md`.
+
 ## Presentation
 
 Typography uses locally bundled Oxanium for headings, buttons, and HUD labels, with Atkinson Hyperlegible Next for body copy and math. The archived Space Mission sheets are visual references, not font files; Oxanium approximates their geometric display style. Font files and licenses live in `src/assets/fonts/` and are included in the offline pack. Counters use tabular digits. The base camp has no headings or labels; its portal uses an E interaction bubble and the boundary-editor control uses an accessible icon.
