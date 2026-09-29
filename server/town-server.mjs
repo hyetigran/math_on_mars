@@ -293,11 +293,8 @@ export function createTownServer({
                   "Another device manages this town. Refresh to take over.",
                 );
               const motto = text(input.motto, 1, 80);
-              const payload = JSON.stringify({
-                deviceId,
-                generation: input.generation,
-                motto,
-              });
+              // Retry identity belongs to the intent, independently of its current lease.
+              const payload = JSON.stringify({ motto });
               const receipt = db
                 .prepare(
                   "SELECT payload,result FROM commands WHERE town_id=? AND request_id=?",

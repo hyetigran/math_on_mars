@@ -245,6 +245,14 @@ test("management takeover rejects stale commands and preserves durable retry rec
     );
     const second = await take(two.cookie, "device-two", "take-second", 1);
     assert.equal(second.data.generation, 2);
+    const handedRetry = await f.request(
+      path + "/preference",
+      { ...command, deviceId: "device-two", generation: 2 },
+      two.cookie,
+    );
+    assert.equal(handedRetry.status, 200);
+    assert.equal(handedRetry.data.revision, 1);
+
     assert.equal(
       (await f.request(path + "/preference", command, one.cookie)).status,
       409,

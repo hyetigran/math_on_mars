@@ -107,6 +107,17 @@ try {
       .querySelector("[data-management-status]")
       ?.textContent.includes("Lost response"),
   );
+  await page.reload();
+  await page.waitForSelector("[data-cadet]");
+  await page.click("[data-cadet]");
+  await page.waitForFunction(
+    () => !document.querySelector("[data-takeover]")?.disabled,
+  );
+  await page.click("[data-takeover]");
+  await page.waitForFunction(
+    () => !document.querySelector("[data-preference] button")?.disabled,
+  );
+  await page.type("[name=motto]", "Grow together");
   await page.click("[data-sync]");
   await page.waitForFunction(
     () => !document.querySelector("[data-preference] button")?.disabled,

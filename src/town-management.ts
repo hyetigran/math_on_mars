@@ -49,8 +49,9 @@ export function mountManagement(root: HTMLElement, townId: string, api: Api) {
     controls();
     try {
       await api(`/api/towns/${townId}/${path}`, payload);
-      if (path === "preference") sessionStorage.removeItem(storageKey);
       await refresh();
+      if (path === "preference" && connected)
+        sessionStorage.removeItem(storageKey);
     } catch (error) {
       connected = false;
       status.textContent = `${error instanceof Error ? error.message : "Connection lost."} Refresh management before retrying.`;
@@ -73,13 +74,9 @@ export function mountManagement(root: HTMLElement, townId: string, api: Api) {
     try {
       pending = JSON.parse(sessionStorage.getItem(storageKey) ?? "null");
     } catch {}
-    if (
-      !pending ||
-      pending.motto !== motto ||
-      pending.generation !== generation ||
-      pending.deviceId !== deviceId
-    )
-      pending = { deviceId, generation, motto, requestId: crypto.randomUUID() };
+    if (!pending || pending.motto !== motto)
+      pending = { motto, requestId: crypto.randomUUID() };
+    pending = { ...pending, deviceId, generation };
     sessionStorage.setItem(storageKey, JSON.stringify(pending));
     void command("preference", pending);
   };
