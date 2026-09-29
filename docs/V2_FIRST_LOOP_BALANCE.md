@@ -20,7 +20,7 @@ Issue #40. These are explicit initial test values, not permanently approved econ
 | House level-2 upgrade | 40 blocks + 10 parts; 60 minutes |
 | Practice reward | 4 minutes per completed/corrected question; five-question set gives 20 minutes |
 
-Starter habitat emergency meals supply unmet basic consumption directly, never as tradeable/processable inventory. Utility shortage pauses optional crop production; essential residents remain safe. Storage-full harvests are held outside spendable inventory until the complete batch fits. The rehearsal has no trade/processing loop; reserve availability is still visible.
+Starter habitat emergency meals supply unmet basic consumption directly, never as tradeable/processable inventory. The shortage preset can restore starter power to 10 capacity through an explicit development recovery control without resetting stocks, practice or history. Utility shortage pauses optional crop production; essential residents remain safe. Storage-full harvests are held outside spendable inventory until the complete batch fits. The rehearsal has no trade/processing loop; reserve availability is still visible.
 
 Practice uses a real fixed-bank grade/topic selected from the eligible list, with no timer. Use five distinct questions when available; if a topic has fewer, use its available count and award four minutes per question. Cycle the topic deck across sets before repetition; repeated practice is allowed and labeled. Correct all mistakes before awarding the set once, retain first-attempt results, and show the amount beforehand. This is an explicit rehearsal proposal for question-count normalization, not a claim of curriculum mastery or unlimited unique questions.
 

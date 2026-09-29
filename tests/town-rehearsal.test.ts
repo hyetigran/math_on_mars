@@ -102,3 +102,18 @@ test("topic decks exhaust before recycling and short topics have proportional aw
   }
   assert.equal(seen.size, 21);
 });
+
+test("restoring starter power resumes a shortage scenario without losing its history", () => {
+  const town = new TownRehearsal({ food: 0, power: 0 });
+  town.start("greenhouse");
+  town.advance(10);
+  town.unlockSeed();
+  town.assignWorker(true);
+  town.advance(3590);
+  town.restoreStarterPower();
+  town.advance(3600);
+  assert.equal(town.snapshot().food, 6);
+  assert.equal(town.snapshot().emergencyMeals, 2);
+  assert.equal(town.snapshot().now, 7200);
+  assert.equal(town.snapshot().tradeCredits, 50);
+});

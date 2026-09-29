@@ -32,6 +32,7 @@ export type RehearsalBalance = {
 };
 export type Project = "greenhouse" | "house";
 export interface RehearsalState {
+  powerSupply: number;
   constructionCredit: number;
   seedUnlocked: boolean;
   workerAssigned: boolean;
@@ -141,6 +142,7 @@ export class TownRehearsal {
     )
       throw Error("Incompatible stock, housing or harvest capacity");
     this.state = {
+      powerSupply: this.balance.power,
       constructionCredit: 0,
       seedUnlocked: false,
       workerAssigned: false,
@@ -186,13 +188,16 @@ export class TownRehearsal {
     if (assigned && this.balance.adults < 1) throw Error("No available adult");
     this.state.workerAssigned = assigned;
   }
+  restoreStarterPower() {
+    this.state.powerSupply = REHEARSAL_BASELINE.power;
+  }
   private growing() {
     return (
       this.state.greenhouse &&
       this.state.seedUnlocked &&
       this.state.workerAssigned &&
       this.state.heldHarvest === 0 &&
-      this.balance.power >= 2 &&
+      this.state.powerSupply >= 2 &&
       this.balance.water >= this.balance.adults + 2
     );
   }
@@ -216,17 +221,26 @@ export class TownRehearsal {
       throw Error("Project already built or running");
     if (s.jobs.length >= b.constructionSlots)
       throw Error("No free construction slot");
-    const blocks = kind === "greenhouse" ? b.greenhouseBlocks : b.upgradeBlocks;
-    const parts = kind === "greenhouse" ? b.greenhouseParts : b.upgradeParts;
-    if (s.blocks < blocks || s.parts < parts)
+    const recipes = {
+      greenhouse: {
+        blocks: b.greenhouseBlocks,
+        parts: b.greenhouseParts,
+        seconds: b.greenhouseSeconds,
+      },
+      house: {
+        blocks: b.upgradeBlocks,
+        parts: b.upgradeParts,
+        seconds: b.upgradeSeconds,
+      },
+    };
+    const recipe = recipes[kind];
+    if (s.blocks < recipe.blocks || s.parts < recipe.parts)
       throw Error("Not enough materials");
-    s.blocks -= blocks;
-    s.parts -= parts;
-    s.jobs.push({
-      kind,
-      remaining: kind === "greenhouse" ? b.greenhouseSeconds : b.upgradeSeconds,
-    });
+    s.blocks -= recipe.blocks;
+    s.parts -= recipe.parts;
+    s.jobs.push({ kind, remaining: recipe.seconds });
   }
+
   advance(seconds: number) {
     if (!Number.isFinite(seconds) || seconds < 0) throw Error("Invalid time");
     if (seconds > 30 * 86400)
