@@ -139,6 +139,10 @@ try {
     ),
     1,
   );
+  const oldLease = await page.evaluate(
+    async (path) => (await fetch(path + "/management")).json(),
+    townPath,
+  );
   await other.click("[data-sync]");
   await other.waitForFunction(
     () => !document.querySelector("[data-takeover]")?.disabled,
@@ -151,11 +155,26 @@ try {
     await other.$eval("[data-motto]", (e) => e.textContent),
     /Grow together/,
   );
-  await page.click("[data-preference] button");
-  await page.waitForFunction(() =>
-    document
-      .querySelector("[data-management-status]")
-      ?.textContent.includes("Another device"),
+  assert.equal(
+    await page.evaluate(
+      async ({ path, lease }) =>
+        (
+          await fetch(path + "/preference", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              ...lease,
+              requestId: crypto.randomUUID(),
+              motto: "Stale write",
+            }),
+          })
+        ).status,
+      { path: townPath, lease: oldLease },
+    ),
+    409,
+  );
+  await page.waitForFunction(
+    () => document.querySelector("[data-preference] button")?.disabled,
   );
   await other.setOfflineMode(true);
   await other.waitForFunction(
@@ -164,6 +183,51 @@ try {
   await other.setOfflineMode(false);
   await other.waitForFunction(
     () => !document.querySelector("[data-preference] button")?.disabled,
+  );
+  await other.click('[data-plot="garden"] [data-mutation]');
+  await other.waitForFunction(() =>
+    document
+      .querySelector('[data-plot="garden"]')
+      ?.textContent.includes("Cancel and refund"),
+  );
+  let townFrame = await (await other.$("iframe")).contentFrame();
+  await other.$eval("iframe", (e) => e.scrollIntoView({ block: "start" }));
+  await townFrame.click('[data-building="1"]');
+  await townFrame.waitForFunction(() =>
+    document
+      .querySelector("#level-note")
+      ?.textContent.includes("seconds remaining"),
+  );
+  await other.$eval("iframe", (e) => e.scrollIntoView({ block: "start" }));
+  await townFrame.click("#walk");
+  await townFrame.waitForFunction(() =>
+    document
+      .querySelector("#level-note")
+      ?.textContent.includes("Saved level 1"),
+  );
+  await other.waitForFunction(() =>
+    document
+      .querySelector('[data-plot="garden"]')
+      ?.textContent.includes("Open Greenhouse"),
+  );
+  await other.click('[data-plot="market"] [data-mutation]');
+  await other.waitForFunction(() =>
+    document
+      .querySelector('[data-plot="market"]')
+      ?.textContent.includes("Cancel and refund"),
+  );
+  await other.click('[data-plot="market"] [data-mutation]');
+  await other.waitForFunction(() =>
+    document
+      .querySelector('[data-plot="market"]')
+      ?.textContent.includes("Build Greenhouse"),
+  );
+  assert.equal(
+    await other.evaluate(
+      async (path) => (await (await fetch(path)).json()).resources.blocks,
+      townPath,
+    ),
+    60,
   );
   await other.reload();
   await other.waitForSelector("[data-cadet]");

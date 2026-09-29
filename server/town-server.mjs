@@ -1,3 +1,9 @@
+import {
+  initializeTown,
+  reconcileTown,
+  applyTownCommand,
+  TownRuleError,
+} from "./town-model.mjs";
 import { createServer } from "node:http";
 import { DatabaseSync } from "node:sqlite";
 import {
@@ -89,7 +95,15 @@ export function createTownServer({
       )
       .get(id, parent);
     if (!row) fail(404, "Town not found");
-    return JSON.parse(row.state);
+    const state = reconcileTown(
+      initializeTown(JSON.parse(row.state), now()),
+      now(),
+    );
+    db.prepare("UPDATE towns SET state=? WHERE cadet_id=?").run(
+      JSON.stringify(state),
+      id,
+    );
+    return state;
   }
   const server = createServer(async (req, res) => {
     res.setHeader("Content-Type", "application/json");
@@ -233,7 +247,7 @@ export function createTownServer({
         return send(201, { id, name });
       }
       const commandPath = path.match(
-        /^\/api\/towns\/([a-f0-9-]+)\/(management|preference)$/,
+        /^\/api\/towns\/([a-f0-9-]+)\/(management|preference|command)$/,
       );
       if (commandPath) {
         const [, id, action] = commandPath;
@@ -292,9 +306,19 @@ export function createTownServer({
                   409,
                   "Another device manages this town. Refresh to take over.",
                 );
-              const motto = text(input.motto, 1, 80);
-              // Retry identity belongs to the intent, independently of its current lease.
-              const payload = JSON.stringify({ motto });
+              const intent =
+                action === "preference"
+                  ? { motto: text(input.motto, 1, 80) }
+                  : input.command;
+              if (
+                !intent ||
+                typeof intent !== "object" ||
+                Array.isArray(intent)
+              )
+                fail(400, "Invalid command");
+              const payload = JSON.stringify(
+                action === "preference" ? intent : { command: intent },
+              );
               const receipt = db
                 .prepare(
                   "SELECT payload,result FROM commands WHERE town_id=? AND request_id=?",
@@ -305,8 +329,10 @@ export function createTownServer({
                   fail(409, "Request ID already used for another command");
                 result = JSON.parse(receipt.result);
               } else {
-                state.motto = motto;
-                state.revision = (state.revision ?? 0) + 1;
+                if (action === "preference") {
+                  state.motto = intent.motto;
+                  state.revision = (state.revision ?? 0) + 1;
+                } else applyTownCommand(state, intent, now());
                 result = state;
                 db.prepare("UPDATE towns SET state=? WHERE cadet_id=?").run(
                   JSON.stringify(state),
@@ -330,10 +356,11 @@ export function createTownServer({
       }
       const match = path.match(/^\/api\/towns\/([a-f0-9-]+)$/);
       if (match && req.method === "GET")
-        return send(200, ownTown(parent, match[1]));
+        return send(200, { ...ownTown(parent, match[1]), serverNow: now() });
       fail(404, "Not found");
     } catch (error) {
-      if (error instanceof HttpError)
+      if (error instanceof TownRuleError) send(400, { error: error.message });
+      else if (error instanceof HttpError)
         send(error.status, { error: error.message });
       else {
         console.error("Town request failed:", error.message);

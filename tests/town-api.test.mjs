@@ -2,8 +2,8 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { createTownServer } from "../server/town-server.mjs";
 const origin = "http://127.0.0.1:5185";
-async function fixture(database = ":memory:") {
-  const app = createTownServer({ database, origin });
+async function fixture(database = ":memory:", now = Date.now) {
+  const app = createTownServer({ database, origin, now });
   await new Promise((r) => app.server.listen(0, "127.0.0.1", r));
   const url = `http://127.0.0.1:${app.server.address().port}`;
   return {
@@ -57,7 +57,7 @@ test("parent can create a cadet town once and load it from a second login", asyn
       login.cookie,
     );
     assert.equal(town.data.houseLevel, 1);
-    assert.equal(town.data.version, 1);
+    assert.equal(town.data.version, 2);
     const stranger = await f.request("/api/register", {
       username: "parent-two",
       password: "another-test-password",
@@ -182,7 +182,10 @@ test("towns survive service restart in a durable database", async () => {
       undefined,
       login.cookie,
     );
-    assert.deepEqual(after.data, before.data);
+    assert.deepEqual(
+      { ...after.data, serverNow: 0 },
+      { ...before.data, serverNow: 0 },
+    );
     const retry = await f.request(
       path + "/preference",
       preference,
@@ -272,6 +275,56 @@ test("management takeover rejects stale commands and preserves durable retry rec
     assert.equal(
       (await take(stranger.cookie, "device-three", "take-other", 2)).status,
       404,
+    );
+  } finally {
+    await f.close();
+  }
+});
+
+test("construction command retries and reload use authoritative elapsed time", async () => {
+  let clock = 0;
+  const f = await fixture(":memory:", () => clock);
+  try {
+    const parent = await f.request("/api/register", {
+      username: "builder-parent",
+      password: "long-test-password",
+    });
+    const cadet = await f.request(
+      "/api/cadets",
+      { name: "Nova", requestId: "builder-cadet" },
+      parent.cookie,
+    );
+    const path = `/api/towns/${cadet.data.id}`;
+    await f.request(
+      path + "/management",
+      {
+        deviceId: "builder-device",
+        requestId: "builder-takeover",
+        generation: 0,
+      },
+      parent.cookie,
+    );
+    const request = {
+      deviceId: "builder-device",
+      generation: 1,
+      requestId: "builder-command",
+      command: { action: "build", plotId: "garden" },
+    };
+    assert.equal(
+      (await f.request(path + "/command", request, parent.cookie)).status,
+      200,
+    );
+    await f.request(path + "/command", request, parent.cookie);
+    let state = (await f.request(path, undefined, parent.cookie)).data;
+    assert.equal(state.resources.blocks, 60);
+    assert.equal(state.jobs.length, 1);
+    clock = 10000;
+    state = (await f.request(path, undefined, parent.cookie)).data;
+    assert.equal(state.plots.garden.building, "greenhouse");
+    await f.request(path + "/command", request, parent.cookie);
+    assert.equal(
+      (await f.request(path, undefined, parent.cookie)).data.jobs.length,
+      1,
     );
   } finally {
     await f.close();

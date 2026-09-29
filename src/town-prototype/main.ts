@@ -303,6 +303,8 @@ const buildings: {
   },
 ];
 let upgraded = false;
+let connectedSnapshot: any = null;
+const connectedPlots = ["home", "garden", "market", "edge"];
 function buildHouse() {
   const g = buildings[0].group;
   while (g.children.length) {
@@ -638,6 +640,22 @@ function select(i: number) {
     );
   $("upgrade").hidden =
     i !== 0 || new URLSearchParams(location.search).has("town");
+  if (connectedSnapshot) {
+    const plotId = connectedPlots[i],
+      plot = connectedSnapshot.plots[plotId];
+    const job = connectedSnapshot.jobs.find(
+      (j: any) => j.plotId === plotId && j.status === "running",
+    );
+    $("building-name").textContent = plot.building ?? "Ordinary plot";
+    $("building-description").textContent =
+      i === 0
+        ? `${connectedSnapshot.adults} adults · ${connectedSnapshot.houseCapacity} housing capacity`
+        : "Open building controls in the town management panel.";
+    $("level-note").textContent = job
+      ? `Connected town · Building Greenhouse · ${Math.max(0, Math.ceil((job.endsAt - connectedSnapshot.serverNow) / 1000))} seconds remaining`
+      : `Connected town · ${plot.building ? "Saved level " + plot.level : "Empty plot"}`;
+    return;
+  }
   $("level-note").textContent =
     i === 0
       ? `House level ${upgraded ? 2 : 1} · Appearance preview only`
@@ -879,37 +897,86 @@ const connectedCadet = new URLSearchParams(location.search).get("town");
 if (connectedCadet) {
   $("upgrade").hidden = true;
   $("upgrade").onclick = null;
+  neighborhood.visible = false;
+  buildings[1].group.visible = false;
+  scene.remove(buildings[2].group);
+  const gardenModel = buildings[1].group;
+  buildings[2].group = gardenModel.clone();
+  buildings[2].group.position.set(buildings[2].x, 0, buildings[2].z);
+  scene.add(buildings[2].group);
+  const edge = gardenModel.clone();
+  edge.position.set(-17, 0, -10);
+  scene.add(edge);
+  buildings.push({
+    name: "Greenhouse",
+    description: "",
+    group: edge,
+    x: -17,
+    z: -10,
+    rotation: 0,
+  });
+  const frames = buildings.slice(1).map((b) => {
+    const frame = new THREE.Group();
+    frame.position.set(b.x, 0, b.z);
+    scene.add(frame);
+    box(frame, 0, 0.15, 0, 5.4, 0.3, 6, 0xd9ba7d);
+    for (const x of [-2.5, 2.5])
+      for (const z of [-2.8, 2.8])
+        box(frame, x, 1.5, z, 0.16, 3, 0.16, 0xc59e62);
+    return frame;
+  });
   document
     .querySelectorAll<HTMLButtonElement>("[data-building]")
     .forEach((button) => {
-      button.hidden = button.dataset.building !== "0";
+      const index = Number(button.dataset.building);
+      button.textContent = connectedPlots[index];
     });
-  buildings[1].group.visible = false;
-  buildings[2].group.visible = false;
-  neighborhood.visible = false;
-  obstacles.splice(0, obstacles.length, {
-    x: buildings[0].x,
-    z: buildings[0].z,
-    w: 5.4,
-    d: 5.5,
-  });
-  $("building-description").textContent = "Loading your saved House…";
-  $("level-note").textContent = "Connected town · Loading";
-  fetch(`/api/towns/${encodeURIComponent(connectedCadet)}`)
-    .then(async (response) => {
+  const plotButtons = document.querySelector("[data-building]")?.parentElement;
+  const edgeButton = document.createElement("button");
+  edgeButton.dataset.building = "3";
+  edgeButton.textContent = "edge";
+  edgeButton.onclick = () => select(3);
+  plotButtons?.append(edgeButton);
+  let loading = false;
+  async function refreshConnected() {
+    if (loading) return;
+    loading = true;
+    try {
+      const response = await fetch(
+        `/api/towns/${encodeURIComponent(connectedCadet!)}`,
+      );
       const town = await response.json();
       if (!response.ok) throw Error(town.error ?? "Could not load town");
-      upgraded = town.houseLevel > 1;
-      buildHouse();
-      $("building-description").textContent =
-        `${town.adults} adults · ${town.houseCapacity} housing capacity`;
+      connectedSnapshot = town;
+      const nextUpgraded = town.houseLevel > 1;
+      if (nextUpgraded !== upgraded) {
+        upgraded = nextUpgraded;
+        buildHouse();
+      }
+      buildings[0].group.visible = true;
+      obstacles.splice(0, obstacles.length, {
+        x: buildings[0].x,
+        z: buildings[0].z,
+        w: 5.4,
+        d: 5.5,
+      });
+      buildings.slice(1).forEach((b, index) => {
+        const plotId = connectedPlots[index + 1];
+        b.group.visible = town.plots[plotId].building === "greenhouse";
+        frames[index].visible = town.jobs.some(
+          (j: any) => j.plotId === plotId && j.status === "running",
+        );
+        if (b.group.visible || frames[index].visible)
+          obstacles.push({ x: b.x, z: b.z, w: 5.4, d: 6 });
+      });
+      select(selected);
+    } catch (error) {
       $("level-note").textContent =
-        `Saved House level ${town.houseLevel} · Connected town`;
-    })
-    .catch((error) => {
-      $("building-description").textContent = error.message;
-      $("level-note").textContent =
-        "Unable to load · Refresh connection in the parent page";
-      buildings[0].group.visible = false;
-    });
+        "Connection unavailable · Changes disabled until reconnect";
+    } finally {
+      loading = false;
+    }
+  }
+  void refreshConnected();
+  window.setInterval(() => void refreshConnected(), 1000);
 }

@@ -1,3 +1,4 @@
+import { renderConstruction } from "./town-construction";
 type Api = (path: string, data?: unknown) => Promise<any>;
 // Each tab gets a separate identity, including tabs sharing the same login cookie.
 const deviceId = crypto.randomUUID();
@@ -8,7 +9,7 @@ export function mountManagement(root: HTMLElement, townId: string, api: Api) {
   let managed = false;
   let busy = true;
   let connected = false;
-  root.innerHTML = `<h3>Town management</h3><p data-management-status role="status">Refreshing management…</p><p data-motto></p><button data-takeover disabled>Manage here / take over</button><button data-sync>Refresh management</button><form data-preference><label>Town motto<input name="motto" maxlength="80" required></label><button disabled>Save motto</button></form>`;
+  root.innerHTML = `<h3>Town management</h3><p data-management-status role="status">Refreshing management…</p><p data-motto></p><button data-takeover disabled>Manage here / take over</button><button data-sync>Refresh management</button><form data-preference><label>Town motto<input name="motto" maxlength="80" required></label><button disabled>Save motto</button></form><div data-construction></div>`;
   const status = root.querySelector<HTMLElement>("[data-management-status]")!;
   const takeover = root.querySelector<HTMLButtonElement>("[data-takeover]")!;
   const form = root.querySelector<HTMLFormElement>("form")!;
@@ -17,6 +18,9 @@ export function mountManagement(root: HTMLElement, townId: string, api: Api) {
   function controls() {
     takeover.disabled = busy || !connected || managed;
     save.disabled = busy || !connected || !managed;
+    root
+      .querySelectorAll<HTMLButtonElement>("[data-mutation]")
+      .forEach((button) => (button.disabled = save.disabled));
   }
   async function refresh() {
     busy = true;
@@ -33,6 +37,25 @@ export function mountManagement(root: HTMLElement, townId: string, api: Api) {
       connected = navigator.onLine;
       root.querySelector<HTMLElement>("[data-motto]")!.textContent =
         `Town motto: ${state.motto ?? "Not set"}`;
+      if (state.plots)
+        renderConstruction(
+          root.querySelector<HTMLElement>("[data-construction]")!,
+          state,
+          (intent) => {
+            const key = `town-command-${townId}`;
+            let pending;
+            try {
+              pending = JSON.parse(sessionStorage.getItem(key) ?? "null");
+            } catch {}
+            if (
+              !pending ||
+              JSON.stringify(pending.command) !== JSON.stringify(intent)
+            )
+              pending = { command: intent, requestId: crypto.randomUUID() };
+            sessionStorage.setItem(key, JSON.stringify(pending));
+            void command("command", { ...pending, deviceId, generation }, key);
+          },
+        );
       status.textContent = managed
         ? "You manage this town."
         : "Read only. Choose Manage here to take over.";
@@ -44,14 +67,18 @@ export function mountManagement(root: HTMLElement, townId: string, api: Api) {
       controls();
     }
   }
-  async function command(path: string, payload: unknown) {
+  async function command(
+    path: string,
+    payload: unknown,
+    receiptKey = storageKey,
+  ) {
     busy = true;
     controls();
     try {
       await api(`/api/towns/${townId}/${path}`, payload);
       await refresh();
-      if (path === "preference" && connected)
-        sessionStorage.removeItem(storageKey);
+      if (path !== "management" && connected)
+        sessionStorage.removeItem(receiptKey);
     } catch (error) {
       connected = false;
       status.textContent = `${error instanceof Error ? error.message : "Connection lost."} Refresh management before retrying.`;
@@ -95,7 +122,11 @@ export function mountManagement(root: HTMLElement, townId: string, api: Api) {
     signal: events.signal,
   });
   void refresh();
+  const poll = window.setInterval(() => {
+    if (!busy && navigator.onLine) void refresh();
+  }, 2000);
   return () => {
+    clearInterval(poll);
     disposed = true;
     events.abort();
   };
