@@ -28,6 +28,7 @@ export function foodSummary(state) {
   const farms = {};
   for (const [id, farm] of Object.entries(state.farms)) {
     let status;
+    let operating = false;
     if (farm.held) status = "Storage full: harvest held safely";
     else if (!farm.workerId) status = "Paused: assign an adult worker";
     else if (!farm.crop) status = "Paused: select an unlocked crop";
@@ -41,11 +42,12 @@ export function foodSummary(state) {
         status = "Paused: insufficient utilities";
       else {
         status = "Growing";
+        operating = true;
         power -= recipe.power;
         water -= recipe.water;
       }
     }
-    farms[id] = { ...farm, status };
+    farms[id] = { ...farm, status, operating };
   }
   return {
     farms,
@@ -67,7 +69,7 @@ export function advanceFood(state, until) {
   while (remaining > 0) {
     transferHarvests(state);
     const growing = Object.entries(foodSummary(state).farms)
-      .filter(([, f]) => f.status === "Growing")
+      .filter(([, f]) => f.operating)
       .map(([id]) => state.farms[id]);
     const step = Math.min(
       remaining,
