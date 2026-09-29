@@ -1,3 +1,4 @@
+import { renderFood } from "./town-food";
 export function renderConstruction(
   root: HTMLElement,
   state: any,
@@ -32,17 +33,8 @@ export function renderConstruction(
       button.textContent = `Build Greenhouse · ${recipe.cost.blocks} blocks + ${recipe.cost.parts} parts · ${recipe.duration / 1000} seconds`;
       button.onclick = () => send({ action: "build", plotId: id });
       section.append(button);
-    } else if (plot.building === "greenhouse") {
-      const details = document.createElement("details");
-      const summary = document.createElement("summary");
-      summary.textContent = "Open Greenhouse";
-      details.append(summary);
-      const note = document.createElement("p");
-      note.textContent =
-        "Greenhouse complete. Worker and crop controls arrive in the farming slice.";
-      details.append(note);
-      section.append(details);
     }
     root.append(section);
   }
+  if (state.foodSummary) renderFood(root, state, send);
 }

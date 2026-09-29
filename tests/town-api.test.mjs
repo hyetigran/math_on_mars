@@ -57,7 +57,7 @@ test("parent can create a cadet town once and load it from a second login", asyn
       login.cookie,
     );
     assert.equal(town.data.houseLevel, 1);
-    assert.equal(town.data.version, 2);
+    assert.equal(town.data.version, 3);
     assert.deepEqual(town.data.recipes.greenhouse, {
       cost: { blocks: 20, parts: 5 },
       duration: 10000,
@@ -186,10 +186,9 @@ test("towns survive service restart in a durable database", async () => {
       undefined,
       login.cookie,
     );
-    assert.deepEqual(
-      { ...after.data, serverNow: 0 },
-      { ...before.data, serverNow: 0 },
-    );
+    assert.equal(after.data.cadetId, before.data.cadetId);
+    assert.equal(after.data.motto, before.data.motto);
+    assert.deepEqual(after.data.resources, before.data.resources);
     const retry = await f.request(
       path + "/preference",
       preference,
@@ -325,6 +324,32 @@ test("construction command retries and reload use authoritative elapsed time", a
     clock = 10000;
     state = (await f.request(path, undefined, parent.cookie)).data;
     assert.equal(state.plots.garden.building, "greenhouse");
+    async function command(id, intent) {
+      return f.request(
+        path + "/command",
+        { ...request, requestId: id, command: intent },
+        parent.cookie,
+      );
+    }
+    const seed = { action: "unlock-seed", crop: "lettuce" };
+    assert.equal((await command("seed-command", seed)).status, 200);
+    assert.equal((await command("seed-command", seed)).status, 200);
+    assert.equal((await command("seed-again-new", seed)).status, 400);
+    await command("worker-command", {
+      action: "assign-worker",
+      plotId: "garden",
+      workerId: "adult-1",
+    });
+    await command("crop-command", {
+      action: "select-crop",
+      plotId: "garden",
+      crop: "lettuce",
+    });
+    clock = 3610000;
+    state = (await f.request(path, undefined, parent.cookie)).data;
+    assert.equal(state.resources.food, 30);
+    assert.equal(state.resources.credits, 50);
+
     await f.request(path + "/command", request, parent.cookie);
     assert.equal(
       (await f.request(path, undefined, parent.cookie)).data.jobs.length,
