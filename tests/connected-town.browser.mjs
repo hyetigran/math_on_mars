@@ -24,8 +24,37 @@ try {
   const first = await browser.createBrowserContext(),
     second = await browser.createBrowserContext();
   const page = await signIn(first, "register");
+  let failRefresh = true;
+  await page.setRequestInterception(true);
+  page.on("request", (request) => {
+    if (
+      failRefresh &&
+      request.url().endsWith("/api/cadets") &&
+      request.method() === "GET"
+    ) {
+      failRefresh = false;
+      void request.respond({
+        status: 503,
+        contentType: "application/json",
+        body: JSON.stringify({ error: "Refresh interrupted" }),
+      });
+    } else void request.continue();
+  });
   await page.type("#create input", "Nova");
   await page.click("#create button");
+  await page.waitForFunction(
+    () =>
+      document.querySelector('[role="status"]')?.textContent ===
+      "Refresh interrupted",
+  );
+  await page.type("#create input", "Nova");
+  await page.click("#create button");
+  await page.waitForSelector("[data-cadet]");
+  assert.equal(
+    await page.$$eval("[data-cadet]", (e) => e.length),
+    1,
+    "Retry after failed refresh must not duplicate towns",
+  );
   await page.waitForSelector("iframe");
   const frame = await (await page.$("iframe")).contentFrame();
   await frame.waitForFunction(
@@ -38,6 +67,9 @@ try {
         ?.textContent.includes("2 adults"),
   );
   assert.equal(await frame.$eval("#upgrade", (e) => e.hidden), true);
+  await page.$eval("iframe", (element) =>
+    element.scrollIntoView({ block: "start" }),
+  );
   await frame.click("#walk");
   assert.equal(
     await frame.$eval("#walk", (e) => e.getAttribute("aria-pressed")),

@@ -81,8 +81,8 @@ function render() {
       const payload = pending;
       void act(async () => {
         active = await api("/api/cadets", payload);
-        sessionStorage.removeItem("town-pending-cadet");
         await refresh();
+        sessionStorage.removeItem("town-pending-cadet");
       });
     };
   root.querySelectorAll<HTMLButtonElement>("[data-cadet]").forEach(

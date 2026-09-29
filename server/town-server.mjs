@@ -64,12 +64,15 @@ export function createTownServer({
   function cookie(token, maxAge = 86400) {
     return `mars_parent=${token}; HttpOnly; SameSite=Strict; Path=/; Max-Age=${maxAge}${origin.startsWith("https:") ? "; Secure" : ""}`;
   }
-  function session(req) {
-    const token = (req.headers.cookie ?? "")
+  function sessionToken(req) {
+    return (req.headers.cookie ?? "")
       .split(";")
       .map((c) => c.trim())
       .find((c) => c.startsWith("mars_parent="))
       ?.slice(12);
+  }
+  function session(req) {
+    const token = sessionToken(req);
     if (!token) return null;
     return (
       db
@@ -170,11 +173,7 @@ export function createTownServer({
       const parent = session(req);
       if (!parent) fail(401, "Sign in to open your town");
       if (path === "/api/logout" && req.method === "POST") {
-        const token = (req.headers.cookie ?? "")
-          .split(";")
-          .map((c) => c.trim())
-          .find((c) => c.startsWith("mars_parent="))
-          ?.slice(12);
+        const token = sessionToken(req);
         if (token)
           db.prepare("DELETE FROM sessions WHERE token=?").run(digest(token));
         res.setHeader("Set-Cookie", cookie("", 0));
