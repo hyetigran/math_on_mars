@@ -98,6 +98,24 @@ export function applyTownCommand(state, input, now) {
       cost,
       status: "running",
     });
+  } else if (input.action === "spend-credit") {
+    requireRule(
+      input.expectedRevision === state.revision,
+      "Town changed. Refresh the credit preview.",
+    );
+    const job = state.jobs.find(
+      (j) => j.id === input.jobId && j.status === "running",
+    );
+    requireRule(job, "Choose a running construction or upgrade job");
+    const used = Math.min(
+      Math.max(0, job.endsAt - now),
+      state.constructionCredit,
+    );
+    requireRule(used > 0, "No construction credit can be applied");
+    state.constructionCredit -= used;
+    job.endsAt -= used;
+    job.creditApplied = (job.creditApplied ?? 0) + used;
+    reconcileTown(state, now);
   } else if (input.action === "cancel") {
     const job = state.jobs.find(
       (j) => j.id === input.jobId && j.status === "running",

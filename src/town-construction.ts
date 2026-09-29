@@ -25,6 +25,23 @@ export function renderConstruction(
       const note = document.createElement("p");
       note.textContent = `${Math.ceil(remaining / 1000)} seconds remaining. Cancel returns ${job.cost.blocks} blocks and ${job.cost.parts} parts; all progress and applied construction credit are lost.`;
       section.append(note);
+      const applicable = Math.min(remaining, state.constructionCredit);
+      const preview = document.createElement("p");
+      preview.textContent = `Bank: ${state.constructionCredit / 60000} minutes. Apply ${applicable / 1000} seconds; ${Math.ceil((remaining - applicable) / 1000)} seconds remain. Completion: ${new Date(job.endsAt - applicable).toLocaleString()}. Excess credit stays banked.`;
+      section.append(preview);
+      if (applicable > 0) {
+        const spend = document.createElement("button");
+        spend.dataset.mutation = "true";
+        spend.dataset.spendCredit = job.id;
+        spend.textContent = "Apply previewed construction credit";
+        spend.onclick = () =>
+          send({
+            action: "spend-credit",
+            jobId: job.id,
+            expectedRevision: state.revision,
+          });
+        section.append(spend);
+      }
       button.textContent = "Cancel and refund materials";
       button.onclick = () => send({ action: "cancel", jobId: job.id });
       section.append(button);

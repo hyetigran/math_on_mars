@@ -156,6 +156,54 @@ try {
     Object.values(state.practice.attempt.firstAttempts).filter(Boolean).length,
     state.practice.attempt.questionIds.length - 1,
   );
+  await page.waitForFunction(
+    () =>
+      document.querySelector("[data-plot=garden] [data-mutation]")?.disabled ===
+      false,
+  );
+  await page.click("[data-plot=garden] [data-mutation]");
+  await page.waitForSelector("[data-spend-credit]");
+  assert.match(
+    await page.$eval("[data-plot=garden]", (e) => e.textContent),
+    /Apply 10 seconds; 0 seconds remain/,
+  );
+  await page.evaluate(() => {
+    const original = window.fetch;
+    window.fetch = async (...args) => {
+      const response = await original(...args);
+      if (
+        args[1]?.body &&
+        JSON.parse(args[1].body).command?.action === "spend-credit"
+      ) {
+        window.fetch = original;
+        throw Error("Credit response lost");
+      }
+      return response;
+    };
+  });
+  await page.click("[data-spend-credit]");
+  await page.waitForFunction(() =>
+    document
+      .querySelector("[data-management-status]")
+      ?.textContent.includes("Credit response lost"),
+  );
+  await page.reload();
+  await page.waitForSelector("[data-cadet]");
+  await page.click("[data-cadet]");
+  await page.waitForSelector("[data-farm=garden]");
+  state = await page.evaluate(async (path) => (await fetch(path)).json(), path);
+  assert.equal(state.constructionCredit, practiceTopics[0].reward - 10000);
+  assert.equal(state.plots.garden.building, "greenhouse");
+  frame = await (await page.$("iframe")).contentFrame();
+  await page.$eval("iframe", (e) => e.scrollIntoView({ block: "start" }));
+  await frame.click('[data-building="1"]');
+  await frame.waitForFunction(() =>
+    document
+      .querySelector("#level-note")
+      ?.textContent.includes("Saved level 1"),
+  );
+  await frame.click("#walk");
+  assert.equal(await frame.evaluate(() => window.townPrototype.mode), "walk");
   assert.deepEqual(errors, []);
   console.log(
     "House upgrade and corrected town practice survive reload and complete with authoritative state.",

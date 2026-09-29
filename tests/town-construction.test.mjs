@@ -97,3 +97,87 @@ test("upgrade shares slots and cancellation preserves the occupied original Hous
   assert.equal(s.adults, 2);
   assert.equal(s.plots.home.building, "house");
 });
+
+test("credit shortens a chosen job, retains surplus, and cannot be refunded by cancellation", () => {
+  const s = starter();
+  applyTownCommand(s, { action: "upgrade-house" }, 0);
+  s.constructionCredit = 1200000;
+  const id = s.jobs[0].id;
+  applyTownCommand(
+    s,
+    { action: "spend-credit", jobId: id, expectedRevision: s.revision },
+    0,
+  );
+  assert.equal(s.jobs[0].endsAt, 2400000);
+  assert.equal(s.constructionCredit, 0);
+  assert.equal(s.houseLevel, 1);
+  applyTownCommand(s, { action: "cancel", jobId: id }, 1);
+  assert.equal(s.constructionCredit, 0);
+  assert.equal(s.resources.blocks, 80);
+  applyTownCommand(s, { action: "build", plotId: "garden" }, 1);
+  s.constructionCredit = 1200000;
+  applyTownCommand(
+    s,
+    {
+      action: "spend-credit",
+      jobId: s.jobs[1].id,
+      expectedRevision: s.revision,
+    },
+    1,
+  );
+  assert.equal(s.constructionCredit, 1190000);
+  assert.equal(s.plots.garden.building, "greenhouse");
+  assert.throws(
+    () =>
+      applyTownCommand(
+        s,
+        {
+          action: "spend-credit",
+          jobId: s.jobs[1].id,
+          expectedRevision: s.revision,
+        },
+        1,
+      ),
+    /running/,
+  );
+});
+test("stale revisions and simultaneous natural completion do not spend credit", () => {
+  const s = starter();
+  applyTownCommand(s, { action: "build", plotId: "garden" }, 0);
+  s.constructionCredit = 20000;
+  const id = s.jobs[0].id,
+    revision = s.revision;
+  assert.throws(
+    () =>
+      applyTownCommand(
+        s,
+        { action: "spend-credit", jobId: id, expectedRevision: revision - 1 },
+        0,
+      ),
+    /changed/,
+  );
+  reconcileTown(s, 10000);
+  assert.throws(
+    () =>
+      applyTownCommand(
+        s,
+        { action: "spend-credit", jobId: id, expectedRevision: revision },
+        10000,
+      ),
+    /changed/,
+  );
+  assert.equal(s.constructionCredit, 20000);
+  assert.throws(
+    () =>
+      applyTownCommand(
+        s,
+        {
+          action: "spend-credit",
+          jobId: "missing",
+          expectedRevision: s.revision,
+        },
+        10000,
+      ),
+    /running/,
+  );
+});
