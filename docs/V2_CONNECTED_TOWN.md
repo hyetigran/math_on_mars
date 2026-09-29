@@ -25,7 +25,7 @@ Cancellation discloses its material refund and loss of progress before the actio
 
 Version 3 adds individually assigned adult workers and farming state. Unlock lettuce once for 10 credits, assign an available adult to a completed Greenhouse, then select lettuce. Its recipe produces four edible portions every 30 growing minutes and replants without another seed payment. Workers cannot occupy multiple Greenhouses. Removing a worker or losing utility capacity pauses growth without discarding progress; starter utility restoration is available during shortages.
 
-Meals consume one portion per adult each hour, with residents' water and oxygen needs reserved before crop production. The view separates housing occupancy from available/assigned adults and displays the one-day food reserve. A full store holds the complete harvest outside spendable inventory until the whole batch fits. Emergency habitat meals cover unmet consumption directly and never enter storage; residents do not die or leave. Server event reconciliation preserves meal/crop progress across reloads. The explicit absence allowance and return summary remain #48.
+Meals consume one portion per adult each hour, with residents' water and oxygen needs reserved before crop production. The view separates housing occupancy from available/assigned adults and displays the one-day food reserve. A full store holds the complete harvest outside spendable inventory until the whole batch fits. Emergency habitat meals cover unmet consumption directly and never enter storage; residents do not die or leave. Server event reconciliation preserves meal/crop progress across reloads. The return policy below caps absent simulation and summarizes its results.
 
 
 ## Occupied House upgrade
@@ -41,3 +41,11 @@ The cadet sees the reward before starting, answers without a timer, and corrects
 ## Spend construction credit
 
 Each running build or upgrade previews the available bank, applicable seconds, remaining duration and resulting completion time. Applying credit spends at most the authoritative remaining duration and keeps the surplus. The command validates the management lease and preview revision, commits the bank deduction and timer change together, and reconciles immediate completion once. Replayed receipts cannot charge again, including after handoff. Cancellation refunds materials only; applied credit stays spent.
+
+## Returning after absence
+
+Version 6 reconciles food and construction events chronologically. Production and consumption share a 48-hour allowance, then both freeze; running construction still finishes over the full elapsed absence. Held harvests, meal timing, worker assignments and utility limits survive the cutoff. Opening the connected town reconciles first and shows finished projects, harvests, stored-food meals, emergency meals and production pauses. It then renews the allowance. **Back to cadets**, hiding the tab and leaving the page end that visit; battle-only or cadet-list reads do not renew it.
+
+Visible connected visits heartbeat every 15 seconds. A normal departure sends a keepalive leave request; if a tab crashes or loses connectivity, the last successful town contact anchors its allowance. Visit identities are session-bound, repeated opens return the original summary, and stale leave messages cannot renew an old allowance. The window is town-wide across browsers. Expired parent sessions require sign-in again on return.
+
+Validation uses injected authoritative clocks, including zero, short and greater-than-48-hour absences, construction crossing the cutoff, utility changes at completion, and repeated/two-device reads. `node tests/town-loop.browser.mjs` starts an isolated local Vite/API fixture and runs the construct → staff → harvest → upgrade → practice/correct → accelerate → leave/return sequence in two headless Chrome browser contexts, including a 390px viewport. This is browser-session coverage on one computer; physical mobile-device testing and public deployment are not claimed. The development API remains loopback-only.

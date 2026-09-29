@@ -78,6 +78,7 @@ export function advanceFood(state, until) {
     );
     remaining -= step;
     state.lastSimulatedAt += step;
+    state.simulatedMs += step;
     state.mealRemaining -= step;
     for (const farm of growing) farm.remaining -= step;
     if (state.mealRemaining === 0) {

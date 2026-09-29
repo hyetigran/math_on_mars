@@ -1,3 +1,4 @@
+import { initializeVisits } from "./town-visits.mjs";
 import { initializePractice, applyPracticeCommand } from "./town-practice.mjs";
 import { initializeFood, advanceFood, applyFoodCommand } from "./town-food.mjs";
 import { TownRuleError, requireRule } from "./town-rules.mjs";
@@ -37,13 +38,15 @@ export function initializeTown(state, now) {
       state.houseLevel > 1 ? constructionRecipes.house.powerDemand : 0;
   }
   initializePractice(state);
+  initializeVisits(state);
   return state;
 }
 export function reconcileTown(state, now) {
+  const productionEnd = Math.min(now, state.productionUntil);
   for (const job of state.jobs
     .filter((j) => j.status === "running" && j.endsAt <= now)
     .sort((a, b) => a.endsAt - b.endsAt)) {
-    advanceFood(state, job.endsAt);
+    advanceFood(state, Math.min(job.endsAt, productionEnd));
     job.status = "completed";
     state.plots[job.plotId] = { building: job.building, level: job.level };
     if (job.building === "house") {
@@ -54,7 +57,8 @@ export function reconcileTown(state, now) {
     initializeFood(state, job.endsAt);
     state.revision++;
   }
-  advanceFood(state, now);
+  advanceFood(state, productionEnd);
+  state.lastSimulatedAt = Math.max(state.lastSimulatedAt, now);
   return state;
 }
 export function applyTownCommand(state, input, now) {

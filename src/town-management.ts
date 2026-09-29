@@ -1,3 +1,4 @@
+import { mountVisit } from "./town-visit";
 import { renderPractice } from "./town-practice";
 import { renderConstruction } from "./town-construction";
 type Api = (path: string, data?: unknown) => Promise<any>;
@@ -10,7 +11,7 @@ export function mountManagement(root: HTMLElement, townId: string, api: Api) {
   let managed = false;
   let busy = true;
   let connected = false;
-  root.innerHTML = `<h3>Town management</h3><p data-management-status role="status">Refreshing management…</p><p data-motto></p><button data-takeover disabled>Manage here / take over</button><button data-sync>Refresh management</button><form data-preference><label>Town motto<input name="motto" maxlength="80" required></label><button disabled>Save motto</button></form><div data-construction></div><section data-practice></section>`;
+  root.innerHTML = `<p data-return-summary></p><h3>Town management</h3><p data-management-status role="status">Refreshing management…</p><p data-motto></p><button data-takeover disabled>Manage here / take over</button><button data-sync>Refresh management</button><form data-preference><label>Town motto<input name="motto" maxlength="80" required></label><button disabled>Save motto</button></form><div data-construction></div><section data-practice></section>`;
   const status = root.querySelector<HTMLElement>("[data-management-status]")!;
   const takeover = root.querySelector<HTMLButtonElement>("[data-takeover]")!;
   const form = root.querySelector<HTMLFormElement>("form")!;
@@ -142,12 +143,19 @@ export function mountManagement(root: HTMLElement, townId: string, api: Api) {
   window.addEventListener("online", () => void refresh(), {
     signal: events.signal,
   });
+  const unmountVisit = mountVisit(
+    root.querySelector<HTMLElement>("[data-return-summary]")!,
+    townId,
+    api,
+    refresh,
+  );
   void refresh();
   const poll = window.setInterval(() => {
     if (!busy && navigator.onLine) void refresh();
   }, 2000);
   return () => {
     clearInterval(poll);
+    unmountVisit();
     disposed = true;
     events.abort();
   };

@@ -251,3 +251,5 @@ Connected version 4 supports occupied House upgrades using shared construction s
 Connected version 5 adds parent-password-protected topic eligibility and persisted untimed bank practice. Up to five distinct questions per set earn four minutes each after all corrections, retaining first-attempt accuracy. Topic cursors label repeats; completion credits once across retries/handoff. Time credit has no expiry or daily/storage cap. Shared numeric-answer logic and attribution preserve battle behavior (#46).
 
 Running construction/upgrades support previewed credit spending, bounded by server remaining time. Stale revisions/leases are rejected; excess stays banked, immediate completion is once-only, and cancellation never refunds applied credit (#47).
+
+Connected version 6 applies one town-wide 48-hour absence allowance to both food production and consumption, while construction can finish across the full absence. Visible town open/heartbeat/leave events renew the allowance; dashboard/battle reads do not. Returns show persisted event deltas and pause/recovery information; repeated visits/handoffs do not replay intervals (#48).

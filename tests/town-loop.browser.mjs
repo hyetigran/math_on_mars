@@ -43,54 +43,54 @@ try {
   );
   await page.click("[data-takeover]");
   await page.waitForFunction(
-    () => document.querySelector("[data-upgrade-house]")?.disabled === false,
+    () =>
+      document.querySelector("[data-plot=garden] [data-mutation]")?.disabled ===
+      false,
   );
-  await page.click("[data-upgrade-house]");
+  await page.click("[data-plot=garden] [data-mutation]");
   await page.waitForFunction(() =>
     document
-      .querySelector("[data-plot=home]")
+      .querySelector("[data-plot=garden]")
       ?.textContent.includes("Cancel and refund"),
   );
   const path = await page.$eval(
     "iframe",
     (e) => "/api/towns/" + new URL(e.src).searchParams.get("town"),
   );
-  await page.reload();
-  await page.waitForSelector("[data-cadet]");
-  await page.click("[data-cadet]");
-  await page.waitForSelector("iframe");
-  let frame = await (await page.$("iframe")).contentFrame();
-  await frame.waitForFunction(() =>
-    document
-      .querySelector("#level-note")
-      ?.textContent.includes("Upgrading House"),
+  clock = 10000;
+  await page.waitForSelector("[data-farm=garden]");
+  await page.click("[data-unlock-seed]");
+  await page.waitForFunction(
+    () => !document.querySelector("[data-unlock-seed]"),
   );
-  clock = 3599999;
+  await page.click("[data-farm=garden] button");
+  await page.waitForFunction(() =>
+    document
+      .querySelector("[data-farm=garden]")
+      ?.textContent.includes("Remove adult-1"),
+  );
+  await page.click("[data-farm=garden] button:last-child");
+  await page.waitForFunction(() =>
+    document
+      .querySelector("[data-farm=garden]")
+      ?.textContent.includes("Growing."),
+  );
+  clock = 1810000;
   let state = await page.evaluate(
     async (path) => (await fetch(path)).json(),
     path,
   );
-  assert.equal(state.houseLevel, 1);
-  assert.equal(state.houseCapacity, 2);
-  assert.equal(state.adults, 2);
-  clock = 3600000;
-  await frame.waitForFunction(() =>
+  assert.equal(state.foodTotals.harvested, 4);
+  assert.equal(state.resources.food, 28);
+  await page.click("[data-upgrade-house]");
+  await page.waitForFunction(() =>
     document
-      .querySelector("#level-note")
-      ?.textContent.includes("Saved level 2"),
+      .querySelector("[data-plot=home]")
+      ?.textContent.includes("Cancel and refund"),
   );
-  assert.equal(await frame.evaluate(() => window.townPrototype.houseLevel), 2);
-  await page.$eval("iframe", (e) => e.scrollIntoView({ block: "start" }));
-  await frame.click("#walk");
-  assert.equal(await frame.evaluate(() => window.townPrototype.mode), "walk");
-  assert.match(
-    await frame.$eval("#building-description", (e) => e.textContent),
-    /2 adults · 4 housing capacity/,
-  );
-  state = await page.evaluate(async (path) => (await fetch(path)).json(), path);
-  assert.equal(state.housePowerDemand, 1);
-  assert.equal(state.resources.blocks, 40);
-  assert.equal(state.jobs.filter((j) => j.status === "completed").length, 1);
+  await page.reload();
+  await page.waitForSelector("[data-cadet]");
+  await page.click("[data-cadet]");
   await page.waitForFunction(
     () => document.querySelector("[data-takeover]")?.disabled === false,
   );
@@ -156,16 +156,12 @@ try {
     Object.values(state.practice.attempt.firstAttempts).filter(Boolean).length,
     state.practice.attempt.questionIds.length - 1,
   );
-  await page.waitForFunction(
-    () =>
-      document.querySelector("[data-plot=garden] [data-mutation]")?.disabled ===
-      false,
-  );
-  await page.click("[data-plot=garden] [data-mutation]");
-  await page.waitForSelector("[data-spend-credit]");
+  await page.waitForSelector("[data-plot=home] [data-spend-credit]");
   assert.match(
-    await page.$eval("[data-plot=garden]", (e) => e.textContent),
-    /Apply 10 seconds; 0 seconds remain/,
+    await page.$eval("[data-plot=home]", (e) => e.textContent),
+    new RegExp(
+      `Apply ${practiceTopics[0].reward / 1000} seconds; ${(3600000 - practiceTopics[0].reward) / 1000} seconds remain`,
+    ),
   );
   await page.evaluate(() => {
     const original = window.fetch;
@@ -192,21 +188,87 @@ try {
   await page.click("[data-cadet]");
   await page.waitForSelector("[data-farm=garden]");
   state = await page.evaluate(async (path) => (await fetch(path)).json(), path);
-  assert.equal(state.constructionCredit, practiceTopics[0].reward - 10000);
-  assert.equal(state.plots.garden.building, "greenhouse");
-  frame = await (await page.$("iframe")).contentFrame();
-  await page.$eval("iframe", (e) => e.scrollIntoView({ block: "start" }));
-  await frame.click('[data-building="1"]');
+  assert.equal(state.constructionCredit, 0);
+  assert.equal(state.houseLevel, 1);
+  assert.equal(
+    state.jobs.find((j) => j.building === "house").endsAt,
+    5410000 - practiceTopics[0].reward,
+  );
+  await page.waitForFunction(() =>
+    document
+      .querySelector("[data-return-summary]")
+      ?.textContent.includes("Since your last town visit"),
+  );
+  await Promise.all([
+    page.waitForResponse(
+      (r) =>
+        r.url().endsWith("/visit") && r.request().postData()?.includes("leave"),
+    ),
+    page.click("#close-town"),
+  ]);
+  clock += 72 * 3600000;
+  await page.reload();
+  await page.waitForFunction(
+    () => document.querySelector("#auth button")?.disabled === false,
+  );
+  await page.type("[name=username]", "upgrade-parent");
+  await page.type("[name=password]", "long-test-password");
+  await page.click("[value=login]");
+  await page.waitForSelector("[data-cadet]");
+  state = await page.evaluate(async (path) => (await fetch(path)).json(), path);
+  assert.equal(state.foodTotals.meals + state.foodTotals.emergencyMeals, 96);
+  const beforeReturn = JSON.stringify(state.foodTotals);
+  await page.click("[data-cadet]");
+  await page.waitForFunction(() =>
+    document
+      .querySelector("[data-return-summary]")
+      ?.textContent.includes("paused after 48 hours"),
+  );
+  assert.match(
+    await page.$eval("[data-return-summary]", (e) => e.textContent),
+    /1 projects finished/,
+  );
+  let frame = await (await page.$("iframe")).contentFrame();
   await frame.waitForFunction(() =>
     document
       .querySelector("#level-note")
-      ?.textContent.includes("Saved level 1"),
+      ?.textContent.includes("Saved level 2"),
   );
+  await page.$eval("iframe", (e) => e.scrollIntoView({ block: "start" }));
   await frame.click("#walk");
-  assert.equal(await frame.evaluate(() => window.townPrototype.mode), "walk");
+  assert.match(
+    await frame.$eval("#building-description", (e) => e.textContent),
+    /2 adults · 4 housing capacity/,
+  );
+  const second = await browser.createBrowserContext(),
+    other = await second.newPage();
+  await other.goto(origin + "/connected-town.html");
+  await other.waitForFunction(
+    () => document.querySelector("#auth button")?.disabled === false,
+  );
+  await other.type("[name=username]", "upgrade-parent");
+  await other.type("[name=password]", "long-test-password");
+  await other.click("[value=login]");
+  await other.waitForSelector("[data-cadet]");
+  await other.click("[data-cadet]");
+  await other.waitForSelector("[data-farm=garden]");
+  state = await other.evaluate(
+    async (path) => (await fetch(path)).json(),
+    path,
+  );
+  assert.equal(JSON.stringify(state.foodTotals), beforeReturn);
+  assert.equal(state.adults, 2);
+  assert.ok(state.resources.food <= 72);
+  await other.setViewport({ width: 390, height: 844 });
+  assert.equal(
+    await other.evaluate(
+      () => document.documentElement.scrollWidth > innerWidth,
+    ),
+    false,
+  );
   assert.deepEqual(errors, []);
   console.log(
-    "House upgrade and corrected town practice survive reload and complete with authoritative state.",
+    "Full construct, staff, harvest, upgrade, practice, accelerate and 72-hour return loop passed in two Chrome sessions.",
   );
 } finally {
   await browser?.close();
