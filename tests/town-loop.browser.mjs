@@ -1,3 +1,4 @@
+import { practiceBank, practiceTopics } from "../server/town-practice.mjs";
 import puppeteer from "puppeteer-core";
 import assert from "node:assert/strict";
 import { createServer as createViteServer } from "vite";
@@ -90,9 +91,74 @@ try {
   assert.equal(state.housePowerDemand, 1);
   assert.equal(state.resources.blocks, 40);
   assert.equal(state.jobs.filter((j) => j.status === "completed").length, 1);
+  await page.waitForFunction(
+    () => document.querySelector("[data-takeover]")?.disabled === false,
+  );
+  await page.click("[data-takeover]");
+  await page.waitForFunction(
+    () =>
+      document.querySelector("[data-eligibility] button")?.disabled === false,
+  );
+  await page.click("[data-practice] summary");
+  await page.select("[name=topics]", practiceTopics[0].id);
+  await page.type("[data-eligibility] [name=password]", "long-test-password");
+  await page.click("[data-eligibility] button");
+  await page.waitForSelector("[data-begin-practice]");
+  assert.match(
+    await page.$eval("[data-begin-practice]", (e) => e.textContent),
+    new RegExp(`${practiceTopics[0].reward / 60000} minutes credit`),
+  );
+  assert.equal(
+    await page.evaluate(() =>
+      JSON.stringify(sessionStorage).includes("long-test-password"),
+    ),
+    false,
+  );
+  await page.click("[data-begin-practice]");
+  await page.waitForSelector("[data-answer-practice]");
+  await page.type("[name=answer]", "999999");
+  await page.click("[data-answer-practice] button");
+  await page.waitForFunction(() =>
+    document
+      .querySelector("[data-practice]")
+      ?.textContent.includes("Try again."),
+  );
+  await page.reload();
+  await page.waitForSelector("[data-cadet]");
+  await page.click("[data-cadet]");
+  await page.waitForFunction(
+    () => document.querySelector("[data-takeover]")?.disabled === false,
+  );
+  await page.click("[data-takeover]");
+  for (let i = 0; i < Math.min(5, practiceTopics[0].count); i++) {
+    await page.waitForFunction(
+      () =>
+        document.querySelector("[data-answer-practice] button")?.disabled ===
+        false,
+    );
+    const id = await page.$eval(
+      "[data-question-id]",
+      (e) => e.dataset.questionId,
+    );
+    const q = practiceBank.find((q) => q.id === id);
+    await page.type("[name=answer]", q.answer.join("/"));
+    await page.click("[data-answer-practice] button");
+    await page.waitForFunction(
+      (id) =>
+        document.querySelector("[data-question-id]")?.dataset.questionId !== id,
+      {},
+      id,
+    );
+  }
+  state = await page.evaluate(async (path) => (await fetch(path)).json(), path);
+  assert.equal(state.constructionCredit, practiceTopics[0].reward);
+  assert.equal(
+    Object.values(state.practice.attempt.firstAttempts).filter(Boolean).length,
+    state.practice.attempt.questionIds.length - 1,
+  );
   assert.deepEqual(errors, []);
   console.log(
-    "House upgrade survives reload and completes in both views at the server boundary.",
+    "House upgrade and corrected town practice survive reload and complete with authoritative state.",
   );
 } finally {
   await browser?.close();

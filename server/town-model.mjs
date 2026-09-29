@@ -1,3 +1,4 @@
+import { initializePractice, applyPracticeCommand } from "./town-practice.mjs";
 import { initializeFood, advanceFood, applyFoodCommand } from "./town-food.mjs";
 import { TownRuleError, requireRule } from "./town-rules.mjs";
 export { TownRuleError } from "./town-rules.mjs";
@@ -35,6 +36,7 @@ export function initializeTown(state, now) {
     state.housePowerDemand =
       state.houseLevel > 1 ? constructionRecipes.house.powerDemand : 0;
   }
+  initializePractice(state);
   return state;
 }
 export function reconcileTown(state, now) {
@@ -104,7 +106,10 @@ export function applyTownCommand(state, input, now) {
     job.status = "cancelled";
     state.resources.blocks += job.cost.blocks;
     state.resources.parts += job.cost.parts;
-  } else if (!applyFoodCommand(state, input))
+  } else if (
+    !applyFoodCommand(state, input) &&
+    !applyPracticeCommand(state, input)
+  )
     throw new TownRuleError("Unknown town command");
   state.revision++;
   return state;

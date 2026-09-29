@@ -31,3 +31,9 @@ Meals consume one portion per adult each hour, with residents' water and oxygen 
 ## Occupied House upgrade
 
 Version 4 supports a level-2 House upgrade: 40 blocks, 10 parts and 60 minutes, using one of the same two construction slots. Level, appearance and capacity remain unchanged until server completion; then capacity becomes four with the same two residents and one additional unit of House power demand. The provisional utility increment is explicit in the server recipe. Cancellation returns materials and leaves the original occupied House intact. The existing second-level model appears in both views only on completion.
+
+## Untimed town practice
+
+Version 5 adds parent-selected eligible grade/topics from the existing attributed IM Kindergarten–Grade 5 bank. Changing eligibility requires the parent password again; passwords are excluded from durable command receipts and browser retry storage. Eligibility gates new sets; an already-started set retains its questions and reward if settings later change.
+
+The cadet sees the reward before starting, answers without a timer, and corrects every mistake. First-attempt accuracy is retained, but corrections never reduce credit. Each set uses up to five distinct questions and earns four minutes per question; topic cursors exhaust the bank before cycling, and repeat sets are labelled. The bank is finite and is not a mastery assessment. Attempts, corrections and completion receipts persist; time credit can accumulate before construction and has no expiry, storage limit or daily cap. Battle quizzes are separate. Parent-assigned homework remains a later slice.
