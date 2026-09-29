@@ -149,6 +149,23 @@ test("towns survive service restart in a durable database", async () => {
       { name: "Nova", requestId: "durable-cadet-request" },
       parent.cookie,
     );
+    const path = `/api/towns/${cadet.data.id}`;
+    await f.request(
+      path + "/management",
+      {
+        deviceId: "durable-device",
+        generation: 0,
+        requestId: "durable-takeover",
+      },
+      parent.cookie,
+    );
+    const preference = {
+      deviceId: "durable-device",
+      generation: 1,
+      requestId: "durable-preference",
+      motto: "Home on Mars",
+    };
+    await f.request(path + "/preference", preference, parent.cookie);
     const before = await f.request(
       `/api/towns/${cadet.data.id}`,
       undefined,
@@ -166,8 +183,97 @@ test("towns survive service restart in a durable database", async () => {
       login.cookie,
     );
     assert.deepEqual(after.data, before.data);
+    const retry = await f.request(
+      path + "/preference",
+      preference,
+      parent.cookie,
+    );
+    assert.equal(retry.status, 200);
+    assert.equal(retry.data.revision, 1);
   } finally {
     await f.close();
     await rm(directory, { recursive: true, force: true });
+  }
+});
+
+test("management takeover rejects stale commands and preserves durable retry receipts", async () => {
+  const f = await fixture();
+  try {
+    const account = {
+      username: "handoff-parent",
+      password: "long-test-password",
+    };
+    const one = await f.request("/api/register", account);
+    const two = await f.request("/api/login", account);
+    const cadet = await f.request(
+      "/api/cadets",
+      { name: "Nova", requestId: "handoff-cadet" },
+      one.cookie,
+    );
+    const path = `/api/towns/${cadet.data.id}`;
+    const take = (cookie, deviceId, requestId, generation) =>
+      f.request(
+        path + "/management",
+        { deviceId, requestId, generation },
+        cookie,
+      );
+    const first = await take(one.cookie, "device-one", "take-first", 0);
+    assert.equal(first.status, 200);
+    assert.equal(first.data.generation, 1);
+    const command = {
+      deviceId: "device-one",
+      generation: 1,
+      requestId: "motto-first",
+      motto: "Grow together",
+    };
+    const saved = await f.request(path + "/preference", command, one.cookie);
+    assert.equal(saved.status, 200);
+    assert.equal(
+      (await f.request(path + "/preference", command, one.cookie)).data
+        .revision,
+      1,
+    );
+    assert.equal(
+      (
+        await f.request(
+          path + "/preference",
+          { ...command, motto: "Different" },
+          one.cookie,
+        )
+      ).status,
+      409,
+    );
+    const second = await take(two.cookie, "device-two", "take-second", 1);
+    assert.equal(second.data.generation, 2);
+    const handedRetry = await f.request(
+      path + "/preference",
+      { ...command, deviceId: "device-two", generation: 2 },
+      two.cookie,
+    );
+    assert.equal(handedRetry.status, 200);
+    assert.equal(handedRetry.data.revision, 1);
+
+    assert.equal(
+      (await f.request(path + "/preference", command, one.cookie)).status,
+      409,
+    );
+    assert.equal(
+      (await take(one.cookie, "device-one", "take-first", 0)).status,
+      409,
+    );
+    assert.equal(
+      (await f.request(path, undefined, two.cookie)).data.motto,
+      "Grow together",
+    );
+    const stranger = await f.request("/api/register", {
+      username: "handoff-stranger",
+      password: "long-test-password",
+    });
+    assert.equal(
+      (await take(stranger.cookie, "device-three", "take-other", 2)).status,
+      404,
+    );
+  } finally {
+    await f.close();
   }
 });
