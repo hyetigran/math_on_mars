@@ -1,7 +1,7 @@
 .DS_Store
 .env
 .wizardgenie
-node_modules/
+node_modules
 dist/
 
 # Local work-in-progress and asset experiments
@@ -9,3 +9,6 @@ dist/
 /assets/sorceress/autosprite/
 /assets/sorceress/enemies/sprites/rekeyed-blue/
 .wizardgenie/
+
+# Isolated V2 visual prototype build
+dist-town/
