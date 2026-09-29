@@ -26,3 +26,8 @@ Cancellation discloses its material refund and loss of progress before the actio
 Version 3 adds individually assigned adult workers and farming state. Unlock lettuce once for 10 credits, assign an available adult to a completed Greenhouse, then select lettuce. Its recipe produces four edible portions every 30 growing minutes and replants without another seed payment. Workers cannot occupy multiple Greenhouses. Removing a worker or losing utility capacity pauses growth without discarding progress; starter utility restoration is available during shortages.
 
 Meals consume one portion per adult each hour, with residents' water and oxygen needs reserved before crop production. The view separates housing occupancy from available/assigned adults and displays the one-day food reserve. A full store holds the complete harvest outside spendable inventory until the whole batch fits. Emergency habitat meals cover unmet consumption directly and never enter storage; residents do not die or leave. Server event reconciliation preserves meal/crop progress across reloads. The explicit absence allowance and return summary remain #48.
+
+
+## Occupied House upgrade
+
+Version 4 supports a level-2 House upgrade: 40 blocks, 10 parts and 60 minutes, using one of the same two construction slots. Level, appearance and capacity remain unchanged until server completion; then capacity becomes four with the same two residents and one additional unit of House power demand. The provisional utility increment is explicit in the server recipe. Cancellation returns materials and leaves the original occupied House intact. The existing second-level model appears in both views only on completion.

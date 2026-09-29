@@ -245,3 +245,5 @@ Connected town management now uses an explicit per-tab takeover lease, bound to 
 Connected town version 2 introduces starter stocks/utilities, three ordinary plots, two construction slots and server-timed Greenhouse jobs. Construction and cancellation use the authoritative command/receipt boundary. Both camera views now poll persisted town snapshots instead of preview state (#43).
 
 Connected town version 3 adds one-time lettuce seeds, unique adult-worker assignments, paused growth, discrete held harvests, hourly household meals and starter utility/emergency-meal recovery. Food and meal progress is persisted and reconciled on server time; housing capacity and available workers are distinct (#44).
+
+Connected version 4 supports occupied House upgrades using shared construction slots. Level 2 costs 40 blocks/10 parts over 60 minutes, raises capacity to four and adds one power demand only at completion. Residents and existing capacity persist during construction/cancellation (#45).

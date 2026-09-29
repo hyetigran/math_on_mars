@@ -55,3 +55,45 @@ test("fixed plots, two shared slots, cancellation refunds and rejects repeat can
     /materials/,
   );
 });
+
+test("occupied House upgrades only at completion and applies capacity and utility demand once", () => {
+  let s = starter();
+  applyTownCommand(s, { action: "upgrade-house" }, 0);
+  assert.equal(s.resources.blocks, 40);
+  assert.equal(s.resources.parts, 10);
+  assert.equal(s.houseLevel, 1);
+  assert.equal(s.houseCapacity, 2);
+  assert.equal(s.adults, 2);
+  s = initializeTown(JSON.parse(JSON.stringify(s)), 1);
+  reconcileTown(s, 3599999);
+  assert.equal(s.houseLevel, 1);
+  assert.equal(s.housePowerDemand, 0);
+  reconcileTown(s, 3600000);
+  assert.equal(s.houseLevel, 2);
+  assert.equal(s.plots.home.level, 2);
+  assert.equal(s.houseCapacity, 4);
+  assert.equal(s.adults, 2);
+  assert.equal(s.housePowerDemand, 1);
+  reconcileTown(s, 7200000);
+  assert.equal(s.housePowerDemand, 1);
+  assert.throws(
+    () => applyTownCommand(s, { action: "upgrade-house" }, 7200000),
+    /level/,
+  );
+});
+test("upgrade shares slots and cancellation preserves the occupied original House", () => {
+  const s = starter();
+  applyTownCommand(s, { action: "upgrade-house" }, 0);
+  applyTownCommand(s, { action: "build", plotId: "garden" }, 0);
+  assert.throws(
+    () => applyTownCommand(s, { action: "build", plotId: "market" }, 0),
+    /slots/,
+  );
+  applyTownCommand(s, { action: "cancel", jobId: s.jobs[0].id }, 1000);
+  assert.equal(s.resources.blocks, 60);
+  assert.equal(s.resources.parts, 15);
+  assert.equal(s.houseLevel, 1);
+  assert.equal(s.houseCapacity, 2);
+  assert.equal(s.adults, 2);
+  assert.equal(s.plots.home.building, "house");
+});
