@@ -28,8 +28,8 @@ export function renderConstruction(
       button.onclick = () => send({ action: "cancel", jobId: job.id });
       section.append(button);
     } else if (!plot.building) {
-      button.textContent =
-        "Build Greenhouse · 20 blocks + 5 parts · 10 seconds";
+      const recipe = state.recipes.greenhouse;
+      button.textContent = `Build Greenhouse · ${recipe.cost.blocks} blocks + ${recipe.cost.parts} parts · ${recipe.duration / 1000} seconds`;
       button.onclick = () => send({ action: "build", plotId: id });
       section.append(button);
     } else if (plot.building === "greenhouse") {

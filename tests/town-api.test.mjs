@@ -58,6 +58,10 @@ test("parent can create a cadet town once and load it from a second login", asyn
     );
     assert.equal(town.data.houseLevel, 1);
     assert.equal(town.data.version, 2);
+    assert.deepEqual(town.data.recipes.greenhouse, {
+      cost: { blocks: 20, parts: 5 },
+      duration: 10000,
+    });
     const stranger = await f.request("/api/register", {
       username: "parent-two",
       password: "another-test-password",

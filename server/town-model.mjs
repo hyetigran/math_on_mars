@@ -1,4 +1,7 @@
 import { randomUUID } from "node:crypto";
+export const constructionRecipes = {
+  greenhouse: { cost: { blocks: 20, parts: 5 }, duration: 10000 },
+};
 export class TownRuleError extends Error {}
 const requireRule = (condition, message) => {
   if (!condition) throw new TownRuleError(message);
@@ -51,7 +54,7 @@ export function applyTownCommand(state, input, now) {
         state.constructionSlots,
       "Both construction slots are occupied",
     );
-    const cost = { blocks: 20, parts: 5 };
+    const { cost, duration } = constructionRecipes.greenhouse;
     requireRule(
       state.resources.blocks >= cost.blocks &&
         state.resources.parts >= cost.parts,
@@ -65,8 +68,8 @@ export function applyTownCommand(state, input, now) {
       building: "greenhouse",
       level: 1,
       startedAt: now,
-      endsAt: now + 10000,
-      duration: 10000,
+      endsAt: now + duration,
+      duration,
       cost,
       status: "running",
     });

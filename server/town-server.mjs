@@ -1,4 +1,5 @@
 import {
+  constructionRecipes,
   initializeTown,
   reconcileTown,
   applyTownCommand,
@@ -356,7 +357,11 @@ export function createTownServer({
       }
       const match = path.match(/^\/api\/towns\/([a-f0-9-]+)$/);
       if (match && req.method === "GET")
-        return send(200, { ...ownTown(parent, match[1]), serverNow: now() });
+        return send(200, {
+          ...ownTown(parent, match[1]),
+          serverNow: now(),
+          recipes: constructionRecipes,
+        });
       fail(404, "Not found");
     } catch (error) {
       if (error instanceof TownRuleError) send(400, { error: error.message });
