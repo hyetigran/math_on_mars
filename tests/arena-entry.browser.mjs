@@ -36,7 +36,8 @@ try {
           : Promise.reject(new Error("Offline storage unavailable"));
     }, failure);
     await page.goto(
-      process.env.GAME_URL || "http://localhost:4173/battle.html?verifyOffline=1",
+      process.env.GAME_URL ||
+        "http://localhost:4173/battle.html?verifyOffline=1",
       { waitUntil: "networkidle0" },
     );
     await page.waitForSelector(".camp-canvas");

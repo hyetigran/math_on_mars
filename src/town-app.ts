@@ -1,3 +1,4 @@
+import { appUrl, currentRoute } from "./app-route";
 import { mountManagement } from "./town-management";
 import {
   api,
@@ -13,9 +14,9 @@ let access: Access = { parent: null, cadets: [], guest: null };
 let active: Cadet | null = null;
 let dispose: (() => void) | undefined;
 let navigation = 0;
-const route = () => location.pathname.replace(/\/+$/, "") || "/";
+const route = currentRoute;
 function go(path: string) {
-  history.pushState(null, "", path);
+  history.pushState(null, "", appUrl(path));
   void render();
 }
 function parentAction() {
@@ -26,15 +27,16 @@ function header(base = false) {
   return `<header class="site-header"><a class="brand" href="/" data-route aria-label="Math on Mars home"><span class="planet" aria-hidden="true">✦</span> math<span>on</span>mars</a><nav aria-label="Main navigation">${base ? '<a data-route href="/play/battle">Battle</a><button data-menu>Menu</button>' : `<button data-parent>${access.parent ? "Parent account" : "Parent sign in"}</button>`}</nav></header>`;
 }
 function bindNavigation() {
-  root.querySelectorAll<HTMLAnchorElement>("[data-route]").forEach(
-    (a) =>
-      (a.onclick = (event) => {
-        if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey)
-          return;
-        event.preventDefault();
-        go(a.getAttribute("href")!);
-      }),
-  );
+  root.querySelectorAll<HTMLAnchorElement>("[data-route]").forEach((a) => {
+    const path = a.getAttribute("href")!;
+    a.href = appUrl(path);
+    a.onclick = (event) => {
+      if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey)
+        return;
+      event.preventDefault();
+      go(path);
+    };
+  });
   root
     .querySelectorAll<HTMLButtonElement>("[data-parent]")
     .forEach((b) => (b.onclick = parentAction));
@@ -84,7 +86,7 @@ async function loadPlay(turn: number) {
   }
   if (turn !== navigation) return;
   localStorage.setItem("town-active-cadet", active!.id);
-  root.innerHTML = `${header(true)}<main id="content" class="base-layout"><section class="town-view"><div class="town-title"><p class="eyebrow">Welcome home</p><h1>Your Mars town</h1></div><iframe title="Your 3D Mars town" src="/town-prototype.html?town=${active!.id}"></iframe></section><aside class="town-panel" aria-label="Build and grow"><h2>Build & grow</h2><p class="hint">A little progress, every time you visit.</p><div id="management"></div></aside></main>`;
+  root.innerHTML = `${header(true)}<main id="content" class="base-layout"><section class="town-view"><div class="town-title"><p class="eyebrow">Welcome home</p><h1>Your Mars town</h1></div><iframe title="Your 3D Mars town" src="${appUrl(`/town-prototype.html?town=${active!.id}`)}"></iframe></section><aside class="town-panel" aria-label="Build and grow"><h2>Build & grow</h2><p class="hint">A little progress, every time you visit.</p><div id="management"></div></aside></main>`;
   dispose = mountManagement(
     root.querySelector<HTMLElement>("#management")!,
     active!.id,
@@ -168,7 +170,7 @@ async function render() {
     else if (current === "/play") await loadPlay(turn);
     else if (current === "/parents") parents();
     else if (current === "/play/battle")
-      root.innerHTML = `<header class="battle-header"><a data-route href="/play">← Return to town</a><span>Battle</span></header><main id="content" class="battle-view"><iframe title="Math on Mars battle" src="/battle.html?townBattle=1"></iframe></main>`;
+      root.innerHTML = `<header class="battle-header"><a data-route href="/play">← Return to town</a><span>Battle</span></header><main id="content" class="battle-view"><iframe title="Math on Mars battle" src="${appUrl("/battle.html?townBattle=1")}"></iframe></main>`;
     else
       root.innerHTML = `${header()}<main id="content" class="parent-page"><h1>A little off the map.</h1><a data-route href="/">Back home</a></main>`;
     if (turn !== navigation) return;

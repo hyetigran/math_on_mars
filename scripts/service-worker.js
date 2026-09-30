@@ -122,10 +122,15 @@ self.addEventListener("fetch", (event) => {
         }
       }
       const cache = await caches.open(prefix + version);
+      const marker = await cache.match(manifestUrl);
+      const manifest = marker ? await marker.json() : BUILD;
+      const hasBattleEntry = manifest.files.some(
+        (file) => file.path === "battle.html",
+      );
       const key =
         event.request.mode === "navigate"
           ? absolute(
-              url.pathname.endsWith("battle.html")
+              url.pathname.endsWith("battle.html") && hasBattleEntry
                 ? "battle.html"
                 : "index.html",
             )
@@ -142,8 +147,6 @@ self.addEventListener("fetch", (event) => {
         }
       }
       // Never substitute current content for a requested older version.
-      const marker = await cache.match(manifestUrl);
-      const manifest = marker ? await marker.json() : BUILD;
       const isRequired = manifest.files.some(
         (file) => absolute(file.path) === key,
       );

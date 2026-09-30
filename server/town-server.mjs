@@ -107,12 +107,12 @@ export function createTownServer({
         ?.parent_id ?? null
     );
   }
-  function ownTown(parent, id) {
+  function ownTown(ownerId, id) {
     const row = db
       .prepare(
         "SELECT t.state FROM towns t JOIN cadets c ON c.id=t.cadet_id WHERE c.id=? AND c.parent_id=?",
       )
-      .get(id, parent);
+      .get(id, ownerId);
     if (!row) fail(404, "Town not found");
     const state = reconcileTown(
       initializeTown(JSON.parse(row.state), now()),
@@ -319,14 +319,14 @@ export function createTownServer({
         db
           .prepare("SELECT id FROM cadets WHERE id=? AND parent_id=?")
           .get(townId, guest);
-      const parent = useGuest ? guest : (account ?? guest);
+      const ownerId = useGuest ? guest : (account ?? guest);
       const token = sessionToken(
         req,
         useGuest || !account ? "mars_guest" : "mars_parent",
       );
       if ((path === "/api/cadets" || path === "/api/logout") && !account)
         fail(401, "Parent sign-in required");
-      if (!parent) fail(401, "Sign in to open your town");
+      if (!ownerId) fail(401, "Sign in to open your town");
       if (path === "/api/logout" && req.method === "POST") {
         const token = sessionToken(req);
         if (token)
@@ -341,7 +341,7 @@ export function createTownServer({
             .prepare(
               "SELECT id,name FROM cadets WHERE parent_id=? ORDER BY rowid",
             )
-            .all(parent),
+            .all(ownerId),
         );
       if (path === "/api/cadets" && req.method === "POST") {
         const input = await body(req),
@@ -351,7 +351,7 @@ export function createTownServer({
           .prepare(
             "SELECT id,name FROM cadets WHERE parent_id=? AND request_id=?",
           )
-          .get(parent, requestId);
+          .get(ownerId, requestId);
         if (existing) {
           if (existing.name !== name)
             fail(409, "Request ID already used with another name");
@@ -370,7 +370,7 @@ export function createTownServer({
         try {
           db.prepare("INSERT INTO cadets VALUES(?,?,?,?)").run(
             id,
-            parent,
+            ownerId,
             name,
             requestId,
           );
@@ -390,7 +390,7 @@ export function createTownServer({
         const input = await body(req);
         db.exec("BEGIN IMMEDIATE");
         try {
-          const state = ownTown(parent, visitPath[1]);
+          const state = ownTown(ownerId, visitPath[1]);
           const result = visitTown(state, input, digest(token), now());
           db.prepare("UPDATE towns SET state=? WHERE cadet_id=?").run(
             JSON.stringify(state),
@@ -408,7 +408,7 @@ export function createTownServer({
       );
       if (commandPath) {
         const [, id, action] = commandPath;
-        ownTown(parent, id);
+        ownTown(ownerId, id);
         if (action === "management" && req.method === "GET") {
           const lease = db
             .prepare(
@@ -431,11 +431,11 @@ export function createTownServer({
         if (req.method === "POST") {
           const input = await body(req);
           if (action === "command" && input.command?.action === "set-topics") {
-            if (parent === guest)
+            if (ownerId === guest)
               fail(403, "Parent sign-in required to change eligible topics");
             const account = db
               .prepare("SELECT salt,password FROM owners WHERE id=?")
-              .get(parent);
+              .get(ownerId);
             const password = text(input.command.password, 12, 128);
             const actual = await scrypt(password, account.salt, 64);
             if (!timingSafeEqual(actual, Buffer.from(account.password, "hex")))
@@ -449,7 +449,7 @@ export function createTownServer({
           db.exec("BEGIN IMMEDIATE");
           let result;
           try {
-            const state = ownTown(parent, id);
+            const state = ownTown(ownerId, id);
             const lease = db
               .prepare("SELECT * FROM management WHERE town_id=?")
               .get(id);
@@ -501,7 +501,7 @@ export function createTownServer({
                   state.motto = intent.motto;
                   state.revision = (state.revision ?? 0) + 1;
                 } else if (intent.action === "guest-profile") {
-                  if (parent !== guest)
+                  if (ownerId !== guest)
                     fail(403, "Guest profile is only available before linking");
                   const name = text(intent.name, 1, 40);
                   if (!["K", "1", "2", "3", "4", "5"].includes(intent.grade))
@@ -540,7 +540,7 @@ export function createTownServer({
       }
       const match = path.match(/^\/api\/towns\/([a-f0-9-]+)$/);
       if (match && req.method === "GET") {
-        const town = ownTown(parent, match[1]);
+        const town = ownTown(ownerId, match[1]);
         return send(200, {
           ...publicTown(town),
           foodSummary: foodSummary(town),

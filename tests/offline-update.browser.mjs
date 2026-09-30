@@ -10,6 +10,7 @@ let release = 1;
 const server = createServer((request, response) => {
   const files = {
     "index.html": `<h1>Release ${release}</h1>`,
+    ...(release >= 2 ? { "battle.html": `<h1>Battle ${release}</h1>` } : {}),
     [`assets/art-release${release}.txt`]: `art ${release}`,
   };
   const manifest = {
@@ -77,6 +78,18 @@ try {
   await page.setOfflineMode(true);
   await page.reload();
   assert.equal(await page.$eval("h1", (el) => el.textContent), "Release 2");
+  await page.goto(
+    `http://production.localhost:${server.address().port}/battle.html`,
+  );
+  assert.equal(await page.$eval("h1", (el) => el.textContent), "Battle 2");
+  await page.goto(
+    `http://production.localhost:${server.address().port}/battle.html?build=${"1".repeat(16)}`,
+  );
+  assert.equal(
+    await page.$eval("h1", (el) => el.textContent),
+    "Release 1",
+    "Pre-routing archived builds still use their original index entry",
+  );
   console.log(
     "Open-tab update activates; old assets survive; reload shows latest release online and offline",
   );

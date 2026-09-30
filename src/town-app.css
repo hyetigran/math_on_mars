@@ -1,8 +1,9 @@
 @import url("./connected-town.css");
+@import url("./typography.css");
 :root {
   color: #173d3a;
   background: #f8f5ed;
-  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--font-body);
   font-synthesis: none;
   --green: #204e44;
   --muted: #63716c;
@@ -171,7 +172,7 @@ nav button {
   margin: 24px 0;
 }
 .hero-copy h1 em {
-  font-family: Georgia, serif;
+  font-family: var(--font-display);
   font-weight: 400;
   color: #ba674f;
 }
@@ -733,4 +734,16 @@ select {
   .card {
     padding: 20px;
   }
+}
+
+body {
+  font-family: var(--font-body);
+}
+h1,
+h2,
+h3,
+button,
+.primary,
+.eyebrow {
+  font-family: var(--font-display);
 }
