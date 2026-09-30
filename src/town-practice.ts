@@ -3,6 +3,7 @@ export function renderPractice(
   practice: any,
   send: (intent: unknown) => void,
   parentControls = true,
+  compact = false,
 ) {
   const signature = JSON.stringify(practice);
   if (root.dataset.snapshot === signature) return;
@@ -14,10 +15,12 @@ export function renderPractice(
     parent.append(e);
     return e;
   };
-  add("h3", "Town practice");
+  if (!compact) add("h3", "Town practice");
   add(
     "p",
-    `Construction credit: ${practice.credit / 60000} minutes. No expiry or daily cap. Town practice is separate from battle quizzes and parent-assigned homework.`,
+    compact
+      ? `${Math.floor(practice.credit / 60000)}m boost saved`
+      : `Construction credit: ${practice.credit / 60000} minutes. No expiry or daily cap. Town practice is separate from battle quizzes and parent-assigned homework.`,
   );
   const settings = document.createElement("details");
   if (parentControls) root.append(settings);
@@ -62,16 +65,19 @@ export function renderPractice(
         "p",
         `Set completed: ${Object.values(attempt.firstAttempts).filter(Boolean).length}/${attempt.questionIds.length} correct first try. All corrections finished. ${attempt.reward / 60000} minutes awarded once.`,
       );
-    add(
-      "p",
-      "Untimed practice. Correct every question to earn the full shown credit. Topics use up to five distinct bank questions per set, cycle before repeating, and award four minutes per question. This starter bank is not a mastery assessment.",
-    );
+    if (!compact)
+      add(
+        "p",
+        "Untimed practice. Correct every question to earn the full shown credit. Topics use up to five distinct bank questions per set, cycle before repeating, and award four minutes per question. This starter bank is not a mastery assessment.",
+      );
     for (const topic of practice.topics.filter((t: any) =>
       practice.eligibleTopics.includes(t.id),
     )) {
       const button = add(
         "button",
-        `Grade ${topic.grade}: ${topic.skill} · ${Math.min(5, topic.count)} questions · ${topic.reward / 60000} minutes credit`,
+        compact
+          ? `${topic.skill} · +${topic.reward / 60000}m`
+          : `Grade ${topic.grade}: ${topic.skill} · ${Math.min(5, topic.count)} questions · ${topic.reward / 60000} minutes credit`,
       );
       button.dataset.mutation = "true";
       button.dataset.beginPractice = topic.id;

@@ -58,3 +58,7 @@ Validation uses injected authoritative clocks, including zero, short and greater
 `node tests/guest-routing.browser.mjs` verifies landing, optional modal sign-in, guest persistence, explicit linking without replacing another cadet, battle navigation, browser history, deep links and narrow layouts. `node --test tests/guest-town.test.mjs` covers guest isolation, cookie role separation, pre-guest database migration, durable links and restart/retry behavior.
 
 `node tests/town-subpath.browser.mjs` serves the compiled `dist` under `/math_on_mars/` without SPA fallback rewrites and verifies direct route reloads, town scene, battle and return navigation. The API remains explicitly rooted at `/api`, independently of the app mount path.
+
+## Play HUD
+
+`/play` fills the viewport with the town. Resource counters and Build, Practice, Battle, camera and menu controls float over the scene; there is no website navigation, footer or always-open management form. Tapping a completed building opens its plot actions. Build also lists available plots. Settings contains guest name/grade, motto and explicit device takeover. The shared parent sign-in remains in Menu. The embedded scene hides its prototype chrome; the standalone prototype and legacy diagnostic route retain their controls.

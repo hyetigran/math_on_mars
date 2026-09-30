@@ -793,6 +793,11 @@ renderer.domElement.addEventListener("pointerup", (e) => {
         const i = buildings.findIndex((b) => b.group === o);
         if (i >= 0) {
           select(i);
+          if (new URLSearchParams(location.search).has("hud"))
+            window.parent.postMessage(
+              { type: "town-select", plotId: connectedPlots[i] },
+              location.origin,
+            );
           break;
         }
         o = o.parent;
@@ -979,4 +984,17 @@ if (connectedCadet) {
   }
   void refreshConnected();
   window.setInterval(() => void refreshConnected(), 1000);
+}
+
+if (new URLSearchParams(location.search).has("hud")) {
+  document.body.classList.add("game-embedded");
+  window.addEventListener("message", (event) => {
+    if (event.origin !== location.origin || event.source !== window.parent)
+      return;
+    if (
+      event.data?.type === "town-camera" &&
+      ["walk", "overview"].includes(event.data.mode)
+    )
+      setMode(event.data.mode);
+  });
 }

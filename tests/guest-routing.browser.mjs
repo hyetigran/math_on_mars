@@ -37,7 +37,7 @@ try {
   await page.click("[data-parent]");
   await page.waitForSelector("dialog[open]");
   await page.keyboard.press("Escape");
-  await page.waitForFunction(() => !document.querySelector("dialog"));
+  await page.waitForFunction(() => !document.querySelector("dialog[open]"));
   await page.click(".play-cta");
   await page.waitForSelector("#management");
   const town = await page.$eval(".town-view iframe", (e) =>
@@ -47,6 +47,40 @@ try {
     () =>
       document.querySelector("[data-guest-profile] button")?.disabled === false,
   );
+  const scene = await (await page.$(".town-view iframe")).contentFrame();
+  await scene.waitForFunction(() =>
+    document.body.classList.contains("game-embedded"),
+  );
+  assert.equal(await page.$(".site-header"), null);
+  assert.equal(
+    await page.evaluate(() =>
+      [...document.querySelectorAll("input")].some((e) => e.checkVisibility()),
+    ),
+    false,
+  );
+  assert.equal(
+    await page.evaluate(
+      () => document.documentElement.scrollHeight > innerHeight,
+    ),
+    false,
+  );
+  await page.screenshot({
+    path: "/tmp/mars-v2-implementation/hud-desktop.png",
+  });
+  await page.click("[data-camera]");
+  await scene.waitForFunction(() => window.townPrototype.mode === "walk");
+  await page.click("[data-camera]");
+  await scene.waitForFunction(() => window.townPrototype.mode === "overview");
+  await scene.evaluate(() =>
+    parent.postMessage(
+      { type: "town-select", plotId: "home" },
+      location.origin,
+    ),
+  );
+  await page.waitForSelector(".game-panel[open]");
+  assert.equal(await page.$eval("[data-plot=garden]", (e) => e.hidden), true);
+  await page.keyboard.press("Escape");
+  await page.click("button[data-panel=settings]");
   await page.type("[data-guest-profile] [name=name]", "Nova");
   await page.select("[data-guest-profile] [name=grade]", "2");
   await page.click("[data-guest-profile] button");
@@ -60,11 +94,84 @@ try {
     () =>
       document.querySelector("[data-plot=garden] button")?.disabled === false,
   );
+  await page.click("[data-close-panel]");
+  await page.click("button[data-panel=build]");
   await page.click("[data-plot=garden] button");
   await page.waitForFunction(() =>
     document
       .querySelector("[data-plot=garden]")
-      ?.textContent.includes("Cancel and refund"),
+      ?.textContent.includes("Cancel build"),
+  );
+  await page.waitForSelector("[data-farm=garden]");
+  await page.waitForFunction(
+    () =>
+      !document.querySelector("[data-farm=garden] [data-mutation]")?.disabled,
+  );
+  await page.click("[data-farm=garden] [data-unlock-seed]");
+  await page.waitForFunction(
+    () => !document.querySelector("[data-unlock-seed]"),
+  );
+  await page.click("[data-farm=garden] button");
+  await page.waitForFunction(() =>
+    document
+      .querySelector("[data-farm=garden]")
+      ?.textContent.includes("Unassign worker"),
+  );
+  await page.click("[data-farm=garden] button:last-child");
+  await page.waitForFunction(() =>
+    document
+      .querySelector("[data-farm=garden]")
+      ?.textContent.includes("Growing"),
+  );
+  await page.click("[data-close-panel]");
+  await page.click("button[data-panel=build]");
+  await page.evaluate(() => {
+    const original = window.fetch;
+    window.fetch = async (...args) => {
+      if (
+        args[1]?.body &&
+        JSON.parse(args[1].body).command?.action === "upgrade-house"
+      ) {
+        window.fetch = original;
+        throw Error("Injected network failure");
+      }
+      return original(...args);
+    };
+  });
+  await page.click("[data-upgrade-house]");
+  await page.waitForFunction(
+    () =>
+      document.querySelector("[data-management-status]")?.checkVisibility() &&
+      document
+        .querySelector("[data-management-status]")
+        ?.textContent.includes("connection"),
+  );
+  await new Promise((resolve) => setTimeout(resolve, 2500));
+  assert.equal(
+    await page.$eval("[data-management-status]", (e) => e.checkVisibility()),
+    true,
+  );
+  await page.click("[data-close-panel]");
+  await page.click("button[data-panel=settings]");
+  await page.click("[data-sync]");
+  await page.waitForFunction(
+    () =>
+      document.querySelector("[data-management-status]")?.dataset.quiet ===
+      "true",
+  );
+  await page.click("[data-close-panel]");
+  await page.click("button[data-panel=practice]");
+  await page.click("[data-begin-practice]");
+  await page.waitForSelector("[data-answer-practice]");
+  await page.waitForFunction(
+    () => !document.querySelector("[data-answer-practice] button")?.disabled,
+  );
+  await page.type("[name=answer]", "999999");
+  await page.click("[data-answer-practice] button");
+  await page.waitForFunction(() =>
+    document
+      .querySelector("[data-practice]")
+      ?.textContent.includes("Try again."),
   );
   await page.reload();
   await page.waitForSelector(".town-view iframe");
@@ -76,11 +183,11 @@ try {
   );
   await page.click("[data-menu]");
   await page.click("dialog [data-parent]");
-  await page.waitForSelector("dialog form");
+  await page.waitForSelector(".town-dialog form");
   await page.type("[name=username]", "routing-parent");
   await page.type("[name=password]", "long-test-password");
   await page.click("[value=register]");
-  await page.waitForFunction(() => !document.querySelector("dialog"));
+  await page.waitForFunction(() => !document.querySelector("dialog[open]"));
   await page.waitForSelector(".town-view iframe");
   assert.equal(new URL(page.url()).pathname, "/play");
   assert.equal(
@@ -111,7 +218,7 @@ try {
   assert.ok(await page.$(`a[href='/play?cadet=${old.id}']`));
   await page.click(`a[href='/play?cadet=${town}']`);
   await page.waitForSelector("#management");
-  await page.click('nav a[href="/play/battle"]');
+  await page.click("a.battle-action");
   await page.waitForSelector(".battle-view iframe");
   const battle = await (await page.$(".battle-view iframe")).contentFrame();
   await battle.waitForSelector("#track-dialog", { timeout: 60000 });
@@ -122,6 +229,7 @@ try {
   await page.goForward();
   await page.waitForSelector("#management");
   await page.setViewport({ width: 390, height: 844 });
+  await page.screenshot({ path: "/tmp/mars-v2-implementation/hud-mobile.png" });
   await page.click("[data-menu]");
   await page.screenshot({
     path: "/tmp/mars-v2-implementation/base-menu-mobile.png",
