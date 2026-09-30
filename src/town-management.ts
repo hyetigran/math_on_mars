@@ -23,18 +23,20 @@ export function mountManagement(
   let busy = true;
   let connected = false;
   let commandError: string | null = null;
-  root.innerHTML = `<p data-return-summary></p><h3>Town management</h3><p data-management-status role="status">Refreshing management…</p><p data-motto></p><button data-takeover disabled>Manage here / take over</button><button data-sync>Refresh management</button><form data-preference><label>Town motto<input name="motto" maxlength="80" required></label><button disabled>Save motto</button></form>${options.guest ? `<form data-guest-profile><label>Explorer name<input name="name" maxlength="40" required></label><label>Practice grade<select name="grade">${["K", "1", "2", "3", "4", "5"].map((grade) => `<option>${grade}</option>`).join("")}</select></label><button data-mutation>Save explorer</button></form>` : ""}<div data-construction></div><section data-practice></section>`;
+  let guestName = "Explorer";
+  root.innerHTML = `<p data-return-summary></p><h3>Town management</h3><p data-management-status role="status">Refreshing management…</p>${options.compact ? "" : "<p data-motto></p>"}<button data-takeover disabled>Manage here / take over</button><button data-sync>Refresh management</button>${options.compact ? "" : `<form data-preference><label>Town motto<input name="motto" maxlength="80" required></label><button disabled>Save motto</button></form>`}${options.guest ? `<form data-guest-profile>${options.compact ? "" : `<label>Explorer name<input name="name" maxlength="40" required></label>`}<label>Practice grade<select name="grade">${["K", "1", "2", "3", "4", "5"].map((grade) => `<option>${grade}</option>`).join("")}</select></label><button data-mutation>${options.compact ? "Save grade" : "Save explorer"}</button></form>` : ""}<div data-construction></div><section data-practice></section>`;
   const status = root.querySelector<HTMLElement>("[data-management-status]")!;
   const takeover = root.querySelector<HTMLButtonElement>("[data-takeover]")!;
-  const form = root.querySelector<HTMLFormElement>("form")!;
-  const save = form.querySelector<HTMLButtonElement>("button")!;
+  const form = root.querySelector<HTMLFormElement>("[data-preference]");
+  const save = form?.querySelector<HTMLButtonElement>("button");
   const storageKey = `town-preference-${townId}`;
   function controls() {
     takeover.disabled = busy || !connected || managed;
-    save.disabled = busy || !connected || !managed;
+    const disabled = busy || !connected || !managed;
+    if (save) save.disabled = disabled;
     root
       .querySelectorAll<HTMLButtonElement>("[data-mutation]")
-      .forEach((button) => (button.disabled = save.disabled));
+      .forEach((button) => (button.disabled = disabled));
   }
   async function refresh() {
     busy = true;
@@ -58,9 +60,12 @@ export function mountManagement(
       const profile = root.querySelector<HTMLFormElement>(
         "[data-guest-profile]",
       );
+      guestName = state.guestName ?? "Explorer";
       if (profile && !profile.dataset.loaded) {
-        (profile.elements.namedItem("name") as HTMLInputElement).value =
-          state.guestName ?? "";
+        const nameInput = profile.elements.namedItem(
+          "name",
+        ) as HTMLInputElement | null;
+        if (nameInput) nameInput.value = state.guestName ?? "";
         (profile.elements.namedItem("grade") as HTMLSelectElement).value =
           state.guestGrade ?? "K";
         profile.dataset.loaded = "true";
@@ -68,8 +73,8 @@ export function mountManagement(
       generation = lease.generation;
       managed = lease.deviceId === deviceId;
       connected = navigator.onLine;
-      root.querySelector<HTMLElement>("[data-motto]")!.textContent =
-        `Town motto: ${state.motto ?? "Not set"}`;
+      const motto = root.querySelector<HTMLElement>("[data-motto]");
+      if (motto) motto.textContent = `Town motto: ${state.motto ?? "Not set"}`;
       options.onSnapshot?.(state, managed);
       if (state.plots)
         (options.compact ? renderBuildPanel : renderConstruction)(
@@ -157,7 +162,7 @@ export function mountManagement(
       const fields = new FormData(profile);
       sendIntent({
         action: "guest-profile",
-        name: fields.get("name"),
+        name: options.compact ? guestName : fields.get("name"),
         grade: fields.get("grade"),
       });
     };
@@ -167,20 +172,21 @@ export function mountManagement(
       generation,
       requestId: crypto.randomUUID(),
     });
-  form.onsubmit = (event) => {
-    event.preventDefault();
-    if (save.disabled) return;
-    const motto = String(new FormData(form).get("motto")).trim();
-    let pending;
-    try {
-      pending = JSON.parse(sessionStorage.getItem(storageKey) ?? "null");
-    } catch {}
-    if (!pending || pending.motto !== motto)
-      pending = { motto, requestId: crypto.randomUUID() };
-    pending = { ...pending, deviceId, generation };
-    sessionStorage.setItem(storageKey, JSON.stringify(pending));
-    void command("preference", pending);
-  };
+  if (form && save)
+    form.onsubmit = (event) => {
+      event.preventDefault();
+      if (save.disabled) return;
+      const motto = String(new FormData(form).get("motto")).trim();
+      let pending;
+      try {
+        pending = JSON.parse(sessionStorage.getItem(storageKey) ?? "null");
+      } catch {}
+      if (!pending || pending.motto !== motto)
+        pending = { motto, requestId: crypto.randomUUID() };
+      pending = { ...pending, deviceId, generation };
+      sessionStorage.setItem(storageKey, JSON.stringify(pending));
+      void command("preference", pending);
+    };
   root.querySelector<HTMLButtonElement>("[data-sync]")!.onclick = () => {
     commandError = null;
     void refresh();
