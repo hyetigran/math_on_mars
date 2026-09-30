@@ -7,7 +7,7 @@ test("WizardGenie root previews hand off to the compiled app before loading Type
   const html = await readFile(join(process.cwd(), "index.html"), "utf8");
   const previewGuard = html.indexOf('"__wgEditorCam" in window');
   const compiledTarget = html.indexOf('new URL("dist/", document.baseURI)');
-  const sourceEntry = html.indexOf('src="/src/town-app.ts"');
+  const sourceEntry = html.indexOf('src="/src/main.ts"');
 
   assert.notEqual(previewGuard, -1);
   assert.notEqual(compiledTarget, -1);

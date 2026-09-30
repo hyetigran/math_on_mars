@@ -4,15 +4,18 @@
     <meta charset="UTF-8" />
     <meta
       name="viewport"
-      content="width=device-width,initial-scale=1,viewport-fit=cover"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
     />
-    <meta name="theme-color" content="#173d3a" />
+    <meta name="theme-color" content="#170f13" />
     <meta
       name="description"
-      content="Build a town on Mars. Grow food and practice math to speed up construction."
+      content="Math on Mars — survive slime waves and power up with math."
     />
     <title>Math on Mars</title>
     <script>
+      // WizardGenie's static preview cannot execute the TypeScript entry below.
+      // Its injected camera bridge identifies that environment, so hand the root
+      // launch to the compiled app without changing normal Vite/deployed builds.
       if (
         "__wgEditorCam" in window &&
         !location.pathname.replace(/\/+$/, "").endsWith("/dist")
@@ -25,8 +28,63 @@
     </script>
   </head>
   <body>
-    <a class="skip-link" href="#content">Skip to content</a>
-    <div id="town-app"></div>
-    <script type="module" src="/src/town-app.ts"></script>
+    <a class="skip-link" href="#app">Skip to game</a>
+    <main id="app">
+      <section
+        style="
+          position: fixed;
+          inset: 0;
+          overflow: hidden;
+          background: #101a2b;
+          display: grid;
+          place-items: center;
+        "
+        aria-label="Loading Math on Mars"
+      >
+        <img
+          src="/game/camp/splash.webp"
+          alt=""
+          aria-hidden="true"
+          style="
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center;
+            filter: blur(24px) brightness(0.5);
+            transform: scale(1.12);
+          "
+        />
+        <img
+          src="/game/camp/splash.webp"
+          alt="Math on Mars"
+          style="
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            object-position: center;
+          "
+        />
+        <p
+          role="status"
+          style="
+            position: absolute;
+            bottom: 4%;
+            color: white;
+            font: 600 16px system-ui;
+            background: #101a2bdd;
+            padding: 12px 24px;
+            border-radius: 12px;
+          "
+        >
+          Loading base camp…
+        </p>
+      </section>
+    </main>
+    <div id="announcer" class="sr-only" role="status" aria-live="polite"></div>
+    <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

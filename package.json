@@ -11,14 +11,7 @@
     "sprites:bake:marine:v005": "node scripts/sprite-baker/bake-marine.mjs --character marine-v005",
     "test": "node scripts/test.mjs",
     "format": "prettier --write src tests scripts content \"*.{html,json,ts,yaml}\"",
-    "format:check": "prettier --check src tests scripts content \"*.{html,json,ts,yaml}\"",
-    "dev:town": "vite --host 127.0.0.1 --open /town-prototype.html",
-    "build:town": "tsc && vite build --config vite.town.config.ts",
-    "dev:rehearsal": "vite --host 127.0.0.1 --open /town-rehearsal.html",
-    "dev:town-api": "node server/town-server.mjs",
-    "dev:connected": "vite --config vite.connected.config.ts --open /",
-    "build:connected": "tsc && vite build --config vite.connected.config.ts",
-    "test:town-api": "node --test tests/town-api.test.mjs"
+    "format:check": "prettier --check src tests scripts content \"*.{html,json,ts,yaml}\""
   },
   "dependencies": {
     "phaser": "4.2.1"
@@ -33,8 +26,5 @@
     "typescript": "^5.9.2",
     "vite": "^7.1.5"
   },
-  "packageManager": "pnpm@12.4.1+sha512.2e81e399d73fe8390dab25e06aa788ab7a5908248d2f5a370f82b481147a6a7a367bf8048f9a6fdb6460f21a66f0542dedb8b94ca2c8723596741920b1656d4c",
-  "engines": {
-    "node": ">=24"
-  }
+  "packageManager": "pnpm@12.4.1+sha512.2e81e399d73fe8390dab25e06aa788ab7a5908248d2f5a370f82b481147a6a7a367bf8048f9a6fdb6460f21a66f0542dedb8b94ca2c8723596741920b1656d4c"
 }
