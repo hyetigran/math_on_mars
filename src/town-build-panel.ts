@@ -19,6 +19,7 @@ export function renderBuildPanel(
       (d) => d.dataset.job,
     ),
   );
+  const scrollLeft = root.scrollLeft;
   root.replaceChildren();
   for (const [id, plot] of Object.entries<any>(state.plots)) {
     const card = document.createElement("section");
@@ -159,4 +160,5 @@ export function renderBuildPanel(
     b.onclick = () => send({ action: "restore-utilities" });
     root.append(b);
   }
+  root.scrollLeft = scrollLeft;
 }
