@@ -16,6 +16,10 @@ async function visit(path) {
 for (const folder of ["src", "content", "scripts"]) await visit(folder);
 for (const file of [
   "index.html",
+  "battle.html",
+  "play/index.html",
+  "play/battle/index.html",
+  "parents/index.html",
   "package.json",
   "pnpm-lock.yaml",
   "vite.config.ts",

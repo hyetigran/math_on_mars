@@ -9,7 +9,9 @@ const browser = await puppeteer.launch({
   args: ["--host-resolver-rules=MAP production.localhost 127.0.0.1"],
 });
 // Exercise a non-QA hostname even when serving the production build locally.
-const target = new URL(process.env.GAME_URL || "http://localhost:4173/");
+const target = new URL(
+  process.env.GAME_URL || "http://localhost:4173/battle.html",
+);
 if (["localhost", "127.0.0.1", "[::1]"].includes(target.hostname))
   target.hostname = "production.localhost";
 const url = target.href;

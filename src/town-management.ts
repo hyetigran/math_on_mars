@@ -4,14 +4,19 @@ import { renderConstruction } from "./town-construction";
 type Api = (path: string, data?: unknown) => Promise<any>;
 // Each tab gets a separate identity, including tabs sharing the same login cookie.
 const deviceId = crypto.randomUUID();
-export function mountManagement(root: HTMLElement, townId: string, api: Api) {
+export function mountManagement(
+  root: HTMLElement,
+  townId: string,
+  api: Api,
+  options: { guest?: boolean; autoManage?: boolean } = {},
+) {
   const events = new AbortController();
   let disposed = false;
   let generation = 0;
   let managed = false;
   let busy = true;
   let connected = false;
-  root.innerHTML = `<p data-return-summary></p><h3>Town management</h3><p data-management-status role="status">Refreshing management…</p><p data-motto></p><button data-takeover disabled>Manage here / take over</button><button data-sync>Refresh management</button><form data-preference><label>Town motto<input name="motto" maxlength="80" required></label><button disabled>Save motto</button></form><div data-construction></div><section data-practice></section>`;
+  root.innerHTML = `<p data-return-summary></p><h3>Town management</h3><p data-management-status role="status">Refreshing management…</p><p data-motto></p><button data-takeover disabled>Manage here / take over</button><button data-sync>Refresh management</button><form data-preference><label>Town motto<input name="motto" maxlength="80" required></label><button disabled>Save motto</button></form>${options.guest ? `<form data-guest-profile><label>Explorer name<input name="name" maxlength="40" required></label><label>Practice grade<select name="grade">${["K", "1", "2", "3", "4", "5"].map((grade) => `<option>${grade}</option>`).join("")}</select></label><button data-mutation>Save explorer</button></form>` : ""}<div data-construction></div><section data-practice></section>`;
   const status = root.querySelector<HTMLElement>("[data-management-status]")!;
   const takeover = root.querySelector<HTMLButtonElement>("[data-takeover]")!;
   const form = root.querySelector<HTMLFormElement>("form")!;
@@ -34,6 +39,25 @@ export function mountManagement(root: HTMLElement, townId: string, api: Api) {
         api(`/api/towns/${townId}`),
       ]);
       if (disposed) return;
+      if (options.autoManage && lease.available) {
+        const acquired = await api(`/api/towns/${townId}/management`, {
+          deviceId,
+          generation: lease.generation,
+          requestId: crypto.randomUUID(),
+        });
+        Object.assign(lease, acquired);
+        if (disposed) return;
+      }
+      const profile = root.querySelector<HTMLFormElement>(
+        "[data-guest-profile]",
+      );
+      if (profile && !profile.dataset.loaded) {
+        (profile.elements.namedItem("name") as HTMLInputElement).value =
+          state.guestName ?? "";
+        (profile.elements.namedItem("grade") as HTMLSelectElement).value =
+          state.guestGrade ?? "K";
+        profile.dataset.loaded = "true";
+      }
       generation = lease.generation;
       managed = lease.deviceId === deviceId;
       connected = navigator.onLine;
@@ -50,6 +74,7 @@ export function mountManagement(root: HTMLElement, townId: string, api: Api) {
           root.querySelector<HTMLElement>("[data-practice]")!,
           state.practice,
           sendIntent,
+          !options.guest,
         );
       status.textContent = managed
         ? "You manage this town."
@@ -109,6 +134,17 @@ export function mountManagement(root: HTMLElement, townId: string, api: Api) {
       controls();
     }
   }
+  const profile = root.querySelector<HTMLFormElement>("[data-guest-profile]");
+  if (profile)
+    profile.onsubmit = (event) => {
+      event.preventDefault();
+      const fields = new FormData(profile);
+      sendIntent({
+        action: "guest-profile",
+        name: fields.get("name"),
+        grade: fields.get("grade"),
+      });
+    };
   takeover.onclick = () =>
     void command("management", {
       deviceId,

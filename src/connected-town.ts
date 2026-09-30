@@ -1,3 +1,6 @@
+import { appUrl } from "./app-route";
+if (!new URLSearchParams(location.search).has("legacy"))
+  location.replace(appUrl("/"));
 import { mountManagement } from "./town-management";
 import "./connected-town.css";
 const root = document.querySelector<HTMLElement>("#connected")!;

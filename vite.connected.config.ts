@@ -9,6 +9,16 @@ export default defineConfig({
   },
   build: {
     outDir: "dist-connected",
-    rollupOptions: { input: ["connected-town.html", "town-prototype.html"] },
+    rollupOptions: {
+      input: [
+        "index.html",
+        "play/index.html",
+        "play/battle/index.html",
+        "parents/index.html",
+        "battle.html",
+        "connected-town.html",
+        "town-prototype.html",
+      ],
+    },
   },
 });

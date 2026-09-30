@@ -12,17 +12,6 @@
       content="Build a little home on Mars. Grow a town, explore its streets, and turn math practice into progress."
     />
     <title>Math on Mars · A little world of possibility</title>
-    <script>
-      if (
-        "__wgEditorCam" in window &&
-        !location.pathname.replace(/\/+$/, "").endsWith("/dist")
-      ) {
-        const compiledApp = new URL("dist/", document.baseURI);
-        compiledApp.search = location.search;
-        compiledApp.hash = location.hash;
-        location.replace(compiledApp);
-      }
-    </script>
   </head>
   <body>
     <a class="skip-link" href="#content">Skip to content</a>

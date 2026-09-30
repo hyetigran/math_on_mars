@@ -362,6 +362,7 @@ function renderBaseCamp(): void {
   host
     .querySelector<HTMLCanvasElement>("canvas")!
     .focus({ preventScroll: true });
+  if (new URLSearchParams(location.search).has("townBattle")) enterCampPortal();
 }
 
 function enterCampPortal(initialTab: "track" | "settings" = "track"): void {
@@ -1543,9 +1544,17 @@ function endRun(victory: boolean, state?: CombatSnapshot): void {
             if (generation === screenGeneration) button.disabled = false;
           }
         });
-      document
-        .querySelector("#return-home")!
-        .addEventListener("click", renderBaseCamp);
+      document.querySelector("#return-home")!.addEventListener("click", () => {
+        if (
+          window.parent !== window &&
+          new URLSearchParams(location.search).has("townBattle")
+        )
+          window.parent.postMessage(
+            { type: "return-to-town" },
+            location.origin,
+          );
+        else renderBaseCamp();
+      });
     },
   );
 }

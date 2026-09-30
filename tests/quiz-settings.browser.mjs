@@ -17,7 +17,7 @@ const browser = await puppeteer.launch({
     "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
   headless: true,
 });
-const url = process.env.GAME_URL || "http://127.0.0.1:4179/";
+const url = process.env.GAME_URL || "http://127.0.0.1:4179/battle.html";
 const errors = [];
 try {
   const context = await browser.createBrowserContext();
