@@ -47,22 +47,9 @@ try {
         await readFile(join("content/questions", file)),
       );
   }
-  const selected = new Set(
-    process.argv
-      .slice(2)
-      .map((name) => name.replace(/^tests\//, "").replace(/\.ts$/, ".js")),
-  );
   const files = (await readdir(join(output, "tests")))
-    .filter(
-      (file) =>
-        file.endsWith(".test.js") && (!selected.size || selected.has(file)),
-    )
+    .filter((file) => file.endsWith(".test.js"))
     .map((file) => join(output, "tests", file));
-  for (const file of await readdir("tests")) {
-    if (file.endsWith(".test.mjs") && (!selected.size || selected.has(file)))
-      files.push(join(process.cwd(), "tests", file));
-  }
-  if (!files.length) throw new Error("No matching test files");
   const result = spawnSync(process.execPath, ["--test", ...files], {
     stdio: "inherit",
   });

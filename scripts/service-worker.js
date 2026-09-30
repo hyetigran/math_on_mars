@@ -98,7 +98,6 @@ self.addEventListener("message", (event) => {
 self.addEventListener("fetch", (event) => {
   if (localPreview) return;
   const url = new URL(event.request.url);
-  if (url.pathname.startsWith("/api/")) return;
   if (event.request.method !== "GET" || !url.href.startsWith(scope)) return;
   event.respondWith(
     (async () => {
@@ -122,18 +121,9 @@ self.addEventListener("fetch", (event) => {
         }
       }
       const cache = await caches.open(prefix + version);
-      const marker = await cache.match(manifestUrl);
-      const manifest = marker ? await marker.json() : BUILD;
-      const hasBattleEntry = manifest.files.some(
-        (file) => file.path === "battle.html",
-      );
       const key =
         event.request.mode === "navigate"
-          ? absolute(
-              url.pathname.endsWith("battle.html") && hasBattleEntry
-                ? "battle.html"
-                : "index.html",
-            )
+          ? absolute("index.html")
           : new URL(url.pathname, url.origin).href;
       const response = await cache.match(key);
       if (response) return response;
@@ -147,6 +137,8 @@ self.addEventListener("fetch", (event) => {
         }
       }
       // Never substitute current content for a requested older version.
+      const marker = await cache.match(manifestUrl);
+      const manifest = marker ? await marker.json() : BUILD;
       const isRequired = manifest.files.some(
         (file) => absolute(file.path) === key,
       );

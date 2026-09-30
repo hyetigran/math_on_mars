@@ -10,7 +10,7 @@ Each trip through the portal starts a fresh mission. You can pause a mission, bu
 
 ## Run locally
 
-Install Node.js 24+ and pnpm, then run:
+Install Node.js and pnpm, then run:
 
 ```sh
 pnpm install
