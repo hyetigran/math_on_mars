@@ -279,7 +279,7 @@ const buildings: {
 }[] = [
   {
     name: "House",
-    description: "A warm home overlooking the plaza.",
+    description: "Housing.",
     group: new THREE.Group(),
     x: -6,
     z: -3,
@@ -287,7 +287,7 @@ const buildings: {
   },
   {
     name: "Greenhouse",
-    description: "Fresh greens beneath Martian skies.",
+    description: "Crop production.",
     group: new THREE.Group(),
     x: 17,
     z: -10,
@@ -295,7 +295,7 @@ const buildings: {
   },
   {
     name: "Bakery",
-    description: "Bread, a striped awning, and a place to linger.",
+    description: "Bread production.",
     group: new THREE.Group(),
     x: 6,
     z: 0,

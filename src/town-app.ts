@@ -48,7 +48,7 @@ function openMenu() {
   const dialog = document.createElement("dialog");
   dialog.className = "town-dialog";
   dialog.setAttribute("aria-labelledby", "menu-title");
-  dialog.innerHTML = `<button class="dialog-close" aria-label="Close menu">×</button><p class="eyebrow">Take a breather</p><h2 id="menu-title">Your little world.</h2><p>${access.guest?.id === active?.id ? "This town is remembered in this browser. A parent can link it to an account to keep it across devices." : "Your town is saved to your parent account."}</p><div class="menu-links"><button data-parent>${access.parent ? "Parent dashboard" : "Parent sign in"}</button><button data-home>Back to landing page</button></div>`;
+  dialog.innerHTML = `<button class="dialog-close" aria-label="Close menu">×</button><h2 id="menu-title">Menu</h2><div class="menu-links"><button data-parent>${access.parent ? "Parent dashboard" : "Parent sign in"}</button><button data-home>Home</button></div>`;
   document.body.append(dialog);
   dialog.querySelector<HTMLButtonElement>(".dialog-close")!.onclick = () =>
     dialog.close();
@@ -64,7 +64,7 @@ function openMenu() {
   dialog.showModal();
 }
 function landing() {
-  root.innerHTML = `${header()}<main id="content" class="landing"><section class="hero-copy"><p class="eyebrow"><span class="live-dot"></span> A new home. A whole world to grow.</p><h1>Big dreams.<br>Little town.<br><em>All yours.</em></h1><p class="intro">Make yourself at home on Mars. Build a cozy town, grow something good, and let a little learning take you a long way.</p><a class="primary play-cta" href="/play" data-route>Play <span aria-hidden="true">↗</span></a><p class="hint">Jump right in. No sign-in needed.</p></section><section class="hero-world" aria-label="Illustration of a cozy town on Mars"><div class="orbit orbit-one"></div><div class="orbit orbit-two"></div><div class="moon"></div><div class="town-island"><div class="village"><i class="tree tree-one"></i><i class="tree tree-two"></i><i class="house house-one"><b></b></i><i class="house house-two"><b></b></i><i class="house house-three"><b></b></i><i class="glasshouse"></i><div class="town-path"></div><i class="garden"></i></div></div><div class="world-caption"><span class="live-dot"></span> A little world of possibility</div><span class="world-coordinates" aria-hidden="true">MARS · YOUR NEXT CHAPTER</span></section><section class="possibilities" aria-label="Ways to play"><article><span>01 / Make it yours</span><h2>From the first brick.</h2><p>Start small. Build and upgrade a place to call home.</p></article><article><span>02 / Watch it grow</span><h2>A town with a rhythm.</h2><p>Plant crops, put your colonists to work, and return to new progress.</p></article><article><span>03 / Find your spark</span><h2>Small lessons. Big steps.</h2><p>Practice math to help your building projects along.</p></article></section></main><footer>Math on Mars <span>A little curiosity goes a long way.</span></footer>`;
+  root.innerHTML = `${header()}<main id="content" class="landing"><section class="hero-copy"><h1>Build a town<br>on Mars.</h1><p class="intro">Grow food. Practice math to speed up construction.</p><a class="primary play-cta" href="/play" data-route>Play <span aria-hidden="true">↗</span></a><p class="hint">No sign-in required.</p></section><section class="hero-world" aria-label="Illustration of a town on Mars"><div class="orbit orbit-one"></div><div class="orbit orbit-two"></div><div class="moon"></div><div class="town-island"><div class="village"><i class="tree tree-one"></i><i class="tree tree-two"></i><i class="house house-one"><b></b></i><i class="house house-two"><b></b></i><i class="house house-three"><b></b></i><i class="glasshouse"></i><div class="town-path"></div><i class="garden"></i></div></div></section></main>`;
 }
 async function loadPlay(turn: number) {
   const selected =
@@ -107,7 +107,7 @@ async function loadPlay(turn: number) {
   );
 }
 function parents() {
-  root.innerHTML = `${header()}<main id="content" class="parent-page"><p class="eyebrow">The grown-up corner</p><h1>A little support.<br>A world of discovery.</h1>${access.parent ? `<p>Signed in as <strong>${esc(access.parent.username)}</strong>.</p><button data-logout>Sign out</button>${access.guest ? `<section class="card"><h2>Keep this town.</h2><p>Link ${esc(access.guest.name)}’s guest town as a new cadet. Your existing cadets stay as they are.</p><button class="primary" data-link>Save this town to my account</button></section>` : ""}<section class="card"><h2>Your cadets</h2><div class="cadet-list">${access.cadets.map((c) => `<a data-route href="/play?cadet=${c.id}">${esc(c.name)} <span>Open town ↗</span></a>`).join("") || "<p>No linked towns yet. You can start playing or create a cadet below.</p>"}</div><form data-create><label>New cadet name<input name="name" maxlength="40" required></label><button>Create cadet town</button></form></section>` : `<p>Sign in to save a town across devices and manage your cadets’ practice topics.</p><div class="actions"><button class="primary" data-parent>Parent sign in</button><a data-route href="/play">Keep playing ↗</a></div>`}<p role="alert" data-error></p></main>`;
+  root.innerHTML = `${header()}<main id="content" class="parent-page"><h1>Parents</h1>${access.parent ? `<p>Signed in as <strong>${esc(access.parent.username)}</strong>.</p><button data-logout>Sign out</button>${access.guest ? `<section class="card"><h2>Link guest town</h2><p>Add ${esc(access.guest.name)} as a new cadet. Existing cadets are unchanged.</p><button class="primary" data-link>Link town</button></section>` : ""}<section class="card"><h2>Your cadets</h2><div class="cadet-list">${access.cadets.map((c) => `<a data-route href="/play?cadet=${c.id}">${esc(c.name)} <span>Open town ↗</span></a>`).join("") || "<p>No cadets.</p>"}</div><form data-create><label>New cadet name<input name="name" maxlength="40" required></label><button>Create cadet town</button></form></section>` : `<p>Sign in to manage cadets.</p><div class="actions"><button class="primary" data-parent>Parent sign in</button><a data-route href="/play">Play ↗</a></div>`}<p role="alert" data-error></p></main>`;
   root.querySelector<HTMLButtonElement>("[data-logout]")?.addEventListener(
     "click",
     () =>
@@ -176,7 +176,7 @@ async function render() {
   } else if (current === "/play")
     root.innerHTML = `<main id="content" class="game-loading"><p role="status">Loading town…</p></main>`;
   else
-    root.innerHTML = `${header()}<main id="content" class="parent-page"><p role="status">Opening your world…</p></main>`;
+    root.innerHTML = `${header()}<main id="content" class="parent-page"><p role="status">Loading…</p></main>`;
   try {
     if (current !== "/play/battle") access = await api("/api/access");
     if (turn !== navigation) return;
@@ -186,12 +186,12 @@ async function render() {
     else if (current === "/play/battle")
       root.innerHTML = `<header class="battle-header"><a data-route href="/play">← Return to town</a><span>Battle</span></header><main id="content" class="battle-view"><iframe title="Math on Mars battle" src="${appUrl("/battle.html?townBattle=1")}"></iframe></main>`;
     else
-      root.innerHTML = `${header()}<main id="content" class="parent-page"><h1>A little off the map.</h1><a data-route href="/">Back home</a></main>`;
+      root.innerHTML = `${header()}<main id="content" class="parent-page"><h1>Page not found</h1><a data-route href="/">Home</a></main>`;
     if (turn !== navigation) return;
     bindNavigation();
   } catch (error) {
     if (turn !== navigation || current === "/") return;
-    root.innerHTML = `${header()}<main id="content" class="parent-page"><h1>Let’s reconnect.</h1><p role="alert">${esc(error instanceof Error ? error.message : "Please try again.")}</p><button data-retry>Try again</button> <a data-route href="/">Back home</a></main>`;
+    root.innerHTML = `${header()}<main id="content" class="parent-page"><h1>Connection error</h1><p role="alert">${esc(error instanceof Error ? error.message : "Please try again.")}</p><button data-retry>Try again</button> <a data-route href="/">Home</a></main>`;
     root.querySelector<HTMLButtonElement>("[data-retry]")!.onclick = () =>
       void render();
     bindNavigation();

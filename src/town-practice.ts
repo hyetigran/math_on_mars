@@ -20,7 +20,7 @@ export function renderPractice(
     "p",
     compact
       ? `${Math.floor(practice.credit / 60000)}m boost saved`
-      : `Construction credit: ${practice.credit / 60000} minutes. No expiry or daily cap. Town practice is separate from battle quizzes and parent-assigned homework.`,
+      : `Construction credit: ${practice.credit / 60000} minutes.`,
   );
   const settings = document.createElement("details");
   if (parentControls) root.append(settings);
@@ -63,13 +63,9 @@ export function renderPractice(
     if (attempt)
       add(
         "p",
-        `Set completed: ${Object.values(attempt.firstAttempts).filter(Boolean).length}/${attempt.questionIds.length} correct first try. All corrections finished. ${attempt.reward / 60000} minutes awarded once.`,
+        `${Object.values(attempt.firstAttempts).filter(Boolean).length}/${attempt.questionIds.length} correct first try · +${attempt.reward / 60000}m boost`,
       );
-    if (!compact)
-      add(
-        "p",
-        "Untimed practice. Correct every question to earn the full shown credit. Topics use up to five distinct bank questions per set, cycle before repeating, and award four minutes per question. This starter bank is not a mastery assessment.",
-      );
+    if (!compact) add("p", "Correct all answers to earn the displayed credit.");
     for (const topic of practice.topics.filter((t: any) =>
       practice.eligibleTopics.includes(t.id),
     )) {
@@ -84,20 +80,18 @@ export function renderPractice(
       button.onclick = () =>
         send({ action: "begin-practice", topic: topic.id });
     }
-    if (!practice.eligibleTopics.length)
-      add("p", "A parent can enable topics above before practice begins.");
+    if (!practice.eligibleTopics.length) add("p", "No topics enabled.");
     return;
   }
   add(
     "p",
-    `${attempt.reward / 60000} minutes credit when every answer is corrected. ${attempt.repeated ? "Repeated bank questions in this set." : "New questions from the topic deck."}`,
+    `${attempt.reward / 60000}m boost for completing this set${attempt.repeated ? " · Repeated questions" : ""}`,
   );
   const q = attempt.questions.find(
     (q: any) => !attempt.corrected.includes(q.id),
   );
   add("p", q.prompt).dataset.questionId = q.id;
-  if (attempt.firstAttempts[q.id] === false)
-    add("p", `Try again. ${q.hint} Your full credit is still available.`);
+  if (attempt.firstAttempts[q.id] === false) add("p", `Try again. ${q.hint}`);
   const answerForm = document.createElement("form");
   answerForm.dataset.answerPractice = "true";
   root.append(answerForm);
