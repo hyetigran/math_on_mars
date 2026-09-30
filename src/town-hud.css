@@ -408,3 +408,25 @@
 .game-panel #management[data-panel="settings"] > [data-return-summary] {
   display: block;
 }
+
+.game-panel:has(#management[data-panel="build"]) {
+  width: min(1100px, calc(100% - 24px));
+}
+.game-panel #management[data-panel="build"] > [data-construction] {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x proximity;
+  padding: 4px 4px 14px;
+}
+.game-panel [data-construction] > [data-plot] {
+  flex: 0 0 min(250px, calc(100vw - 88px));
+  min-width: 0;
+  margin: 0;
+  scroll-snap-align: start;
+}
+.game-panel [data-construction] > button {
+  flex-shrink: 0;
+  align-self: start;
+}
