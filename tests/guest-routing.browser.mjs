@@ -81,7 +81,8 @@ try {
   assert.equal(await page.$eval("[data-plot=garden]", (e) => e.hidden), true);
   await page.keyboard.press("Escape");
   await page.click("button[data-panel=settings]");
-  await page.type("[data-guest-profile] [name=name]", "Nova");
+  assert.equal(await page.$("[data-guest-profile] [name=name]"), null);
+  assert.equal(await page.$("[data-preference]"), null);
   await page.select("[data-guest-profile] [name=grade]", "2");
   await page.click("[data-guest-profile] button");
   await page.waitForFunction(() =>
