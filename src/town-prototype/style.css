@@ -266,3 +266,13 @@ label {
     white-space: nowrap;
   }
 }
+
+body.game-embedded header,
+body.game-embedded nav,
+body.game-embedded aside,
+body.game-embedded footer {
+  display: none;
+}
+body.game-embedded #movement {
+  bottom: 110px;
+}

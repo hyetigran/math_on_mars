@@ -1,3 +1,4 @@
+import { renderBuildPanel } from "./town-build-panel";
 import { mountVisit } from "./town-visit";
 import { renderPractice } from "./town-practice";
 import { renderConstruction } from "./town-construction";
@@ -8,7 +9,12 @@ export function mountManagement(
   root: HTMLElement,
   townId: string,
   api: Api,
-  options: { guest?: boolean; autoManage?: boolean } = {},
+  options: {
+    guest?: boolean;
+    autoManage?: boolean;
+    compact?: boolean;
+    onSnapshot?: (state: any, managed: boolean) => void;
+  } = {},
 ) {
   const events = new AbortController();
   let disposed = false;
@@ -63,8 +69,9 @@ export function mountManagement(
       connected = navigator.onLine;
       root.querySelector<HTMLElement>("[data-motto]")!.textContent =
         `Town motto: ${state.motto ?? "Not set"}`;
+      options.onSnapshot?.(state, managed);
       if (state.plots)
-        renderConstruction(
+        (options.compact ? renderBuildPanel : renderConstruction)(
           root.querySelector<HTMLElement>("[data-construction]")!,
           state,
           sendIntent,
@@ -75,11 +82,14 @@ export function mountManagement(
           state.practice,
           sendIntent,
           !options.guest,
+          options.compact,
         );
+      status.dataset.quiet = String(managed);
       status.textContent = managed
         ? "You manage this town."
         : "Read only. Choose Manage here to take over.";
     } catch (error) {
+      status.dataset.quiet = "false";
       status.textContent =
         error instanceof Error ? error.message : "Connection unavailable.";
     } finally {

@@ -1,5 +1,5 @@
 import { appUrl, currentRoute } from "./app-route";
-import { mountManagement } from "./town-management";
+import { mountTownHud } from "./town-hud";
 import {
   api,
   escapeHtml as esc,
@@ -23,8 +23,8 @@ function parentAction() {
   if (access.parent) go("/parents");
   else openParentSignIn(() => void render());
 }
-function header(base = false) {
-  return `<header class="site-header"><a class="brand" href="/" data-route aria-label="Math on Mars home"><span class="planet" aria-hidden="true">✦</span> math<span>on</span>mars</a><nav aria-label="Main navigation">${base ? '<a data-route href="/play/battle">Battle</a><button data-menu>Menu</button>' : `<button data-parent>${access.parent ? "Parent account" : "Parent sign in"}</button>`}</nav></header>`;
+function header() {
+  return `<header class="site-header"><a class="brand" href="/" data-route aria-label="Math on Mars home"><span class="planet" aria-hidden="true">✦</span> math<span>on</span>mars</a><nav aria-label="Main navigation">${`<button data-parent>${access.parent ? "Parent account" : "Parent sign in"}</button>`}</nav></header>`;
 }
 function bindNavigation() {
   root.querySelectorAll<HTMLAnchorElement>("[data-route]").forEach((a) => {
@@ -86,12 +86,24 @@ async function loadPlay(turn: number) {
   }
   if (turn !== navigation) return;
   localStorage.setItem("town-active-cadet", active!.id);
-  root.innerHTML = `${header(true)}<main id="content" class="base-layout"><section class="town-view"><div class="town-title"><p class="eyebrow">Welcome home</p><h1>Your Mars town</h1></div><iframe title="Your 3D Mars town" src="${appUrl(`/town-prototype.html?town=${active!.id}`)}"></iframe></section><aside class="town-panel" aria-label="Build and grow"><h2>Build & grow</h2><p class="hint">A little progress, every time you visit.</p><div id="management"></div></aside></main>`;
-  dispose = mountManagement(
-    root.querySelector<HTMLElement>("#management")!,
+  root.innerHTML = `<main id="content" class="game-screen"><div class="town-view"><iframe title="Your 3D Mars town" src="${appUrl(`/town-prototype.html?town=${active!.id}&hud=1`)}"></iframe></div><div class="game-top"><div class="game-tools"><button data-menu class="hud-square" aria-label="Menu">☰</button><button data-panel="settings" class="hud-square" aria-label="Settings">⚙</button></div><div class="resource-strip" aria-label="Town resources">${[
+    ["blocks", "▰", "Blocks"],
+    ["parts", "⚙", "Parts"],
+    ["credits", "✦", "Credits"],
+    ["food", "❧", "Food"],
+  ]
+    .map(
+      ([key, icon, label]) =>
+        `<div class="resource-pill" aria-label="${label}" title="${label}"><span aria-hidden="true">${icon}</span><strong data-resource="${key}">—</strong><small>${label}</small></div>`,
+    )
+    .join(
+      "",
+    )}</div></div><div class="game-notices"><p data-network role="status" hidden>Offline</p><button data-manage-here hidden>Manage here</button></div><div class="game-bottom"><a class="hud-action battle-action" data-route href="/play/battle"><span aria-hidden="true">⚔</span>Battle</a><div class="game-actions"><button class="hud-action" data-panel="practice"><span aria-hidden="true">✧</span>Practice</button><button class="hud-action build-action" data-panel="build"><span aria-hidden="true">▰</span>Build <small data-builders>—</small></button></div></div><button class="camera-toggle" data-camera aria-pressed="false">♟ Walk</button><dialog class="game-panel" aria-labelledby="panel-title"><div class="panel-heading"><h2 id="panel-title">Build</h2><button data-close-panel aria-label="Close panel">×</button></div><button data-all-plots hidden>← All plots</button><div id="management" data-panel="build"></div></dialog></main>`;
+  dispose = mountTownHud(
+    root,
     active!.id,
     api,
-    { guest: active!.id === access.guest?.id, autoManage: true },
+    active!.id === access.guest?.id,
   );
 }
 function parents() {
@@ -161,7 +173,9 @@ async function render() {
   if (current === "/") {
     landing();
     bindNavigation();
-  } else
+  } else if (current === "/play")
+    root.innerHTML = `<main id="content" class="game-loading"><p role="status">Loading town…</p></main>`;
+  else
     root.innerHTML = `${header()}<main id="content" class="parent-page"><p role="status">Opening your world…</p></main>`;
   try {
     if (current !== "/play/battle") access = await api("/api/access");
