@@ -1,3 +1,4 @@
+import { availableWorker } from "./town-workers";
 const time = (ms: number) =>
   ms < 60000
     ? `${Math.ceil(ms / 1000)}s`
@@ -124,15 +125,7 @@ export function renderBuildPanel(
           workerId: null,
         });
       else {
-        const worker = Array.from(
-          { length: state.adults },
-          (_, i) => `adult-${i + 1}`,
-        ).find(
-          (w) =>
-            !Object.values<any>(state.foodSummary.farms).some(
-              (f) => f.workerId === w,
-            ),
-        );
+        const worker = availableWorker(state);
         if (worker)
           button("Assign worker", {
             action: "assign-worker",

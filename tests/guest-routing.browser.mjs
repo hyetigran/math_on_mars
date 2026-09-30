@@ -121,7 +121,43 @@ try {
   await page.waitForFunction(() =>
     document
       .querySelector("[data-farm=garden]")
-      ?.textContent.includes("growing"),
+      ?.textContent.includes("Growing"),
+  );
+  await page.click("[data-close-panel]");
+  await page.click("button[data-panel=build]");
+  await page.evaluate(() => {
+    const original = window.fetch;
+    window.fetch = async (...args) => {
+      if (
+        args[1]?.body &&
+        JSON.parse(args[1].body).command?.action === "upgrade-house"
+      ) {
+        window.fetch = original;
+        throw Error("Injected network failure");
+      }
+      return original(...args);
+    };
+  });
+  await page.click("[data-upgrade-house]");
+  await page.waitForFunction(
+    () =>
+      document.querySelector("[data-management-status]")?.checkVisibility() &&
+      document
+        .querySelector("[data-management-status]")
+        ?.textContent.includes("connection"),
+  );
+  await new Promise((resolve) => setTimeout(resolve, 2500));
+  assert.equal(
+    await page.$eval("[data-management-status]", (e) => e.checkVisibility()),
+    true,
+  );
+  await page.click("[data-close-panel]");
+  await page.click("button[data-panel=settings]");
+  await page.click("[data-sync]");
+  await page.waitForFunction(
+    () =>
+      document.querySelector("[data-management-status]")?.dataset.quiet ===
+      "true",
   );
   await page.click("[data-close-panel]");
   await page.click("button[data-panel=practice]");

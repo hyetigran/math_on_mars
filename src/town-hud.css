@@ -404,3 +404,7 @@
     max-height: 95dvh;
   }
 }
+
+.game-panel #management[data-panel="settings"] > [data-return-summary] {
+  display: block;
+}

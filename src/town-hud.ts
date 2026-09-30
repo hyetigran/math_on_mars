@@ -12,10 +12,11 @@ export function mountTownHud(
   const title = root.querySelector<HTMLElement>("#panel-title")!;
   let opener: HTMLElement | null = null;
   function open(panel: string, plot?: string) {
-    opener =
-      document.activeElement instanceof HTMLElement
-        ? document.activeElement
-        : null;
+    if (!dialog.open)
+      opener =
+        document.activeElement instanceof HTMLElement
+          ? document.activeElement
+          : null;
     management.dataset.panel = panel;
     title.textContent =
       panel === "build"

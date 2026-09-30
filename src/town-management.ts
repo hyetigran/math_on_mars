@@ -22,6 +22,7 @@ export function mountManagement(
   let managed = false;
   let busy = true;
   let connected = false;
+  let commandError: string | null = null;
   root.innerHTML = `<p data-return-summary></p><h3>Town management</h3><p data-management-status role="status">Refreshing management…</p><p data-motto></p><button data-takeover disabled>Manage here / take over</button><button data-sync>Refresh management</button><form data-preference><label>Town motto<input name="motto" maxlength="80" required></label><button disabled>Save motto</button></form>${options.guest ? `<form data-guest-profile><label>Explorer name<input name="name" maxlength="40" required></label><label>Practice grade<select name="grade">${["K", "1", "2", "3", "4", "5"].map((grade) => `<option>${grade}</option>`).join("")}</select></label><button data-mutation>Save explorer</button></form>` : ""}<div data-construction></div><section data-practice></section>`;
   const status = root.querySelector<HTMLElement>("[data-management-status]")!;
   const takeover = root.querySelector<HTMLButtonElement>("[data-takeover]")!;
@@ -84,10 +85,12 @@ export function mountManagement(
           !options.guest,
           options.compact,
         );
-      status.dataset.quiet = String(managed);
-      status.textContent = managed
-        ? "You manage this town."
-        : "Read only. Choose Manage here to take over.";
+      status.dataset.quiet = String(managed && !commandError);
+      status.textContent =
+        commandError ??
+        (managed
+          ? "You manage this town."
+          : "Read only. Choose Manage here to take over.");
     } catch (error) {
       status.dataset.quiet = "false";
       status.textContent =
@@ -130,6 +133,7 @@ export function mountManagement(
     receiptKey = storageKey,
   ) {
     busy = true;
+    commandError = null;
     controls();
     try {
       await api(`/api/towns/${townId}/${path}`, payload);
@@ -138,7 +142,9 @@ export function mountManagement(
         sessionStorage.removeItem(receiptKey);
     } catch (error) {
       connected = false;
-      status.textContent = `${error instanceof Error ? error.message : "Connection lost."} Refresh management before retrying.`;
+      commandError = `${error instanceof Error ? error.message : "Connection lost."} Refresh or retry.`;
+      status.dataset.quiet = "false";
+      status.textContent = commandError;
     } finally {
       busy = false;
       controls();
@@ -175,12 +181,15 @@ export function mountManagement(
     sessionStorage.setItem(storageKey, JSON.stringify(pending));
     void command("preference", pending);
   };
-  root.querySelector<HTMLButtonElement>("[data-sync]")!.onclick = () =>
+  root.querySelector<HTMLButtonElement>("[data-sync]")!.onclick = () => {
+    commandError = null;
     void refresh();
+  };
   window.addEventListener(
     "offline",
     () => {
       connected = false;
+      status.dataset.quiet = "false";
       status.textContent = "Offline: town changes are disabled.";
       controls();
     },

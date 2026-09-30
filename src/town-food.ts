@@ -1,3 +1,4 @@
+import { availableWorker } from "./town-workers";
 export function renderFood(
   root: HTMLElement,
   state: any,
@@ -42,13 +43,7 @@ export function renderFood(
         group,
       );
     else {
-      const available = Array.from(
-        { length: state.adults },
-        (_, i) => `adult-${i + 1}`,
-      ).find(
-        (worker) =>
-          !Object.values<any>(summary.farms).some((f) => f.workerId === worker),
-      );
+      const available = availableWorker(state);
       if (available)
         button(
           `Assign ${available}`,
