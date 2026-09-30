@@ -14,16 +14,15 @@ export async function api(path: string, data?: unknown): Promise<any> {
       body: data === undefined ? undefined : JSON.stringify(data),
     });
   } catch {
-    throw Error("Your town needs a connection. Reconnect and try again.");
+    throw Error("No connection. Retry when online.");
   }
   let result;
   try {
     result = await response.json();
   } catch {
-    throw Error("The town service is unavailable. Please try again shortly.");
+    throw Error("Town service unavailable. Retry shortly.");
   }
-  if (!response.ok)
-    throw Error(result.error ?? "Request failed. Please try again.");
+  if (!response.ok) throw Error(result.error ?? "Request failed. Retry.");
   return result;
 }
 export const escapeHtml = (value: string) =>
@@ -45,7 +44,7 @@ export function openParentSignIn(onSuccess: () => void) {
   const dialog = document.createElement("dialog");
   dialog.className = "town-dialog";
   dialog.setAttribute("aria-labelledby", "parent-title");
-  dialog.innerHTML = `<button class="dialog-close" aria-label="Close parent sign in">×</button><p class="eyebrow">For grown-ups</p><h2 id="parent-title">Welcome, parents.</h2><p>Save a town to your account and choose practice topics. Playing does not require an account.</p><form><label>Parent username<input name="username" autocomplete="username" minlength="3" maxlength="40" pattern="[A-Za-z0-9_-]+" required></label><label>Password<input name="password" type="password" autocomplete="current-password" minlength="12" maxlength="128" required></label><p class="hint">Use at least 12 characters for your password.</p><p role="alert" data-error></p><div class="actions"><button class="primary" value="login">Sign in</button><button value="register">Create parent account</button></div></form>`;
+  dialog.innerHTML = `<button class="dialog-close" aria-label="Close parent sign in">×</button><h2 id="parent-title">Parent sign in</h2><form><label>Parent username<input name="username" autocomplete="username" minlength="3" maxlength="40" pattern="[A-Za-z0-9_-]+" required></label><label>Password<input name="password" type="password" autocomplete="current-password" minlength="12" maxlength="128" required></label><p class="hint">At least 12 characters.</p><p role="alert" data-error></p><div class="actions"><button class="primary" value="login">Sign in</button><button value="register">Create parent account</button></div></form>`;
   document.body.append(dialog);
   let busy = false;
   const close = () => {

@@ -396,7 +396,7 @@ function enterCampPortal(initialTab: "track" | "settings" = "track"): void {
   <section id="settings-panel" role="tabpanel" aria-labelledby="settings-tab" hidden>
     <form id="quiz-settings-form">
       <h1>Quiz settings</h1>
-      <p>Choose the pace and amount of practice. Saved for this cadet and used in new missions.</p>
+      <p>Applies to new missions.</p>
       <div class="quiz-settings-fields">
         <label for="seconds-per-question">Seconds per question
           <input id="seconds-per-question" name="seconds" type="number" inputmode="numeric" min="1" max="300" step="1" value="${settings.secondsPerQuestion}" required aria-describedby="seconds-help">
@@ -1046,7 +1046,7 @@ function renderCorrection(message = ""): void {
   const attempt = misses[0];
   const multipleChoice = quiz.answerType === "multiple-choice";
   app.innerHTML = shell(
-    `<section class="correction-screen" id="content"><div class="correction-copy"><p class="eyebrow warm">1 / 4 · QUIZ REVIEW</p><h1>Try this one again.</h1><p>Untimed · Your reward level is already set.</p></div>
+    `<section class="correction-screen" id="content"><div class="correction-copy"><p class="eyebrow warm">1 / 4 · QUIZ REVIEW</p><h1>Corrections</h1><p>Untimed · Your reward level is already set.</p></div>
     <div class="correction-card"><div><span class="correction-count">${quiz.attempts.filter((a) => !a.correct).length - misses.length + 1} / ${quiz.attempts.filter((a) => !a.correct).length}</span><p class="prompt">${escapeHtml(attempt.question.prompt)}</p>${questionVisuals(attempt.question)}${questionSourceHtml(attempt.question)}<div class="hint-box"><b>Hint</b><p>${escapeHtml(attempt.question.hint)}</p></div><details><summary>Show solution</summary><p>${escapeHtml(attempt.question.explanation)}</p></details></div>
       <div>${multipleChoice ? `${answerChoicesHtml(attempt.question)}<input id="correction-input" hidden><p class="input-error" id="correction-error">${escapeHtml(message)}</p>` : `${usesFractionInput(attempt.question) ? fractionFields : '<label for="correction-input">Correct answer</label>'}<input id="correction-input" ${usesFractionInput(attempt.question) ? "hidden" : ""} inputmode="none" autocomplete="off" value="${escapeHtml(quiz.correctionDraft ?? "")}"><div class="keypad correction-keypad" aria-label="Correction number keypad">${["7", "8", "9", "4", "5", "6", "1", "2", "3", ".", "0", "/", "back", "clear", "-"].map((key) => `<button type="button" data-correction-key="${key}" aria-label="${key === "/" ? "Fraction bar" : key === "back" ? "Backspace" : key === "-" ? "Minus" : key}">${key === "back" ? "⌫" : key === "clear" ? "Clear" : key}</button>`).join("")}</div><p class="input-error" id="correction-error">${escapeHtml(message)}</p><button id="correction-check" class="button primary">Check answer</button>`}</div></div>
     ${LOCAL_QA ? '<button id="qa-skip-quiz" class="text-button centered">QA · Skip quiz</button>' : ""}</section>`,
