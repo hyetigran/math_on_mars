@@ -42,7 +42,7 @@ try {
       void request.abort();
     } else void request.continue();
   });
-  await page.goto(process.env.GAME_URL || "http://localhost:4173/", {
+  await page.goto(process.env.GAME_URL || "http://localhost:4173/battle.html", {
     waitUntil: "domcontentloaded",
   });
   await page.waitForSelector("#retry-camp");

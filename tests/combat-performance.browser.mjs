@@ -30,7 +30,7 @@ try {
       }),
     );
   });
-  await page.goto(process.env.GAME_URL || "http://localhost:4173/", {
+  await page.goto(process.env.GAME_URL || "http://localhost:4173/battle.html", {
     waitUntil: "domcontentloaded",
   });
   await page.waitForSelector(".camp-canvas", { timeout: 120000 });

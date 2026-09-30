@@ -1,4 +1,4 @@
-// Run against a production build: GAME_URL=http://localhost:4173/?verifyOffline=1
+// Run against a production build: GAME_URL=http://localhost:4173/battle.html?verifyOffline=1
 // CHROME_PATH selects a local Chrome executable.
 import assert from "node:assert/strict";
 import puppeteer from "puppeteer-core";
@@ -36,7 +36,7 @@ try {
           : Promise.reject(new Error("Offline storage unavailable"));
     }, failure);
     await page.goto(
-      process.env.GAME_URL || "http://localhost:4173/?verifyOffline=1",
+      process.env.GAME_URL || "http://localhost:4173/battle.html?verifyOffline=1",
       { waitUntil: "networkidle0" },
     );
     await page.waitForSelector(".camp-canvas");

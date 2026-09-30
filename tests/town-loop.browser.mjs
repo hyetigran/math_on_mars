@@ -28,7 +28,7 @@ try {
   const page = await browser.newPage();
   const errors = [];
   page.on("pageerror", (error) => errors.push(error.message));
-  await page.goto(origin + "/connected-town.html");
+  await page.goto(origin + "/connected-town.html?legacy=1");
   await page.waitForFunction(
     () => document.querySelector("#auth button")?.disabled === false,
   );
@@ -242,7 +242,7 @@ try {
   );
   const second = await browser.createBrowserContext(),
     other = await second.newPage();
-  await other.goto(origin + "/connected-town.html");
+  await other.goto(origin + "/connected-town.html?legacy=1");
   await other.waitForFunction(
     () => document.querySelector("#auth button")?.disabled === false,
   );

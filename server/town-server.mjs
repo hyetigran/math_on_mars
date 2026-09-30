@@ -1,5 +1,5 @@
 import { visitTown } from "./town-visits.mjs";
-import { practiceSummary } from "./town-practice.mjs";
+import { practiceSummary, practiceTopics } from "./town-practice.mjs";
 import { foodSummary, cropRecipes } from "./town-food.mjs";
 import {
   constructionRecipes,
@@ -64,32 +64,47 @@ export function createTownServer({
   now = Date.now,
 } = {}) {
   const db = new DatabaseSync(database);
+  if (db.prepare("SELECT name FROM sqlite_master WHERE name='parents'").get())
+    db.exec("ALTER TABLE parents RENAME TO owners");
   db.exec(`PRAGMA journal_mode=WAL; PRAGMA foreign_keys=ON;
- CREATE TABLE IF NOT EXISTS parents(id TEXT PRIMARY KEY,username TEXT NOT NULL UNIQUE,salt TEXT NOT NULL,password TEXT NOT NULL);
- CREATE TABLE IF NOT EXISTS sessions(token TEXT PRIMARY KEY,parent_id TEXT NOT NULL REFERENCES parents(id),expires INTEGER NOT NULL);
- CREATE TABLE IF NOT EXISTS cadets(id TEXT PRIMARY KEY,parent_id TEXT NOT NULL REFERENCES parents(id),name TEXT NOT NULL,request_id TEXT NOT NULL,UNIQUE(parent_id,request_id));
+ CREATE TABLE IF NOT EXISTS owners(id TEXT PRIMARY KEY,username TEXT NOT NULL UNIQUE,salt TEXT NOT NULL,password TEXT NOT NULL,kind TEXT NOT NULL DEFAULT 'parent');
+ CREATE TABLE IF NOT EXISTS sessions(token TEXT PRIMARY KEY,parent_id TEXT NOT NULL REFERENCES owners(id),expires INTEGER NOT NULL);
+ CREATE TABLE IF NOT EXISTS cadets(id TEXT PRIMARY KEY,parent_id TEXT NOT NULL REFERENCES owners(id),name TEXT NOT NULL,request_id TEXT NOT NULL,UNIQUE(parent_id,request_id));
  CREATE TABLE IF NOT EXISTS management(town_id TEXT PRIMARY KEY,device_id TEXT NOT NULL,session_id TEXT NOT NULL,generation INTEGER NOT NULL,request_id TEXT NOT NULL);
  CREATE TABLE IF NOT EXISTS commands(town_id TEXT NOT NULL,request_id TEXT NOT NULL,payload TEXT NOT NULL,result TEXT NOT NULL,PRIMARY KEY(town_id,request_id));
+ CREATE TABLE IF NOT EXISTS claims(parent_id TEXT NOT NULL,request_id TEXT NOT NULL,cadet_id TEXT NOT NULL,PRIMARY KEY(parent_id,request_id));
  CREATE TABLE IF NOT EXISTS towns(cadet_id TEXT PRIMARY KEY REFERENCES cadets(id),state TEXT NOT NULL);
  `);
+  if (
+    !db
+      .prepare("PRAGMA table_info(owners)")
+      .all()
+      .some((c) => c.name === "kind")
+  )
+    db.exec(
+      "ALTER TABLE owners ADD COLUMN kind TEXT NOT NULL DEFAULT 'parent'",
+    );
   const attempts = new Map();
-  function cookie(token, maxAge = 86400) {
-    return `mars_parent=${token}; HttpOnly; SameSite=Strict; Path=/; Max-Age=${maxAge}${origin.startsWith("https:") ? "; Secure" : ""}`;
+  function cookie(token, maxAge = 86400, name = "mars_parent") {
+    return `${name}=${token}; HttpOnly; SameSite=Strict; Path=/; Max-Age=${maxAge}${origin.startsWith("https:") ? "; Secure" : ""}`;
   }
-  function sessionToken(req) {
+  function sessionToken(req, name = "mars_parent") {
     return (req.headers.cookie ?? "")
       .split(";")
       .map((c) => c.trim())
-      .find((c) => c.startsWith("mars_parent="))
-      ?.slice(12);
+      .find((c) => c.startsWith(`${name}=`))
+      ?.slice(name.length + 1);
   }
-  function session(req) {
-    const token = sessionToken(req);
+  function session(req, name = "mars_parent") {
+    const token = sessionToken(req, name);
     if (!token) return null;
     return (
       db
-        .prepare("SELECT parent_id FROM sessions WHERE token=? AND expires>?")
-        .get(digest(token), now())?.parent_id ?? null
+        .prepare(
+          "SELECT parent_id FROM sessions JOIN owners ON owners.id=sessions.parent_id WHERE token=? AND expires>? AND owners.kind=?",
+        )
+        .get(digest(token), now(), name === "mars_guest" ? "guest" : "parent")
+        ?.parent_id ?? null
     );
   }
   function ownTown(parent, id) {
@@ -152,7 +167,7 @@ export function createTownServer({
             "Use letters, digits, dash or underscore for parent username",
           );
         let parent = db
-          .prepare("SELECT * FROM parents WHERE username=?")
+          .prepare("SELECT * FROM owners WHERE username=?")
           .get(username);
         if (path === "/api/register") {
           if (parent) fail(409, "Username unavailable");
@@ -160,12 +175,9 @@ export function createTownServer({
             hash = (await scrypt(password, salt, 64)).toString("hex"),
             id = randomUUID();
           try {
-            db.prepare("INSERT INTO parents VALUES(?,?,?,?)").run(
-              id,
-              username,
-              salt,
-              hash,
-            );
+            db.prepare(
+              "INSERT INTO owners(id,username,salt,password) VALUES(?,?,?,?)",
+            ).run(id, username, salt, hash);
           } catch {
             fail(409, "Username unavailable");
           }
@@ -178,6 +190,7 @@ export function createTownServer({
           );
           if (
             !parent ||
+            parent.kind !== "parent" ||
             !timingSafeEqual(actual, Buffer.from(parent.password, "hex"))
           )
             fail(401, "Invalid username or password");
@@ -194,7 +207,125 @@ export function createTownServer({
           username: parent.username,
         });
       }
-      const parent = session(req);
+      const account = session(req);
+      const guest = session(req, "mars_guest");
+      const cadets = (owner) =>
+        db
+          .prepare(
+            "SELECT id,name FROM cadets WHERE parent_id=? ORDER BY rowid",
+          )
+          .all(owner);
+      if (path === "/api/access" && req.method === "GET")
+        return send(200, {
+          parent: account
+            ? db.prepare("SELECT username FROM owners WHERE id=?").get(account)
+            : null,
+          cadets: account ? cadets(account) : [],
+          guest: guest ? (cadets(guest)[0] ?? null) : null,
+        });
+      if (path === "/api/guest" && req.method === "POST") {
+        await body(req);
+        if (guest) return send(200, cadets(guest)[0]);
+        const owner = randomUUID(),
+          id = randomUUID(),
+          token = randomBytes(32).toString("hex");
+        const state = initializeTown(
+          {
+            version: 1,
+            cadetId: id,
+            houseLevel: 1,
+            adults: 2,
+            houseCapacity: 2,
+            createdAt: now(),
+          },
+          now(),
+        );
+        state.guestGrade = "K";
+        state.eligibleTopics = practiceTopics
+          .filter((t) => t.grade === "K")
+          .map((t) => t.id);
+        db.exec("BEGIN IMMEDIATE");
+        try {
+          db.prepare("INSERT INTO owners VALUES(?,?,?,?,?)").run(
+            owner,
+            `guest-${owner}`,
+            "",
+            "",
+            "guest",
+          );
+          db.prepare("INSERT INTO sessions VALUES(?,?,?)").run(
+            digest(token),
+            owner,
+            now() + 31536000000,
+          );
+          db.prepare("INSERT INTO cadets VALUES(?,?,?,?)").run(
+            id,
+            owner,
+            "Explorer",
+            id,
+          );
+          db.prepare("INSERT INTO towns VALUES(?,?)").run(
+            id,
+            JSON.stringify(state),
+          );
+          db.exec("COMMIT");
+        } catch (error) {
+          db.exec("ROLLBACK");
+          throw error;
+        }
+        res.setHeader("Set-Cookie", cookie(token, 31536000, "mars_guest"));
+        return send(200, { id, name: "Explorer" });
+      }
+      if (path === "/api/guest/link" && req.method === "POST") {
+        if (!account) fail(401, "Parent sign-in required");
+        const requestId = text((await body(req)).requestId, 8, 100);
+        const receipt = db
+          .prepare(
+            "SELECT cadet_id FROM claims WHERE parent_id=? AND request_id=?",
+          )
+          .get(account, requestId);
+        if (receipt)
+          return send(
+            200,
+            db
+              .prepare("SELECT id,name FROM cadets WHERE id=? AND parent_id=?")
+              .get(receipt.cadet_id, account),
+          );
+        if (!guest) fail(409, "No guest town to link");
+        const cadet = cadets(guest)[0];
+        db.exec("BEGIN IMMEDIATE");
+        try {
+          db.prepare(
+            "UPDATE cadets SET parent_id=?,request_id=? WHERE id=? AND parent_id=?",
+          ).run(account, `claim-${randomUUID()}`, cadet.id, guest);
+          db.prepare("INSERT INTO claims VALUES(?,?,?)").run(
+            account,
+            requestId,
+            cadet.id,
+          );
+          db.prepare("DELETE FROM sessions WHERE parent_id=?").run(guest);
+          db.exec("COMMIT");
+        } catch (error) {
+          db.exec("ROLLBACK");
+          throw error;
+        }
+        res.setHeader("Set-Cookie", cookie("", 0, "mars_guest"));
+        return send(200, cadet);
+      }
+      const townId = path.match(/^\/api\/towns\/([a-f0-9-]+)/)?.[1];
+      const useGuest =
+        guest &&
+        townId &&
+        db
+          .prepare("SELECT id FROM cadets WHERE id=? AND parent_id=?")
+          .get(townId, guest);
+      const parent = useGuest ? guest : (account ?? guest);
+      const token = sessionToken(
+        req,
+        useGuest || !account ? "mars_guest" : "mars_parent",
+      );
+      if ((path === "/api/cadets" || path === "/api/logout") && !account)
+        fail(401, "Parent sign-in required");
       if (!parent) fail(401, "Sign in to open your town");
       if (path === "/api/logout" && req.method === "POST") {
         const token = sessionToken(req);
@@ -260,12 +391,7 @@ export function createTownServer({
         db.exec("BEGIN IMMEDIATE");
         try {
           const state = ownTown(parent, visitPath[1]);
-          const result = visitTown(
-            state,
-            input,
-            digest(sessionToken(req)),
-            now(),
-          );
+          const result = visitTown(state, input, digest(token), now());
           db.prepare("UPDATE towns SET state=? WHERE cadet_id=?").run(
             JSON.stringify(state),
             visitPath[1],
@@ -291,17 +417,24 @@ export function createTownServer({
             .get(id);
           return send(200, {
             generation: lease?.generation ?? 0,
+            available:
+              !lease ||
+              !db
+                .prepare(
+                  "SELECT token FROM sessions WHERE token=? AND expires>?",
+                )
+                .get(lease.session_id, now()),
             deviceId:
-              lease?.session_id === digest(sessionToken(req))
-                ? lease.device_id
-                : null,
+              lease?.session_id === digest(token) ? lease.device_id : null,
           });
         }
         if (req.method === "POST") {
           const input = await body(req);
           if (action === "command" && input.command?.action === "set-topics") {
+            if (parent === guest)
+              fail(403, "Parent sign-in required to change eligible topics");
             const account = db
-              .prepare("SELECT salt,password FROM parents WHERE id=?")
+              .prepare("SELECT salt,password FROM owners WHERE id=?")
               .get(parent);
             const password = text(input.command.password, 12, 128);
             const actual = await scrypt(password, account.salt, 64);
@@ -322,7 +455,7 @@ export function createTownServer({
               .get(id);
             const mine =
               lease?.device_id === deviceId &&
-              lease?.session_id === digest(sessionToken(req));
+              lease?.session_id === digest(token);
             if (action === "management") {
               if (mine && lease.request_id === requestId)
                 result = { generation: lease.generation, deviceId };
@@ -332,13 +465,7 @@ export function createTownServer({
                 const generation = input.generation + 1;
                 db.prepare(
                   "INSERT INTO management VALUES(?,?,?,?,?) ON CONFLICT(town_id) DO UPDATE SET device_id=excluded.device_id,session_id=excluded.session_id,generation=excluded.generation,request_id=excluded.request_id",
-                ).run(
-                  id,
-                  deviceId,
-                  digest(sessionToken(req)),
-                  generation,
-                  requestId,
-                );
+                ).run(id, deviceId, digest(token), generation, requestId);
                 result = { generation, deviceId };
               }
             } else {
@@ -372,6 +499,22 @@ export function createTownServer({
               } else {
                 if (action === "preference") {
                   state.motto = intent.motto;
+                  state.revision = (state.revision ?? 0) + 1;
+                } else if (intent.action === "guest-profile") {
+                  if (parent !== guest)
+                    fail(403, "Guest profile is only available before linking");
+                  const name = text(intent.name, 1, 40);
+                  if (!["K", "1", "2", "3", "4", "5"].includes(intent.grade))
+                    fail(400, "Choose a grade from K to 5");
+                  db.prepare("UPDATE cadets SET name=? WHERE id=?").run(
+                    name,
+                    id,
+                  );
+                  state.guestGrade = intent.grade;
+                  state.guestName = name;
+                  state.eligibleTopics = practiceTopics
+                    .filter((t) => t.grade === intent.grade)
+                    .map((t) => t.id);
                   state.revision = (state.revision ?? 0) + 1;
                 } else applyTownCommand(state, intent, now());
                 result = publicTown(state);

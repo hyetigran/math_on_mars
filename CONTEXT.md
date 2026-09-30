@@ -25,7 +25,11 @@ _Avoid_: Consumable bullet supply
 **Legendary Omni Ammo**:
 An ammo type formed from the five distinct purple ammo types, firing all five ammo types while occupying one active ammo slot.
 
-## V2 language — agreed design, not yet implemented
+## Entry and ownership
+
+The landing page at `/` leads directly to the town at `/play`. Parent sign-in is optional through the landing navigation or base Menu. A **guest town** is server-persisted and accessed by a browser cookie; a parent can explicitly link it as a new cadet without replacing existing towns. `/parents` protects parent controls. `/play/battle` retains the separate local battle game. See ADR-0006 and `docs/V2_CONNECTED_TOWN.md` for the implemented entry flow and guest-access limits.
+
+## V2 language — agreed design, implementation in progress
 
 **Town**:
 A cadet's personal persistent colony, continued across devices, built on plots along predefined streets and inhabited by colonists. A transparent pressurized dome encloses the European-inspired streets, gardens, plazas, and rural plots, with the Martian landscape visible outside. One 3D scene supports elevated management and behind-character walking views; desktop/tablets take priority, with simplified phone controls and detail.

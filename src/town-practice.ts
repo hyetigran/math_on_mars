@@ -2,6 +2,7 @@ export function renderPractice(
   root: HTMLElement,
   practice: any,
   send: (intent: unknown) => void,
+  parentControls = true,
 ) {
   const signature = JSON.stringify(practice);
   if (root.dataset.snapshot === signature) return;
@@ -19,7 +20,7 @@ export function renderPractice(
     `Construction credit: ${practice.credit / 60000} minutes. No expiry or daily cap. Town practice is separate from battle quizzes and parent-assigned homework.`,
   );
   const settings = document.createElement("details");
-  root.append(settings);
+  if (parentControls) root.append(settings);
   add("summary", "Parent: eligible practice topics", settings);
   const parentForm = document.createElement("form");
   parentForm.dataset.eligibility = "true";

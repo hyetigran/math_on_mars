@@ -16,7 +16,7 @@
     "build:town": "tsc && vite build --config vite.town.config.ts",
     "dev:rehearsal": "vite --host 127.0.0.1 --open /town-rehearsal.html",
     "dev:town-api": "node server/town-server.mjs",
-    "dev:connected": "vite --config vite.connected.config.ts --open /connected-town.html",
+    "dev:connected": "vite --config vite.connected.config.ts --open /",
     "build:connected": "tsc && vite build --config vite.connected.config.ts",
     "test:town-api": "node --test tests/town-api.test.mjs"
   },

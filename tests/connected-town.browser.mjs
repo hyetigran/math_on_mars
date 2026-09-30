@@ -13,7 +13,7 @@ try {
   async function signIn(context, action) {
     const page = await context.newPage();
     page.on("pageerror", (e) => errors.push(e.message));
-    await page.goto("http://127.0.0.1:5185/connected-town.html");
+    await page.goto("http://127.0.0.1:5185/connected-town.html?legacy=1");
     await page.waitForSelector("#auth");
     await page.type("[name=username]", username);
     await page.type("[name=password]", password);

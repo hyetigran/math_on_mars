@@ -1,6 +1,6 @@
 import { defineConfig } from "vite";
 export default defineConfig({
-  base: "./",
+  base: "/",
   server: {
     host: "127.0.0.1",
     port: 5185,
@@ -9,6 +9,16 @@ export default defineConfig({
   },
   build: {
     outDir: "dist-connected",
-    rollupOptions: { input: ["connected-town.html", "town-prototype.html"] },
+    rollupOptions: {
+      input: [
+        "index.html",
+        "play/index.html",
+        "play/battle/index.html",
+        "parents/index.html",
+        "battle.html",
+        "connected-town.html",
+        "town-prototype.html",
+      ],
+    },
   },
 });

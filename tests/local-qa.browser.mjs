@@ -8,7 +8,7 @@ const browser = await puppeteer.launch({
   headless: true,
   args: ["--host-resolver-rules=MAP production.localhost 127.0.0.1"],
 });
-const url = process.env.GAME_URL || "http://localhost:4173/";
+const url = process.env.GAME_URL || "http://localhost:4173/battle.html";
 const errors = [];
 async function camp(viewport) {
   const context = await browser.createBrowserContext();

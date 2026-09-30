@@ -98,6 +98,7 @@ self.addEventListener("message", (event) => {
 self.addEventListener("fetch", (event) => {
   if (localPreview) return;
   const url = new URL(event.request.url);
+  if (url.pathname.startsWith("/api/")) return;
   if (event.request.method !== "GET" || !url.href.startsWith(scope)) return;
   event.respondWith(
     (async () => {
@@ -123,7 +124,11 @@ self.addEventListener("fetch", (event) => {
       const cache = await caches.open(prefix + version);
       const key =
         event.request.mode === "navigate"
-          ? absolute("index.html")
+          ? absolute(
+              url.pathname.endsWith("battle.html")
+                ? "battle.html"
+                : "index.html",
+            )
           : new URL(url.pathname, url.origin).href;
       const response = await cache.match(key);
       if (response) return response;

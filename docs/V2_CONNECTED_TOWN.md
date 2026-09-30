@@ -1,6 +1,10 @@
 # Connected town development
 
-Requires Node 24 and existing installed dependencies. In two terminals run `pnpm dev:town-api` and `pnpm dev:connected`. Open `http://127.0.0.1:5185/connected-town.html`. Create a parent username/password, add a cadet, and open the saved House in the two-camera scene. A second browser session can sign in to the same parent and load the same cadet town. Child email accounts are not used.
+Requires Node 24 and existing installed dependencies. In two terminals run `pnpm dev:town-api` and `pnpm dev:connected`. Open `http://127.0.0.1:5185/`. **Play** creates or resumes a guest town at `/play`; parent sign-in is optional in the top-right landing navigation and base Menu. `/parents` hosts parent sign-in, cadet selection/creation and explicit guest-town linking. `/play/battle` opens the existing local battle game with a return-to-town link. Battle profiles remain separate from town cadets.
+
+A guest can save an explorer name and practice grade inside the base. Progress is stored on the server; this browser's HttpOnly guest cookie remembers access for one year. Clearing the cookie loses anonymous access. A parent can sign in and explicitly **Save this town to my account** to add it as a new cadet, keeping all existing cadets. Sign-in alone never moves or replaces guest progress. Linking revokes anonymous access and persists a retry receipt. A second browser can then sign in to the parent account to continue the same town.
+
+Both the default and connected builds include the root, `/play/`, `/parents/` and `/play/battle/` HTML entry points. Serve directory index pages for direct links and forward `/api` to the service with the matching `TOWN_ORIGIN`. Static hosting alone cannot run connected towns. `connected-town.html` redirects to the landing page; `connected-town.html?legacy=1` retains the older diagnostic UI for regression testing. See ADR-0006 for the updated entry and ownership boundary.
 
 The API stores its database in ignored `.town-data/development.sqlite`. Restarting it preserves accounts and towns. Override `TOWN_DATABASE` for an isolated database; the API port defaults to 5186, with `TOWN_ORIGIN` defaulting to `http://127.0.0.1:5185`. If changing ports/origin, update the frontend proxy consistently. Do not commit database files or test credentials. This is a loopback development setup, not a public deployment.
 
@@ -10,7 +14,7 @@ A server snapshot supplies the connected House’s level, occupancy and capacity
 
 ## Device handoff
 
-Each open tab has its own management identity. Select **Manage here / take over** to acquire the town's sole management lease. The server increments a durable generation on each takeover; every town mutation must match both the active tab/session and generation. Old tabs can read but their changes are rejected immediately by the service. Opening a town alone never takes management away from another device.
+Each open tab has its own management identity. A new town or a lease whose session has expired/revoked is acquired automatically in Play. Otherwise select **Manage here / take over** to acquire the town's sole management lease. The server increments a durable generation on each takeover; every town mutation must match both the active tab/session and generation. Old tabs can read but their changes are rejected immediately by the service. Opening a town never takes management away from another device with a live session. Reloading into a new tab identity may require an explicit takeover.
 
 The town motto is a harmless persistent preference for exercising the command path. Command receipts and state changes commit together, so retrying after a lost response returns the same result without applying the command twice. Receipts survive service restarts. A stale takeover retry cannot reacquire a lease after another device takes over. Offline controls disable changes and reconnect refreshes the authoritative lease and state before enabling them. Battle play is unchanged.
 
@@ -49,3 +53,6 @@ Version 6 reconciles food and construction events chronologically. Production an
 Visible connected visits heartbeat every 15 seconds. A normal departure sends a keepalive leave request; if a tab crashes or loses connectivity, the last successful town contact anchors its allowance. Visit identities are session-bound, repeated opens return the original summary, and stale leave messages cannot renew an old allowance. The window is town-wide across browsers. Expired parent sessions require sign-in again on return.
 
 Validation uses injected authoritative clocks, including zero, short and greater-than-48-hour absences, construction crossing the cutoff, utility changes at completion, and repeated/two-device reads. `node tests/town-loop.browser.mjs` starts an isolated local Vite/API fixture and runs the construct → staff → harvest → upgrade → practice/correct → accelerate → leave/return sequence in two headless Chrome browser contexts, including a 390px viewport. This is browser-session coverage on one computer; physical mobile-device testing and public deployment are not claimed. The development API remains loopback-only.
+
+
+`node tests/guest-routing.browser.mjs` verifies landing, optional modal sign-in, guest persistence, explicit linking without replacing another cadet, battle navigation, browser history, deep links and narrow layouts. `node --test tests/guest-town.test.mjs` covers guest isolation, cookie role separation, pre-guest database migration, durable links and restart/retry behavior.

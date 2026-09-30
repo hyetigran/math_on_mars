@@ -1,3 +1,4 @@
+if (!new URLSearchParams(location.search).has("legacy")) location.replace("/");
 import { mountManagement } from "./town-management";
 import "./connected-town.css";
 const root = document.querySelector<HTMLElement>("#connected")!;
