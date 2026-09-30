@@ -15,7 +15,7 @@ User request: remove filler throughout the interface, including the entire Menu 
 | Loading and errors | “Opening your world”, “A little off the map”, “Let’s reconnect” replaced with **Loading**, **Page not found**, **Connection error**. Network errors shortened. |
 | Practice | Removed repetitive explanations of separate learning paths, bank cycling, and unlimited credit. Results now show first-attempt score and earned boost. Removed “All corrections finished”, “awarded once”, “New questions from the topic deck”, and “Your full credit is still available.” Actual question hints, rewards, repeat indicators and attribution remain. |
 | Battle | Setup commentary shortened to **Applies to new missions**. “Try this one again” becomes **Corrections**. |
-| Standalone prototype | Removed “A little town. A new world.” Replaced “A warm home overlooking the plaza”, “Fresh greens beneath Martian skies”, and “Bread, a striped awning, and a place to linger” with building functions. |
+| Standalone prototype | Removed “A little town. A new world.”, “YOUR FIRST NEIGHBORHOOD” and the decorative exploration header. “First Light” becomes **Town prototype**. Replaced “A warm home overlooking the plaza”, “Fresh greens beneath Martian skies”, and “Bread, a striped awning, and a place to linger” with building functions. |
 | Browser titles and descriptions | Removed “A little world of possibility” and “Build a little home…” across all four route entries. |
 
 The audit covered application UI strings and HTML entries, including battle and prototype screens. Question-bank content, source/license notices, action costs, cancellation losses, input requirements and actionable errors are not filler. Historical planning documents retain their historical wording.
