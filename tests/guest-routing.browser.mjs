@@ -79,6 +79,38 @@ try {
   );
   await page.waitForSelector(".game-panel[open]");
   assert.equal(await page.$eval("[data-plot=garden]", (e) => e.hidden), true);
+  assert.equal(
+    await page.$eval(".game-panel", (e) => e.matches(":modal")),
+    false,
+  );
+  assert.ok(
+    await page.$eval(
+      ".game-panel",
+      (e) => e.getBoundingClientRect().width <= 300,
+    ),
+  );
+  await page.click("button[data-panel=settings]");
+  await page.keyboard.press("Escape");
+  assert.equal(
+    await page.evaluate(() =>
+      document.activeElement?.getAttribute("data-panel"),
+    ),
+    "settings",
+  );
+  await scene.evaluate(() =>
+    parent.postMessage(
+      { type: "town-select", plotId: "home" },
+      location.origin,
+    ),
+  );
+  await page.waitForSelector(".game-panel[open]");
+  await page.click("[data-all-plots]");
+  assert.equal(
+    await page.$eval(".game-panel", (e) => e.matches(":modal")),
+    true,
+  );
+  assert.equal(await page.$eval("[data-plot=garden]", (e) => e.hidden), false);
+
   await page.keyboard.press("Escape");
   await page.click("button[data-panel=settings]");
   assert.equal(await page.$("[data-guest-profile] [name=name]"), null);

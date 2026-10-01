@@ -1,3 +1,4 @@
+import { townIcon } from "./town-ui-art";
 import { appUrl, currentRoute } from "./app-route";
 import { mountTownHud } from "./town-hud";
 import {
@@ -93,12 +94,12 @@ async function loadPlay(turn: number) {
     ["food", "❧", "Food"],
   ]
     .map(
-      ([key, icon, label]) =>
-        `<div class="resource-pill" aria-label="${label}" title="${label}"><span aria-hidden="true">${icon}</span><strong data-resource="${key}">—</strong><small>${label}</small></div>`,
+      ([key, , label]) =>
+        `<div class="resource-pill" aria-label="${label}" title="${label}"><span aria-hidden="true">${townIcon(key)}</span><strong data-resource="${key}">—</strong><small>${label}</small></div>`,
     )
     .join(
       "",
-    )}</div></div><div class="game-notices"><p data-network role="status" hidden>Offline</p><button data-manage-here hidden>Manage here</button></div><div class="game-bottom"><a class="hud-action battle-action" data-route href="/play/battle"><span aria-hidden="true">⚔</span>Battle</a><div class="game-actions"><button class="hud-action" data-panel="practice"><span aria-hidden="true">✧</span>Practice</button><button class="hud-action build-action" data-panel="build"><span aria-hidden="true">▰</span>Build <small data-builders>—</small></button></div></div><button class="camera-toggle" data-camera aria-pressed="false">♟ Walk</button><dialog class="game-panel" aria-labelledby="panel-title"><div class="panel-heading"><h2 id="panel-title">Build</h2><button data-close-panel aria-label="Close panel">×</button></div><button data-all-plots hidden>← All plots</button><div id="management" data-panel="build"></div></dialog></main>`;
+    )}</div></div><div class="game-notices"><p data-network role="status" hidden>Offline</p><button data-manage-here hidden>Manage here</button></div><div class="game-bottom"><a class="hud-action battle-action" data-route href="/play/battle"><span aria-hidden="true">${townIcon("battle")}</span>Battle</a><div class="game-actions"><button class="hud-action" data-panel="practice"><span aria-hidden="true">${townIcon("practice")}</span>Practice</button><button class="hud-action build-action" data-panel="build"><span aria-hidden="true">${townIcon("build")}</span>Build <small data-builders>—</small></button></div></div><button class="camera-toggle" data-camera aria-pressed="false">♟ Walk</button><dialog class="game-panel" aria-labelledby="panel-title"><div class="panel-heading"><h2 id="panel-title">Build</h2><button data-close-panel aria-label="Close panel">×</button></div><button data-all-plots hidden>← All plots</button><div id="management" data-panel="build"></div></dialog></main>`;
   dispose = mountTownHud(
     root,
     active!.id,
