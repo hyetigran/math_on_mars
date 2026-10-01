@@ -12,6 +12,8 @@ Seven images supplied by the user on September 29, 2026 guide the architectural 
 | HTPzwQaWkAE24Zs.jpeg | Authored irregular blocks, passages, enclosed gardens and a connected sequence of small squares |
 | HTQlHbKWUAABqRI.jpeg | Dense village footprint surrounded by ordered growing rows and open agricultural space |
 
+See the proposed [city-builder art style guide](V2_TOWN_ART_STYLE.md) for materials, building identities, upgrade language, character conventions, and the approval scene. It remains a draft until the owner reviews representative art.
+
 ## Application to the prototype
 
 Replace the three isolated objects/crossroads composition with a connected neighborhood: attached residential frontages, a shaded lane, small fountain square, planted courtyard and growing beds at the outer edge. Keep the House, Greenhouse and Bakery as selectable prototype buildings; added houses/café frontages are scenery for judging spatial density, not additional production systems. Vary roof colors/heights and wall finishes using a coherent modular kit. Add timber details, window boxes, seating and canopies to make ground-level scale legible. Preserve Mars through the dome framework and distant red terrain, with greenery inside the habitat.
