@@ -12,7 +12,7 @@ export function mountTownHud(
   const title = root.querySelector<HTMLElement>("#panel-title")!;
   let opener: HTMLElement | null = null;
   function open(panel: string, plot?: string) {
-    if (!dialog.open)
+    if (!dialog.open || !dialog.contains(document.activeElement))
       opener =
         document.activeElement instanceof HTMLElement
           ? document.activeElement
