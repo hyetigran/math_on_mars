@@ -17,6 +17,7 @@ export function mountTownHud(
         document.activeElement instanceof HTMLElement
           ? document.activeElement
           : null;
+    dialog.classList.toggle("building-tray", !!plot);
     management.dataset.panel = panel;
     title.textContent =
       panel === "build"
@@ -33,7 +34,10 @@ export function mountTownHud(
       .forEach((c) => (c.hidden = !!plot && c.dataset.plot !== plot));
     root.querySelector<HTMLButtonElement>("[data-all-plots]")!.hidden =
       panel !== "build" || !plot;
-    if (!dialog.open) dialog.showModal();
+    // A selected building uses a nonmodal tray so the town remains interactive.
+    if (dialog.open) dialog.close();
+    if (plot) dialog.show();
+    else dialog.showModal();
   }
   const dispose = mountManagement(management, townId, api, {
     guest,
@@ -42,7 +46,15 @@ export function mountTownHud(
     onSnapshot(state, managed) {
       for (const [key, value] of Object.entries(state.resources)) {
         const el = root.querySelector<HTMLElement>(`[data-resource=${key}]`);
-        if (el) el.textContent = Number(value).toLocaleString();
+        if (el) {
+          const next = Number(value).toLocaleString();
+          if (el.textContent !== "—" && el.textContent !== next) {
+            el.classList.remove("resource-changed");
+            void el.offsetWidth;
+            el.classList.add("resource-changed");
+          }
+          el.textContent = next;
+        }
       }
       root.querySelector<HTMLElement>("[data-builders]")!.textContent =
         `${state.jobs.filter((j: any) => j.status === "running").length}/${state.constructionSlots}`;
@@ -59,7 +71,13 @@ export function mountTownHud(
     open("build");
   root.querySelector<HTMLButtonElement>("[data-manage-here]")!.onclick = () =>
     open("settings");
-  dialog.onclose = () => opener?.focus();
+  dialog.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && dialog.classList.contains("building-tray"))
+      dialog.close();
+  });
+  dialog.onclose = () => {
+    if (!dialog.open) opener?.focus();
+  };
   let walking = false;
   root.querySelector<HTMLButtonElement>("[data-camera]")!.onclick = (event) => {
     walking = !walking;

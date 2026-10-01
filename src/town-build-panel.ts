@@ -1,3 +1,4 @@
+import { buildingArt, townIcon } from "./town-ui-art";
 import { availableWorker } from "./town-workers";
 const time = (ms: number) =>
   ms < 60000
@@ -35,8 +36,15 @@ export function renderBuildPanel(
         ? `House · Lv ${plot.level}`
         : plot.building === "greenhouse" || job
           ? "Greenhouse"
-          : "Empty plot";
-    card.append(title);
+          : "Greenhouse";
+    const preview = document.createElement("div");
+    preview.className = "building-preview";
+    preview.innerHTML = buildingArt(
+      plot.building === "house",
+      plot.level ?? 1,
+      !!job,
+    );
+    card.append(preview, title);
     const location = document.createElement("small");
     location.textContent =
       (
@@ -47,7 +55,25 @@ export function renderBuildPanel(
           edge: "Outskirts",
         } as Record<string, string>
       )[id] ?? id;
+    location.className = "plot-location";
     card.append(location);
+    const cost = (recipe: any) => {
+      const row = document.createElement("div");
+      row.className = "building-cost";
+      for (const key of ["blocks", "parts"]) {
+        const item = document.createElement("span");
+        item.innerHTML = townIcon(key);
+        item.append(String(recipe.cost[key]));
+        item.title = key;
+        item.setAttribute("aria-label", `${recipe.cost[key]} ${key}`);
+        row.append(item);
+      }
+      const duration = document.createElement("span");
+      duration.textContent = time(recipe.duration);
+      duration.setAttribute("aria-label", `Duration ${time(recipe.duration)}`);
+      row.append(duration);
+      card.append(row);
+    };
     const note = (text: string) => {
       const p = document.createElement("p");
       p.textContent = text;
@@ -71,6 +97,7 @@ export function renderBuildPanel(
       progress.setAttribute("aria-label", "Construction progress");
       card.append(progress);
       note(`${time(left)} remaining`);
+      card.classList.add("is-building");
       if (credit > 0)
         button(`Boost −${time(credit)}`, {
           action: "spend-credit",
@@ -97,17 +124,13 @@ export function renderBuildPanel(
       note(`${state.adults} / ${state.houseCapacity} residents`);
       if (plot.level === 1) {
         const r = state.recipes.house;
-        note(
-          `${r.cost.blocks} blocks · ${r.cost.parts} parts · ${time(r.duration)}`,
-        );
+        cost(r);
         button("Upgrade", { action: "upgrade-house" }).dataset.upgradeHouse =
           "true";
       }
     } else if (!plot.building) {
       const r = state.recipes.greenhouse;
-      note(
-        `${r.cost.blocks} blocks · ${r.cost.parts} parts · ${time(r.duration)}`,
-      );
+      cost(r);
       button("Build greenhouse", { action: "build", plotId: id });
     }
     const farm = state.foodSummary?.farms[id];

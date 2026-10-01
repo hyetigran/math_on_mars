@@ -430,3 +430,315 @@
   flex-shrink: 0;
   align-self: start;
 }
+
+/* Town game chrome: dark counters, carved frames, and illustrated actions. */
+.game-screen {
+  --game-outline: #534939;
+  --game-cream: #fff2d0;
+}
+.game-screen button,
+.game-screen .hud-action {
+  touch-action: manipulation;
+  transition:
+    filter 120ms,
+    transform 120ms,
+    box-shadow 120ms;
+}
+.game-screen button:active:not(:disabled),
+.game-screen .hud-action:active {
+  transform: translateY(3px);
+}
+.game-screen :focus-visible {
+  outline: 3px solid #73e4ff;
+  outline-offset: 4px;
+}
+.resource-pill {
+  position: relative;
+  min-width: 120px;
+  padding: 8px 16px 8px 12px;
+  border: 3px solid #a99b79;
+  border-radius: 12px;
+  background: linear-gradient(#3c4945, #263a34);
+  color: #fff6d9;
+  box-shadow:
+    inset 0 2px 0 #ffffff25,
+    0 4px 0 #30342c,
+    0 7px 12px #172e2840;
+  grid-template-columns: 34px 1fr;
+}
+.resource-pill > span {
+  width: 40px;
+  margin-left: -12px;
+  filter: drop-shadow(0 3px 1px #14251d60);
+}
+.resource-pill svg,
+.hud-action svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.resource-pill strong {
+  font-size: 21px;
+  font-weight: 900;
+  text-shadow: 0 2px #172a24;
+}
+.resource-pill small {
+  color: #e4d9b8;
+}
+.hud-action {
+  min-width: 104px;
+  min-height: 100px;
+  border: 3px solid #fff0c8;
+  border-radius: 18px;
+  font-size: 16px;
+  font-weight: 900;
+  text-shadow: 0 1px #ffffff66;
+  box-shadow:
+    inset 0 3px #ffffff70,
+    0 6px 0 #665841,
+    0 9px 16px #172e2860;
+}
+.hud-action > span {
+  width: 48px;
+  height: 48px;
+  filter: drop-shadow(0 2px 0 #0003);
+}
+.build-action {
+  background: linear-gradient(
+    #a7d762 0%,
+    #77b83e 48%,
+    #609433 50%,
+    #79b53f 100%
+  ) !important;
+  text-shadow: 0 2px #365728;
+}
+.battle-action {
+  background: linear-gradient(#ffc468, #e68b38 48%, #c66a2f 50%, #e58b3f);
+  text-shadow: 0 2px #824227;
+}
+.hud-action small {
+  font-size: 13px;
+  padding: 4px 9px;
+  box-shadow: 0 2px 0 #243a28;
+}
+.game-panel {
+  padding: 0 18px 18px;
+  border: 4px solid #6e604a;
+  border-radius: 20px;
+  background: #eaddbb;
+  box-shadow:
+    inset 0 0 0 3px #fff2d0,
+    0 7px 0 #3e4334,
+    0 20px 65px #172e2866;
+}
+.panel-heading {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  padding: 12px 16px;
+  margin: 0 -18px 14px;
+  border-bottom: 3px solid #41594d;
+  background: linear-gradient(#6f8e79, #4b6b58);
+  color: #fff6dd;
+  text-shadow: 0 2px #334b40;
+}
+.panel-heading h2 {
+  color: #fff6dd;
+  font-weight: 900;
+}
+.game-panel .panel-heading button {
+  background: linear-gradient(#d98060, #ae4f3e);
+  border: 2px solid #ffd5a5;
+  color: white;
+  border-radius: 10px;
+  box-shadow: 0 3px #683b31;
+  font-size: 26px;
+  padding: 0;
+}
+.game-panel button {
+  border-radius: 10px;
+  font-weight: 800;
+  border: 2px solid #a2946e;
+  box-shadow:
+    inset 0 2px #ffffff65,
+    0 3px #80775d;
+}
+.game-panel button[data-mutation] {
+  background: linear-gradient(#96c957, #619735);
+  border: 2px solid #e3efb1;
+  text-shadow: 0 1px #35562a;
+  box-shadow:
+    inset 0 2px #cce990,
+    0 3px #3e612d;
+  font-size: 14px;
+}
+.game-panel button:disabled {
+  filter: grayscale(0.8);
+}
+.game-panel [data-plot] {
+  position: relative;
+  padding: 12px;
+  border: 2px solid #bbaa7f;
+  background: linear-gradient(#fffae8, #efe5c9);
+  box-shadow:
+    inset 0 0 0 2px #fffdf0,
+    0 3px #b5a782;
+  text-align: center;
+}
+.building-preview {
+  height: 150px;
+  margin: -4px -4px 8px;
+  border-radius: 10px;
+  background: radial-gradient(
+    ellipse at 50% 80%,
+    #aaba8170,
+    #e6e9ca50 65%,
+    transparent
+  );
+}
+.building-preview svg {
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 5px 2px #79684920);
+}
+.game-panel [data-plot] h3 {
+  margin: 0;
+  font-size: 21px;
+  font-weight: 900;
+}
+.plot-location {
+  display: block;
+  color: #726b50;
+  margin: 3px 0 10px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+.building-cost {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  align-items: center;
+  margin: 12px 0;
+  font-weight: 850;
+  font-variant-numeric: tabular-nums;
+}
+.building-cost span {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+.building-cost svg {
+  width: 24px;
+  height: 24px;
+}
+.game-panel [data-plot] > button {
+  display: block;
+  width: 100%;
+}
+.game-panel progress {
+  height: 18px;
+  border: 2px solid #6a7050;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #495c3e;
+}
+.game-panel progress::-webkit-progress-bar {
+  background: #495c3e;
+}
+.game-panel progress::-webkit-progress-value {
+  background: linear-gradient(#c3e86c, #82b939);
+}
+.game-panel progress::-moz-progress-bar {
+  background: #99c74d;
+}
+.game-panel.building-tray:has(#management[data-panel="build"]) {
+  position: fixed;
+  inset: auto 14px 130px auto;
+  margin: 0;
+  width: 300px;
+  max-height: calc(100dvh - 220px);
+}
+.building-tray [data-construction] > [data-plot] {
+  flex-basis: 100%;
+}
+.building-tray .building-preview {
+  height: 100px;
+}
+.building-tray .panel-heading {
+  padding: 6px 12px;
+  margin-bottom: 8px;
+}
+.building-tray .panel-heading h2 {
+  font-size: 20px;
+}
+@keyframes resource-pop {
+  50% {
+    transform: scale(1.15);
+    color: #d2ed8e;
+  }
+}
+.resource-changed {
+  animation: resource-pop 450ms ease-out;
+}
+@media (max-width: 600px) {
+  .resource-pill {
+    min-width: 0;
+    padding: 6px 6px;
+    grid-template-columns: 23px 1fr;
+    border-width: 2px;
+  }
+  .resource-pill > span {
+    width: 29px;
+    margin-left: -8px;
+  }
+  .resource-pill strong {
+    font-size: 16px;
+  }
+  .hud-action {
+    min-width: 80px;
+    min-height: 86px;
+    padding: 7px 12px;
+    font-size: 13px;
+  }
+  .hud-action > span {
+    width: 38px;
+    height: 38px;
+  }
+  .game-panel.building-tray:has(#management[data-panel="build"]) {
+    right: 10px;
+    bottom: 116px;
+    width: min(280px, calc(100vw - 20px));
+    max-height: calc(100dvh - 245px);
+  }
+  .building-preview {
+    height: 130px;
+  }
+}
+@media (max-height: 500px) {
+  .hud-action {
+    min-height: 60px;
+    min-width: 80px;
+    padding: 4px 10px;
+  }
+  .hud-action > span {
+    width: 26px;
+    height: 26px;
+  }
+  .building-preview {
+    height: 75px;
+  }
+  .game-panel.building-tray:has(#management[data-panel="build"]) {
+    bottom: 85px;
+    max-height: calc(100dvh - 100px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .game-screen button,
+  .game-screen .hud-action {
+    transition: none;
+  }
+  .resource-changed {
+    animation: none;
+  }
+}
