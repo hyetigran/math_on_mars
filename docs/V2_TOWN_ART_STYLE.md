@@ -191,6 +191,10 @@ Provisional ceilings for the **first reference block**, to revise from measureme
 
 These are proposed experiment bounds, not proven engine limits or approved full-town budgets. Choose and record actual desktop/tablet/phone models before claiming coverage. Track texture memory, visible skinned meshes, material count and load/decode time as well as triangles. Reuse materials and batch static repeated scenery; do not require a separate material for every shutter or plant pot.
 
+## Town progression concepts
+
+The [Level 0–5 concept gallery](art/v2-town-levels/README.md) shows the same settlement developing from its founding layout into a mature village. These are generated illustrations for comparing art direction, not in-engine captures or usable 3D assets. Level 0 is a whole-town founding concept; the accepted building-level rules remain 1–5. The gallery does not establish new gameplay progression or record production approval. Exact prompts and generation provenance accompany the images.
+
 ## Approval scene and production gate
 
 Build one representative corner with a House, Bakery frontage, Greenhouse, narrow planted lane, small fountain/bench area and a view of the dome/Mars edge. Show House L1 and L2 in the same location. Include the protagonist and a small varied adult group; child proportions can be a clearly labeled concept before #55's animation kit exists.
