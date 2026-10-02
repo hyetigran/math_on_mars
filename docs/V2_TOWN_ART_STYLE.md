@@ -178,6 +178,8 @@ Animate construction, completion and resource changes with short, restrained fee
 
 ## Asset production and initial budgets
 
+The [asset production plan and WizardGenie workflow](V2_ASSET_PRODUCTION_PLAN.md) inventories the full catalog, proposes production batches, and provides practical generation/editing/export steps.
+
 Deliver editable sources alongside runtime GLB exports, shared materials/atlases, collision proxies, documented pivots/socket names, and a reproducible export procedure. Keep textures separate when useful for caching. Record provenance and rights for every externally sourced component; original concept images are references, not usable 3D exports. Do not import unverified artwork or photographic crops as textures.
 
 Provisional ceilings for the **first reference block**, to revise from measurements:
