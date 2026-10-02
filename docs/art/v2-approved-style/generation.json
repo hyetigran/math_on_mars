@@ -1,0 +1,23 @@
+{
+  "tool": "built-in image_gen",
+  "created": "2026-10-02",
+  "ownerApproval": {
+    "date": "2026-10-02",
+    "statement": "This is the one",
+    "scope": "City-builder visual direction shown in this concept; production assets and in-engine validation remain outstanding."
+  },
+  "file": "town-style-approved.png",
+  "source": "/Users/tig/.codex/generated_images/01a0b20c-511e-7521-be64-e2f3b7df834c/exec-851cabb8-b932-4e74-bb57-4ead194e9ff0.png",
+  "prompt": "Edit image 1, the latest slightly stylized Martian European village concept. Image 2 is the actual main character's turntable and is the authoritative CHARACTER PROPORTION reference. Create one landscape image of the same town, with a targeted subtle style revision.\n\nThe central issue to fix: the existing civilian townspeople have realistically tiny heads, long thin limbs and tall torsos, whereas our MC has a large rounded head/helmet, compact torso, short sturdy legs, substantial hands and feet. Rebuild EVERY visible civilian adult and child to share the MC's stylized body language. Adult civilians should be approximately 3.5\u20134 heads tall, with clearly larger rounded heads, compact torsos, sturdy short limbs and slightly larger shoes/hands. Keep adults recognizably adult through clothes, posture, hairstyles and faces, not tall realistic body ratios. Children use smaller overall stature and distinct child styling. Retain diverse everyday clothing, ages, skin tones, hairstyles, groups, and activities; do not put everyone in spacesuits. Avoid bobblehead dolls, toddlers-only population, ultra-chibi two-head bodies, or featureless toy figures. On nearby plaza/foreground residents make enlarged heads visibly clear even at this camera distance. Preserve the MC's suit, visor and proportions and its location just below the fountain. MC and civilians must look like characters from the same game.\n\nGently harmonize the architecture/props to these characters: slightly more substantial rounded door frames, welcoming broad door openings, chunkier bench/table/lamp forms, softly simplified roof and window shapes. Adjust just enough that larger-headed compact characters feel natural at entrances and around caf\u00e9 tables. Retain the already-liked sophistication and richness, not a wholesale exaggerated cartoon conversion.\n\nStrict preservation: exact camera and landscape framing, winding streets, building arrangement and village density, fountain/plaza, courtyard/playground, greenhouse/farming/livestock edge, transparent dome ribs, habitat gate, red Martian horizon, warm sun direction, terracotta/cream/teal palette, mature trees, flower boxes, soft 3D shading and level of environmental stylization from image 1. Do not alter the map, remove buildings, add new districts or enlarge the MC into a foreground hero. Keep smooth matte materials and clear clustered foliage. No heavy black outlines, text, HUD, labels, watermarks, borders, split panels or turntable display. The main visible change must be the unified stylized resident proportions, with only modest environmental shape adjustments.",
+  "references": [
+    {
+      "role": "environment edit target",
+      "path": "/Users/tig/.codex/generated_images/01a0b20c-511e-7521-be64-e2f3b7df834c/exec-61105e7c-789e-4245-98ef-c2a0fbbc86c5.png"
+    },
+    {
+      "role": "MC character proportion reference",
+      "path": "/tmp/mars-v2-implementation/current-marine-turntable.png",
+      "model": "src/assets/characters/marine/source/rigged/character-rigged-1789585407607.glb"
+    }
+  ]
+}

@@ -1,14 +1,14 @@
 # V2 city builder — art style guide
 
-Draft for owner review · October 1, 2026 · Related ticket: [#49](https://github.com/hyetigran/math_on_mars/issues/49).
+Visual direction approved by owner · October 2, 2026 · Related ticket: [#49](https://github.com/hyetigran/math_on_mars/issues/49).
 
-This document defines the proposed visual target for the city builder. The town layout, two camera modes, building catalog, five building levels, families, livestock, and decorative production follow the [accepted product plan](V2_TOWN_BUILDER_PLAN.md). The art treatment, dimensions, and budgets below are proposals to validate in a representative scene. Writing this guide does not approve production assets or complete #49.
+This document defines the owner-approved visual direction for the city builder, anchored by the [selected concept](art/v2-approved-style/README.md). The town layout, two camera modes, building catalog, five building levels, families, livestock, and decorative production follow the [accepted product plan](V2_TOWN_BUILDER_PLAN.md). The selected environment treatment and MC-compatible character style are approved. Individual building designs, exact palette values, dimensions, and budgets still require validation in a representative scene. Concept approval does not approve production assets or complete #49.
 
 ## Direction
 
 **A stylized, inhabited European village inside a Martian habitat.** Warm plaster houses, tiled roofs, leafy pedestrian lanes, active shopfronts, and gardens form the foreground. A light dome structure and a red rocky horizon establish Mars beyond it. Quietly integrated technology makes the settlement believable without overwhelming its architecture.
 
-The recommended treatment is a storybook miniature rendered in 3D: simplified substantial shapes, gently softened edges, restrained painted detail, and warm daylight. Buildings have enough physical detail to reward walking past them, while roof shapes and primary features remain clear from above. Charming does not mean every surface is decorated; each building gets a few memorable features.
+The approved treatment is a softly stylized 3D village with substantial rounded forms, smooth matte surfaces, clustered foliage, restrained texture detail, and warm daylight. The final concept retains architectural richness while moving away from the more realistic miniature treatment of the initial Level 0–5 images. Townspeople share the existing marine MC's larger heads, compact torsos, sturdy limbs, and substantial hands/feet; doorways and furniture are modestly chunkier to support them. Buildings have enough physical detail to reward walking past them, while roof shapes and primary features remain clear from above. Charming does not mean every surface is decorated; each building gets a few memorable features.
 
 Clash of Clans informs interaction clarity, bold HUD controls, and rewarding upgrades. Our environment uses the supplied European-town references and its own architecture, palette, characters, and symbols. The [implemented UI pass](https://github.com/hyetigran/math_on_mars/pull/77) is a starting point for the town's controls, not an approved final art kit.
 
@@ -22,9 +22,13 @@ Clash of Clans informs interaction clarity, bold HUD controls, and rewarding upg
 - Food crops come from Greenhouses; decorative plants come from the Plant Nursery. Workshop furnishings and the separate Playground serve different roles.
 - Functional, minimal UI copy: names, levels, costs, timers, states, and consequences.
 
-### Proposed for review
+### Selected visual target
 
-The storybook treatment, architectural family, palette, proportions, lighting, progression examples, and production constraints in this guide. The owner may revise these after seeing the same street corner from both cameras.
+On October 2, 2026, the owner selected the [MC-aligned town concept](art/v2-approved-style/README.md) with “This is the one.” Use its balance of warm European village architecture, rounded characters, simplified surfaces and dimensional lighting as the target. Keep the current MC silhouette and suit identity; align civilian characters with it. The concept image takes precedence over earlier illustrative proportions and the initial more realistic town renders.
+
+### Still to validate
+
+Individual building-family designs and five-level progressions, exact palette values, measured rig proportions, modular dimensions, budgets, and how the selected treatment reads from the behind-character camera. The selected image is generated concept art; a finished runnable reference corner remains required.
 
 ## Use the supplied references
 
@@ -137,7 +141,7 @@ Show active construction with clear scaffolding and a restrained dust/work effec
 
 ## Colonists, children, and animals
 
-Colonists have soft stylized proportions, readable faces, substantial hands/feet, and everyday clothing suited to a comfortable habitat. Adults should read as adults, with roughly five to six heads of height; children need a separate, shorter four-to-five-head proportion and animation set. Test these proportions beside doorways and furniture before locking them. The town protagonist may share conventions where compatible with the existing marine source; town NPCs do not inherit combat gear requirements.
+Colonists match the MC’s stylized proportions: larger rounded heads, compact torsos, sturdy short limbs, substantial hands/feet, and everyday clothing suited to a comfortable habitat. Aim initially for approximately 3.5–4 heads of total adult height, judging against the selected concept and current marine rather than realistic human ratios. Adults remain recognizable through clothes, hairstyles, posture and faces. Children have smaller overall stature, distinct child proportions and a separate animation set. Avoid making every adult look like a toddler. Measured rig proportions remain to validate beside doorways and furniture; the earlier five-to-six-head adult recommendation is superseded. The town protagonist may share conventions where compatible with the existing marine source; town NPCs do not inherit combat gear requirements.
 
 Build a compatible wardrobe around a small adult body/rig family. Compose skin tones, face shapes, hair, clothing and accessories using stable part IDs in a versioned appearance recipe. Demonstrate at least 12 distinct adults across idle, walk and sit poses. Hair/hats, sleeves/hands, shoes/legs, and body/clothing pairings need explicit compatibility rules. A fallback part must preserve saved identity as far as possible when an asset is unavailable.
 
@@ -193,7 +197,7 @@ These are proposed experiment bounds, not proven engine limits or approved full-
 
 ## Town progression concepts
 
-The [Level 0–5 concept gallery](art/v2-town-levels/README.md) shows the same settlement developing from its founding layout into a mature village. These are generated illustrations for comparing art direction, not in-engine captures or usable 3D assets. Level 0 is a whole-town founding concept; the accepted building-level rules remain 1–5. The gallery does not establish new gameplay progression or record production approval. Exact prompts and generation provenance accompany the images.
+The [Level 0–5 concept gallery](art/v2-town-levels/README.md) shows the same settlement developing from its founding layout into a mature village. These are generated illustrations for comparing art direction, not in-engine captures or usable 3D assets. Level 0 is a whole-town founding concept; the accepted building-level rules remain 1–5. The gallery does not establish new gameplay progression or record production approval. Its earlier realistic character proportions and finer texture treatment are superseded by the [approved style concept](art/v2-approved-style/README.md). Exact prompts and generation provenance accompany the images.
 
 ## Approval scene and production gate
 
@@ -207,6 +211,6 @@ Deliver the following review evidence:
 4. A runnable scene with selection, camera switching and walking; record clipping, foreground-fading and collision limitations.
 5. Asset manifest and measured load/render cost; list actual devices tested and those still untested.
 
-**Current approval record:** the European-town references and game-style UI direction were accepted in conversation. The storybook environment treatment, palette, character proportions and finished modular kit are proposed here. The current Three.js scene and SVG building cards are placeholders. No finished reference corner, physical-device budget validation, or production art approval is recorded.
+**Current approval record:** on October 2, 2026, the owner approved the final generated MC-aligned town concept with “This is the one.” This approves the pictured city-builder visual direction: softly stylized architecture/materials, warm palette and lighting, and larger-headed compact colonists coherent with the existing MC. The approved image and exact prompt/provenance are retained in the [approval gallery](art/v2-approved-style/README.md). It does not approve all building-level appearances, a finished modular kit, in-engine character integration, or performance budgets. The current Three.js scene and SVG building cards remain placeholders; the runnable reference corner, both-camera validation, and physical-device measurements remain outstanding.
 
-After owner review, record the selected direction and date here, revise the guide, and complete the remaining #49 acceptance checks before starting dependent asset production (#50, #51, #54). The complete 23-building/five-level catalog requires further family-by-family reviews. This document does not unblock those tickets by itself.
+The owner’s visual selection is now recorded. Complete the remaining #49 reference-scene and validation checks before starting dependent production tickets (#50, #51, #54). The complete 23-building/five-level catalog requires further family-by-family reviews. This document does not unblock those tickets by itself.
