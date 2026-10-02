@@ -12,7 +12,7 @@ Seven images supplied by the user on September 29, 2026 guide the architectural 
 | HTPzwQaWkAE24Zs.jpeg | Authored irregular blocks, passages, enclosed gardens and a connected sequence of small squares |
 | HTQlHbKWUAABqRI.jpeg | Dense village footprint surrounded by ordered growing rows and open agricultural space |
 
-See the proposed [city-builder art style guide](V2_TOWN_ART_STYLE.md) for materials, building identities, upgrade language, character conventions, and the approval scene. It remains a draft until the owner reviews representative art.
+See the [city-builder art style guide](V2_TOWN_ART_STYLE.md) for materials, building identities, upgrade language, character conventions, and the approval scene. The owner selected the [MC-aligned visual direction](art/v2-approved-style/README.md) on October 2, 2026; finished assets and in-engine validation remain outstanding.
 
 ## Application to the prototype
 
