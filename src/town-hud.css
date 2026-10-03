@@ -350,6 +350,7 @@
   color: #ffc89f;
 }
 .game-panel {
+  z-index: 4;
   width: min(490px, calc(100% - 24px));
   max-height: calc(100dvh - 32px);
   padding: 0 14px 14px;
