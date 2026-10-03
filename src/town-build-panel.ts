@@ -32,11 +32,7 @@ export function renderBuildPanel(
     );
     const title = document.createElement("h3");
     title.textContent =
-      plot.building === "house"
-        ? `House · Lv ${plot.level}`
-        : plot.building === "greenhouse" || job
-          ? "Greenhouse"
-          : "Greenhouse";
+      plot.building === "house" ? `House · Lv ${plot.level}` : "Greenhouse";
     const preview = document.createElement("div");
     preview.className = "building-preview";
     preview.innerHTML = buildingArt(
@@ -44,7 +40,7 @@ export function renderBuildPanel(
       plot.level ?? 1,
       !!job,
     );
-    card.append(preview, title);
+    card.append(title, preview);
     const location = document.createElement("small");
     location.textContent =
       (

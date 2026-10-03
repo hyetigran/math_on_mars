@@ -305,6 +305,7 @@ const buildings: {
 let upgraded = false;
 let connectedSnapshot: any = null;
 const connectedPlots = ["home", "garden", "market", "edge"];
+const connectedPlotTargets: THREE.Group[] = [];
 function buildHouse() {
   const g = buildings[0].group;
   while (g.children.length) {
@@ -783,6 +784,7 @@ renderer.domElement.addEventListener("pointerup", (e) => {
     const hit = r.intersectObjects(
       [
         ...buildings.filter((b) => b.group.visible).map((b) => b.group),
+        ...connectedPlotTargets.filter((target) => target.visible),
         ...(neighborhood.visible ? [neighborhood] : []),
       ],
       true,
@@ -790,7 +792,10 @@ renderer.domElement.addEventListener("pointerup", (e) => {
     if (hit) {
       let o: THREE.Object3D | null = hit.object;
       while (o) {
-        const i = buildings.findIndex((b) => b.group === o);
+        const i =
+          typeof o.userData.plotIndex === "number"
+            ? o.userData.plotIndex
+            : buildings.findIndex((b) => b.group === o);
         if (i >= 0) {
           select(i);
           if (new URLSearchParams(location.search).has("hud"))
@@ -923,12 +928,30 @@ if (connectedCadet) {
   const frames = buildings.slice(1).map((b) => {
     const frame = new THREE.Group();
     frame.position.set(b.x, 0, b.z);
+    frame.visible = false;
+    frame.userData.plotIndex = buildings.indexOf(b);
+    connectedPlotTargets.push(frame);
     scene.add(frame);
     box(frame, 0, 0.15, 0, 5.4, 0.3, 6, 0xd9ba7d);
     for (const x of [-2.5, 2.5])
       for (const z of [-2.8, 2.8])
         box(frame, x, 1.5, z, 0.16, 3, 0.16, 0xc59e62);
     return frame;
+  });
+  const emptyPlots = buildings.slice(1).map((b) => {
+    const plot = new THREE.Group();
+    plot.position.set(b.x, 0, b.z);
+    plot.userData.plotIndex = buildings.indexOf(b);
+    scene.add(plot);
+    connectedPlotTargets.push(plot);
+    box(plot, 0, 0.18, 0, 5.8, 0.08, 6.4, 0x859b69);
+    for (const side of [-1, 1]) {
+      box(plot, side * 2.85, 0.25, 0, 0.12, 0.12, 6.4, 0xe8dca4);
+      box(plot, 0, 0.25, side * 3.15, 5.8, 0.12, 0.12, 0xe8dca4);
+    }
+    box(plot, 0, 0.3, 0, 1.4, 0.08, 0.2, 0xe8dca4);
+    box(plot, 0, 0.3, 0, 0.2, 0.08, 1.4, 0xe8dca4);
+    return plot;
   });
   document
     .querySelectorAll<HTMLButtonElement>("[data-building]")
@@ -971,6 +994,7 @@ if (connectedCadet) {
         frames[index].visible = town.jobs.some(
           (j: any) => j.plotId === plotId && j.status === "running",
         );
+        emptyPlots[index].visible = !b.group.visible && !frames[index].visible;
         if (b.group.visible || frames[index].visible)
           obstacles.push({ x: b.x, z: b.z, w: 5.4, d: 6 });
       });
