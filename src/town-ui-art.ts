@@ -1,5 +1,7 @@
 // Original UI illustrations. All markup is static; server data never enters SVG.
 const icons: Record<string, string> = {
+  workers:
+    '<circle cx="24" cy="14" r="9" fill="#e8bd8b"/><path fill="#758d69" d="M9 43V32q0-12 15-12t15 12v11Z"/><path fill="#dae3ca" d="m18 22 6 8 6-8-6 19Z"/>',
   blocks:
     '<path fill="#e6ab76" d="M5 18 24 8l19 10-19 11Z"/><path fill="#ae694d" d="m5 18 19 11v15L5 33Z"/><path fill="#cf8d60" d="m24 29 19-11v15L24 44Z"/><path d="m14 14 19 11M14 23v15m19-14v15"/>',
   parts:

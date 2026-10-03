@@ -184,6 +184,8 @@ _Avoid_: Trade goods
 
 ## V2 visual experiment
 
+`pnpm dev:playtest` opens the connected mechanics playtest at `http://127.0.0.1:5190/play/`, with a separate disposable in-memory database and paused authoritative clock. The city-builder HUD puts House upgrade progress, workers, resources, Settings/Build/Inventory and Attack around the scene; outlined empty plots can be selected before construction. Time buttons advance actual server rules and are excluded from ordinary builds/services. See `docs/V2_MECHANICS_PLAYTEST.md` for the first loop, verification and pending systems.
+
 `town-prototype.html` is an isolated Three.js camera/asset experiment on the V2 worktree. Run `pnpm dev:town`; `pnpm build:town` builds it separately. It contains three selectable geometric buildings, a two-state House appearance preview, overview/walking controls, and a proxy character. The user-provided European-town references now inform additional attached-house scenery, a leafy lane, courtyard, fountain square, and agricultural edge; see `docs/V2_VISUAL_REFERENCES.md`. These scenery instances do not add simulated building functions. All changes are in memory; it does not implement the agreed town simulation or modify cadet saves. See `docs/V2_VISUAL_PROTOTYPE.md`.
 
 ## Connected town development slice

@@ -1,4 +1,4 @@
-import { townIcon } from "./town-ui-art";
+import { townScreen } from "./town-screen";
 import { appUrl, currentRoute } from "./app-route";
 import { mountTownHud } from "./town-hud";
 import {
@@ -87,19 +87,7 @@ async function loadPlay(turn: number) {
   }
   if (turn !== navigation) return;
   localStorage.setItem("town-active-cadet", active!.id);
-  root.innerHTML = `<main id="content" class="game-screen"><div class="town-view"><iframe title="Your 3D Mars town" src="${appUrl(`/town-prototype.html?town=${active!.id}&hud=1`)}"></iframe></div><div class="game-top"><div class="game-tools"><button data-menu class="hud-square" aria-label="Menu">☰</button><button data-panel="settings" class="hud-square" aria-label="Settings">⚙</button></div><div class="resource-strip" aria-label="Town resources">${[
-    ["blocks", "▰", "Blocks"],
-    ["parts", "⚙", "Parts"],
-    ["credits", "✦", "Credits"],
-    ["food", "❧", "Food"],
-  ]
-    .map(
-      ([key, , label]) =>
-        `<div class="resource-pill" aria-label="${label}" title="${label}"><span aria-hidden="true">${townIcon(key)}</span><strong data-resource="${key}">—</strong><small>${label}</small></div>`,
-    )
-    .join(
-      "",
-    )}</div></div><div class="game-notices"><p data-network role="status" hidden>Offline</p><button data-manage-here hidden>Manage here</button></div><div class="game-bottom"><a class="hud-action battle-action" data-route href="/play/battle"><span aria-hidden="true">${townIcon("battle")}</span>Battle</a><div class="game-actions"><button class="hud-action" data-panel="practice"><span aria-hidden="true">${townIcon("practice")}</span>Practice</button><button class="hud-action build-action" data-panel="build"><span aria-hidden="true">${townIcon("build")}</span>Build <small data-builders>—</small></button></div></div><button class="camera-toggle" data-camera aria-pressed="false">♟ Walk</button><dialog class="game-panel" aria-labelledby="panel-title"><div class="panel-heading"><h2 id="panel-title">Build</h2><button data-close-panel aria-label="Close panel">×</button></div><button data-all-plots hidden>← All plots</button><div id="management" data-panel="build"></div></dialog></main>`;
+  root.innerHTML = townScreen(active!.id, import.meta.env.MODE === "playtest");
   dispose = mountTownHud(
     root,
     active!.id,
